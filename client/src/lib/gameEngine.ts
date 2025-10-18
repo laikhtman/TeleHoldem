@@ -199,7 +199,18 @@ export class GameEngine {
     const players = [...gameState.players];
     const player = players[playerIndex];
     
+    const amountToCall = gameState.currentBet - player.bet;
     const actualBet = Math.min(amount, player.chips);
+
+    let actionText = '';
+    if (gameState.currentBet === 0) {
+      actionText = `${player.name} bets $${actualBet}`;
+    } else if (actualBet === amountToCall) {
+      actionText = `${player.name} calls $${actualBet}`;
+    } else {
+      actionText = `${player.name} raises to $${player.bet + actualBet}`;
+    }
+    
     players[playerIndex] = {
       ...player,
       chips: player.chips - actualBet,
@@ -212,7 +223,7 @@ export class GameEngine {
       players,
       pot: gameState.pot + actualBet,
       currentBet: Math.max(gameState.currentBet, players[playerIndex].bet),
-      lastAction: `${player.name} bets $${actualBet}`
+      lastAction: actionText
     };
   }
 

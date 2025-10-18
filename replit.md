@@ -4,6 +4,11 @@
 A complete Texas Hold'em poker web application featuring a realistic poker table interface, AI bot opponents, and full game mechanics. Built with React, TypeScript, and Tailwind CSS.
 
 ## Recent Changes
+- **October 19, 2025**: Gameplay Polish
+  - Refined betting logic to differentiate between call, bet, and raise.
+  - Improved game loop to handle end-of-round phase progression correctly.
+  - Made player action controls dynamic based on the current bet.
+  - Added a visual "WINNER" badge to the winning player's seat after a hand.
 - **October 18, 2025**: Initial implementation
   - Created complete poker game engine with deck management, card dealing, and game state tracking
   - Implemented AI bot logic with decision-making for fold/check/bet/raise actions

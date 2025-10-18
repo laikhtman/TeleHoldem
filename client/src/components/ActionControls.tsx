@@ -1,30 +1,50 @@
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface ActionControlsProps {
   onFold: () => void;
   onCheck: () => void;
+  onCall: () => void;
   onBet: (amount: number) => void;
+  onRaise: (amount: number) => void;
   canCheck: boolean;
   minBet: number;
   maxBet: number;
+  amountToCall: number;
+  currentBet: number;
   disabled?: boolean;
 }
 
 export function ActionControls({ 
   onFold, 
   onCheck, 
-  onBet, 
+  onCall,
+  onBet,
+  onRaise,
   canCheck,
   minBet,
   maxBet,
+  amountToCall,
+  currentBet,
   disabled = false
 }: ActionControlsProps) {
   const [betAmount, setBetAmount] = useState(minBet);
 
+  useEffect(() => {
+    setBetAmount(minBet);
+  }, [minBet]);
+
   const handleBetChange = (value: number[]) => {
     setBetAmount(value[0]);
+  };
+
+  const handleBetOrRaise = () => {
+    if (currentBet === 0) {
+      onBet(betAmount);
+    } else {
+      onRaise(betAmount);
+    }
   };
 
   return (
@@ -54,33 +74,33 @@ export function ActionControls({
           </Button>
         ) : (
           <Button
-            onClick={() => onBet(minBet)}
+            onClick={onCall}
             variant="secondary"
             size="lg"
-            disabled={disabled || maxBet < minBet}
+            disabled={disabled || amountToCall <= 0}
             data-testid="button-call"
             className="min-w-[120px] bg-accent hover:bg-accent/90"
           >
-            Call ${minBet}
+            Call ${amountToCall}
           </Button>
         )}
         
         <Button
-          onClick={() => onBet(betAmount)}
+          onClick={handleBetOrRaise}
           variant="default"
           size="lg"
           disabled={disabled || maxBet < minBet}
-          data-testid="button-bet"
+          data-testid="button-bet-raise"
           className="min-w-[120px] bg-poker-chipGold text-black hover:bg-poker-chipGold/90 font-bold"
         >
-          Bet ${betAmount}
+          {currentBet === 0 ? `Bet $${betAmount}` : `Raise to $${betAmount}`}
         </Button>
       </div>
 
       {maxBet >= minBet && (
         <div className="space-y-2">
           <div className="flex justify-between items-center text-sm">
-            <span className="text-muted-foreground">Bet Amount:</span>
+            <span className="text-muted-foreground">Amount:</span>
             <span className="font-mono font-bold text-poker-chipGold" data-testid="text-bet-amount">
               ${betAmount}
             </span>

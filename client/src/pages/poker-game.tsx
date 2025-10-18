@@ -14,6 +14,7 @@ const NUM_PLAYERS = 6;
 export default function PokerGame() {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [winningPlayerIds, setWinningPlayerIds] = useState<string[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -25,6 +26,7 @@ export default function PokerGame() {
   const startNewHand = () => {
     if (!gameState) return;
     
+    setWinningPlayerIds([]);
     let newState = gameEngine.startNewHand(gameState);
     
     // Post blinds (small blind $10, big blind $20)
@@ -97,7 +99,6 @@ export default function PokerGame() {
     if (gameEngine.isRoundComplete(currentState)) {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Check if only one player left (everyone else folded)
       const activePlayers = gameEngine.getActivePlayers(currentState);
       if (activePlayers.length === 1) {
         const { winners, winningHand } = gameEngine.resolveShowdown(currentState);
@@ -109,7 +110,6 @@ export default function PokerGame() {
           duration: 4000,
         });
         
-        // Award pot
         currentState = gameEngine.awardPot(currentState, winners);
         currentState = { ...currentState, phase: 'waiting' as GamePhase };
         setGameState({ ...currentState });
@@ -118,22 +118,18 @@ export default function PokerGame() {
       }
       
       if (currentState.phase === 'river') {
-        // Move to showdown
-        currentState = gameEngine.advancePhase(currentState);
-        setGameState({ ...currentState });
-        
-        // Resolve showdown automatically
         await resolveShowdown(currentState);
-        setIsProcessing(false);
-        return;
-      } else if (currentState.phase !== 'showdown') {
+      } else if (currentState.phase !== 'showdown' && currentState.phase !== 'waiting') {
         currentState = gameEngine.advancePhase(currentState);
         
-        // Set first player for new betting round
-        const firstPlayer = (currentState.dealerIndex + 1) % NUM_PLAYERS;
+        let nextPlayerIndex = (currentState.dealerIndex + 1) % NUM_PLAYERS;
+        while (currentState.players[nextPlayerIndex].folded) {
+          nextPlayerIndex = (nextPlayerIndex + 1) % NUM_PLAYERS;
+        }
+        
         currentState = {
           ...currentState,
-          currentPlayerIndex: firstPlayer
+          currentPlayerIndex: nextPlayerIndex
         };
         
         setGameState({ ...currentState });
@@ -143,7 +139,6 @@ export default function PokerGame() {
           description: getPhaseDescription(currentState.phase),
         });
 
-        // Continue with bot actions in new phase
         if (currentState.currentPlayerIndex !== 0) {
           setTimeout(() => processBotActions(currentState), 1000);
         }
@@ -158,6 +153,9 @@ export default function PokerGame() {
     const { winners, winningHand } = gameEngine.resolveShowdown(state);
     
     if (winners.length > 0) {
+      const winnerIds = winners.map(i => state.players[i].id);
+      setWinningPlayerIds(winnerIds);
+
       const winnerNames = winners.map(i => state.players[i].name).join(', ');
       toast({
         title: "Hand Complete!",
@@ -172,62 +170,50 @@ export default function PokerGame() {
     }
   };
 
-  const handleFold = () => {
-    if (!gameState || isProcessing) return;
-    
-    const newState = gameEngine.playerFold(gameState, 0);
+  const handlePlayerAction = (newState: GameState) => {
     setGameState(newState);
     
     toast({
-      description: "You folded",
-      variant: "destructive",
+      description: newState.lastAction || '',
     });
 
-    // Move to next player and process bots
     const nextState = {
       ...newState,
       currentPlayerIndex: gameEngine.getNextPlayerIndex(newState)
     };
     setGameState(nextState);
     setTimeout(() => processBotActions(nextState), 500);
+  };
+
+  const handleFold = () => {
+    if (!gameState || isProcessing) return;
+    const newState = gameEngine.playerFold(gameState, 0);
+    handlePlayerAction(newState);
   };
 
   const handleCheck = () => {
     if (!gameState || isProcessing) return;
-    
     const newState = gameEngine.playerCheck(gameState, 0);
-    setGameState(newState);
-    
-    toast({
-      description: "You checked",
-    });
+    handlePlayerAction(newState);
+  };
 
-    // Move to next player and process bots
-    const nextState = {
-      ...newState,
-      currentPlayerIndex: gameEngine.getNextPlayerIndex(newState)
-    };
-    setGameState(nextState);
-    setTimeout(() => processBotActions(nextState), 500);
+  const handleCall = () => {
+    if (!gameState || isProcessing) return;
+    const amountToCall = gameState.currentBet - gameState.players[0].bet;
+    const newState = gameEngine.playerBet(gameState, 0, amountToCall);
+    handlePlayerAction(newState);
   };
 
   const handleBet = (amount: number) => {
     if (!gameState || isProcessing) return;
-    
     const newState = gameEngine.playerBet(gameState, 0, amount);
-    setGameState(newState);
-    
-    toast({
-      description: `You bet $${amount}`,
-    });
+    handlePlayerAction(newState);
+  };
 
-    // Move to next player and process bots
-    const nextState = {
-      ...newState,
-      currentPlayerIndex: gameEngine.getNextPlayerIndex(newState)
-    };
-    setGameState(nextState);
-    setTimeout(() => processBotActions(nextState), 500);
+  const handleRaise = (amount: number) => {
+    if (!gameState || isProcessing) return;
+    const newState = gameEngine.playerBet(gameState, 0, amount);
+    handlePlayerAction(newState);
   };
 
   const getPhaseTitle = (phase: GamePhase): string => {
@@ -290,6 +276,7 @@ export default function PokerGame() {
             totalPlayers={NUM_PLAYERS}
             isCurrentPlayer={index === gameState.currentPlayerIndex}
             isDealer={index === gameState.dealerIndex}
+            isWinner={winningPlayerIds.includes(player.id)}
           />
         ))}
 
@@ -329,10 +316,14 @@ export default function PokerGame() {
           <ActionControls
             onFold={handleFold}
             onCheck={handleCheck}
+            onCall={handleCall}
             onBet={handleBet}
+            onRaise={handleRaise}
             canCheck={canCheck}
             minBet={minBet}
             maxBet={maxBet}
+            amountToCall={gameState.currentBet - humanPlayer.bet}
+            currentBet={gameState.currentBet}
             disabled={gameState.currentPlayerIndex !== 0 || isProcessing || humanPlayer.folded}
           />
         )}
