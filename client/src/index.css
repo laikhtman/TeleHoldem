@@ -290,6 +290,55 @@
     pointer-events: none;
   }
 
+  /* Poker Card Animations */
+  @keyframes dealCard {
+    0% {
+      transform: translate(var(--deal-from-x, 0), var(--deal-from-y, -300px)) scale(0.3);
+      opacity: 0;
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      transform: translate(0, 0) scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes flopReveal {
+    0% {
+      transform: translateY(-50px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes turnRiverReveal {
+    0% {
+      transform: translateX(80px) scale(0.95);
+      opacity: 0;
+    }
+    100% {
+      transform: translateX(0) scale(1);
+      opacity: 1;
+    }
+  }
+
+  .card-deal-animation {
+    animation: dealCard 0.6s ease-out forwards;
+  }
+
+  .card-flop-animation {
+    animation: flopReveal 0.4s ease-out forwards;
+  }
+
+  .card-turn-river-animation {
+    animation: turnRiverReveal 0.3s ease-out forwards;
+  }
+
   /* .no-default-hover-elevate/no-default-active-elevate is an escape hatch so consumers of
    * buttons/badges can remove the automatic brightness adjustment on interactions
    * and program their own. */
@@ -365,5 +414,32 @@
   .border.active-elevate-2:not(.no-active-interaction-elevate)::after,
   .border.hover-elevate:not(.no-hover-interaction-elevate)::after {
     inset: -1px;
+  }
+
+  /* Poker button interaction effects */
+  .poker-button-glow {
+    transition: box-shadow 0.2s ease-in-out, transform 0.1s ease-in-out;
+  }
+
+  .poker-button-glow:hover:not(:disabled) {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.4), 0 0 30px rgba(255, 215, 0, 0.2);
+  }
+
+  .poker-button-glow:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+
+  /* Enhanced pulsing glow for current player */
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.5), 0 0 30px rgba(255, 215, 0, 0.3), 0 0 45px rgba(255, 215, 0, 0.1);
+    }
+    50% {
+      box-shadow: 0 0 25px rgba(255, 215, 0, 0.8), 0 0 45px rgba(255, 215, 0, 0.5), 0 0 60px rgba(255, 215, 0, 0.3);
+    }
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
   }
 }

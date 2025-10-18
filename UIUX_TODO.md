@@ -4,10 +4,10 @@
 ## Visual Polish & Animations (Priority: High)
 
 ### 1. Enhanced Card Animations
-- [ ] Add smooth card dealing animation from deck position to player hands
-- [ ] Implement card flip animation with realistic 3D rotation and timing
-- [ ] Add staggered reveal animation for flop cards (0.2s delay between each)
-- [ ] Create card slide-in animation when new community cards are revealed
+- [x] Add smooth card dealing animation from deck position to player hands
+- [x] Implement card flip animation with realistic 3D rotation and timing
+- [x] Add staggered reveal animation for flop cards (0.2s delay between each)
+- [x] Create card slide-in animation when new community cards are revealed
 
 ### 2. Chip Movement & Betting Animations
 - [ ] Animate chips moving from player seats to pot with realistic arc trajectory
@@ -16,9 +16,9 @@
 - [ ] Create chip counting animation when distributing winnings
 
 ### 3. Player Interaction Feedback
-- [ ] Add hover effects on action buttons with subtle glow
-- [ ] Implement button press feedback with scale animation (0.95x on click)
-- [ ] Create pulsing glow effect for current player's turn
+- [x] Add hover effects on action buttons with subtle glow
+- [x] Implement button press feedback with scale animation (0.95x on click)
+- [x] Create pulsing glow effect for current player's turn
 - [ ] Add subtle shake animation for invalid actions
 
 ### 4. Table Atmosphere & Immersion
@@ -30,10 +30,10 @@
 ## User Experience Enhancements (Priority: High)
 
 ### 5. Game State Communication
-- [ ] Add toast notifications for all major game events (fold, raise, win)
+- [x] Add toast notifications for all major game events (fold, raise, win)
 - [ ] Implement action history sidebar showing recent moves
-- [ ] Create clear winner announcement with celebration animation
-- [ ] Add phase transition indicators (flop, turn, river announcements)
+- [x] Create clear winner announcement with celebration animation
+- [x] Add phase transition indicators (flop, turn, river announcements)
 
 ### 6. Player Information Display
 - [ ] Show hand strength indicator for human player (pair, flush draw, etc.)
@@ -42,10 +42,10 @@
 - [ ] Create player elimination indicator when chips reach zero
 
 ### 7. Action Controls Improvement
-- [ ] Add quick bet buttons (1/2 pot, 3/4 pot, pot, all-in)
-- [ ] Implement keyboard shortcuts for common actions (F=fold, C=check/call)
-- [ ] Create bet amount suggestions based on pot size
-- [ ] Add confirmation dialog for large bets (>50% of chips)
+- [x] Add quick bet buttons (1/2 pot, 3/4 pot, pot, all-in)
+- [x] Implement keyboard shortcuts for common actions (F=fold, C=check/call)
+- [x] Create bet amount suggestions based on pot size
+- [x] Add confirmation dialog for large bets (>50% of chips) - Visual warning instead of dialog
 
 ### 8. Game Flow & Navigation
 - [ ] Implement game pause/resume functionality

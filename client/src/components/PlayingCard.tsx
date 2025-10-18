@@ -7,10 +7,20 @@ interface PlayingCardProps {
   faceDown?: boolean;
   className?: string;
   animateFlip?: boolean;
+  animateDeal?: boolean;
+  dealDelay?: number;
 }
 
-export function PlayingCard({ card, faceDown = false, className = '', animateFlip = false }: PlayingCardProps) {
+export function PlayingCard({ 
+  card, 
+  faceDown = false, 
+  className = '', 
+  animateFlip = false,
+  animateDeal = false,
+  dealDelay = 0
+}: PlayingCardProps) {
   const [isFlipped, setIsFlipped] = useState(!animateFlip);
+  const [isDealt, setIsDealt] = useState(!animateDeal);
 
   useEffect(() => {
     if (animateFlip) {
@@ -18,6 +28,13 @@ export function PlayingCard({ card, faceDown = false, className = '', animateFli
       return () => clearTimeout(timer);
     }
   }, [animateFlip]);
+
+  useEffect(() => {
+    if (animateDeal) {
+      const timer = setTimeout(() => setIsDealt(true), dealDelay);
+      return () => clearTimeout(timer);
+    }
+  }, [animateDeal, dealDelay]);
 
   if (!card) {
     return (
@@ -31,12 +48,30 @@ export function PlayingCard({ card, faceDown = false, className = '', animateFli
   const color = getCardColor(card.suit);
   const colorClass = color === 'red' ? 'text-poker-cardRed' : 'text-poker-cardBlack';
 
+  const getInitialState = () => {
+    if (animateDeal) {
+      return { opacity: 0, scale: 0.3, y: -300, rotateY: 0 };
+    }
+    return { opacity: 1, scale: 1, y: 0, rotateY: isFlipped ? 180 : 0 };
+  };
+
+  const getAnimateState = () => {
+    if (animateDeal && !isDealt) {
+      return getInitialState();
+    }
+    return { opacity: 1, scale: 1, y: 0, rotateY: isFlipped ? 180 : 0 };
+  };
+
   return (
     <motion.div
       className={`relative w-[70px] h-[100px] ${className}`}
-      initial={false}
-      animate={{ rotateY: isFlipped ? 180 : 0 }}
-      transition={{ duration: 0.3 }}
+      initial={getInitialState()}
+      animate={getAnimateState()}
+      transition={{ 
+        duration: animateDeal ? 0.6 : 0.4, 
+        ease: animateDeal ? "easeOut" : "easeInOut",
+        delay: animateDeal ? dealDelay / 1000 : 0
+      }}
       style={{ transformStyle: 'preserve-3d' }}
     >
       <motion.div 

@@ -30,6 +30,12 @@ const toastVariants = cva(
         default: "border bg-background text-foreground",
         destructive:
           "destructive group border-destructive bg-destructive text-destructive-foreground",
+        success:
+          "border-poker-success bg-poker-success/10 text-poker-success backdrop-blur-sm",
+        info:
+          "border-poker-info bg-poker-info/10 text-poker-info backdrop-blur-sm",
+        warning:
+          "border-poker-warning bg-poker-warning/10 text-poker-warning backdrop-blur-sm",
       },
     },
     defaultVariants: {

@@ -147,11 +147,17 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
               <PlayingCard 
                 card={player.hand[0]} 
                 faceDown={!player.isHuman && phase !== 'showdown'}
+                animateDeal={phase === 'pre-flop'}
+                dealDelay={position * 2 * 150}
+                animateFlip={player.isHuman && phase === 'pre-flop'}
                 className="transform scale-90"
               />
               <PlayingCard 
                 card={player.hand[1]} 
                 faceDown={!player.isHuman && phase !== 'showdown'}
+                animateDeal={phase === 'pre-flop'}
+                dealDelay={position * 2 * 150 + 150}
+                animateFlip={player.isHuman && phase === 'pre-flop'}
                 className="transform scale-90"
               />
             </>

@@ -8,6 +8,8 @@ import { PotDisplay } from '@/components/PotDisplay';
 import { ActionControls } from '@/components/ActionControls';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { WinnerCelebration } from '@/components/WinnerCelebration';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const NUM_PLAYERS = 6;
 
@@ -15,6 +17,7 @@ export default function PokerGame() {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [winningPlayerIds, setWinningPlayerIds] = useState<string[]>([]);
+  const [phaseKey, setPhaseKey] = useState(0);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -42,8 +45,10 @@ export default function PokerGame() {
     setGameState(newState);
     
     toast({
+      variant: "info" as any,
       title: "New Hand",
       description: newState.lastAction || "Cards have been dealt. Good luck!",
+      duration: 3000,
     });
 
     // After dealing, start bot actions if human is not first
@@ -82,6 +87,7 @@ export default function PokerGame() {
       }
 
       toast({
+        variant: "info" as any,
         description: currentState.lastAction || '',
         duration: 2000,
       });
@@ -104,10 +110,14 @@ export default function PokerGame() {
         const { winners, winningHand } = gameEngine.resolveShowdown(currentState);
         const winnerNames = winners.map(i => currentState.players[i].name).join(', ');
         
+        const winnerIds = winners.map(i => currentState.players[i].id);
+        setWinningPlayerIds(winnerIds);
+        
         toast({
+          variant: "success" as any,
           title: "Hand Complete!",
           description: `${winnerNames} wins the pot - ${winningHand}`,
-          duration: 4000,
+          duration: 5000,
         });
         
         currentState = gameEngine.awardPots(currentState, winners);
@@ -133,10 +143,13 @@ export default function PokerGame() {
         };
         
         setGameState({ ...currentState });
+        setPhaseKey(prev => prev + 1);
         
         toast({
+          variant: "info" as any,
           title: getPhaseTitle(currentState.phase),
           description: getPhaseDescription(currentState.phase),
+          duration: 3500,
         });
 
         if (currentState.currentPlayerIndex !== 0) {
@@ -158,9 +171,10 @@ export default function PokerGame() {
 
       const winnerNames = winners.map(i => state.players[i].name).join(', ');
       toast({
+        variant: "success" as any,
         title: "Hand Complete!",
         description: `${winnerNames} wins the pot - ${winningHand}`,
-        duration: 4000,
+        duration: 5000,
       });
       
       // Award pot
@@ -177,11 +191,14 @@ export default function PokerGame() {
     if (activePlayers.length === 1) {
       const { winners, winningHand } = gameEngine.resolveShowdown(newState);
       const winnerNames = winners.map(i => newState.players[i].name).join(', ');
+      const winnerIds = winners.map(i => newState.players[i].id);
+      setWinningPlayerIds(winnerIds);
       
       toast({
+        variant: "success" as any,
         title: "Hand Complete!",
         description: `${winnerNames} wins the pot - ${winningHand}`,
-        duration: 4000,
+        duration: 5000,
       });
       
       let finalState = gameEngine.awardPots(newState, winners);
@@ -191,7 +208,9 @@ export default function PokerGame() {
     }
 
     toast({
+      variant: "info" as any,
       description: newState.lastAction || '',
+      duration: 2000,
     });
 
     const nextState = {
@@ -280,7 +299,7 @@ export default function PokerGame() {
         data-testid="poker-table"
       >
         {/* Community Cards */}
-        <CommunityCards cards={gameState.communityCards} />
+        <CommunityCards cards={gameState.communityCards} phase={gameState.phase} />
 
         {/* Pot Display */}
         <PotDisplay amount={gameState.pots.reduce((sum, pot) => sum + pot.amount, 0)} />
@@ -301,13 +320,30 @@ export default function PokerGame() {
         ))}
 
         {/* Game Phase Indicator */}
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-30">
-          <div className="bg-black/70 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/20">
-            <div className="text-sm text-white font-semibold" data-testid="text-game-phase">
-              {getPhaseTitle(gameState.phase)}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={phaseKey}
+            className="absolute top-4 left-1/2 transform -translate-x-1/2 z-30"
+            initial={{ opacity: 0, y: -20, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.8 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="bg-black/80 backdrop-blur-sm px-6 py-3 rounded-lg border-2 border-poker-chipGold shadow-lg shadow-poker-chipGold/20">
+              <div className="text-base text-poker-chipGold font-bold tracking-wide" data-testid="text-game-phase">
+                {getPhaseTitle(gameState.phase)}
+              </div>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Winner Celebration */}
+        {winningPlayerIds.length > 0 && winningPlayerIds.map(winnerId => {
+          const winner = gameState.players.find(p => p.id === winnerId);
+          return winner ? (
+            <WinnerCelebration key={winnerId} isWinner={true} playerName={winner.name} />
+          ) : null;
+        })}
 
         {/* Last Action */}
         {gameState.lastAction && (
@@ -345,6 +381,8 @@ export default function PokerGame() {
             amountToCall={gameState.currentBet - humanPlayer.bet}
             currentBet={gameState.currentBet}
             minRaiseAmount={minRaiseAmount}
+            potSize={gameState.pots.reduce((sum, pot) => sum + pot.amount, 0)}
+            playerChips={humanPlayer.chips}
             disabled={gameState.currentPlayerIndex !== 0 || isProcessing || humanPlayer.folded}
           />
         )}
