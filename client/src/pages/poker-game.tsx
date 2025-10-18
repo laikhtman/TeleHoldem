@@ -122,23 +122,10 @@ export default function PokerGame() {
         currentState = gameEngine.advancePhase(currentState);
         setGameState({ ...currentState });
         
-        // Resolve showdown
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        const { winners, winningHand } = gameEngine.resolveShowdown(currentState);
-        
-        if (winners.length > 0) {
-          const winnerNames = winners.map(i => currentState.players[i].name).join(', ');
-          toast({
-            title: "Hand Complete!",
-            description: `${winnerNames} wins $${currentState.pot} - ${winningHand}`,
-            duration: 4000,
-          });
-          
-          // Award pot
-          currentState = gameEngine.awardPot(currentState, winners);
-          currentState = { ...currentState, phase: 'waiting' as GamePhase };
-          setGameState({ ...currentState });
-        }
+        // Resolve showdown automatically
+        await resolveShowdown(currentState);
+        setIsProcessing(false);
+        return;
       } else if (currentState.phase !== 'showdown') {
         currentState = gameEngine.advancePhase(currentState);
         
@@ -164,6 +151,25 @@ export default function PokerGame() {
     }
 
     setIsProcessing(false);
+  };
+
+  const resolveShowdown = async (state: GameState) => {
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    const { winners, winningHand } = gameEngine.resolveShowdown(state);
+    
+    if (winners.length > 0) {
+      const winnerNames = winners.map(i => state.players[i].name).join(', ');
+      toast({
+        title: "Hand Complete!",
+        description: `${winnerNames} wins $${state.pot} - ${winningHand}`,
+        duration: 4000,
+      });
+      
+      // Award pot
+      let finalState = gameEngine.awardPot(state, winners);
+      finalState = { ...finalState, phase: 'waiting' as GamePhase };
+      setGameState(finalState);
+    }
   };
 
   const handleFold = () => {

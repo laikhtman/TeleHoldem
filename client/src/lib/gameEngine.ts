@@ -1,4 +1,5 @@
 import { Card, Player, GameState, SUITS, RANKS, Suit, Rank, GamePhase } from '@shared/schema';
+import { handEvaluator } from './handEvaluator';
 
 export class GameEngine {
   createDeck(): Card[] {
@@ -261,7 +262,6 @@ export class GameEngine {
     }
 
     // Evaluate all active players' hands
-    const { handEvaluator } = require('./handEvaluator');
     const evaluations = activePlayers.map((player, idx) => {
       const playerIndex = gameState.players.findIndex(p => p.id === player.id);
       const result = handEvaluator.evaluateHand(player.hand, gameState.communityCards);
