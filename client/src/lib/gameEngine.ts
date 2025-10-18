@@ -66,7 +66,7 @@ export class GameEngine {
       players,
       deck: this.createDeck(),
       communityCards: [],
-      pot: 0,
+      pots: [{ amount: 0, eligiblePlayerIds: players.map(p => p.id) }],
       currentPlayerIndex: 0,
       dealerIndex: 0,
       phase: 'waiting',
@@ -102,7 +102,7 @@ export class GameEngine {
     return {
       ...gameState,
       players,
-      pot: smallBlindBet + bigBlindBet,
+      pots: [{ ...gameState.pots[0], amount: smallBlindBet + bigBlindBet }],
       currentBet: bigBlindAmount,
       lastAction: `Blinds posted: $${smallBlindAmount}/$${bigBlindAmount}`
     };
@@ -110,7 +110,17 @@ export class GameEngine {
 
   startNewHand(gameState: GameState): GameState {
     const deck = this.createDeck();
-    const players = gameState.players.map(p => ({
+    
+    const activePlayers = gameState.players.filter(p => p.chips > 0);
+
+    if (activePlayers.find(p => p.isHuman)?.chips === 0) {
+      return {
+        ...gameState,
+        lastAction: "Game Over! You are out of chips."
+      };
+    }
+
+    const players = activePlayers.map(p => ({
       ...p,
       hand: [],
       bet: 0,
@@ -134,7 +144,7 @@ export class GameEngine {
       players: updatedPlayers,
       deck: currentDeck,
       communityCards: [],
-      pot: 0,
+      pots: [{ amount: 0, eligiblePlayerIds: updatedPlayers.map(p => p.id) }],
       currentBet: 0,
       dealerIndex: newDealerIndex,
       currentPlayerIndex: (newDealerIndex + 1) % players.length,
@@ -218,10 +228,13 @@ export class GameEngine {
       allIn: player.chips - actualBet === 0
     };
 
+    const newPots = [...gameState.pots];
+    newPots[0].amount += actualBet;
+
     return {
       ...gameState,
       players,
-      pot: gameState.pot + actualBet,
+      pots: newPots,
       currentBet: Math.max(gameState.currentBet, players[playerIndex].bet),
       lastAction: actionText
     };
@@ -295,25 +308,43 @@ export class GameEngine {
     return { winners, winningHand };
   }
 
-  awardPot(gameState: GameState, winners: number[]): GameState {
-    const players = [...gameState.players];
-    const potShare = Math.floor(gameState.pot / winners.length);
-    const remainder = gameState.pot % winners.length;
+  calculatePots(gameState: GameState): GameState {
+    // This is a simplified pot calculation. A full implementation would be more complex.
+    const activePlayers = this.getActivePlayers(gameState);
+    const totalPot = activePlayers.reduce((sum, player) => sum + player.bet, 0);
+    
+    return {
+      ...gameState,
+      pots: [{ amount: totalPot, eligiblePlayerIds: activePlayers.map(p => p.id) }]
+    };
+  }
 
-    // Give each winner their share
-    winners.forEach((winnerIndex, idx) => {
-      // First winner(s) get remainder chips to ensure full pot distribution
-      const extraChip = idx < remainder ? 1 : 0;
-      players[winnerIndex] = {
-        ...players[winnerIndex],
-        chips: players[winnerIndex].chips + potShare + extraChip
-      };
+  awardPots(gameState: GameState, winners: number[]): GameState {
+    const players = [...gameState.players];
+    
+    gameState.pots.forEach(pot => {
+      const eligibleWinners = winners.filter(winnerIndex => 
+        pot.eligiblePlayerIds.includes(players[winnerIndex].id)
+      );
+
+      if (eligibleWinners.length > 0) {
+        const potShare = Math.floor(pot.amount / eligibleWinners.length);
+        const remainder = pot.amount % eligibleWinners.length;
+
+        eligibleWinners.forEach((winnerIndex, idx) => {
+          const extraChip = idx < remainder ? 1 : 0;
+          players[winnerIndex] = {
+            ...players[winnerIndex],
+            chips: players[winnerIndex].chips + potShare + extraChip
+          };
+        });
+      }
     });
 
     return {
       ...gameState,
       players,
-      pot: 0
+      pots: []
     };
   }
 }

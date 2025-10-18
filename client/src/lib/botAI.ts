@@ -3,72 +3,75 @@ import { handEvaluator } from './handEvaluator';
 
 export class BotAI {
   getAction(player: Player, gameState: GameState): BotAction {
-    const { currentBet, phase, pot } = gameState;
+    const { currentBet, phase, pots, players } = gameState;
+    const totalPot = pots.reduce((acc, pot) => acc + pot.amount, 0);
     const callAmount = currentBet - player.bet;
-    
-    // Evaluate hand strength
+    const activePlayers = players.filter(p => !p.folded).length;
+
     const handStrength = this.evaluateHandStrength(player.hand, gameState.communityCards);
-    
-    // Calculate pot odds
-    const potOdds = callAmount > 0 ? callAmount / (pot + callAmount) : 0;
-    
-    // If there's no bet to call
-    if (callAmount === 0) {
-      // Strong hand - bet
+    const potOdds = callAmount > 0 ? callAmount / (totalPot + callAmount) : 0;
+
+    // Bluffing logic
+    const isLatePosition = player.position >= players.length - 2;
+    const bluffChance = isLatePosition ? 0.15 : 0.05;
+    if (Math.random() < bluffChance && handStrength < 0.4) {
+      const raiseAmount = Math.min(
+        callAmount + Math.floor(totalPot * (0.5 + Math.random() * 0.5)),
+        player.chips
+      );
+      if (raiseAmount > callAmount) {
+        return { action: 'raise', amount: raiseAmount };
+      }
+    }
+
+    if (callAmount === 0) { // No bet to call
       if (handStrength > 0.7) {
         const betAmount = Math.min(
-          Math.floor(pot * 0.5 + Math.random() * pot * 0.3),
+          Math.floor(totalPot * (0.4 + Math.random() * 0.3)),
           player.chips
         );
         return { action: 'bet', amount: Math.max(betAmount, 20) };
       }
-      // Medium hand - sometimes bet, sometimes check
       if (handStrength > 0.4) {
-        if (Math.random() < 0.4) {
-          const betAmount = Math.min(20 + Math.floor(Math.random() * 30), player.chips);
-          return { action: 'bet', amount: betAmount };
+        if (Math.random() < 0.5) {
+          const betAmount = Math.min(
+            Math.floor(totalPot * (0.3 + Math.random() * 0.2)),
+            player.chips
+          );
+          return { action: 'bet', amount: Math.max(betAmount, 20) };
         }
       }
-      // Weak hand - mostly check
       return { action: 'check' };
     }
-    
-    // If there's a bet to call
-    // Very strong hand - raise
-    if (handStrength > 0.8) {
+
+    // Facing a bet
+    if (handStrength > 0.85) {
       const raiseAmount = Math.min(
-        callAmount + Math.floor(pot * 0.4),
+        callAmount + Math.floor(totalPot * (0.6 + Math.random() * 0.4)),
         player.chips
       );
       return { action: 'raise', amount: raiseAmount };
     }
-    
-    // Strong hand - call or raise
+
     if (handStrength > 0.6) {
-      if (Math.random() < 0.7) {
-        return { action: 'call', amount: callAmount };
-      } else {
-        const raiseAmount = Math.min(
-          callAmount + Math.floor(pot * 0.3),
-          player.chips
-        );
-        return { action: 'raise', amount: raiseAmount };
-      }
-    }
-    
-    // Medium hand - call if pot odds are good, otherwise fold
-    if (handStrength > 0.35) {
-      if (potOdds < 0.3 || callAmount < player.chips * 0.2) {
+      if (Math.random() < 0.8) {
         return { action: 'call', amount: callAmount };
       }
-      return { action: 'fold' };
+      const raiseAmount = Math.min(
+        callAmount + Math.floor(totalPot * (0.4 + Math.random() * 0.2)),
+        player.chips
+      );
+      return { action: 'raise', amount: raiseAmount };
     }
-    
-    // Weak hand - mostly fold, occasionally bluff
-    if (Math.random() < 0.1 && phase === 'pre-flop') {
-      return { action: 'call', amount: callAmount };
+
+    // Adjust calling strategy based on number of players
+    const requiredStrengthToCall = 0.3 + (activePlayers * 0.05);
+    if (handStrength > requiredStrengthToCall) {
+      if (potOdds < 0.4) { // Good pot odds
+        return { action: 'call', amount: callAmount };
+      }
     }
-    
+
     return { action: 'fold' };
   }
 

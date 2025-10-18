@@ -1,6 +1,9 @@
-import { Player } from '@shared/schema';
+import { Player, GamePhase } from '@shared/schema';
 import { PlayingCard } from './PlayingCard';
 import { Coins, Trophy } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Chip } from './Chip';
 
 interface PlayerSeatProps {
   player: Player;
@@ -9,17 +12,28 @@ interface PlayerSeatProps {
   isCurrentPlayer: boolean;
   isDealer: boolean;
   isWinner: boolean;
+  phase: GamePhase;
 }
 
-export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, isDealer, isWinner }: PlayerSeatProps) {
-  // Calculate position around oval table using trigonometry
+export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, isDealer, isWinner, phase }: PlayerSeatProps) {
+  const [animatedChips, setAnimatedChips] = useState(0);
+  const prevBet = useRef(player.bet);
+
+  useEffect(() => {
+    if (player.bet > prevBet.current) {
+      const chipsToAnimate = Math.max(1, Math.floor((player.bet - prevBet.current) / 20));
+      setAnimatedChips(chipsToAnimate);
+      setTimeout(() => setAnimatedChips(0), 500); // Disappear after animation
+    }
+    prevBet.current = player.bet;
+  }, [player.bet]);
+
   const getPosition = () => {
     const tableWidth = 800;
     const tableHeight = 500;
     const radiusX = tableWidth / 2 - 80;
     const radiusY = tableHeight / 2 - 60;
     
-    // Distribute players around oval
     const angle = (position / totalPlayers) * 2 * Math.PI - Math.PI / 2;
     
     const x = Math.cos(angle) * radiusX + tableWidth / 2;
@@ -35,7 +49,8 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
   const seatClasses = [
     'rounded-lg p-3 backdrop-blur-sm transition-all duration-300',
     isCurrentPlayer ? 'bg-black/80 border-2 border-poker-chipGold animate-pulse-glow' : 'bg-black/70 border border-white/20',
-    isWinner ? 'bg-poker-chipGold/20 border-2 border-poker-chipGold shadow-lg' : ''
+    isWinner ? 'bg-poker-chipGold/20 border-2 border-poker-chipGold shadow-lg' : '',
+    player.chips === 0 ? 'opacity-50' : ''
   ].join(' ');
 
   return (
@@ -44,6 +59,24 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
       style={getPosition()}
       data-testid={`player-seat-${player.id}`}
     >
+      <AnimatePresence>
+        {animatedChips > 0 && Array.from({ length: animatedChips }).map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute"
+            initial={{ x: 0, y: 0 }}
+            animate={{ 
+              x: -getPosition().left.slice(0,-2) + 400, 
+              y: -getPosition().top.slice(0,-2) + 250,
+              transition: { duration: 0.3, ease: 'easeOut' }
+            }}
+            exit={{ opacity: 0 }}
+          >
+            <Chip />
+          </motion.div>
+        ))}
+      </AnimatePresence>
+
       <div className={seatClasses}>
         {isWinner && (
           <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-poker-chipGold text-black px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
@@ -90,12 +123,12 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
             <>
               <PlayingCard 
                 card={player.hand[0]} 
-                faceDown={!player.isHuman && !isWinner}
+                faceDown={!player.isHuman && phase !== 'showdown'}
                 className="transform scale-90"
               />
               <PlayingCard 
                 card={player.hand[1]} 
-                faceDown={!player.isHuman && !isWinner}
+                faceDown={!player.isHuman && phase !== 'showdown'}
                 className="transform scale-90"
               />
             </>

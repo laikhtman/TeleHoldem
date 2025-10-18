@@ -106,11 +106,11 @@ export default function PokerGame() {
         
         toast({
           title: "Hand Complete!",
-          description: `${winnerNames} wins $${currentState.pot} - ${winningHand}`,
+          description: `${winnerNames} wins the pot - ${winningHand}`,
           duration: 4000,
         });
         
-        currentState = gameEngine.awardPot(currentState, winners);
+        currentState = gameEngine.awardPots(currentState, winners);
         currentState = { ...currentState, phase: 'waiting' as GamePhase };
         setGameState({ ...currentState });
         setIsProcessing(false);
@@ -122,9 +122,9 @@ export default function PokerGame() {
       } else if (currentState.phase !== 'showdown' && currentState.phase !== 'waiting') {
         currentState = gameEngine.advancePhase(currentState);
         
-        let nextPlayerIndex = (currentState.dealerIndex + 1) % NUM_PLAYERS;
+        let nextPlayerIndex = (currentState.dealerIndex + 1) % currentState.players.length;
         while (currentState.players[nextPlayerIndex].folded) {
-          nextPlayerIndex = (nextPlayerIndex + 1) % NUM_PLAYERS;
+          nextPlayerIndex = (nextPlayerIndex + 1) % currentState.players.length;
         }
         
         currentState = {
@@ -159,12 +159,12 @@ export default function PokerGame() {
       const winnerNames = winners.map(i => state.players[i].name).join(', ');
       toast({
         title: "Hand Complete!",
-        description: `${winnerNames} wins $${state.pot} - ${winningHand}`,
+        description: `${winnerNames} wins the pot - ${winningHand}`,
         duration: 4000,
       });
       
       // Award pot
-      let finalState = gameEngine.awardPot(state, winners);
+      let finalState = gameEngine.awardPots(state, winners);
       finalState = { ...finalState, phase: 'waiting' as GamePhase };
       setGameState(finalState);
     }
@@ -248,6 +248,7 @@ export default function PokerGame() {
   const canCheck = gameState.currentBet === 0 || gameState.currentBet === humanPlayer.bet;
   const minBet = gameState.currentBet - humanPlayer.bet || 10;
   const maxBet = humanPlayer.chips;
+  const minRaiseAmount = gameState.currentBet + (gameState.currentBet - (gameState.players.find(p => p.bet < gameState.currentBet)?.bet || 0));
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 gap-6">
@@ -265,7 +266,7 @@ export default function PokerGame() {
         <CommunityCards cards={gameState.communityCards} />
 
         {/* Pot Display */}
-        <PotDisplay amount={gameState.pot} />
+        <PotDisplay amount={gameState.pots.reduce((acc, pot) => acc + pot.amount, 0)} />
 
         {/* Player Seats */}
         {gameState.players.map((player, index) => (
@@ -277,6 +278,7 @@ export default function PokerGame() {
             isCurrentPlayer={index === gameState.currentPlayerIndex}
             isDealer={index === gameState.dealerIndex}
             isWinner={winningPlayerIds.includes(player.id)}
+            phase={gameState.phase}
           />
         ))}
 
@@ -324,6 +326,7 @@ export default function PokerGame() {
             maxBet={maxBet}
             amountToCall={gameState.currentBet - humanPlayer.bet}
             currentBet={gameState.currentBet}
+            minRaiseAmount={minRaiseAmount}
             disabled={gameState.currentPlayerIndex !== 0 || isProcessing || humanPlayer.folded}
           />
         )}

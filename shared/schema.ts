@@ -51,7 +51,7 @@ export interface GameState {
   players: Player[];
   deck: Card[];
   communityCards: Card[];
-  pot: number;
+  pots: { amount: number; eligiblePlayerIds: string[] }[];
   currentPlayerIndex: number;
   dealerIndex: number;
   phase: GamePhase;
