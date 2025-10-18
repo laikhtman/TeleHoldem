@@ -1,0 +1,90 @@
+5. game-table-ui.js - The UI Controller
+In this file, create and export a class named GameUI to handle all DOM updates.
+
+Class GameUI should contain:
+
+constructor():
+
+Get references to all key DOM elements (#poker-table, #player-seats, #community-cards-area, #pot-display, etc.).
+
+Method drawPlayer(player, index, totalPlayers):
+
+Calculates the position of a player around the oval table using trigonometry.
+
+Creates and appends a div for the player to the #player-seats element. This div should contain the player's name, chip count, and two card placeholders.
+
+Method updatePlayer(player, index):
+
+Updates an existing player's chip count and cards on the screen.
+
+Method dealCardToPlayer(playerIndex, card, cardIndex):
+
+Visually updates a player's card placeholder to show the dealt card (e.g., A♥). Use CSS to distinguish card colors.
+
+Method dealCommunityCard(card, cardIndex):
+
+Updates a community card placeholder.
+
+Method updatePot(amount):
+
+Updates the text of the #pot-display element.
+
+6. ai-bot-logic.js - The Bot Brain
+Create and export a simple BotAI class.
+
+Class BotAI should contain:
+
+Method getAction(playerHand, communityCards):
+
+A simple logic function. For now, it can just return a random action:
+
+Generate a random number. If it's less than 0.2, return { action: 'fold' }. If it's less than 0.7, return { action: 'check' }. Otherwise, return { action: 'bet', amount: 20 }.
+
+7. main.js - The Application Entry Point
+This file will initialize and connect all the modules.
+
+JavaScript
+
+// This assumes the classes are exported correctly from their files.
+// In a real module setup, you'd use import/export syntax.
+
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Initialize Engine, UI, and AI
+    const gameEngine = new GameEngine();
+    const gameUI = new GameUI();
+    const botAI = new BotAI();
+
+    const NUM_PLAYERS = 6;
+
+    // 2. Add Players
+    gameEngine.addPlayer('You', 1000, true); // The human player
+    for (let i = 1; i < NUM_PLAYERS; i++) {
+        gameEngine.addPlayer(`Bot ${i}`, 1000);
+    }
+
+    // 3. Draw the initial table
+    gameEngine.players.forEach((player, index) => {
+        gameUI.drawPlayer(player, index, NUM_PLAYERS);
+    });
+
+    // 4. Start the Game
+    function startNewHand() {
+        console.log("--- New Hand Starting ---");
+        gameEngine.startGame();
+        
+        // Update UI for the new hand
+        gameUI.updatePot(gameEngine.pot);
+        gameEngine.players.forEach((player, index) => {
+            // Deal hole cards visually with a delay
+            setTimeout(() => gameUI.dealCardToPlayer(index, player.hand[0], 0), 200 * index);
+            setTimeout(() => gameUI.dealCardToPlayer(index, player.hand[1], 1), 200 * index + 100);
+        });
+        
+        console.log(gameEngine);
+    }
+
+    // Start the first hand
+    startNewHand();
+
+    // TODO: Add event listeners for player controls and create the main game loop.
+});
