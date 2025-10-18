@@ -33,7 +33,7 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
 
   return (
     <div
-      className="absolute"
+      className="absolute z-10"
       style={getPosition()}
       data-testid={`player-seat-${player.id}`}
     >

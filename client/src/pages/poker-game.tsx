@@ -294,7 +294,7 @@ export default function PokerGame() {
         ))}
 
         {/* Game Phase Indicator */}
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-30">
           <div className="bg-black/70 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/20">
             <div className="text-sm text-white font-semibold" data-testid="text-game-phase">
               {getPhaseTitle(gameState.phase)}
@@ -304,7 +304,7 @@ export default function PokerGame() {
 
         {/* Last Action */}
         {gameState.lastAction && (
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-30">
             <div className="bg-black/70 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/20">
               <div className="text-xs text-white" data-testid="text-last-action">
                 {gameState.lastAction}

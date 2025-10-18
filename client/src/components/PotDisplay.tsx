@@ -6,7 +6,7 @@ interface PotDisplayProps {
 
 export function PotDisplay({ amount }: PotDisplayProps) {
   return (
-    <div className="absolute top-[30%] left-1/2 transform -translate-x-1/2">
+    <div className="absolute top-[30%] left-1/2 transform -translate-x-1/2 z-15">
       <div className="bg-black/70 backdrop-blur-sm px-6 py-3 rounded-lg border border-poker-chipGold/40 shadow-lg">
         <div className="flex items-center gap-2">
           <Coins className="w-6 h-6 text-poker-chipGold" />
