@@ -74,6 +74,39 @@ export class GameEngine {
     };
   }
 
+  postBlinds(gameState: GameState, smallBlindAmount: number, bigBlindAmount: number): GameState {
+    const players = [...gameState.players];
+    const dealerIndex = gameState.dealerIndex;
+    const smallBlindIndex = (dealerIndex + 1) % players.length;
+    const bigBlindIndex = (dealerIndex + 2) % players.length;
+
+    // Post small blind
+    const smallBlindBet = Math.min(smallBlindAmount, players[smallBlindIndex].chips);
+    players[smallBlindIndex] = {
+      ...players[smallBlindIndex],
+      chips: players[smallBlindIndex].chips - smallBlindBet,
+      bet: smallBlindBet,
+      allIn: players[smallBlindIndex].chips - smallBlindBet === 0
+    };
+
+    // Post big blind
+    const bigBlindBet = Math.min(bigBlindAmount, players[bigBlindIndex].chips);
+    players[bigBlindIndex] = {
+      ...players[bigBlindIndex],
+      chips: players[bigBlindIndex].chips - bigBlindBet,
+      bet: bigBlindBet,
+      allIn: players[bigBlindIndex].chips - bigBlindBet === 0
+    };
+
+    return {
+      ...gameState,
+      players,
+      pot: smallBlindBet + bigBlindBet,
+      currentBet: bigBlindAmount,
+      lastAction: `Blinds posted: $${smallBlindAmount}/$${bigBlindAmount}`
+    };
+  }
+
   startNewHand(gameState: GameState): GameState {
     const deck = this.createDeck();
     const players = gameState.players.map(p => ({
@@ -210,6 +243,67 @@ export class GameEngine {
 
   getActivePlayers(gameState: GameState): Player[] {
     return gameState.players.filter(p => !p.folded);
+  }
+
+  resolveShowdown(gameState: GameState): { winners: number[]; winningHand: string } {
+    const activePlayers = this.getActivePlayers(gameState);
+    
+    if (activePlayers.length === 0) {
+      return { winners: [], winningHand: 'No players' };
+    }
+
+    if (activePlayers.length === 1) {
+      const winnerIndex = gameState.players.findIndex(p => p.id === activePlayers[0].id);
+      return { 
+        winners: [winnerIndex], 
+        winningHand: 'All others folded' 
+      };
+    }
+
+    // Evaluate all active players' hands
+    const { handEvaluator } = require('./handEvaluator');
+    const evaluations = activePlayers.map((player, idx) => {
+      const playerIndex = gameState.players.findIndex(p => p.id === player.id);
+      const result = handEvaluator.evaluateHand(player.hand, gameState.communityCards);
+      return {
+        playerIndex,
+        ...result
+      };
+    });
+
+    // Find the highest hand value
+    const maxValue = Math.max(...evaluations.map(e => e.value));
+    
+    // Get all players with the max value (handles ties)
+    const winners = evaluations
+      .filter(e => e.value === maxValue)
+      .map(e => e.playerIndex);
+    
+    const winningHand = evaluations.find(e => e.value === maxValue)?.description || 'Best Hand';
+    
+    return { winners, winningHand };
+  }
+
+  awardPot(gameState: GameState, winners: number[]): GameState {
+    const players = [...gameState.players];
+    const potShare = Math.floor(gameState.pot / winners.length);
+    const remainder = gameState.pot % winners.length;
+
+    // Give each winner their share
+    winners.forEach((winnerIndex, idx) => {
+      // First winner(s) get remainder chips to ensure full pot distribution
+      const extraChip = idx < remainder ? 1 : 0;
+      players[winnerIndex] = {
+        ...players[winnerIndex],
+        chips: players[winnerIndex].chips + potShare + extraChip
+      };
+    });
+
+    return {
+      ...gameState,
+      players,
+      pot: 0
+    };
   }
 }
 

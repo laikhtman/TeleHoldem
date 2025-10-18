@@ -25,12 +25,23 @@ export default function PokerGame() {
   const startNewHand = () => {
     if (!gameState) return;
     
-    const newState = gameEngine.startNewHand(gameState);
+    let newState = gameEngine.startNewHand(gameState);
+    
+    // Post blinds (small blind $10, big blind $20)
+    newState = gameEngine.postBlinds(newState, 10, 20);
+    
+    // First action is from player after big blind
+    const bigBlindIndex = (newState.dealerIndex + 2) % NUM_PLAYERS;
+    newState = {
+      ...newState,
+      currentPlayerIndex: (bigBlindIndex + 1) % NUM_PLAYERS
+    };
+    
     setGameState(newState);
     
     toast({
       title: "New Hand",
-      description: "Cards have been dealt. Good luck!",
+      description: newState.lastAction || "Cards have been dealt. Good luck!",
     });
 
     // After dealing, start bot actions if human is not first
@@ -86,8 +97,58 @@ export default function PokerGame() {
     if (gameEngine.isRoundComplete(currentState)) {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      if (currentState.phase !== 'showdown') {
+      // Check if only one player left (everyone else folded)
+      const activePlayers = gameEngine.getActivePlayers(currentState);
+      if (activePlayers.length === 1) {
+        const { winners, winningHand } = gameEngine.resolveShowdown(currentState);
+        const winnerNames = winners.map(i => currentState.players[i].name).join(', ');
+        
+        toast({
+          title: "Hand Complete!",
+          description: `${winnerNames} wins $${currentState.pot} - ${winningHand}`,
+          duration: 4000,
+        });
+        
+        // Award pot
+        currentState = gameEngine.awardPot(currentState, winners);
+        currentState = { ...currentState, phase: 'waiting' as GamePhase };
+        setGameState({ ...currentState });
+        setIsProcessing(false);
+        return;
+      }
+      
+      if (currentState.phase === 'river') {
+        // Move to showdown
         currentState = gameEngine.advancePhase(currentState);
+        setGameState({ ...currentState });
+        
+        // Resolve showdown
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        const { winners, winningHand } = gameEngine.resolveShowdown(currentState);
+        
+        if (winners.length > 0) {
+          const winnerNames = winners.map(i => currentState.players[i].name).join(', ');
+          toast({
+            title: "Hand Complete!",
+            description: `${winnerNames} wins $${currentState.pot} - ${winningHand}`,
+            duration: 4000,
+          });
+          
+          // Award pot
+          currentState = gameEngine.awardPot(currentState, winners);
+          currentState = { ...currentState, phase: 'waiting' as GamePhase };
+          setGameState({ ...currentState });
+        }
+      } else if (currentState.phase !== 'showdown') {
+        currentState = gameEngine.advancePhase(currentState);
+        
+        // Set first player for new betting round
+        const firstPlayer = (currentState.dealerIndex + 1) % NUM_PLAYERS;
+        currentState = {
+          ...currentState,
+          currentPlayerIndex: firstPlayer
+        };
+        
         setGameState({ ...currentState });
         
         toast({
