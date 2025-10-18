@@ -4,6 +4,7 @@ interface HandResult {
   rank: HandRank;
   value: number;
   description: string;
+  winningCards: Card[];
 }
 
 export class HandEvaluator {
@@ -12,7 +13,7 @@ export class HandEvaluator {
     
     // Get best 5-card combination
     const combinations = this.getCombinations(allCards, 5);
-    let bestHand: HandResult = { rank: 'high-card', value: 0, description: 'High Card' };
+    let bestHand: HandResult = { rank: 'high-card', value: 0, description: 'High Card', winningCards: [] };
     
     for (const combo of combinations) {
       const result = this.evaluateFiveCards(combo);
@@ -59,12 +60,12 @@ export class HandEvaluator {
     
     // Royal Flush  
     if (isFlush && straightResult.isStraight && straightResult.highCard === 14) {
-      return { rank: 'royal-flush', value: 9000000, description: 'Royal Flush' };
+      return { rank: 'royal-flush', value: 9000000, description: 'Royal Flush', winningCards: cards };
     }
     
     // Straight Flush
     if (isFlush && straightResult.isStraight) {
-      return { rank: 'straight-flush', value: 8000000 + straightResult.highCard, description: 'Straight Flush' };
+      return { rank: 'straight-flush', value: 8000000 + straightResult.highCard, description: 'Straight Flush', winningCards: cards };
     }
     
     // Four of a Kind
@@ -72,7 +73,7 @@ export class HandEvaluator {
       const quadRank = Array.from(rankCounts.entries()).find(([_, count]) => count === 4)![0];
       const quadValue = getRankValue(quadRank);
       const kicker = uniqueRankValues.find(v => v !== quadValue) || 0;
-      return { rank: 'four-of-a-kind', value: 7000000 + quadValue * 100 + kicker, description: 'Four of a Kind' };
+      return { rank: 'four-of-a-kind', value: 7000000 + quadValue * 100 + kicker, description: 'Four of a Kind', winningCards: cards };
     }
     
     // Full House
@@ -81,19 +82,19 @@ export class HandEvaluator {
       const pairRank = Array.from(rankCounts.entries()).find(([_, count]) => count === 2)![0];
       const tripValue = getRankValue(tripRank);
       const pairValue = getRankValue(pairRank);
-      return { rank: 'full-house', value: 6000000 + tripValue * 100 + pairValue, description: `Full House, ${tripRank}s over ${pairRank}s` };
+      return { rank: 'full-house', value: 6000000 + tripValue * 100 + pairValue, description: `Full House, ${tripRank}s over ${pairRank}s`, winningCards: cards };
     }
     
     // Flush
     if (isFlush) {
       // Use weighted sum ensuring max value < 1,000,000
       const flushValue = uniqueRankValues.slice(0, 5).reduce((sum, val, idx) => sum + val * Math.pow(15, 4 - idx), 0);
-      return { rank: 'flush', value: 5000000 + flushValue, description: 'Flush' };
+      return { rank: 'flush', value: 5000000 + flushValue, description: 'Flush', winningCards: cards };
     }
     
     // Straight
     if (straightResult.isStraight) {
-      return { rank: 'straight', value: 4000000 + straightResult.highCard, description: 'Straight' };
+      return { rank: 'straight', value: 4000000 + straightResult.highCard, description: 'Straight', winningCards: cards };
     }
     
     // Three of a Kind
@@ -103,7 +104,7 @@ export class HandEvaluator {
       // Add top 2 kickers for tie-breaking  
       const kickers = uniqueRankValues.filter(v => v !== tripValue).slice(0, 2);
       const kickerValue = kickers.reduce((sum, val, idx) => sum + val * Math.pow(15, 1 - idx), 0);
-      return { rank: 'three-of-a-kind', value: 3000000 + tripValue * 1000 + kickerValue, description: `Three ${tripRank}s` };
+      return { rank: 'three-of-a-kind', value: 3000000 + tripValue * 1000 + kickerValue, description: `Three ${tripRank}s`, winningCards: cards };
     }
     
     // Two Pair
@@ -114,7 +115,7 @@ export class HandEvaluator {
         .sort((a, b) => b - a);
       // Add kicker for tie-breaking
       const kicker = uniqueRankValues.find(v => v !== pairRanks[0] && v !== pairRanks[1]) || 0;
-      return { rank: 'two-pair', value: 2000000 + pairRanks[0] * 1000 + pairRanks[1] * 50 + kicker, description: 'Two Pair' };
+      return { rank: 'two-pair', value: 2000000 + pairRanks[0] * 1000 + pairRanks[1] * 50 + kicker, description: 'Two Pair', winningCards: cards };
     }
     
     // One Pair
@@ -124,12 +125,12 @@ export class HandEvaluator {
       // Add kicker values for tie-breaking
       const kickers = uniqueRankValues.filter(v => v !== pairValue).slice(0, 3);
       const kickerValue = kickers.reduce((sum, val, idx) => sum + val * Math.pow(15, 2 - idx), 0);
-      return { rank: 'pair', value: 1000000 + pairValue * 10000 + kickerValue, description: `Pair of ${pairRank}s` };
+      return { rank: 'pair', value: 1000000 + pairValue * 10000 + kickerValue, description: `Pair of ${pairRank}s`, winningCards: cards };
     }
     
     // High Card
     const highCardValue = uniqueRankValues.slice(0, 5).reduce((sum, val, idx) => sum + val * Math.pow(15, 4 - idx), 0);
-    return { rank: 'high-card', value: highCardValue, description: `${ranks[0]} High` };
+    return { rank: 'high-card', value: highCardValue, description: `${ranks[0]} High`, winningCards: cards };
   }
 
   private isStraight(rankValues: number[]): { isStraight: boolean; highCard: number } {

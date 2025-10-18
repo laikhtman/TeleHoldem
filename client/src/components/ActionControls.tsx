@@ -13,6 +13,7 @@ interface ActionControlsProps {
   maxBet: number;
   amountToCall: number;
   currentBet: number;
+  minRaiseAmount: number;
   disabled?: boolean;
 }
 
@@ -27,13 +28,14 @@ export function ActionControls({
   maxBet,
   amountToCall,
   currentBet,
+  minRaiseAmount,
   disabled = false
 }: ActionControlsProps) {
   const [betAmount, setBetAmount] = useState(minBet);
 
   useEffect(() => {
-    setBetAmount(minBet);
-  }, [minBet]);
+    setBetAmount(currentBet > 0 ? minRaiseAmount : minBet);
+  }, [minBet, minRaiseAmount, currentBet]);
 
   const handleBetChange = (value: number[]) => {
     setBetAmount(value[0]);
@@ -108,7 +110,7 @@ export function ActionControls({
           <Slider
             value={[betAmount]}
             onValueChange={handleBetChange}
-            min={minBet}
+            min={currentBet > 0 ? minRaiseAmount : minBet}
             max={maxBet}
             step={10}
             disabled={disabled}
@@ -116,7 +118,7 @@ export function ActionControls({
             className="w-full"
           />
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>${minBet}</span>
+            <span>${currentBet > 0 ? minRaiseAmount : minBet}</span>
             <span>${maxBet}</span>
           </div>
         </div>

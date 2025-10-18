@@ -70,13 +70,13 @@ Goal: If multiple players have the same winning hand, the pot must be split even
 
 Prompt: "In gameEngine.ts, the awardPot (or awardPots) function already receives an array of winners. Ensure the logic correctly handles this by dividing the pot.amount by winners.length and distributing the chips. Account for any odd chips by giving them to the winner in the earliest position."
 
-Task 8: Enforce Bet Sizing Rules
+**Task 8: Enforce Bet Sizing Rules (DONE)**
 
 Goal: A raise must be at least as large as the previous bet or raise in the same betting round.
 
 Prompt: "In poker-game.tsx, calculate a minRaiseAmount based on the game state. The minimum legal raise is the current bet amount plus the size of the last raise. Pass this minRaiseAmount to the ActionControls component. The slider's minimum value should be adjusted to this minRaiseAmount when the player chooses to raise."
 
-Task 9: Award Pot on Uncalled Bet
+**Task 9: Award Pot on Uncalled Bet (DONE)**
 
 Goal: If a player bets and all other players fold, they win the pot immediately without a showdown.
 
@@ -84,19 +84,19 @@ Prompt: "In poker-game.tsx, inside the processBotActions and handlePlayerAction 
 
 Phase 2.3: UI/UX & Visual Polish
 
-Task 10: Animate Community Card Dealing
+**Task 10: Animate Community Card Dealing (DONE)**
 
 Goal: Animate the flop, turn, and river cards being dealt and flipped over.
 
 Prompt: "In client/src/components/PlayingCard.tsx, add a isFlipping state. When the card is first rendered, it should be face-down. After a short delay (e.g., 100ms), set isFlipping to true. Use CSS transitions or framer-motion to create a card-flipping animation (a rotation on the Y-axis). Apply this logic within the CommunityCards.tsx component, adding a staggered delay for each card in the flop."
 
-Task 11: Display Player Action Badges
+**Task 11: Display Player Action Badges (DONE)**
 
 Goal: When a player acts, a temporary badge showing their action should appear over their seat.
 
 Prompt: "In PlayerSeat.tsx, add a component that displays the player's last action (e.g., 'Check', 'Fold', 'Raise $50'). This should be derived from the gameState.lastAction string. The badge should be visible for a few seconds (e.g., 2-3 seconds) after the action and then fade out."
 
-Task 12: Animate Pot Total Updates
+**Task 12: Animate Pot Total Updates (DONE)**
 
 Goal: When chips are added to the pot, the number should animate instead of changing instantly.
 

@@ -13,10 +13,12 @@ interface PlayerSeatProps {
   isDealer: boolean;
   isWinner: boolean;
   phase: GamePhase;
+  lastAction: string | null;
 }
 
-export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, isDealer, isWinner, phase }: PlayerSeatProps) {
+export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, isDealer, isWinner, phase, lastAction }: PlayerSeatProps) {
   const [animatedChips, setAnimatedChips] = useState(0);
+  const [showAction, setShowAction] = useState(false);
   const prevBet = useRef(player.bet);
 
   useEffect(() => {
@@ -27,6 +29,14 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
     }
     prevBet.current = player.bet;
   }, [player.bet]);
+
+  useEffect(() => {
+    if (lastAction && lastAction.startsWith(player.name)) {
+      setShowAction(true);
+      const timer = setTimeout(() => setShowAction(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [lastAction, player.name]);
 
   const getPosition = () => {
     const tableWidth = 800;
@@ -65,8 +75,8 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
             key={i}
             className="absolute"
             initial={{ x: 0, y: 0 }}
-            animate={{ 
-              x: -getPosition().left.slice(0,-2) + 400, 
+            animate={{
+              x: -getPosition().left.slice(0,-2) + 400,
               y: -getPosition().top.slice(0,-2) + 250,
               transition: { duration: 0.3, ease: 'easeOut' }
             }}
@@ -78,7 +88,20 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
       </AnimatePresence>
 
       <div className={seatClasses}>
+        <AnimatePresence>
+          {showAction && (
+            <motion.div
+              className="absolute -top-4 left-1/2 -translate-x-1/2 bg-black/70 text-white px-3 py-1 rounded-full text-xs font-bold"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              {lastAction?.split(' ').slice(1).join(' ')}
+            </motion.div>
+          )}
+        </AnimatePresence>
         {isWinner && (
+
           <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-poker-chipGold text-black px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
             <Trophy className="w-3 h-3" />
             WINNER

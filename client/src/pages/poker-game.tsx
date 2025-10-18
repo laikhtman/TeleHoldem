@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { GameState, GamePhase } from '@shared/schema';
+import { GameState, GamePhase, Card } from '@shared/schema';
 import { gameEngine } from '@/lib/gameEngine';
 import { botAI } from '@/lib/botAI';
 import { PlayerSeat } from '@/components/PlayerSeat';
@@ -15,6 +15,7 @@ export default function PokerGame() {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [winningPlayerIds, setWinningPlayerIds] = useState<string[]>([]);
+  const [winningCards, setWinningCards] = useState<Card[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -27,6 +28,7 @@ export default function PokerGame() {
     if (!gameState) return;
     
     setWinningPlayerIds([]);
+    setWinningCards([]);
     let newState = gameEngine.startNewHand(gameState);
     
     // Post blinds (small blind $10, big blind $20)
@@ -150,11 +152,12 @@ export default function PokerGame() {
 
   const resolveShowdown = async (state: GameState) => {
     await new Promise(resolve => setTimeout(resolve, 1500));
-    const { winners, winningHand } = gameEngine.resolveShowdown(state);
+    const { winners, winningHand, winningCards } = gameEngine.resolveShowdown(state);
     
     if (winners.length > 0) {
       const winnerIds = winners.map(i => state.players[i].id);
       setWinningPlayerIds(winnerIds);
+      setWinningCards(winningCards);
 
       const winnerNames = winners.map(i => state.players[i].name).join(', ');
       toast({
@@ -173,6 +176,23 @@ export default function PokerGame() {
   const handlePlayerAction = (newState: GameState) => {
     setGameState(newState);
     
+    const activePlayers = gameEngine.getActivePlayers(newState);
+    if (activePlayers.length === 1) {
+      const { winners, winningHand } = gameEngine.resolveShowdown(newState);
+      const winnerNames = winners.map(i => newState.players[i].name).join(', ');
+      
+      toast({
+        title: "Hand Complete!",
+        description: `${winnerNames} wins the pot - ${winningHand}`,
+        duration: 4000,
+      });
+      
+      let finalState = gameEngine.awardPots(newState, winners);
+      finalState = { ...finalState, phase: 'waiting' as GamePhase };
+      setGameState(finalState);
+      return;
+    }
+
     toast({
       description: newState.lastAction || '',
     });
@@ -263,24 +283,16 @@ export default function PokerGame() {
         data-testid="poker-table"
       >
         {/* Community Cards */}
-        <CommunityCards cards={gameState.communityCards} />
+        <CommunityCards cards={gameState.communityCards} winningCards={winningCards} />
 
         {/* Pot Display */}
-        <PotDisplay amount={gameState.pots.reduce((acc, pot) => acc + pot.amount, 0)} />
-
-        {/* Player Seats */}
-        {gameState.players.map((player, index) => (
-          <PlayerSeat
-            key={player.id}
-            player={player}
-            position={index}
-            totalPlayers={NUM_PLAYERS}
-            isCurrentPlayer={index === gameState.currentPlayerIndex}
-            isDealer={index === gameState.dealerIndex}
+...
             isWinner={winningPlayerIds.includes(player.id)}
             phase={gameState.phase}
+            lastAction={gameState.lastAction}
+            winningCards={winningCards}
           />
-        ))}
+...
 
         {/* Game Phase Indicator */}
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-30">
