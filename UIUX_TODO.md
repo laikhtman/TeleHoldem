@@ -82,10 +82,10 @@
 ## Advanced Features (Priority: Medium)
 
 ### 13. Sound Design
-- [ ] Add card shuffling and dealing sound effects
-- [ ] Implement chip movement audio feedback
-- [ ] Create ambient casino background sounds (optional)
-- [ ] Add victory fanfare for big wins
+- [x] Add card shuffling and dealing sound effects
+- [x] Implement chip movement audio feedback
+- [x] Create ambient casino background sounds (optional) - Skipped as optional
+- [x] Add victory fanfare for big wins
 
 ### 14. Visual Customization
 - [ ] Allow players to choose avatar/profile pictures

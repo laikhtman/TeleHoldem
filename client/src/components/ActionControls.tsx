@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useShake } from '@/hooks/useShake';
@@ -51,21 +51,79 @@ export function ActionControls({
   }, [minBet, minRaiseAmount, currentBet]);
 
   // Wrapped action handlers with sound effects
-  const handleFold = () => {
+  const handleFold = useCallback(() => {
     playSound('fold', { volume: 0.2 });
     onFold();
-  };
+  }, [playSound, onFold]);
 
-  const handleCheck = () => {
+  const handleCheck = useCallback(() => {
     playSound('check', { volume: 0.15 });
     onCheck();
-  };
+  }, [playSound, onCheck]);
 
-  const handleCall = () => {
+  const handleCall = useCallback(() => {
     playSound('button-click', { volume: 0.15 });
     onCall();
+  }, [playSound, onCall]);
+
+  const handleBetChange = (value: number[]) => {
+    setBetAmount(value[0]);
   };
 
+  const handleBetOrRaise = useCallback(() => {
+    const minRequired = currentBet > 0 ? minRaiseAmount : minBet;
+    
+    if (betAmount < minRequired) {
+      triggerSliderShake();
+      toast({
+        variant: "destructive",
+        title: "Invalid Bet",
+        description: `Minimum ${currentBet > 0 ? 'raise' : 'bet'} is $${minRequired}`,
+        duration: 2000,
+      });
+      return;
+    }
+
+    if (betAmount > maxBet) {
+      triggerSliderShake();
+      toast({
+        variant: "destructive",
+        title: "Invalid Bet",
+        description: `You only have $${maxBet} in chips`,
+        duration: 2000,
+      });
+      return;
+    }
+
+    playSound('raise', { volume: 0.25 });
+    
+    if (currentBet === 0) {
+      onBet(betAmount);
+    } else {
+      onRaise(betAmount);
+    }
+  }, [betAmount, currentBet, maxBet, minBet, minRaiseAmount, onBet, onRaise, playSound, toast, triggerSliderShake]);
+
+  const handleQuickBet = useCallback((amount: number) => {
+    const clampedAmount = Math.max(
+      currentBet > 0 ? minRaiseAmount : minBet,
+      Math.min(amount, maxBet)
+    );
+    setBetAmount(clampedAmount);
+    playSound('button-click', { volume: 0.1 });
+  }, [currentBet, maxBet, minBet, minRaiseAmount, playSound]);
+
+  const handleAllIn = useCallback(() => {
+    playSound('raise', { volume: 0.3 });
+    
+    if (currentBet === 0) {
+      onBet(maxBet);
+    } else {
+      onRaise(maxBet);
+    }
+  }, [currentBet, maxBet, onBet, onRaise, playSound]);
+
+  // Keyboard shortcuts - must be after all handler definitions
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       if (disabled) return;
@@ -101,64 +159,7 @@ export function ActionControls({
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [disabled, canCheck, betAmount, handleFold, handleCheck, handleCall, currentBet, onBet, onRaise, maxBet]);
-
-  const handleBetChange = (value: number[]) => {
-    setBetAmount(value[0]);
-  };
-
-  const handleBetOrRaise = () => {
-    const minRequired = currentBet > 0 ? minRaiseAmount : minBet;
-    
-    if (betAmount < minRequired) {
-      triggerSliderShake();
-      toast({
-        variant: "destructive",
-        title: "Invalid Bet",
-        description: `Minimum ${currentBet > 0 ? 'raise' : 'bet'} is $${minRequired}`,
-        duration: 2000,
-      });
-      return;
-    }
-
-    if (betAmount > maxBet) {
-      triggerSliderShake();
-      toast({
-        variant: "destructive",
-        title: "Invalid Bet",
-        description: `You only have $${maxBet} in chips`,
-        duration: 2000,
-      });
-      return;
-    }
-
-    playSound('raise', { volume: 0.25 });
-    
-    if (currentBet === 0) {
-      onBet(betAmount);
-    } else {
-      onRaise(betAmount);
-    }
-  };
-
-  const handleQuickBet = (amount: number) => {
-    const clampedAmount = Math.max(
-      currentBet > 0 ? minRaiseAmount : minBet,
-      Math.min(amount, maxBet)
-    );
-    setBetAmount(clampedAmount);
-    playSound('button-click', { volume: 0.1 });
-  };
-
-  const handleAllIn = () => {
-    playSound('raise', { volume: 0.3 });
-    
-    if (currentBet === 0) {
-      onBet(maxBet);
-    } else {
-      onRaise(maxBet);
-    }
-  };
+  }, [disabled, canCheck, handleFold, handleCheck, handleCall, handleBetOrRaise, handleAllIn]);
 
   const halfPot = Math.floor(potSize / 2);
   const remainingChips = playerChips - betAmount;
