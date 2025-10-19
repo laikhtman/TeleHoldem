@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import { GameState, GamePhase, Card, ActionHistoryEntry, PlayerAction, ACHIEVEMENT_LIST } from '@shared/schema';
 import { gameEngine } from '@/lib/gameEngine';
 import { botAI } from '@/lib/botAI';
@@ -23,6 +24,8 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useSound } from '@/hooks/useSound';
 import { useSwipe } from '@/hooks/useSwipe';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { useTelegramAuth } from '@/hooks/useTelegramAuth';
+import { apiRequest } from '@/lib/queryClient';
 
 const NUM_PLAYERS = 6;
 const MAX_HISTORY_ENTRIES = 30;
@@ -76,6 +79,27 @@ export default function PokerGame() {
   const potPosition = useRef<{ x: number; y: number }>({ x: 400, y: 150 });
   const { toast } = useToast();
   const { playSound } = useSound();
+  const { user, isAuthenticated, isStandalone } = useTelegramAuth();
+
+  // Mutation to save stats to backend (only for authenticated Telegram users)
+  const saveStatsMutation = useMutation({
+    mutationFn: async (stats: { handsPlayed: number; handsWon: number; biggestPot: number; totalWinnings: number; achievements: string[] }) => {
+      await apiRequest('PATCH', '/api/users/me/stats', { stats });
+    },
+    onError: (error) => {
+      console.error('Failed to save stats:', error);
+    },
+  });
+
+  // Mutation to save bankroll to backend (only for authenticated Telegram users)
+  const saveBankrollMutation = useMutation({
+    mutationFn: async (bankroll: number) => {
+      await apiRequest('PATCH', '/api/users/me/bankroll', { bankroll });
+    },
+    onError: (error) => {
+      console.error('Failed to save bankroll:', error);
+    },
+  });
 
   useSwipe({
     onSwipeLeft: () => {
@@ -96,6 +120,13 @@ export default function PokerGame() {
   const handleResetGame = () => {
     localStorage.removeItem('pokerGameState');
     const initialState = gameEngine.createInitialGameState(NUM_PLAYERS);
+    
+    // If authenticated with Telegram, use user's displayName and bankroll
+    if (isAuthenticated && user) {
+      initialState.players[0].name = user.displayName;
+      initialState.players[0].chips = user.bankroll;
+    }
+    
     setGameState(initialState);
     setWinningPlayerIds([]);
     setWinAmounts({});
@@ -133,14 +164,28 @@ export default function PokerGame() {
         setGameState(JSON.parse(savedGame));
       } else {
         const initialState = gameEngine.createInitialGameState(NUM_PLAYERS);
+        
+        // If authenticated with Telegram, use user's displayName and bankroll
+        if (isAuthenticated && user) {
+          initialState.players[0].name = user.displayName;
+          initialState.players[0].chips = user.bankroll;
+        }
+        
         setGameState(initialState);
       }
     } catch (error) {
       console.error("Failed to load game state from local storage:", error);
       const initialState = gameEngine.createInitialGameState(NUM_PLAYERS);
+      
+      // If authenticated with Telegram, use user's displayName and bankroll
+      if (isAuthenticated && user) {
+        initialState.players[0].name = user.displayName;
+        initialState.players[0].chips = user.bankroll;
+      }
+      
       setGameState(initialState);
     }
-  }, []);
+  }, [isAuthenticated, user]);
 
   useEffect(() => {
     // Save game to local storage whenever it changes
@@ -152,6 +197,34 @@ export default function PokerGame() {
       }
     }
   }, [gameState]);
+
+  // Save stats and bankroll to backend when hand ends (for authenticated users)
+  useEffect(() => {
+    if (!gameState || !isAuthenticated || !user) return;
+    
+    // Only save when phase is 'waiting' (hand just ended)
+    if (gameState.phase === 'waiting' && gameState.sessionStats.handsPlayed > 0) {
+      const humanPlayer = gameState.players[0];
+      
+      // Save bankroll if it changed
+      if (humanPlayer.chips !== user.bankroll) {
+        saveBankrollMutation.mutate(humanPlayer.chips);
+      }
+      
+      // Save stats (combine session stats with player stats)
+      const stats = {
+        handsPlayed: gameState.sessionStats.handsPlayed,
+        handsWon: humanPlayer.stats.handsWon,
+        biggestPot: humanPlayer.stats.biggestPot,
+        totalWinnings: humanPlayer.chips - 1000, // Calculate total winnings from starting bankroll
+        achievements: Object.keys(gameState.achievements).filter(
+          key => gameState.achievements[key as keyof typeof gameState.achievements].unlockedAt
+        ),
+      };
+      
+      saveStatsMutation.mutate(stats);
+    }
+  }, [gameState?.phase, gameState?.sessionStats.handsPlayed, isAuthenticated, user]);
 
   const startNewHand = () => {
     if (!gameState) return;
