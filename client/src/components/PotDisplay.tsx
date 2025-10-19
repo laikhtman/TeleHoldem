@@ -11,16 +11,13 @@ interface PotDisplayProps {
 
 export function PotDisplay({ amount, onRef }: PotDisplayProps) {
   const animatedAmount = useAnimatedCounter(amount);
-  const potRef = useRef<HTMLDivElement>(null);
   const chipCount = Math.min(Math.floor(amount / 50), 10);
 
   return (
     <div 
-      ref={(node) => {
-        potRef.current = node;
-        if (onRef) onRef(node);
-      }}
-      className="absolute top-[30%] left-1/2 transform -translate-x-1/2 z-15"
+      ref={onRef}
+      className="absolute top-[30%] left-1/2 transform -translate-x-1/2"
+      style={{ zIndex: 3 }}
     >
       <AnimatePresence>
         {amount > 0 && (

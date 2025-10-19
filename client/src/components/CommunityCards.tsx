@@ -117,7 +117,7 @@ export function CommunityCards({ cards, phase }: CommunityCardsProps) {
     const skeletonStartIndex = phase === 'flop' ? 0 : phase === 'turn' ? 3 : phase === 'river' ? 4 : 0;
   
     return (
-      <div className="absolute top-[45%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20">
+      <div className="absolute top-[45%] left-1/2 transform -translate-x-1/2 -translate-y-1/2" style={{ zIndex: 3 }}>
         <div className="relative">
           {/* Glow effect container */}
           <AnimatePresence>

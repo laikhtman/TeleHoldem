@@ -659,17 +659,17 @@ export default function PokerGame() {
   const minRaiseAmount = gameState.currentBet + (gameState.currentBet - (gameState.players.find(p => p.bet < gameState.currentBet)?.bet || 0));
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-2 sm:p-4 relative">
+    <div className="min-h-screen bg-background flex items-center justify-center p-2 sm:p-4 lg:p-6 relative overflow-hidden">
       {/* Theme Toggle - Fixed Top Right */}
       <div className="fixed top-4 right-4 z-50">
         <ThemeToggle />
       </div>
 
-      {/* Responsive Grid Layout */}
-      <div className="w-full max-w-[1800px] grid grid-cols-1 lg:grid-cols-[280px_1fr_320px] xl:grid-cols-[320px_1fr_380px] gap-4 items-start">
+      {/* Cleaner Centered Layout */}
+      <div className="w-full max-w-[2000px] flex flex-col lg:flex-row gap-4 lg:gap-6 items-start justify-center">
         
-        {/* Hand Strength Indicator - Left Sidebar (Desktop) / Collapsible (Mobile) */}
-        <div className="lg:sticky lg:top-4">
+        {/* Hand Strength Indicator - Floating Panel (Desktop) / Collapsible (Mobile) */}
+        <div className="lg:sticky lg:top-6 lg:self-start order-2 lg:order-1 w-full lg:w-64 xl:w-72">
           {/* Mobile Toggle Button - Always Visible */}
           <Button
             variant="outline"
@@ -682,10 +682,10 @@ export default function PokerGame() {
           </Button>
 
           {/* Panel Content */}
-          <div className={`bg-card/80 backdrop-blur-sm border border-card-border rounded-lg p-4 ${isHandStrengthCollapsed ? 'hidden lg:block' : ''}`}>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-bold flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-poker-chipGold" />
+          <div className={`bg-card/70 backdrop-blur-sm border border-card-border rounded-lg p-3 shadow-sm ${isHandStrengthCollapsed ? 'hidden lg:block pointer-events-none lg:pointer-events-auto' : 'pointer-events-auto'}`}>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-semibold flex items-center gap-1.5 text-muted-foreground">
+                <TrendingUp className="w-3.5 h-3.5 text-poker-chipGold" />
                 Hand Strength
               </h3>
             </div>
@@ -698,18 +698,20 @@ export default function PokerGame() {
           </div>
         </div>
 
-        {/* Main Game Area - Center */}
-        <div className="flex flex-col gap-4 items-center">
+        {/* Main Game Area - Center - Takes Priority */}
+        <div className="flex flex-col gap-4 items-center flex-1 order-1 lg:order-2 w-full max-w-5xl mx-auto">
           {/* Poker Table with Wood Border */}
           <div 
-            className="rounded-[105px] sm:rounded-[150px] lg:rounded-[210px] wood-grain p-[6px] sm:p-[8px] lg:p-[10px] table-edge-glow w-full max-w-[380px] sm:max-w-[560px] lg:max-w-[820px]"
+            className="rounded-[120px] sm:rounded-[160px] lg:rounded-[220px] wood-grain p-[8px] sm:p-[10px] lg:p-[12px] table-edge-glow w-full lg:min-h-[70vh]"
             style={{ 
-              aspectRatio: '820 / 520',
+              aspectRatio: '3 / 2',
+              maxWidth: '100%',
             }}
           >
             {/* Poker Table Felt Surface */}
             <div 
-              className="relative felt-texture vignette table-depth rounded-[100px] sm:rounded-[143px] lg:rounded-[200px] overflow-visible w-full h-full"
+              className="relative felt-texture vignette table-depth rounded-[113px] sm:rounded-[152px] lg:rounded-[210px] overflow-visible w-full h-full"
+              style={{ zIndex: 0 }}
               data-testid="poker-table"
             >
               {/* Community Cards */}
@@ -742,7 +744,8 @@ export default function PokerGame() {
               <AnimatePresence mode="wait">
                 <motion.div
                   key={phaseKey}
-                  className="absolute top-4 left-1/2 transform -translate-x-1/2 z-30"
+                  className="absolute top-4 left-1/2 transform -translate-x-1/2"
+                  style={{ zIndex: 10 }}
                   initial={{ opacity: 0, y: -20, scale: 0.8 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -20, scale: 0.8 }}
@@ -771,7 +774,7 @@ export default function PokerGame() {
 
               {/* Last Action */}
               {gameState.lastAction && (
-                <div className="absolute bottom-2 sm:bottom-4 left-1/2 transform -translate-x-1/2 z-30">
+                <div className="absolute bottom-2 sm:bottom-4 left-1/2 transform -translate-x-1/2" style={{ zIndex: 10 }}>
                   <div className="bg-black/70 backdrop-blur-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-white/20">
                     <div className="text-[10px] sm:text-xs text-white" data-testid="text-last-action">
                       {gameState.lastAction}
@@ -783,12 +786,12 @@ export default function PokerGame() {
           </div>
 
           {/* Controls */}
-          <div className="w-full">
+          <div className="w-full max-w-3xl" style={{ zIndex: 5 }}>
             {gameState.phase === 'waiting' ? (
               <Button 
                 onClick={startNewHand}
                 size="lg"
-                className="w-full min-h-[44px] bg-poker-chipGold text-black hover:bg-poker-chipGold/90 font-bold text-base sm:text-lg"
+                className="w-full min-h-[48px] bg-poker-chipGold text-black hover:bg-poker-chipGold/90 font-bold text-base sm:text-lg"
                 data-testid="button-start-hand"
               >
                 Start New Hand
@@ -815,7 +818,7 @@ export default function PokerGame() {
         </div>
 
         {/* Action History - Right Sidebar (Desktop) / Collapsible (Mobile) */}
-        <div className="lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)]">
+        <div className="lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-3rem)] order-3 w-full lg:w-72 xl:w-80">
           {/* Mobile Toggle Button - Always Visible */}
           <Button
             variant="outline"
@@ -828,14 +831,16 @@ export default function PokerGame() {
           </Button>
 
           {/* Panel Content */}
-          <div className={`${isHistoryCollapsed ? 'hidden lg:block' : ''}`}>
-            <ActionHistory 
-              history={gameState.actionHistory} 
-              currentPlayerName={gameState.players[0].name}
-            />
-            <SessionStats stats={gameState.sessionStats} />
-            <HandDistributionChart data={gameState.sessionStats.handDistribution} />
-            <AchievementsList achievements={gameState.achievements} />
+          <div className={`flex flex-col gap-3 ${isHistoryCollapsed ? 'hidden lg:flex pointer-events-none lg:pointer-events-auto' : 'flex pointer-events-auto'}`}>
+            <div className="lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto lg:pr-2 space-y-3">
+              <ActionHistory 
+                history={gameState.actionHistory} 
+                currentPlayerName={gameState.players[0].name}
+              />
+              <SessionStats stats={gameState.sessionStats} />
+              <HandDistributionChart data={gameState.sessionStats.handDistribution} />
+              <AchievementsList achievements={gameState.achievements} />
+            </div>
           </div>
         </div>
       </div>

@@ -101,6 +101,18 @@
   --poker-chip-gold: 45 90% 55%;
   --poker-success: 140 60% 50%;
 
+  /* Z-Index Layering System for Poker Table */
+  --z-table-base: 0;
+  --z-felt: 1;
+  --z-community-cards: 3;
+  --z-pot-display: 3;
+  --z-player-seats: 4;
+  --z-controls: 5;
+  --z-overlays: 10;
+  --z-modals: 20;
+  --z-tooltips: 30;
+  --z-fixed-ui: 50;
+
   /* Automatically computed borders - intensity can be controlled by the user by the --opaque-button-border-intensity setting */
 
   /* Fallback for older browsers */

@@ -89,19 +89,24 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
   }, [winAmount]);
 
   const getPosition = () => {
-    const tableWidth = 800;
-    const tableHeight = 500;
-    const radiusX = tableWidth / 2 - 80;
-    const radiusY = tableHeight / 2 - 60;
+    const baseWidth = 100;
+    const baseHeight = 66.67;
+    
+    const bufferPercentage = 0.12;
+    const maxRadiusX = (baseWidth / 2) * (1 - bufferPercentage);
+    const maxRadiusY = (baseHeight / 2) * (1 - bufferPercentage);
+    
+    const radiusX = maxRadiusX - 8;
+    const radiusY = maxRadiusY - 6;
     
     const angle = (position / totalPlayers) * 2 * Math.PI - Math.PI / 2;
     
-    const x = Math.cos(angle) * radiusX + tableWidth / 2;
-    const y = Math.sin(angle) * radiusY + tableHeight / 2;
+    const x = Math.cos(angle) * radiusX + baseWidth / 2;
+    const y = Math.sin(angle) * radiusY + baseHeight / 2;
     
     return {
-      left: `${x}px`,
-      top: `${y}px`,
+      left: `${x}%`,
+      top: `${y}%`,
       transform: 'translate(-50%, -50%)'
     };
   };
@@ -131,8 +136,8 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
   return (
     <div
       ref={seatRef}
-      className="absolute z-10 seat-shadow"
-      style={getPosition()}
+      className="absolute seat-shadow"
+      style={{ ...getPosition(), zIndex: 4 }}
       data-testid={`player-seat-${player.id}`}
       onMouseEnter={() => setShowStats(true)}
       onMouseLeave={() => setShowStats(false)}

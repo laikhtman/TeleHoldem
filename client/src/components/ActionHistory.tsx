@@ -32,8 +32,6 @@ const getActionIcon = (entry: ActionHistoryEntry) => {
         case 'bet':
         case 'raise':
           return <TrendingUp className="w-4 h-4" />;
-        case 'all-in':
-          return <CircleDollarSign className="w-4 h-4" />;
         default:
           return <Eye className="w-4 h-4" />;
       }
@@ -61,8 +59,6 @@ const getActionVariant = (entry: ActionHistoryEntry): "default" | "secondary" | 
         case 'call':
         case 'bet':
         case 'raise':
-          return 'default';
-        case 'all-in':
           return 'default';
         default:
           return 'secondary';
@@ -112,7 +108,7 @@ export function ActionHistory({ history, currentPlayerName }: ActionHistoryProps
 
   return (
     <div 
-      className="flex flex-col h-full bg-card/80 backdrop-blur-sm border border-card-border rounded-lg"
+      className="flex flex-col h-full bg-card/70 backdrop-blur-sm border border-card-border rounded-lg shadow-sm"
       data-testid="action-history-sidebar"
     >
       <div className="p-4 border-b border-card-border">
