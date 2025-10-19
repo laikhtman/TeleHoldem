@@ -6,12 +6,16 @@ import { PlayerSeat } from '@/components/PlayerSeat';
 import { CommunityCards } from '@/components/CommunityCards';
 import { PotDisplay } from '@/components/PotDisplay';
 import { ActionControls } from '@/components/ActionControls';
+import { ActionHistory } from '@/components/ActionHistory';
+import { HandStrengthIndicator } from '@/components/HandStrengthIndicator';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { WinnerCelebration } from '@/components/WinnerCelebration';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FlyingChip } from '@/components/Chip';
 import { useSound } from '@/hooks/useSound';
+import { useSwipe } from '@/hooks/useSwipe';
+import { ChevronRight, ChevronLeft, TrendingUp } from 'lucide-react';
 
 const NUM_PLAYERS = 6;
 
@@ -30,9 +34,28 @@ export default function PokerGame() {
   const [winAmounts, setWinAmounts] = useState<Record<string, number>>({});
   const [phaseKey, setPhaseKey] = useState(0);
   const [flyingChips, setFlyingChips] = useState<FlyingChipData[]>([]);
+  const [isHistoryCollapsed, setIsHistoryCollapsed] = useState(false);
+  const [isHandStrengthCollapsed, setIsHandStrengthCollapsed] = useState(false);
   const potPosition = useRef<{ x: number; y: number }>({ x: 400, y: 150 });
   const { toast } = useToast();
   const { playSound } = useSound();
+
+  // Swipe gestures for mobile (only when it's player's turn and not processing)
+  useSwipe({
+    onSwipeLeft: () => {
+      if (!gameState || gameState.currentPlayerIndex !== 0 || isProcessing) return;
+      handleFold();
+    },
+    onSwipeRight: () => {
+      if (!gameState || gameState.currentPlayerIndex !== 0 || isProcessing) return;
+      const canCheck = gameState.currentBet === 0 || gameState.currentBet === gameState.players[0].bet;
+      if (canCheck) {
+        handleCheck();
+      } else {
+        handleCall();
+      }
+    },
+  }, { minSwipeDistance: 80 });
 
   const handlePotRef = (node: HTMLDivElement | null) => {
     if (node) {
@@ -344,122 +367,197 @@ export default function PokerGame() {
   const minRaiseAmount = gameState.currentBet + (gameState.currentBet - (gameState.players.find(p => p.bet < gameState.currentBet)?.bet || 0));
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 gap-6">
-      {/* Poker Table with Wood Border */}
-      <div 
-        className="rounded-[210px] wood-grain p-[10px] table-edge-glow"
-        style={{ 
-          width: '820px', 
-          height: '520px',
-        }}
-      >
-        {/* Poker Table Felt Surface */}
-        <div 
-          className="relative felt-texture vignette table-depth rounded-[200px] overflow-visible"
-          style={{ 
-            width: '800px', 
-            height: '500px',
-          }}
-          data-testid="poker-table"
-        >
-        {/* Community Cards */}
-        <CommunityCards cards={gameState.communityCards} phase={gameState.phase} />
-
-        {/* Pot Display */}
-        <PotDisplay 
-          amount={gameState.pots.reduce((sum, pot) => sum + pot.amount, 0)} 
-          onRef={handlePotRef}
-        />
-
-        {/* Player Seats */}
-        {gameState.players.map((player, index) => (
-          <PlayerSeat
-            key={player.id}
-            player={player}
-            position={index}
-            totalPlayers={NUM_PLAYERS}
-            isCurrentPlayer={index === gameState.currentPlayerIndex}
-            isDealer={index === gameState.dealerIndex}
-            isWinner={winningPlayerIds.includes(player.id)}
-            phase={gameState.phase}
-            lastAction={gameState.lastAction}
-            winAmount={winAmounts[player.id] || 0}
-          />
-        ))}
-
-        {/* Game Phase Indicator */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={phaseKey}
-            className="absolute top-4 left-1/2 transform -translate-x-1/2 z-30"
-            initial={{ opacity: 0, y: -20, scale: 0.8 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.8 }}
-            transition={{ duration: 0.5 }}
+    <div className="min-h-screen bg-background flex items-center justify-center p-2 sm:p-4">
+      {/* Responsive Grid Layout */}
+      <div className="w-full max-w-[1800px] grid grid-cols-1 lg:grid-cols-[280px_1fr_320px] xl:grid-cols-[320px_1fr_380px] gap-4 items-start">
+        
+        {/* Hand Strength Indicator - Left Sidebar (Desktop) / Collapsible (Mobile) */}
+        <div className="lg:sticky lg:top-4">
+          {/* Mobile Toggle Button - Always Visible */}
+          <Button
+            variant="outline"
+            size="icon"
+            className="lg:hidden fixed left-2 top-20 z-50 h-11 w-11 rounded-full shadow-lg bg-card/95 backdrop-blur-sm"
+            onClick={() => setIsHandStrengthCollapsed(!isHandStrengthCollapsed)}
+            data-testid="button-toggle-hand-strength"
           >
-            <div className="bg-black/80 backdrop-blur-sm px-6 py-3 rounded-lg border-2 border-poker-chipGold shadow-lg shadow-poker-chipGold/20">
-              <div className="text-base text-poker-chipGold font-bold tracking-wide" data-testid="text-game-phase">
-                {getPhaseTitle(gameState.phase)}
-              </div>
+            {isHandStrengthCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
+          </Button>
+
+          {/* Panel Content */}
+          <div className={`bg-card/80 backdrop-blur-sm border border-card-border rounded-lg p-4 ${isHandStrengthCollapsed ? 'hidden lg:block' : ''}`}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-bold flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-poker-chipGold" />
+                Hand Strength
+              </h3>
             </div>
-          </motion.div>
-        </AnimatePresence>
+            {gameState && (
+              <HandStrengthIndicator
+                hand={gameState.players[0].hand}
+                communityCards={gameState.communityCards}
+              />
+            )}
+          </div>
+        </div>
 
-        {/* Winner Celebration */}
-        {winningPlayerIds.length > 0 && winningPlayerIds.map(winnerId => {
-          const winner = gameState.players.find(p => p.id === winnerId);
-          return winner ? (
-            <WinnerCelebration 
-              key={winnerId} 
-              isWinner={true} 
-              playerName={winner.name} 
-              winAmount={winAmounts[winnerId] || 0}
-            />
-          ) : null;
-        })}
+        {/* Main Game Area - Center */}
+        <div className="flex flex-col gap-4 items-center">
+          {/* Poker Table with Wood Border */}
+          <div 
+            className="rounded-[105px] sm:rounded-[150px] lg:rounded-[210px] wood-grain p-[6px] sm:p-[8px] lg:p-[10px] table-edge-glow w-full max-w-[380px] sm:max-w-[560px] lg:max-w-[820px]"
+            style={{ 
+              aspectRatio: '820 / 520',
+            }}
+          >
+            {/* Poker Table Felt Surface */}
+            <div 
+              className="relative felt-texture vignette table-depth rounded-[100px] sm:rounded-[143px] lg:rounded-[200px] overflow-visible w-full h-full"
+              data-testid="poker-table"
+            >
+              {/* Community Cards */}
+              <CommunityCards cards={gameState.communityCards} phase={gameState.phase} />
 
-        {/* Last Action */}
-        {gameState.lastAction && (
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-30">
-            <div className="bg-black/70 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/20">
-              <div className="text-xs text-white" data-testid="text-last-action">
-                {gameState.lastAction}
-              </div>
+              {/* Pot Display */}
+              <PotDisplay 
+                amount={gameState.pots.reduce((sum, pot) => sum + pot.amount, 0)} 
+                onRef={handlePotRef}
+              />
+
+              {/* Player Seats */}
+              {gameState.players.map((player, index) => (
+                <PlayerSeat
+                  key={player.id}
+                  player={player}
+                  position={index}
+                  totalPlayers={NUM_PLAYERS}
+                  isCurrentPlayer={index === gameState.currentPlayerIndex}
+                  isDealer={index === gameState.dealerIndex}
+                  isWinner={winningPlayerIds.includes(player.id)}
+                  phase={gameState.phase}
+                  lastAction={gameState.lastAction}
+                  winAmount={winAmounts[player.id] || 0}
+                />
+              ))}
+
+              {/* Game Phase Indicator */}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={phaseKey}
+                  className="absolute top-4 left-1/2 transform -translate-x-1/2 z-30"
+                  initial={{ opacity: 0, y: -20, scale: 0.8 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -20, scale: 0.8 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <div className="bg-black/80 backdrop-blur-sm px-6 py-3 rounded-lg border-2 border-poker-chipGold shadow-lg shadow-poker-chipGold/20">
+                    <div className="text-base sm:text-lg text-poker-chipGold font-bold tracking-wide" data-testid="text-game-phase">
+                      {getPhaseTitle(gameState.phase)}
+                    </div>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+
+              {/* Winner Celebration */}
+              {winningPlayerIds.length > 0 && winningPlayerIds.map(winnerId => {
+                const winner = gameState.players.find(p => p.id === winnerId);
+                return winner ? (
+                  <WinnerCelebration 
+                    key={winnerId} 
+                    isWinner={true} 
+                    playerName={winner.name} 
+                    winAmount={winAmounts[winnerId] || 0}
+                  />
+                ) : null;
+              })}
+
+              {/* Last Action */}
+              {gameState.lastAction && (
+                <div className="absolute bottom-2 sm:bottom-4 left-1/2 transform -translate-x-1/2 z-30">
+                  <div className="bg-black/70 backdrop-blur-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-white/20">
+                    <div className="text-[10px] sm:text-xs text-white" data-testid="text-last-action">
+                      {gameState.lastAction}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-        )}
+
+          {/* Controls */}
+          <div className="w-full">
+            {gameState.phase === 'waiting' ? (
+              <Button 
+                onClick={startNewHand}
+                size="lg"
+                className="w-full min-h-[44px] bg-poker-chipGold text-black hover:bg-poker-chipGold/90 font-bold text-base sm:text-lg"
+                data-testid="button-start-hand"
+              >
+                Start New Hand
+              </Button>
+            ) : (
+              <ActionControls
+                onFold={handleFold}
+                onCheck={handleCheck}
+                onCall={handleCall}
+                onBet={handleBet}
+                onRaise={handleRaise}
+                canCheck={canCheck}
+                minBet={minBet}
+                maxBet={maxBet}
+                amountToCall={gameState.currentBet - humanPlayer.bet}
+                currentBet={gameState.currentBet}
+                minRaiseAmount={minRaiseAmount}
+                potSize={gameState.pots.reduce((sum, pot) => sum + pot.amount, 0)}
+                playerChips={humanPlayer.chips}
+                disabled={gameState.currentPlayerIndex !== 0 || isProcessing || humanPlayer.folded}
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Action History - Right Sidebar (Desktop) / Collapsible (Mobile) */}
+        <div className="lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)]">
+          {/* Mobile Toggle Button - Always Visible */}
+          <Button
+            variant="outline"
+            size="icon"
+            className="lg:hidden fixed right-2 top-20 z-50 h-11 w-11 rounded-full shadow-lg bg-card/95 backdrop-blur-sm"
+            onClick={() => setIsHistoryCollapsed(!isHistoryCollapsed)}
+            data-testid="button-toggle-action-history"
+          >
+            {isHistoryCollapsed ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+          </Button>
+
+          {/* Panel Content */}
+          <div className={`${isHistoryCollapsed ? 'hidden lg:block' : ''}`}>
+            <ActionHistory 
+              history={gameState.actionHistory} 
+              currentPlayerName={gameState.players[0].name}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Controls */}
-      <div className="flex flex-col gap-4 w-full max-w-2xl">
-        {gameState.phase === 'waiting' ? (
-          <Button 
-            onClick={startNewHand}
-            size="lg"
-            className="w-full bg-poker-chipGold text-black hover:bg-poker-chipGold/90 font-bold text-lg"
-            data-testid="button-start-hand"
-          >
-            Start New Hand
-          </Button>
-        ) : (
-          <ActionControls
-            onFold={handleFold}
-            onCheck={handleCheck}
-            onCall={handleCall}
-            onBet={handleBet}
-            onRaise={handleRaise}
-            canCheck={canCheck}
-            minBet={minBet}
-            maxBet={maxBet}
-            amountToCall={gameState.currentBet - humanPlayer.bet}
-            currentBet={gameState.currentBet}
-            minRaiseAmount={minRaiseAmount}
-            potSize={gameState.pots.reduce((sum, pot) => sum + pot.amount, 0)}
-            playerChips={humanPlayer.chips}
-            disabled={gameState.currentPlayerIndex !== 0 || isProcessing || humanPlayer.folded}
-          />
-        )}
+      {/* Flying Chips Animation */}
+      {flyingChips.map((chip) => (
+        <FlyingChip
+          key={chip.id}
+          startX={chip.startX}
+          startY={chip.startY}
+          endX={chip.endX}
+          endY={chip.endY}
+          onComplete={() => {
+            setFlyingChips(prev => prev.filter(c => c.id !== chip.id));
+          }}
+        />
+      ))}
+
+      {/* Mobile Swipe Hint */}
+      <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 lg:hidden">
+        <div className="bg-black/50 backdrop-blur-sm px-4 py-2 rounded-full text-xs text-white/70 text-center">
+          Swipe left to fold • Swipe right to call/check
+        </div>
       </div>
     </div>
   );
