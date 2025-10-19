@@ -4,6 +4,15 @@
 A complete Texas Hold'em poker web application featuring a realistic poker table interface, AI bot opponents, and full game mechanics. Built with React, TypeScript, and Tailwind CSS.
 
 ## Recent Changes
+- **October 19, 2025**: Professional Layout Refactoring + Visual Polish
+  - **Layout Architecture**: Transformed from cramped 3-column grid to centered flexbox design with poker table as focal point
+  - **Table Dimensions**: Upgraded to lg:min-h-[70vh] with 3:2 aspect ratio for professional proportions and better screen utilization
+  - **Player Positioning**: Percentage-based calculations with 12% buffer zone to prevent overlap and ensure even spacing around table oval
+  - **Z-Index System**: Established CSS variable-based layering (--z-table-base through --z-modals) for proper element stacking across all components
+  - **Sidebar Redesign**: Lighter bg-card/70 with backdrop blur, collapsible mobile view with proper pointer-events management to prevent click interception
+  - **Responsive Layout**: Mobile-first design with proper breakpoints, collapsible panels, and fixed toggle buttons for sidebar access
+  - **Critical Fixes**: calculatePots deep copy bug (was mutating player bets), mobile pointer-events issue (collapsed sidebars blocking clicks), winner mapping (Player objects vs indices)
+  
 - **October 19, 2025**: Comprehensive UI/UX Enhancement & Polish + Sound Design
   - **Enhanced Card Animations**: Staggered dealing from deck (0.15s delays), 3D flip rotations (0.4s), staggered flop reveals (0.2s delays), turn/river slide-ins with glow effects
   - **Chip Movement & Betting**: Arc trajectory animations from seats to pot (0.6s), pot to winner (0.9s), animated chip counters with smooth transitions, chip stack visuals
