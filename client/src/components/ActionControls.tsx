@@ -168,15 +168,15 @@ export function ActionControls({
   const isSignificantBet = betPercentageOfChips > 50;
 
   return (
-    <div className="flex flex-col gap-4 p-4 sm:p-6 bg-card/50 backdrop-blur-sm rounded-lg border border-card-border">
-      <div className="flex gap-2 sm:gap-3 justify-center flex-wrap">
+    <div className="flex flex-col gap-4 p-4 sm:p-6 md:p-5 bg-card/50 backdrop-blur-sm rounded-lg border border-card-border">
+      <div className="flex gap-2 sm:gap-3 md:gap-4 justify-center flex-wrap">
         <Button
           onClick={handleFold}
           variant="destructive"
           size="lg"
           disabled={disabled}
           data-testid="button-fold"
-          className="min-w-[110px] sm:min-w-[120px] min-h-[44px] poker-button-glow"
+          className="min-w-[110px] sm:min-w-[120px] md:min-w-[140px] min-h-[44px] md:min-h-[52px] poker-button-glow"
         >
           Fold <span className="text-xs ml-1 opacity-70 hidden sm:inline">(F)</span>
         </Button>
@@ -188,7 +188,7 @@ export function ActionControls({
             size="lg"
             disabled={disabled}
             data-testid="button-check"
-            className="min-w-[110px] sm:min-w-[120px] min-h-[44px] bg-accent hover:bg-accent/90 poker-button-glow"
+            className="min-w-[110px] sm:min-w-[120px] md:min-w-[140px] min-h-[44px] md:min-h-[52px] bg-accent hover:bg-accent/90 poker-button-glow"
           >
             Check <span className="text-xs ml-1 opacity-70 hidden sm:inline">(C)</span>
           </Button>
@@ -199,7 +199,7 @@ export function ActionControls({
             size="lg"
             disabled={disabled || amountToCall <= 0}
             data-testid="button-call"
-            className="min-w-[110px] sm:min-w-[120px] min-h-[44px] bg-accent hover:bg-accent/90 poker-button-glow"
+            className="min-w-[110px] sm:min-w-[120px] md:min-w-[140px] min-h-[44px] md:min-h-[52px] bg-accent hover:bg-accent/90 poker-button-glow"
           >
             Call ${amountToCall} <span className="text-xs ml-1 opacity-70 hidden sm:inline">(C)</span>
           </Button>
@@ -211,7 +211,7 @@ export function ActionControls({
           size="lg"
           disabled={disabled || maxBet < minBet}
           data-testid="button-bet-raise"
-          className="min-w-[110px] sm:min-w-[120px] min-h-[44px] bg-poker-chipGold text-black hover:bg-poker-chipGold/90 font-bold poker-button-glow"
+          className="min-w-[110px] sm:min-w-[120px] md:min-w-[140px] min-h-[44px] md:min-h-[52px] bg-poker-chipGold text-black hover:bg-poker-chipGold/90 font-bold poker-button-glow"
         >
           {currentBet === 0 ? `Bet $${betAmount}` : `Raise to $${betAmount}`} <span className="text-xs ml-1 opacity-70 hidden sm:inline">(R)</span>
         </Button>
@@ -280,7 +280,7 @@ export function ActionControls({
               variant="outline"
               disabled={disabled || halfPot < (currentBet > 0 ? minRaiseAmount : minBet) || halfPot > maxBet}
               data-testid="button-quick-half-pot"
-              className="min-w-[90px] min-h-[44px] text-sm"
+              className="min-w-[90px] min-h-[44px] md:min-h-[48px] text-sm"
             >
               1/2 Pot
             </Button>
@@ -289,7 +289,7 @@ export function ActionControls({
               variant="outline"
               disabled={disabled || potSize < (currentBet > 0 ? minRaiseAmount : minBet) || potSize > maxBet}
               data-testid="button-quick-pot"
-              className="min-w-[90px] min-h-[44px] text-sm"
+              className="min-w-[90px] min-h-[44px] md:min-h-[48px] text-sm"
             >
               Pot
             </Button>
@@ -298,7 +298,7 @@ export function ActionControls({
               variant="outline"
               disabled={disabled || maxBet <= (currentBet > 0 ? minRaiseAmount : minBet)}
               data-testid="button-quick-all-in"
-              className="min-w-[90px] min-h-[44px] text-sm border-poker-chipGold/50 text-poker-chipGold hover:bg-poker-chipGold/10"
+              className="min-w-[90px] min-h-[44px] md:min-h-[48px] text-sm border-poker-chipGold/50 text-poker-chipGold hover:bg-poker-chipGold/10"
             >
               All-In <span className="text-xs ml-1 opacity-70 hidden sm:inline">(A)</span>
             </Button>
@@ -312,7 +312,7 @@ export function ActionControls({
             step={10}
             disabled={disabled}
             data-testid="slider-bet"
-            className="w-full"
+            className="w-full [&>span:first-child]:h-2 [&>span:first-child]:md:h-3"
           />
           <div className="flex justify-between text-xs text-muted-foreground">
             <span>${currentBet > 0 ? minRaiseAmount : minBet}</span>

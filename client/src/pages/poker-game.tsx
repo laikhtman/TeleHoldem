@@ -26,6 +26,7 @@ import { useSwipe } from '@/hooks/useSwipe';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useTelegramAuth } from '@/hooks/useTelegramAuth';
 import { apiRequest } from '@/lib/queryClient';
+import { useOrientation } from '@/hooks/useOrientation';
 
 const NUM_PLAYERS = 6;
 const MAX_HISTORY_ENTRIES = 30;
@@ -80,6 +81,7 @@ export default function PokerGame() {
   const { toast } = useToast();
   const { playSound } = useSound();
   const { user, isAuthenticated, isStandalone } = useTelegramAuth();
+  const { isLandscape } = useOrientation();
 
   // Mutation to save stats to backend (only for authenticated Telegram users)
   const saveStatsMutation = useMutation({
@@ -739,15 +741,15 @@ export default function PokerGame() {
       </div>
 
       {/* Cleaner Centered Layout */}
-      <div className="w-full max-w-[2000px] flex flex-col lg:flex-row gap-4 lg:gap-6 items-start justify-center">
+      <div className="w-full max-w-[2000px] flex flex-col md:flex-row lg:flex-row gap-4 md:gap-5 lg:gap-6 items-start justify-center">
         
         {/* Hand Strength Indicator - Floating Panel (Desktop) / Collapsible (Mobile) */}
-        <div className="lg:sticky lg:top-6 lg:self-start order-2 lg:order-1 w-full lg:w-64 xl:w-72">
-          {/* Mobile Toggle Button - Always Visible */}
+        <div className="md:sticky lg:sticky md:top-6 lg:top-6 md:self-start lg:self-start order-2 lg:order-1 w-full md:w-72 lg:w-64 xl:w-72">
+          {/* Mobile/Portrait Toggle Button - Hidden in landscape on tablets */}
           <Button
             variant="outline"
             size="icon"
-            className="lg:hidden fixed left-2 top-20 z-50 h-11 w-11 rounded-full shadow-lg bg-card/95 backdrop-blur-sm"
+            className={`${isLandscape ? 'md:hidden' : ''} lg:hidden fixed left-2 top-20 z-50 h-11 w-11 rounded-full shadow-lg bg-card/95 backdrop-blur-sm`}
             onClick={() => setIsHandStrengthCollapsed(!isHandStrengthCollapsed)}
             data-testid="button-toggle-hand-strength"
           >
@@ -755,7 +757,7 @@ export default function PokerGame() {
           </Button>
 
           {/* Panel Content */}
-          <div className={`bg-card/70 backdrop-blur-sm border border-card-border rounded-lg p-3 shadow-sm ${isHandStrengthCollapsed ? 'hidden lg:block pointer-events-none lg:pointer-events-auto' : 'pointer-events-auto'}`}>
+          <div className={`bg-card/70 backdrop-blur-sm border border-card-border rounded-lg p-3 shadow-sm ${isHandStrengthCollapsed ? `hidden ${isLandscape ? 'md:block' : ''} lg:block pointer-events-none ${isLandscape ? 'md:pointer-events-auto' : ''} lg:pointer-events-auto` : 'pointer-events-auto'}`}>
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-semibold flex items-center gap-1.5 text-muted-foreground">
                 <TrendingUp className="w-3.5 h-3.5 text-poker-chipGold" />
@@ -775,7 +777,7 @@ export default function PokerGame() {
         <div className="flex flex-col gap-4 items-center flex-1 order-1 lg:order-2 w-full max-w-5xl mx-auto">
           {/* Poker Table with Wood Border */}
           <div 
-            className="rounded-[120px] sm:rounded-[160px] lg:rounded-[220px] wood-grain p-[8px] sm:p-[10px] lg:p-[12px] table-edge-glow w-full lg:min-h-[70vh]"
+            className="rounded-[120px] sm:rounded-[160px] md:rounded-[190px] lg:rounded-[220px] wood-grain p-[8px] sm:p-[10px] md:p-[11px] lg:p-[12px] table-edge-glow w-full md:min-h-[60vh] lg:min-h-[70vh]"
             style={{ 
               aspectRatio: '3 / 2',
               maxWidth: '100%',
@@ -783,7 +785,7 @@ export default function PokerGame() {
           >
             {/* Poker Table Felt Surface */}
             <div 
-              className="relative felt-texture vignette table-depth rounded-[113px] sm:rounded-[152px] lg:rounded-[210px] overflow-visible w-full h-full"
+              className="relative felt-texture vignette table-depth rounded-[113px] sm:rounded-[152px] md:rounded-[181px] lg:rounded-[210px] overflow-visible w-full h-full"
               style={{ zIndex: 0 }}
               data-testid="poker-table"
             >
@@ -825,7 +827,7 @@ export default function PokerGame() {
                   transition={{ duration: 0.5 }}
                 >
                   <div className="bg-black/80 backdrop-blur-sm px-6 py-3 rounded-lg border-2 border-poker-chipGold shadow-lg shadow-poker-chipGold/20">
-                    <div className="text-base sm:text-lg text-poker-chipGold font-bold tracking-wide" data-testid="text-game-phase">
+                    <div className="text-base md:text-base sm:text-lg text-poker-chipGold font-bold tracking-wide" data-testid="text-game-phase">
                       {getPhaseTitle(gameState.phase)}
                     </div>
                   </div>
@@ -891,12 +893,12 @@ export default function PokerGame() {
         </div>
 
         {/* Action History - Right Sidebar (Desktop) / Collapsible (Mobile) */}
-        <div className="lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-3rem)] order-3 w-full lg:w-72 xl:w-80">
-          {/* Mobile Toggle Button - Always Visible */}
+        <div className="md:sticky lg:sticky md:top-6 lg:top-6 md:self-start lg:self-start md:max-h-[calc(100vh-3rem)] lg:max-h-[calc(100vh-3rem)] order-3 w-full md:w-76 lg:w-72 xl:w-80">
+          {/* Mobile/Portrait Toggle Button - Hidden in landscape on tablets */}
           <Button
             variant="outline"
             size="icon"
-            className="lg:hidden fixed right-2 top-20 z-50 h-11 w-11 rounded-full shadow-lg bg-card/95 backdrop-blur-sm"
+            className={`${isLandscape ? 'md:hidden' : ''} lg:hidden fixed right-2 top-20 z-50 h-11 w-11 rounded-full shadow-lg bg-card/95 backdrop-blur-sm`}
             onClick={() => setIsHistoryCollapsed(!isHistoryCollapsed)}
             data-testid="button-toggle-action-history"
           >
@@ -904,7 +906,7 @@ export default function PokerGame() {
           </Button>
 
           {/* Panel Content */}
-          <div className={`flex flex-col gap-3 ${isHistoryCollapsed ? 'hidden lg:flex pointer-events-none lg:pointer-events-auto' : 'flex pointer-events-auto'}`}>
+          <div className={`flex flex-col gap-3 ${isHistoryCollapsed ? `hidden ${isLandscape ? 'md:flex' : ''} lg:flex pointer-events-none ${isLandscape ? 'md:pointer-events-auto' : ''} lg:pointer-events-auto` : 'flex pointer-events-auto'}`}>
             <div className="lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto lg:pr-2 space-y-3">
               <ActionHistory 
                 history={gameState.actionHistory} 

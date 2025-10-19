@@ -140,7 +140,7 @@ export function CommunityCards({ cards, phase }: CommunityCardsProps) {
           </AnimatePresence>
   
           {/* Cards */}
-          <div className="flex gap-3 relative" data-testid="community-cards">
+          <div className="flex gap-3 md:gap-4 relative" data-testid="community-cards">
             {[0, 1, 2, 3, 4].map((index) => {
               const hasCard = !!cards[index];
               const animation = getCardAnimation(index);

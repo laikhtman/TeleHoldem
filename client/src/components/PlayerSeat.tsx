@@ -112,7 +112,7 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
   };
 
   const seatClasses = [
-    'rounded-lg p-3 backdrop-blur-sm transition-all duration-300 relative',
+    'rounded-lg p-3 md:p-4 backdrop-blur-sm transition-all duration-300 relative',
     isCurrentPlayer ? 'bg-black/80 border-2 border-poker-chipGold animate-pulse-glow' : 'bg-black/70 border border-white/20',
     isWinner ? 'bg-poker-chipGold/20 border-2 border-poker-chipGold shadow-lg' : '',
     player.chips === 0 ? 'opacity-50 grayscale' : ''
@@ -198,7 +198,7 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
         {/* Player info */}
         <div className="text-center mb-2">
           <div className="flex items-center justify-between gap-2 mb-1">
-            <div className="text-sm font-semibold text-white">
+            <div className="text-sm md:text-base font-semibold text-white">
               {player.name}
             </div>
             {isDealer && (
@@ -207,7 +207,7 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
               </div>
             )}
           </div>
-          <div className="flex items-center justify-center gap-1 text-poker-chipGold font-mono font-bold">
+          <div className="flex items-center justify-center gap-1 text-poker-chipGold font-mono font-bold text-sm md:text-base">
             <Coins className="w-4 h-4" />
             <span data-testid={`player-chips-${player.id}`}>${animatedChipCount}</span>
           </div>
