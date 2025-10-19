@@ -58,7 +58,7 @@
 
   --muted: 140 8% 90%;
 
-  --muted-foreground: 140 6% 35%;
+  --muted-foreground: 140 10% 25%;
 
   --accent: 140 15% 88%;
 
@@ -186,7 +186,7 @@
 
   --muted: 140 6% 20%;
 
-  --muted-foreground: 140 4% 70%;
+  --muted-foreground: 140 6% 75%;
 
   --accent: 140 12% 22%;
 
@@ -246,6 +246,76 @@
   --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 }
 
+/* High Contrast Mode - Enhanced accessibility */
+.high-contrast {
+  /* Stronger contrast for text */
+  --foreground: 0 0% 0%;
+  --background: 0 0% 100%;
+  
+  /* Enhanced border visibility */
+  --border: 0 0% 30%;
+  
+  /* Card with stronger contrast */
+  --card: 0 0% 98%;
+  --card-foreground: 0 0% 0%;
+  --card-border: 0 0% 25%;
+  
+  /* Stronger button contrasts */
+  --primary: 220 100% 35%;
+  --primary-foreground: 0 0% 100%;
+  
+  --secondary: 0 0% 20%;
+  --secondary-foreground: 0 0% 100%;
+  
+  --muted: 0 0% 85%;
+  --muted-foreground: 0 0% 10%;
+  
+  --accent: 140 50% 30%;
+  --accent-foreground: 0 0% 100%;
+  
+  --destructive: 0 90% 40%;
+  --destructive-foreground: 0 0% 100%;
+  
+  /* Poker table with higher contrast */
+  --poker-felt: 140 80% 20%;
+  --poker-card-red: 0 100% 35%;
+  --poker-card-black: 0 0% 0%;
+  --poker-chip-gold: 45 100% 40%;
+}
+
+.dark.high-contrast {
+  /* High contrast dark mode */
+  --foreground: 0 0% 100%;
+  --background: 0 0% 0%;
+  
+  --border: 0 0% 70%;
+  
+  --card: 0 0% 8%;
+  --card-foreground: 0 0% 100%;
+  --card-border: 0 0% 75%;
+  
+  --primary: 220 100% 60%;
+  --primary-foreground: 0 0% 0%;
+  
+  --secondary: 0 0% 85%;
+  --secondary-foreground: 0 0% 0%;
+  
+  --muted: 0 0% 25%;
+  --muted-foreground: 0 0% 95%;
+  
+  --accent: 140 70% 55%;
+  --accent-foreground: 0 0% 0%;
+  
+  --destructive: 0 100% 55%;
+  --destructive-foreground: 0 0% 0%;
+  
+  /* Poker colors for dark high contrast */
+  --poker-felt: 140 80% 25%;
+  --poker-card-red: 0 100% 50%;
+  --poker-card-black: 0 0% 100%;
+  --poker-chip-gold: 45 100% 55%;
+}
+
 @layer base {
     :root {
       --background: 222 15% 12%;
@@ -266,7 +336,6 @@
   .animate-pulse-dots {
     animation: pulse-dots 1.4s infinite;
   }
-}
 
 /**
  * Using the elevate system.

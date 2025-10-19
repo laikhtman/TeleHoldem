@@ -1,5 +1,6 @@
-import { Card, Player, GameState, SUITS, RANKS, GamePhase, Pot } from '@shared/schema';
+import { Card, Player, GameState, SUITS, RANKS, GamePhase, Pot, ACHIEVEMENT_LIST, AchievementId } from '@shared/schema';
 import { handEvaluator } from './handEvaluator';
+import { achievementEngine } from './achievementEngine';
 
 export class GameEngine {
   createDeck(): Card[] {
@@ -41,7 +42,11 @@ export class GameEngine {
       folded: false,
       allIn: false,
       isHuman: i === 0,
-      position: i
+      position: i,
+      stats: {
+        handsWon: 0,
+        biggestPot: 0,
+      },
     }));
 
     return {
@@ -54,7 +59,15 @@ export class GameEngine {
       phase: 'waiting',
       currentBet: 0,
       lastAction: null,
-      actionHistory: []
+      actionHistory: [],
+      sessionStats: {
+        handsPlayed: 0,
+        handsWonByPlayer: 0,
+        handDistribution: {},
+      },
+      achievements: Object.fromEntries(
+        Object.entries(ACHIEVEMENT_LIST).map(([id, ach]) => [id, { ...ach }])
+      ),
     };
   }
 
@@ -121,7 +134,11 @@ export class GameEngine {
       dealerIndex: newDealerIndex,
       currentPlayerIndex: (newDealerIndex + 1) % updatedPlayers.length,
       phase: 'pre-flop',
-      lastAction: 'New hand started'
+      lastAction: 'New hand started',
+      sessionStats: {
+        ...gameState.sessionStats,
+        handsPlayed: gameState.sessionStats.handsPlayed + 1,
+      },
     };
   }
 
@@ -286,14 +303,17 @@ export class GameEngine {
     return { ...gameState, pots };
   }
 
-  awardPots(gameState: GameState): GameState {
+  awardPots(gameState: GameState): { newState: GameState, unlockedAchievements: AchievementId[] } {
     let players = [...gameState.players];
+    let sessionStats = { ...gameState.sessionStats };
+    let achievements = { ...gameState.achievements };
+    let unlockedAchievements: AchievementId[] = [];
     
     for (const pot of gameState.pots) {
       const eligiblePlayers = players.filter(p => pot.eligiblePlayerIds.includes(p.id) && !p.folded);
       if (eligiblePlayers.length === 0) continue;
 
-      const { winners } = this.resolveShowdown({ ...gameState, players: eligiblePlayers });
+      const { winners, winningHand } = this.resolveShowdown({ ...gameState, players: eligiblePlayers });
       if (winners.length === 0) continue;
 
       const potShare = Math.floor(pot.amount / winners.length);
@@ -302,16 +322,33 @@ export class GameEngine {
       winners.forEach((winner, idx) => {
         const winnerIndex = players.findIndex(p => p.id === winner.id);
         if (winnerIndex !== -1) {
+          if (players[winnerIndex].isHuman) {
+            sessionStats.handsWonByPlayer += 1;
+            const currentCount = sessionStats.handDistribution[winningHand] || 0;
+            sessionStats.handDistribution[winningHand] = currentCount + 1;
+          }
           const extraChip = idx < remainder ? 1 : 0;
+          const winAmount = potShare + extraChip;
+          
           players[winnerIndex] = {
             ...players[winnerIndex],
-            chips: players[winnerIndex].chips + potShare + extraChip
+            chips: players[winnerIndex].chips + winAmount,
+            stats: {
+              handsWon: players[winnerIndex].stats.handsWon + 1,
+              biggestPot: Math.max(players[winnerIndex].stats.biggestPot, winAmount),
+            }
           };
+
+          if (players[winnerIndex].isHuman) {
+            const result = achievementEngine.checkAchievements({ ...gameState, achievements, sessionStats }, winningHand, winAmount);
+            achievements = result.newState.achievements;
+            unlockedAchievements.push(...result.unlockedAchievements);
+          }
         }
       });
     }
 
-    return { ...gameState, players, pots: [] };
+    return { newState: { ...gameState, players, pots: [], sessionStats, achievements }, unlockedAchievements };
   }
 }
 

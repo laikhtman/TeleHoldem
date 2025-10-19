@@ -1,6 +1,7 @@
 import { Card, getCardColor } from '@shared/schema';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
+import { useSound } from '@/hooks/useSound';
 
 interface PlayingCardProps {
   card?: Card;
@@ -21,20 +22,27 @@ export function PlayingCard({
 }: PlayingCardProps) {
   const [isFlipped, setIsFlipped] = useState(!animateFlip);
   const [isDealt, setIsDealt] = useState(!animateDeal);
+  const { playSound } = useSound();
 
   useEffect(() => {
     if (animateFlip) {
-      const timer = setTimeout(() => setIsFlipped(true), 100);
+      const timer = setTimeout(() => {
+        setIsFlipped(true);
+        playSound('card-flip', { volume: 0.12 });
+      }, 100);
       return () => clearTimeout(timer);
     }
-  }, [animateFlip]);
+  }, [animateFlip, playSound]);
 
   useEffect(() => {
     if (animateDeal) {
-      const timer = setTimeout(() => setIsDealt(true), dealDelay);
+      const timer = setTimeout(() => {
+        setIsDealt(true);
+        playSound('card-deal', { volume: 0.1 });
+      }, dealDelay);
       return () => clearTimeout(timer);
     }
-  }, [animateDeal, dealDelay]);
+  }, [animateDeal, dealDelay, playSound]);
 
   if (!card) {
     return (
@@ -47,6 +55,23 @@ export function PlayingCard({
 
   const color = getCardColor(card.suit);
   const colorClass = color === 'red' ? 'text-poker-cardRed' : 'text-poker-cardBlack';
+  
+  // Colorblind-friendly suit indicators (small geometric shapes)
+  const getSuitIndicator = () => {
+    const baseClass = "absolute top-1 right-1 w-2 h-2";
+    switch (card.suit) {
+      case '♠': // Spades - Circle (filled)
+        return <div className={`${baseClass} rounded-full bg-poker-cardBlack`} aria-label="Spades indicator" />;
+      case '♥': // Hearts - Square (filled) 
+        return <div className={`${baseClass} bg-poker-cardRed`} aria-label="Hearts indicator" />;
+      case '♦': // Diamonds - Diamond shape (rotated square)
+        return <div className={`${baseClass} bg-poker-cardRed transform rotate-45`} aria-label="Diamonds indicator" />;
+      case '♣': // Clubs - Circle (outline)
+        return <div className={`${baseClass} rounded-full border-2 border-poker-cardBlack`} aria-label="Clubs indicator" />;
+      default:
+        return null;
+    }
+  };
 
   const getInitialState = () => {
     if (animateDeal) {
@@ -92,9 +117,12 @@ export function PlayingCard({
         style={{ backfaceVisibility: 'hidden', rotateY: 180 }}
       >
         <div 
-          className={`w-full h-full rounded-md bg-poker-cardBg border-2 border-gray-300 shadow-md flex flex-col items-center justify-between p-2`}
+          className={`w-full h-full rounded-md bg-poker-cardBg border-2 border-gray-300 shadow-md flex flex-col items-center justify-between p-2 relative`}
           data-testid={`card-${card.id}`}
         >
+          {/* Colorblind-friendly suit indicator badge */}
+          {getSuitIndicator()}
+          
           <div className={`text-sm font-bold ${colorClass} self-start`}>
             {card.rank}
           </div>

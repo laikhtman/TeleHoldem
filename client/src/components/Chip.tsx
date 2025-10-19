@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { useSound } from '@/hooks/useSound';
+import { useEffect } from 'react';
 
 interface ChipProps {
   className?: string;
@@ -48,6 +50,8 @@ export function FlyingChip({
   onComplete,
   size = 'sm'
 }: FlyingChipProps) {
+  const { playSound } = useSound();
+
   // Calculate arc trajectory
   const midX = (startX + endX) / 2;
   const midY = Math.min(startY, endY) - 100; // Arc peak
@@ -56,6 +60,22 @@ export function FlyingChip({
     sm: 'w-4 h-4',
     md: 'w-6 h-6',
     lg: 'w-8 h-8',
+  };
+
+  useEffect(() => {
+    // Play chip placement sound when animation starts
+    const timer = setTimeout(() => {
+      playSound('chip-place', { volume: 0.2 });
+    }, delay * 1000);
+    
+    return () => clearTimeout(timer);
+  }, [delay, playSound]);
+
+  const handleAnimationComplete = () => {
+    playSound('chip-stack', { volume: 0.15 });
+    if (onComplete) {
+      onComplete();
+    }
   };
 
   return (
@@ -83,7 +103,7 @@ export function FlyingChip({
         ease: "easeInOut",
         times: [0, 0.5, 1]
       }}
-      onAnimationComplete={onComplete}
+      onAnimationComplete={handleAnimationComplete}
       data-testid="flying-chip"
     />
   );

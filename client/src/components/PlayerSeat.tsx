@@ -1,3 +1,4 @@
+import { PlayerStats } from './PlayerStats';
 import { Player, GamePhase } from '@shared/schema';
 import { PlayingCard } from './PlayingCard';
 import { Coins, Trophy, XCircle, CheckCircle, ArrowUpCircle } from 'lucide-react';
@@ -32,6 +33,7 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
   const [flyingChips, setFlyingChips] = useState<Array<{ id: number; startX: number; startY: number }>>([]);
   const [actionBadge, setActionBadge] = useState<ActionBadge | null>(null);
   const [showWinAmount, setShowWinAmount] = useState(false);
+  const [showStats, setShowStats] = useState(false);
   const prevBet = useRef(player.bet);
   const seatRef = useRef<HTMLDivElement>(null);
   const animatedChipCount = useAnimatedCounter(player.chips);
@@ -85,6 +87,95 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
       return () => clearTimeout(timer);
     }
   }, [winAmount]);
+
+  const getPosition = () => {
+    const tableWidth = 800;
+    const tableHeight = 500;
+    const radiusX = tableWidth / 2 - 80;
+    const radiusY = tableHeight / 2 - 60;
+    
+    const angle = (position / totalPlayers) * 2 * Math.PI - Math.PI / 2;
+    
+    const x = Math.cos(angle) * radiusX + tableWidth / 2;
+    const y = Math.sin(angle) * radiusY + tableHeight / 2;
+    
+    return {
+      left: `${x}px`,
+      top: `${y}px`,
+      transform: 'translate(-50%, -50%)'
+    };
+  };
+
+  const seatClasses = [
+    'rounded-lg p-3 backdrop-blur-sm transition-all duration-300 relative',
+    isCurrentPlayer ? 'bg-black/80 border-2 border-poker-chipGold animate-pulse-glow' : 'bg-black/70 border border-white/20',
+    isWinner ? 'bg-poker-chipGold/20 border-2 border-poker-chipGold shadow-lg' : '',
+    player.chips === 0 ? 'opacity-50 grayscale' : ''
+  ].join(' ');
+
+  const getBadgeStyle = (type: ActionBadgeType) => {
+    switch (type) {
+      case 'fold':
+        return { icon: <XCircle className="w-4 h-4" />, class: 'bg-destructive text-destructive-foreground' };
+      case 'check':
+      case 'call':
+        return { icon: <CheckCircle className="w-4 h-4" />, class: 'bg-poker-success text-white' };
+      case 'bet':
+      case 'raise':
+        return { icon: <ArrowUpCircle className="w-4 h-4" />, class: 'bg-poker-chipGold text-black' };
+      default:
+        return { icon: null, class: 'bg-black/70 text-white' };
+    }
+  };
+
+  return (
+    <div
+      ref={seatRef}
+      className="absolute z-10 seat-shadow"
+      style={getPosition()}
+      data-testid={`player-seat-${player.id}`}
+      onMouseEnter={() => setShowStats(true)}
+      onMouseLeave={() => setShowStats(false)}
+    >
+      <AnimatePresence>{showStats && <PlayerStats player={player} />}</AnimatePresence>
+      <div className={seatClasses}>
+        {player.chips === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center z-10">
+            <span className="text-white text-2xl font-bold bg-black/50 px-4 py-2 rounded-md">OUT</span>
+          </div>
+        )}
+        <AnimatePresence>
+          {actionBadge && (
+            <motion.div
+              className={`absolute -top-10 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full text-sm font-bold z-20 flex items-center gap-2 shadow-lg ${getBadgeStyle(actionBadge.type).class}`}
+              initial={{ opacity: 0, y: 10, scale: 0.8 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.8 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+            >
+              {getBadgeStyle(actionBadge.type).icon}
+              <span className="capitalize">{actionBadge.text}</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        
+        <AnimatePresence>
+          {showWinAmount && winAmount > 0 && (
+            <motion.div
+              className="absolute -top-4 left-1/2 -translate-x-1/2 bg-poker-success text-white px-4 py-2 rounded-full text-sm font-bold z-20 shadow-lg"
+              initial={{ opacity: 0, y: -20, scale: 0.5 }}
+              animate={{ 
+                opacity: 1, 
+                y: 0, 
+                scale: [0, 1.2, 1],
+              }}
+              exit={{ opacity: 0, y: -30, scale: 0.8 }}
+              transition={{ duration: 0.5 }}
+              data-testid={`win-indicator-${player.id}`}
+            >
+              +${winAmount}
+            </motion.div>
+          )}
         </AnimatePresence>
         
         <AnimatePresence>
@@ -98,6 +189,7 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
             <Trophy className="w-3 h-3" />
             WINNER
           </div>
+        )}
         {/* Player info */}
         <div className="text-center mb-2">
           <div className="flex items-center justify-between gap-2 mb-1">

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { GameState, GamePhase, Card, ActionHistoryEntry, PlayerAction } from '@shared/schema';
+import { GameState, GamePhase, Card, ActionHistoryEntry, PlayerAction, ACHIEVEMENT_LIST } from '@shared/schema';
 import { gameEngine } from '@/lib/gameEngine';
 import { botAI } from '@/lib/botAI';
 import { PlayerSeat } from '@/components/PlayerSeat';
@@ -7,12 +7,22 @@ import { CommunityCards } from '@/components/CommunityCards';
 import { PotDisplay } from '@/components/PotDisplay';
 import { ActionControls } from '@/components/ActionControls';
 import { ActionHistory } from '@/components/ActionHistory';
+import { SessionStats } from '@/components/SessionStats';
+import { HandDistributionChart } from '@/components/HandDistributionChart';
+import { AchievementsList } from '@/components/AchievementsList';
+import { AchievementToast } from '@/components/AchievementToast';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { WinnerCelebration } from '@/components/WinnerCelebration';
 import { HandStrengthIndicator } from '@/components/HandStrengthIndicator';
+import { PotOddsDisplay } from '@/components/PotOddsDisplay';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FlyingChip } from '@/components/Chip';
+import { Trash2, ChevronRight, ChevronLeft, TrendingUp } from 'lucide-react';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { useSound } from '@/hooks/useSound';
+import { useSwipe } from '@/hooks/useSwipe';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 const NUM_PLAYERS = 6;
 const MAX_HISTORY_ENTRIES = 30;
@@ -61,8 +71,41 @@ export default function PokerGame() {
   const [phaseKey, setPhaseKey] = useState(0);
   const [showPhaseTransition, setShowPhaseTransition] = useState(false);
   const [flyingChips, setFlyingChips] = useState<FlyingChipData[]>([]);
+  const [isHistoryCollapsed, setIsHistoryCollapsed] = useState(false);
+  const [isHandStrengthCollapsed, setIsHandStrengthCollapsed] = useState(false);
   const potPosition = useRef<{ x: number; y: number }>({ x: 400, y: 150 });
   const { toast } = useToast();
+  const { playSound } = useSound();
+
+  useSwipe({
+    onSwipeLeft: () => {
+      if (!gameState || gameState.currentPlayerIndex !== 0 || isProcessing) return;
+      handleFold();
+    },
+    onSwipeRight: () => {
+      if (!gameState || gameState.currentPlayerIndex !== 0 || isProcessing) return;
+      const canCheck = gameState.currentBet === 0 || gameState.currentBet === gameState.players[0].bet;
+      if (canCheck) {
+        handleCheck();
+      } else {
+        handleCall();
+      }
+    },
+  }, { minSwipeDistance: 80 });
+
+  const handleResetGame = () => {
+    localStorage.removeItem('pokerGameState');
+    const initialState = gameEngine.createInitialGameState(NUM_PLAYERS);
+    setGameState(initialState);
+    setWinningPlayerIds([]);
+    setWinAmounts({});
+    setPhaseKey(0);
+    toast({
+      title: "Game Reset",
+      description: "A new game has started.",
+      duration: 3000,
+    });
+  };
 
   useEffect(() => {
     if (phaseKey > 0) {
@@ -83,13 +126,37 @@ export default function PokerGame() {
   };
 
   useEffect(() => {
-    // Initialize game
-    const initialState = gameEngine.createInitialGameState(NUM_PLAYERS);
-    setGameState(initialState);
+    // Load game from local storage on component mount
+    try {
+      const savedGame = localStorage.getItem('pokerGameState');
+      if (savedGame) {
+        setGameState(JSON.parse(savedGame));
+      } else {
+        const initialState = gameEngine.createInitialGameState(NUM_PLAYERS);
+        setGameState(initialState);
+      }
+    } catch (error) {
+      console.error("Failed to load game state from local storage:", error);
+      const initialState = gameEngine.createInitialGameState(NUM_PLAYERS);
+      setGameState(initialState);
+    }
   }, []);
+
+  useEffect(() => {
+    // Save game to local storage whenever it changes
+    if (gameState) {
+      try {
+        localStorage.setItem('pokerGameState', JSON.stringify(gameState));
+      } catch (error) {
+        console.error("Failed to save game state to local storage:", error);
+      }
+    }
+  }, [gameState]);
 
   const startNewHand = () => {
     if (!gameState) return;
+    
+    playSound('card-shuffle', { volume: 0.2 });
     
     setWinningPlayerIds([]);
     setWinAmounts({});
@@ -262,7 +329,18 @@ export default function PokerGame() {
           duration: 5000,
         });
         
-        currentState = gameEngine.awardPots(currentState, winners);
+        const { newState, unlockedAchievements } = gameEngine.awardPots(currentState);
+        currentState = newState;
+
+        if (unlockedAchievements.length > 0) {
+          unlockedAchievements.forEach(id => {
+            toast({
+              duration: 5000,
+              // @ts-ignore
+              description: <AchievementToast achievement={ACHIEVEMENT_LIST[id]} />,
+            });
+          });
+        }
         
         // Add pot award history
         winners.forEach(winnerIndex => {
@@ -365,7 +443,18 @@ export default function PokerGame() {
       });
       
       // Award pot
-      let finalState = gameEngine.awardPots(state, winners);
+      const { newState, unlockedAchievements } = gameEngine.awardPots(state);
+      let finalState = newState;
+
+      if (unlockedAchievements.length > 0) {
+        unlockedAchievements.forEach(id => {
+          toast({
+            duration: 5000,
+            // @ts-ignore
+            description: <AchievementToast achievement={ACHIEVEMENT_LIST[id]} />,
+          });
+        });
+      }
       
       // Add pot award history
       winners.forEach(winnerIndex => {
@@ -410,7 +499,17 @@ export default function PokerGame() {
         duration: 5000,
       });
       
-      let finalState = gameEngine.awardPots(newState, winners);
+      const { newState: finalState, unlockedAchievements } = gameEngine.awardPots(newState);
+      
+      if (unlockedAchievements.length > 0) {
+        unlockedAchievements.forEach(id => {
+          toast({
+            duration: 5000,
+            // @ts-ignore
+            description: <AchievementToast achievement={ACHIEVEMENT_LIST[id]} />,
+          });
+        });
+      }
       
       // Add pot award history
       winners.forEach(winnerIndex => {
@@ -542,12 +641,6 @@ export default function PokerGame() {
     return descriptions[phase];
   };
 
-  import { LoadingSpinner } from '@/components/ui/loading-spinner';
-
-// ... (rest of the imports)
-
-// ... (inside PokerGame component)
-
   if (!gameState) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-background text-white">
@@ -565,150 +658,206 @@ export default function PokerGame() {
   const minRaiseAmount = gameState.currentBet + (gameState.currentBet - (gameState.players.find(p => p.bet < gameState.currentBet)?.bet || 0));
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4 gap-6">
-      {/* Main Content Area */}
-      <div className="flex flex-col items-center justify-center gap-6">
-        {/* Poker Table with Wood Border */}
-        <div 
-          className="rounded-[210px] wood-grain p-[10px] table-edge-glow"
-          style={{ 
-            width: '820px', 
-            height: '520px',
-          }}
-        >
-          {/* Poker Table Felt Surface */}
-          <div 
-            className="relative felt-texture vignette table-depth rounded-[200px] overflow-visible"
-            style={{ 
-              width: '800px', 
-              height: '500px',
-            }}
-            data-testid="poker-table"
+    <div className="min-h-screen bg-background flex items-center justify-center p-2 sm:p-4 relative">
+      {/* Theme Toggle - Fixed Top Right */}
+      <div className="fixed top-4 right-4 z-50">
+        <ThemeToggle />
+      </div>
+
+      {/* Responsive Grid Layout */}
+      <div className="w-full max-w-[1800px] grid grid-cols-1 lg:grid-cols-[280px_1fr_320px] xl:grid-cols-[320px_1fr_380px] gap-4 items-start">
+        
+        {/* Hand Strength Indicator - Left Sidebar (Desktop) / Collapsible (Mobile) */}
+        <div className="lg:sticky lg:top-4">
+          {/* Mobile Toggle Button - Always Visible */}
+          <Button
+            variant="outline"
+            size="icon"
+            className="lg:hidden fixed left-2 top-20 z-50 h-11 w-11 rounded-full shadow-lg bg-card/95 backdrop-blur-sm"
+            onClick={() => setIsHandStrengthCollapsed(!isHandStrengthCollapsed)}
+            data-testid="button-toggle-hand-strength"
           >
-            <AnimatePresence>
-              {showPhaseTransition && (
-                <motion.div
-                  className="absolute inset-0 bg-black/50 rounded-[200px] z-40 border-4 border-poker-chipGold/80 shadow-lg shadow-poker-chipGold/50"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: [0, 1, 0], transition: { duration: 0.7, ease: "easeInOut" } }}
-                  exit={{ opacity: 0 }}
-                />
-              )}
-            </AnimatePresence>
+            {isHandStrengthCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
+          </Button>
 
-            {/* Community Cards */}
-            <CommunityCards cards={gameState.communityCards} phase={gameState.phase} />
-
-            {/* Pot Display */}
-            <PotDisplay 
-              amount={gameState.pots.reduce((sum, pot) => sum + pot.amount, 0)} 
-              onRef={handlePotRef}
-            />
-
-            {/* Player Seats */}
-            {gameState.players.map((player, index) => (
-              <PlayerSeat
-                key={player.id}
-                player={player}
-                position={index}
-                totalPlayers={NUM_PLAYERS}
-                isCurrentPlayer={index === gameState.currentPlayerIndex}
-                isDealer={index === gameState.dealerIndex}
-                isWinner={winningPlayerIds.includes(player.id)}
-                phase={gameState.phase}
-                lastAction={gameState.lastAction}
-                winAmount={winAmounts[player.id] || 0}
-                isProcessing={isProcessing}
+          {/* Panel Content */}
+          <div className={`bg-card/80 backdrop-blur-sm border border-card-border rounded-lg p-4 ${isHandStrengthCollapsed ? 'hidden lg:block' : ''}`}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-bold flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-poker-chipGold" />
+                Hand Strength
+              </h3>
+            </div>
+            {gameState && (
+              <HandStrengthIndicator
+                hand={gameState.players[0].hand}
+                communityCards={gameState.communityCards}
               />
-            ))}
-
-            {/* Game Phase Indicator */}
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={phaseKey}
-                className="absolute top-4 left-1/2 transform -translate-x-1/2 z-30"
-                initial={{ opacity: 0, y: -20, scale: 0.8 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -20, scale: 0.8 }}
-                transition={{ duration: 0.5 }}
-              >
-                <div className="bg-black/80 backdrop-blur-sm px-6 py-3 rounded-lg border-2 border-poker-chipGold shadow-lg shadow-poker-chipGold/20">
-                  <div className="text-base text-poker-chipGold font-bold tracking-wide" data-testid="text-game-phase">
-                    {getPhaseTitle(gameState.phase)}
-                  </div>
-                </div>
-              </motion.div>
-            </AnimatePresence>
-
-            {/* Winner Celebration */}
-            {winningPlayerIds.length > 0 && winningPlayerIds.map(winnerId => {
-              const winner = gameState.players.find(p => p.id === winnerId);
-              return winner ? (
-                <WinnerCelebration key={winnerId} isWinner={true} playerName={winner.name} />
-              ) : null;
-            })}
-
-            {/* Last Action */}
-            {gameState.lastAction && (
-              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-30">
-                <div className="bg-black/70 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/20">
-                  <div className="text-xs text-white" data-testid="text-last-action">
-                    {gameState.lastAction}
-                  </div>
-                </div>
-              </div>
             )}
           </div>
         </div>
 
-        {/* Controls */}
-        <div className="flex flex-col gap-4 w-full max-w-2xl">
-          {/* Hand Strength Indicator - Only show when hand is in play */}
-          {gameState.phase !== 'waiting' && humanPlayer.hand.length > 0 && (
-            <div className="flex justify-center">
-              <HandStrengthIndicator
-                hand={humanPlayer.hand}
-                communityCards={gameState.communityCards}
-              />
-            </div>
-          )}
-
-          {gameState.phase === 'waiting' ? (
-            <Button 
-              onClick={startNewHand}
-              size="lg"
-              className="w-full bg-poker-chipGold text-black hover:bg-poker-chipGold/90 font-bold text-lg"
-              data-testid="button-start-hand"
+        {/* Main Game Area - Center */}
+        <div className="flex flex-col gap-4 items-center">
+          {/* Poker Table with Wood Border */}
+          <div 
+            className="rounded-[105px] sm:rounded-[150px] lg:rounded-[210px] wood-grain p-[6px] sm:p-[8px] lg:p-[10px] table-edge-glow w-full max-w-[380px] sm:max-w-[560px] lg:max-w-[820px]"
+            style={{ 
+              aspectRatio: '820 / 520',
+            }}
+          >
+            {/* Poker Table Felt Surface */}
+            <div 
+              className="relative felt-texture vignette table-depth rounded-[100px] sm:rounded-[143px] lg:rounded-[200px] overflow-visible w-full h-full"
+              data-testid="poker-table"
             >
-              Start New Hand
-            </Button>
-          ) : (
-            <ActionControls
-              onFold={handleFold}
-              onCheck={handleCheck}
-              onCall={handleCall}
-              onBet={handleBet}
-              onRaise={handleRaise}
-              canCheck={canCheck}
-              minBet={minBet}
-              maxBet={maxBet}
-              amountToCall={gameState.currentBet - humanPlayer.bet}
-              currentBet={gameState.currentBet}
-              minRaiseAmount={minRaiseAmount}
-              potSize={gameState.pots.reduce((sum, pot) => sum + pot.amount, 0)}
-              playerChips={humanPlayer.chips}
-              disabled={gameState.currentPlayerIndex !== 0 || isProcessing || humanPlayer.folded}
+              {/* Community Cards */}
+              <CommunityCards cards={gameState.communityCards} phase={gameState.phase} />
+
+              {/* Pot Display */}
+              <PotDisplay 
+                amount={gameState.pots.reduce((sum, pot) => sum + pot.amount, 0)} 
+                onRef={handlePotRef}
+              />
+
+              {/* Player Seats */}
+              {gameState.players.map((player, index) => (
+                <PlayerSeat
+                  key={player.id}
+                  player={player}
+                  position={index}
+                  totalPlayers={NUM_PLAYERS}
+                  isCurrentPlayer={index === gameState.currentPlayerIndex}
+                  isDealer={index === gameState.dealerIndex}
+                  isWinner={winningPlayerIds.includes(player.id)}
+                  phase={gameState.phase}
+                  lastAction={gameState.lastAction}
+                  winAmount={winAmounts[player.id] || 0}
+                  isProcessing={isProcessing}
+                />
+              ))}
+
+              {/* Game Phase Indicator */}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={phaseKey}
+                  className="absolute top-4 left-1/2 transform -translate-x-1/2 z-30"
+                  initial={{ opacity: 0, y: -20, scale: 0.8 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -20, scale: 0.8 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <div className="bg-black/80 backdrop-blur-sm px-6 py-3 rounded-lg border-2 border-poker-chipGold shadow-lg shadow-poker-chipGold/20">
+                    <div className="text-base sm:text-lg text-poker-chipGold font-bold tracking-wide" data-testid="text-game-phase">
+                      {getPhaseTitle(gameState.phase)}
+                    </div>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+
+              {/* Winner Celebration */}
+              {winningPlayerIds.length > 0 && winningPlayerIds.map(winnerId => {
+                const winner = gameState.players.find(p => p.id === winnerId);
+                return winner ? (
+                  <WinnerCelebration 
+                    key={winnerId} 
+                    isWinner={true} 
+                    playerName={winner.name} 
+                    winAmount={winAmounts[winnerId] || 0}
+                  />
+                ) : null;
+              })}
+
+              {/* Last Action */}
+              {gameState.lastAction && (
+                <div className="absolute bottom-2 sm:bottom-4 left-1/2 transform -translate-x-1/2 z-30">
+                  <div className="bg-black/70 backdrop-blur-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-white/20">
+                    <div className="text-[10px] sm:text-xs text-white" data-testid="text-last-action">
+                      {gameState.lastAction}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Controls */}
+          <div className="w-full">
+            {gameState.phase === 'waiting' ? (
+              <Button 
+                onClick={startNewHand}
+                size="lg"
+                className="w-full min-h-[44px] bg-poker-chipGold text-black hover:bg-poker-chipGold/90 font-bold text-base sm:text-lg"
+                data-testid="button-start-hand"
+              >
+                Start New Hand
+              </Button>
+            ) : (
+              <ActionControls
+                onFold={handleFold}
+                onCheck={handleCheck}
+                onCall={handleCall}
+                onBet={handleBet}
+                onRaise={handleRaise}
+                canCheck={canCheck}
+                minBet={minBet}
+                maxBet={maxBet}
+                amountToCall={gameState.currentBet - humanPlayer.bet}
+                currentBet={gameState.currentBet}
+                minRaiseAmount={minRaiseAmount}
+                potSize={gameState.pots.reduce((sum, pot) => sum + pot.amount, 0)}
+                playerChips={humanPlayer.chips}
+                disabled={gameState.currentPlayerIndex !== 0 || isProcessing || humanPlayer.folded}
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Action History - Right Sidebar (Desktop) / Collapsible (Mobile) */}
+        <div className="lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)]">
+          {/* Mobile Toggle Button - Always Visible */}
+          <Button
+            variant="outline"
+            size="icon"
+            className="lg:hidden fixed right-2 top-20 z-50 h-11 w-11 rounded-full shadow-lg bg-card/95 backdrop-blur-sm"
+            onClick={() => setIsHistoryCollapsed(!isHistoryCollapsed)}
+            data-testid="button-toggle-action-history"
+          >
+            {isHistoryCollapsed ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+          </Button>
+
+          {/* Panel Content */}
+          <div className={`${isHistoryCollapsed ? 'hidden lg:block' : ''}`}>
+            <ActionHistory 
+              history={gameState.actionHistory} 
+              currentPlayerName={gameState.players[0].name}
             />
-          )}
+            <SessionStats stats={gameState.sessionStats} />
+            <HandDistributionChart data={gameState.sessionStats.handDistribution} />
+            <AchievementsList achievements={gameState.achievements} />
+          </div>
         </div>
       </div>
 
-      {/* Action History Sidebar */}
-      <div className="h-[calc(100vh-2rem)] w-80" style={{ maxHeight: '800px' }}>
-        <ActionHistory 
-          history={gameState.actionHistory}
-          currentPlayerName={humanPlayer.name}
+      {/* Flying Chips Animation */}
+      {flyingChips.map((chip) => (
+        <FlyingChip
+          key={chip.id}
+          startX={chip.startX}
+          startY={chip.startY}
+          endX={chip.endX}
+          endY={chip.endY}
+          onComplete={() => {
+            setFlyingChips(prev => prev.filter(c => c.id !== chip.id));
+          }}
         />
+      ))}
+
+      {/* Mobile Swipe Hint */}
+      <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 lg:hidden">
+        <div className="bg-black/50 backdrop-blur-sm px-4 py-2 rounded-full text-xs text-white/70 text-center">
+          Swipe left to fold • Swipe right to call/check
+        </div>
       </div>
     </div>
   );

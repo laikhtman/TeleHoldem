@@ -1,17 +1,33 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Coins } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useSound } from '@/hooks/useSound';
 
 interface WinnerCelebrationProps {
   isWinner: boolean;
   playerName: string;
+  winAmount?: number;
 }
 
-export function WinnerCelebration({ isWinner, playerName }: WinnerCelebrationProps) {
+export function WinnerCelebration({ isWinner, playerName, winAmount = 0 }: WinnerCelebrationProps) {
   const [confetti, setConfetti] = useState<Array<{ id: number; x: number; delay: number; color: string }>>([]);
+  const { playSound } = useSound();
 
   useEffect(() => {
     if (isWinner) {
+      // Play victory sound based on win amount
+      const isBigWin = winAmount > 100; // Consider wins over $100 as "big wins"
+      if (isBigWin) {
+        playSound('victory-big', { volume: 0.35 });
+      } else {
+        playSound('victory-small', { volume: 0.3 });
+      }
+
+      // Also play chip collect sound for the win
+      setTimeout(() => {
+        playSound('chip-collect', { volume: 0.25 });
+      }, 500);
+
       const particles = Array.from({ length: 30 }, (_, i) => ({
         id: i,
         x: Math.random() * 200 - 100,
@@ -26,7 +42,7 @@ export function WinnerCelebration({ isWinner, playerName }: WinnerCelebrationPro
       
       return () => clearTimeout(timer);
     }
-  }, [isWinner]);
+  }, [isWinner, winAmount, playSound]);
 
   return (
     <AnimatePresence>
