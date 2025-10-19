@@ -37,7 +37,7 @@ export function PotDisplay({ amount, onRef }: PotDisplayProps) {
       </AnimatePresence>
 
       <motion.div
-        className="bg-black/70 backdrop-blur-sm px-6 py-3 rounded-lg border border-poker-chipGold/40 shadow-lg"
+        className="bg-black/70 backdrop-blur-sm px-6 py-3 rounded-lg border border-poker-chipGold/40 pot-elevation"
         animate={amount > 0 ? {
           scale: [1, 1.05, 1],
           borderColor: ['hsl(var(--poker-chipGold) / 0.4)', 'hsl(var(--poker-chipGold) / 0.8)', 'hsl(var(--poker-chipGold) / 0.4)']

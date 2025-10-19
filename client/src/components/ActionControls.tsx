@@ -4,6 +4,8 @@ import { Badge } from '@/components/ui/badge';
 import { useState, useEffect } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useShake } from '@/hooks/useShake';
+import { useToast } from '@/hooks/use-toast';
 
 interface ActionControlsProps {
   onFold: () => void;
@@ -39,6 +41,8 @@ export function ActionControls({
   disabled = false
 }: ActionControlsProps) {
   const [betAmount, setBetAmount] = useState(minBet);
+  const { isShaking: isSliderShaking, triggerShake: triggerSliderShake } = useShake(400);
+  const { toast } = useToast();
 
   useEffect(() => {
     setBetAmount(currentBet > 0 ? minRaiseAmount : minBet);
@@ -86,6 +90,30 @@ export function ActionControls({
   };
 
   const handleBetOrRaise = () => {
+    const minRequired = currentBet > 0 ? minRaiseAmount : minBet;
+    
+    if (betAmount < minRequired) {
+      triggerSliderShake();
+      toast({
+        variant: "destructive",
+        title: "Invalid Bet",
+        description: `Minimum ${currentBet > 0 ? 'raise' : 'bet'} is $${minRequired}`,
+        duration: 2000,
+      });
+      return;
+    }
+
+    if (betAmount > maxBet) {
+      triggerSliderShake();
+      toast({
+        variant: "destructive",
+        title: "Invalid Bet",
+        description: `You only have $${maxBet} in chips`,
+        duration: 2000,
+      });
+      return;
+    }
+
     if (currentBet === 0) {
       onBet(betAmount);
     } else {
@@ -166,13 +194,13 @@ export function ActionControls({
       </div>
 
       {maxBet >= minBet && (
-        <div className="space-y-3">
+        <div className={`space-y-3 ${isSliderShaking ? 'animate-shake' : ''}`}>
           <motion.div 
-            className="flex items-center justify-between gap-2 p-3 bg-background/50 rounded-md border border-border"
+            className={`flex items-center justify-between gap-2 p-3 bg-background/50 rounded-md border ${isSliderShaking ? 'animate-flash-border' : 'border-border'}`}
             animate={{
-              borderColor: isSignificantBet 
+              borderColor: isSliderShaking ? undefined : (isSignificantBet 
                 ? ['hsl(var(--border))', 'hsl(var(--destructive))', 'hsl(var(--border))']
-                : 'hsl(var(--border))'
+                : 'hsl(var(--border))')
             }}
             transition={{ duration: 1.5, repeat: isSignificantBet ? Infinity : 0 }}
           >

@@ -17,7 +17,7 @@ export function Chip({ className, style, size = 'md' }: ChipProps) {
   return (
     <motion.div
       className={cn(
-        'rounded-full bg-poker-chipGold border-2 border-yellow-600 shadow-md',
+        'rounded-full bg-poker-chipGold border-2 border-yellow-600 shadow-md chip-shine',
         sizeClasses[size],
         className
       )}
@@ -61,7 +61,7 @@ export function FlyingChip({
   return (
     <motion.div
       className={cn(
-        'absolute rounded-full bg-poker-chipGold border-2 border-yellow-600 shadow-lg z-50',
+        'absolute rounded-full bg-poker-chipGold border-2 border-yellow-600 shadow-lg chip-shine z-50',
         sizeClasses[size]
       )}
       initial={{ 
@@ -102,7 +102,7 @@ export function ChipStack({ count, className }: ChipStackProps) {
       {Array.from({ length: displayCount }).map((_, i) => (
         <motion.div
           key={i}
-          className="absolute w-6 h-6 rounded-full bg-poker-chipGold border-2 border-yellow-600 shadow-md"
+          className="absolute w-6 h-6 rounded-full bg-poker-chipGold border-2 border-yellow-600 shadow-md chip-shine"
           style={{
             top: `-${i * 2}px`,
             left: 0,

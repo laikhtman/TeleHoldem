@@ -340,16 +340,23 @@ export default function PokerGame() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 gap-6">
-      {/* Poker Table */}
+      {/* Poker Table with Wood Border */}
       <div 
-        className="relative bg-poker-felt rounded-[200px] border-[10px] border-poker-tableBorder shadow-2xl"
+        className="rounded-[210px] wood-grain p-[10px] table-edge-glow"
         style={{ 
-          width: '800px', 
-          height: '500px',
-          background: 'radial-gradient(ellipse at center, hsl(var(--poker-felt-light)), hsl(var(--poker-felt)))'
+          width: '820px', 
+          height: '520px',
         }}
-        data-testid="poker-table"
       >
+        {/* Poker Table Felt Surface */}
+        <div 
+          className="relative felt-texture vignette table-depth rounded-[200px] overflow-visible"
+          style={{ 
+            width: '800px', 
+            height: '500px',
+          }}
+          data-testid="poker-table"
+        >
         {/* Community Cards */}
         <CommunityCards cards={gameState.communityCards} phase={gameState.phase} />
 
@@ -411,6 +418,7 @@ export default function PokerGame() {
             </div>
           </div>
         )}
+        </div>
       </div>
 
       {/* Controls */}

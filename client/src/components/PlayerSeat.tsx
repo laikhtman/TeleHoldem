@@ -94,7 +94,7 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
   return (
     <div
       ref={seatRef}
-      className="absolute z-10"
+      className="absolute z-10 seat-shadow"
       style={getPosition()}
       data-testid={`player-seat-${player.id}`}
     >

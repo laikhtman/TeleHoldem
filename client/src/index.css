@@ -492,4 +492,175 @@
   .chip-transition {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
+
+  /* Shake animation for invalid actions */
+  @keyframes shake {
+    0%, 100% {
+      transform: translateX(0);
+    }
+    10%, 30%, 50%, 70%, 90% {
+      transform: translateX(-8px);
+    }
+    20%, 40%, 60%, 80% {
+      transform: translateX(8px);
+    }
+  }
+
+  .animate-shake {
+    animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+  }
+
+  /* Flash border for invalid actions */
+  @keyframes flash-border {
+    0%, 100% {
+      border-color: hsl(var(--border));
+    }
+    50% {
+      border-color: hsl(var(--destructive));
+    }
+  }
+
+  .animate-flash-border {
+    animation: flash-border 0.4s ease-in-out;
+  }
+
+  /* Poker Table Textures and Ambient Effects */
+  
+  /* Felt texture using CSS noise pattern */
+  .felt-texture {
+    background-image: 
+      /* Subtle noise texture */
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.03) 2px,
+        rgba(0, 0, 0, 0.03) 4px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.03) 2px,
+        rgba(0, 0, 0, 0.03) 4px
+      ),
+      /* Radial gradient for depth */
+      radial-gradient(
+        ellipse at center,
+        hsl(var(--poker-felt-light)),
+        hsl(var(--poker-felt))
+      );
+  }
+
+  /* Wood grain effect for table border */
+  .wood-grain {
+    background-image:
+      /* Wood grain lines */
+      repeating-linear-gradient(
+        90deg,
+        hsl(25 35% 28%),
+        hsl(25 35% 28%) 2px,
+        hsl(25 35% 26%) 2px,
+        hsl(25 35% 26%) 4px,
+        hsl(25 35% 30%) 4px,
+        hsl(25 35% 30%) 8px
+      ),
+      /* Wood knots and variation */
+      linear-gradient(
+        180deg,
+        hsl(25 35% 32%) 0%,
+        hsl(25 35% 28%) 50%,
+        hsl(25 35% 24%) 100%
+      );
+    box-shadow: 
+      inset 0 2px 4px rgba(255, 255, 255, 0.1),
+      inset 0 -2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Table inner shadow for depth */
+  .table-depth {
+    box-shadow: 
+      inset 0 0 80px rgba(0, 0, 0, 0.4),
+      inset 0 0 40px rgba(0, 0, 0, 0.3),
+      0 20px 60px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Subtle vignette effect */
+  .vignette {
+    position: relative;
+  }
+
+  .vignette::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(
+      ellipse at center,
+      transparent 30%,
+      rgba(0, 0, 0, 0.2) 70%,
+      rgba(0, 0, 0, 0.4) 100%
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Table edge glow */
+  .table-edge-glow {
+    box-shadow: 
+      0 0 20px rgba(0, 0, 0, 0.6),
+      0 0 40px rgba(0, 0, 0, 0.4),
+      inset 0 0 20px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Player seat shadow */
+  .seat-shadow {
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6))
+            drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+  }
+
+  /* Pot display enhanced shadow */
+  .pot-elevation {
+    box-shadow: 
+      0 4px 12px rgba(0, 0, 0, 0.5),
+      0 2px 6px rgba(0, 0, 0, 0.3),
+      inset 0 1px 2px rgba(255, 255, 255, 0.1);
+  }
+
+  /* Chip shine effect */
+  .chip-shine {
+    position: relative;
+    overflow: visible;
+  }
+
+  .chip-shine::after {
+    content: '';
+    position: absolute;
+    top: -20%;
+    left: -20%;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.4) 0%,
+      rgba(255, 255, 255, 0.2) 40%,
+      transparent 70%
+    );
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  /* Ambient pulse animation for current player */
+  @keyframes ambient-pulse {
+    0%, 100% {
+      box-shadow: 0 0 10px hsl(var(--poker-chipGold) / 0.3);
+    }
+    50% {
+      box-shadow: 0 0 20px hsl(var(--poker-chipGold) / 0.6);
+    }
+  }
+
+  .ambient-pulse {
+    animation: ambient-pulse 2s ease-in-out infinite;
+  }
 }
