@@ -15,6 +15,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FlyingChip } from '@/components/Chip';
 import { useSound } from '@/hooks/useSound';
 import { useSwipe } from '@/hooks/useSwipe';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { ChevronRight, ChevronLeft, TrendingUp } from 'lucide-react';
 
 const NUM_PLAYERS = 6;
@@ -367,7 +368,12 @@ export default function PokerGame() {
   const minRaiseAmount = gameState.currentBet + (gameState.currentBet - (gameState.players.find(p => p.bet < gameState.currentBet)?.bet || 0));
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-2 sm:p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-2 sm:p-4 relative">
+      {/* Theme Toggle - Fixed Top Right */}
+      <div className="fixed top-4 right-4 z-50">
+        <ThemeToggle />
+      </div>
+
       {/* Responsive Grid Layout */}
       <div className="w-full max-w-[1800px] grid grid-cols-1 lg:grid-cols-[280px_1fr_320px] xl:grid-cols-[320px_1fr_380px] gap-4 items-start">
         
