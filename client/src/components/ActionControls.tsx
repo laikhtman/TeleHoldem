@@ -6,6 +6,7 @@ import { AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useShake } from '@/hooks/useShake';
 import { useToast } from '@/hooks/use-toast';
+import { useSound } from '@/hooks/useSound';
 
 interface ActionControlsProps {
   onFold: () => void;
@@ -43,10 +44,27 @@ export function ActionControls({
   const [betAmount, setBetAmount] = useState(minBet);
   const { isShaking: isSliderShaking, triggerShake: triggerSliderShake } = useShake(400);
   const { toast } = useToast();
+  const { playSound } = useSound();
 
   useEffect(() => {
     setBetAmount(currentBet > 0 ? minRaiseAmount : minBet);
   }, [minBet, minRaiseAmount, currentBet]);
+
+  // Wrapped action handlers with sound effects
+  const handleFold = () => {
+    playSound('fold', { volume: 0.2 });
+    onFold();
+  };
+
+  const handleCheck = () => {
+    playSound('check', { volume: 0.15 });
+    onCheck();
+  };
+
+  const handleCall = () => {
+    playSound('button-click', { volume: 0.15 });
+    onCall();
+  };
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -60,14 +78,14 @@ export function ActionControls({
       switch (key) {
         case 'f':
           e.preventDefault();
-          onFold();
+          handleFold();
           break;
         case 'c':
           e.preventDefault();
           if (canCheck) {
-            onCheck();
+            handleCheck();
           } else {
-            onCall();
+            handleCall();
           }
           break;
         case 'r':
@@ -83,7 +101,7 @@ export function ActionControls({
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [disabled, canCheck, betAmount, onFold, onCheck, onCall, currentBet, onBet, onRaise, maxBet]);
+  }, [disabled, canCheck, betAmount, handleFold, handleCheck, handleCall, currentBet, onBet, onRaise, maxBet]);
 
   const handleBetChange = (value: number[]) => {
     setBetAmount(value[0]);
@@ -114,6 +132,8 @@ export function ActionControls({
       return;
     }
 
+    playSound('raise', { volume: 0.25 });
+    
     if (currentBet === 0) {
       onBet(betAmount);
     } else {
@@ -127,9 +147,12 @@ export function ActionControls({
       Math.min(amount, maxBet)
     );
     setBetAmount(clampedAmount);
+    playSound('button-click', { volume: 0.1 });
   };
 
   const handleAllIn = () => {
+    playSound('raise', { volume: 0.3 });
+    
     if (currentBet === 0) {
       onBet(maxBet);
     } else {
@@ -147,7 +170,7 @@ export function ActionControls({
     <div className="flex flex-col gap-4 p-6 bg-card/50 backdrop-blur-sm rounded-lg border border-card-border">
       <div className="flex gap-3 justify-center flex-wrap">
         <Button
-          onClick={onFold}
+          onClick={handleFold}
           variant="destructive"
           size="lg"
           disabled={disabled}
@@ -159,7 +182,7 @@ export function ActionControls({
         
         {canCheck ? (
           <Button
-            onClick={onCheck}
+            onClick={handleCheck}
             variant="secondary"
             size="lg"
             disabled={disabled}
@@ -170,7 +193,7 @@ export function ActionControls({
           </Button>
         ) : (
           <Button
-            onClick={onCall}
+            onClick={handleCall}
             variant="secondary"
             size="lg"
             disabled={disabled || amountToCall <= 0}

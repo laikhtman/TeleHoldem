@@ -1,6 +1,7 @@
 import { Card, getCardColor } from '@shared/schema';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
+import { useSound } from '@/hooks/useSound';
 
 interface PlayingCardProps {
   card?: Card;
@@ -21,20 +22,27 @@ export function PlayingCard({
 }: PlayingCardProps) {
   const [isFlipped, setIsFlipped] = useState(!animateFlip);
   const [isDealt, setIsDealt] = useState(!animateDeal);
+  const { playSound } = useSound();
 
   useEffect(() => {
     if (animateFlip) {
-      const timer = setTimeout(() => setIsFlipped(true), 100);
+      const timer = setTimeout(() => {
+        setIsFlipped(true);
+        playSound('card-flip', { volume: 0.12 });
+      }, 100);
       return () => clearTimeout(timer);
     }
-  }, [animateFlip]);
+  }, [animateFlip, playSound]);
 
   useEffect(() => {
     if (animateDeal) {
-      const timer = setTimeout(() => setIsDealt(true), dealDelay);
+      const timer = setTimeout(() => {
+        setIsDealt(true);
+        playSound('card-deal', { volume: 0.1 });
+      }, dealDelay);
       return () => clearTimeout(timer);
     }
-  }, [animateDeal, dealDelay]);
+  }, [animateDeal, dealDelay, playSound]);
 
   if (!card) {
     return (
