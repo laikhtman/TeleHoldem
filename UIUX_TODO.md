@@ -19,24 +19,24 @@
 - [x] Add hover effects on action buttons with subtle glow
 - [x] Implement button press feedback with scale animation (0.95x on click)
 - [x] Create pulsing glow effect for current player's turn
-- [ ] Add subtle shake animation for invalid actions
+- [x] Add subtle shake animation for invalid actions
 
 ### 4. Table Atmosphere & Immersion
-- [ ] Implement subtle table felt texture with CSS gradient or image
-- [ ] Add realistic wood grain texture to table border
-- [ ] Create ambient lighting effects with subtle shadows
-- [ ] Add particle effects for big wins or royal flush celebrations
+- [x] Implement subtle table felt texture with CSS gradient or image
+- [x] Add realistic wood grain texture to table border
+- [x] Create ambient lighting effects with subtle shadows
+- [x] Add particle effects for big wins or royal flush celebrations
 
 ## User Experience Enhancements (Priority: High)
 
 ### 5. Game State Communication
 - [x] Add toast notifications for all major game events (fold, raise, win)
-- [ ] Implement action history sidebar showing recent moves
+- [x] Implement action history sidebar showing recent moves
 - [x] Create clear winner announcement with celebration animation
 - [x] Add phase transition indicators (flop, turn, river announcements)
 
 ### 6. Player Information Display
-- [ ] Show hand strength indicator for human player (pair, flush draw, etc.)
+- [x] Show hand strength indicator for human player (pair, flush draw, etc.)
 - [ ] Add pot odds calculator display during betting decisions
 - [ ] Implement player statistics overlay (hands won, biggest pot)
 - [ ] Create player elimination indicator when chips reach zero

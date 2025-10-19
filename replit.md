@@ -4,31 +4,44 @@
 A complete Texas Hold'em poker web application featuring a realistic poker table interface, AI bot opponents, and full game mechanics. Built with React, TypeScript, and Tailwind CSS.
 
 ## Recent Changes
-- **October 19, 2025**: Gameplay Polish
-  - Refined betting logic to differentiate between call, bet, and raise.
-  - Improved game loop to handle end-of-round phase progression correctly.
-  - Made player action controls dynamic based on the current bet.
-  - Added a visual "WINNER" badge to the winning player's seat after a hand.
+- **October 19, 2025**: Comprehensive UI/UX Enhancement & Polish
+  - **Enhanced Card Animations**: Staggered dealing from deck (0.15s delays), 3D flip rotations (0.4s), staggered flop reveals (0.2s delays), turn/river slide-ins with glow effects
+  - **Chip Movement & Betting**: Arc trajectory animations from seats to pot (0.6s), pot to winner (0.9s), animated chip counters with smooth transitions, chip stack visuals
+  - **Player Interaction Feedback**: Button hover glow effects, press scale animations (0.95x), enhanced pulsing for current player, shake animation for invalid actions
+  - **Advanced Action Controls**: Quick bet buttons (1/2 pot, pot, all-in), keyboard shortcuts (F=fold, C=check/call, R=raise, A=all-in), bet amount display with pot percentage and risk warnings
+  - **Game State Communication**: Contextual toast notifications with icons, winner celebration with confetti/coins/trophy, phase transition effects with golden glow
+  - **Table Atmosphere**: Realistic felt texture with noise pattern, polished wood grain border, ambient lighting effects, subtle shadows and depth
+  - **Hand Strength Indicator**: Real-time hand evaluation showing current hand rank (1-10), draw detection (flush/straight draws with outs), color-coded strength badges, animated improvement feedback
+  - **Action History Sidebar**: Complete event tracking, phase-grouped chronological display, player action highlighting, scrollable with sticky headers
+  - **Bug Fixes**: Card animation state management, keyboard shortcut stale closures, useAnimatedCounter runaway re-renders, useShake cleanup on unmount
 - **October 18, 2025**: Initial implementation
   - Created complete poker game engine with deck management, card dealing, and game state tracking
   - Implemented AI bot logic with decision-making for fold/check/bet/raise actions
   - Built all React components: PokerTable, PlayingCard, PlayerSeat, CommunityCards, ActionControls, PotDisplay
   - Configured poker-themed design tokens (green felt table, card colors, chip gold)
-  - Added animations for card dealing, pot updates, and player turn indicators
+  - Added basic animations for card dealing, pot updates, and player turn indicators
 
 ## Project Architecture
 
 ### Frontend Structure
-- **`/client/src/pages/poker-game.tsx`**: Main game page with complete game flow management
+- **`/client/src/pages/poker-game.tsx`**: Main game page with complete game flow management, action history tracking
 - **`/client/src/components/`**: Reusable poker components
-  - `PlayingCard.tsx`: Card rendering with suits and colors
-  - `PlayerSeat.tsx`: Player position with trigonometric layout around oval table
-  - `CommunityCards.tsx`: Five community card display area
-  - `ActionControls.tsx`: Fold/Check/Bet controls with slider
-  - `PotDisplay.tsx`: Pot amount with chip icon
+  - `PlayingCard.tsx`: Card rendering with suits, colors, flip and deal animations
+  - `PlayerSeat.tsx`: Player position with trigonometric layout, chip animations, win indicators
+  - `CommunityCards.tsx`: Five community card display with staggered reveals and glow effects
+  - `ActionControls.tsx`: Advanced betting interface with quick buttons, keyboard shortcuts, validation
+  - `PotDisplay.tsx`: Pot amount with chip stack visualization and animations
+  - `HandStrengthIndicator.tsx`: Real-time hand evaluation with draw detection and strength display
+  - `ActionHistory.tsx`: Scrollable sidebar showing chronological game events
+  - `Chip.tsx`: Flying chip animations, chip stacks, and visual effects
+  - `WinnerCelebration.tsx`: Confetti and trophy celebration animations
 - **`/client/src/lib/`**: Game logic and utilities
   - `gameEngine.ts`: Core poker game engine (deck, dealing, betting, phase advancement)
+  - `handEvaluator.ts`: Hand ranking and strength evaluation with draw detection
   - `botAI.ts`: AI decision-making logic for bot players
+- **`/client/src/hooks/`**: Custom React hooks
+  - `useAnimatedCounter.ts`: Smooth number transitions for chip counts
+  - `useShake.ts`: Reusable shake animation for invalid actions
 
 ### Game Engine
 The `GameEngine` class provides:
@@ -48,8 +61,12 @@ The `BotAI` class implements:
 ### Data Models (`/shared/schema.ts`)
 - **Card**: rank, suit, id
 - **Player**: name, chips, hand, bet, folded, allIn, isHuman, position
-- **GameState**: players, deck, communityCards, pot, currentPlayerIndex, dealerIndex, phase, currentBet
+- **GameState**: players, deck, communityCards, pot, currentPlayerIndex, dealerIndex, phase, currentBet, actionHistory
 - **GamePhase**: waiting | pre-flop | flop | turn | river | showdown
+- **ActionHistoryEntry**: id, type, playerName, action, amount, phase, timestamp, message
+- **ActionHistoryType**: player-action | phase-change | cards-dealt | pot-award | blinds-posted
+- **HandEvaluation**: hand (current made hand), rank (1-10), description, flushDraw, straightDraw
+- **DrawInfo**: hasFlushDraw, flushSuit, hasStraightDraw, straightType, outs
 
 ## Design System
 
@@ -62,9 +79,30 @@ The `BotAI` class implements:
 - **Card Black**: `0 0% 10%` - Deep black for spades and clubs
 
 ### Animations
-- **deal-card**: 0.3s slide-in animation for card dealing
-- **pulse-glow**: 2s infinite pulse for active player turn indicator
-- **pot-bounce**: 0.2s scale bounce when pot increases
+- **Card Animations**:
+  - `deal-card`: Staggered card dealing from deck position (0.15s delays)
+  - `card-flip`: 3D rotation flip animation (0.4s) for card reveals
+  - `flop-reveal`: Staggered flop card reveals with 0.2s delays
+  - `turn-river-slide`: Slide-in animations for turn and river cards
+  - Card glow effects on reveal
+- **Chip Animations**:
+  - `chip-fly`: Arc trajectory from player seats to pot (0.6s cubic bezier)
+  - `chip-award`: Pot to winner animation (0.9s)
+  - `chip-count`: Smooth number counting transitions (0.5s ease-out)
+  - `chip-shimmer`: Reflective shine on chips
+  - `chip-stack`: Visual chip stack representation
+- **Player Feedback**:
+  - `pulse-glow`: Enhanced pulsing for current player turn (2s infinite)
+  - `button-hover-glow`: Subtle glow on button hover
+  - `button-press`: Scale animation on button press (0.95x)
+  - `shake`: Horizontal shake for invalid actions (0.4s)
+  - `flash-border`: Red border flash for errors
+- **Game Events**:
+  - `winner-celebration`: Confetti, coins, and trophy animations
+  - `phase-transition`: Golden glow effects between game phases
+  - `pot-bounce`: Scale bounce when pot increases
+  - `win-indicator`: Floating "+$XXX" with scale animation
+  - `hand-improvement`: Scale animation when hand strength improves
 
 ### Layout
 - **Poker Table**: 800px × 500px oval with radial gradient
@@ -83,21 +121,55 @@ The `BotAI` class implements:
 - Current player turn indicator with glow animation
 
 ### Visual Features
-- Realistic green felt poker table with brown border
-- Playing cards with proper suit symbols (♠ ♥ ♦ ♣)
-- Color-coded suits (red for hearts/diamonds, black for spades/clubs)
-- Face-down cards for bot players, face-up for human
-- Semi-transparent player seats with chip counts
-- Gold-themed chip display with coin icons
-- Real-time action notifications via toasts
+- **Table Atmosphere**:
+  - Realistic green felt texture with subtle noise pattern
+  - Polished wood grain border with authentic gradients
+  - Ambient lighting effects with inner shadows
+  - Subtle vignette for depth
+  - Multiple z-index layers for proper element stacking
+- **Cards & Chips**:
+  - Playing cards with proper suit symbols (♠ ♥ ♦ ♣) and 3D flip animations
+  - Color-coded suits (red for hearts/diamonds, black for spades/clubs)
+  - Face-down cards for bot players, face-up for human
+  - Animated chip stacks with reflective shine
+  - Flying chips with arc trajectories
+  - Smooth chip counter animations
+- **Player Interface**:
+  - Semi-transparent player seats with elevation shadows
+  - Animated chip counts and bet displays
+  - Winner badges and celebration effects
+  - Current player pulsing glow indicator
+  - Action feedback notifications (fold, bet, raise)
+  - Win amount indicators (+$XXX)
+- **Information Display**:
+  - Real-time hand strength indicator with color-coded badges
+  - Draw detection (flush draw, straight draw) with outs counting
+  - Action history sidebar with phase grouping
+  - Contextual toast notifications with icons
+  - Phase transition announcements
 
 ### Player Controls
-- Fold button (red/destructive)
-- Check button (when no bet to call)
-- Call button (to match current bet)
-- Bet/Raise button with adjustable slider
-- Bet slider range: minimum bet to all chips
-- Disabled controls during bot turns
+- **Basic Actions**:
+  - Fold button (red/destructive) with hover glow
+  - Check button (when no bet to call)
+  - Call button (to match current bet)
+  - Bet/Raise button with context-aware labeling
+- **Advanced Betting**:
+  - Adjustable bet slider with smooth transitions
+  - Quick bet buttons: 1/2 Pot, Pot, All-In
+  - Bet amount display with pot percentage
+  - Risk warnings for large bets (>50% of stack)
+  - Real-time validation with shake feedback
+- **Keyboard Shortcuts**:
+  - F: Fold
+  - C: Check/Call
+  - R: Raise/Bet
+  - A: All-In
+- **Visual Feedback**:
+  - Button press scale animations
+  - Disabled state during bot turns
+  - Shake animation for invalid actions
+  - Border flash for validation errors
 
 ## Technical Implementation
 
@@ -136,6 +208,9 @@ The `BotAI` class implements:
 ## Dependencies
 - React + TypeScript
 - Tailwind CSS for styling
-- Radix UI for slider component
+- Framer Motion for animations
+- Radix UI components (Slider, ScrollArea, Toast, etc.)
 - Lucide React for icons
-- Shadcn UI components (Button, Slider, Toast)
+- Shadcn UI components (Button, Slider, Toast, Badge, Card)
+- React Hook Form for form validation
+- Zod for schema validation
