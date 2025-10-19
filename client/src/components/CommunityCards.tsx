@@ -1,11 +1,12 @@
-import { Card } from '@shared/schema';
+import { Card, GamePhase } from '@shared/schema';
 import { PlayingCard } from './PlayingCard';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { CardSkeleton } from './ui/card-skeleton';
 
 interface CommunityCardsProps {
   cards: Card[];
-  phase?: string;
+  phase: GamePhase;
 }
 
 export function CommunityCards({ cards, phase }: CommunityCardsProps) {
@@ -13,8 +14,25 @@ export function CommunityCards({ cards, phase }: CommunityCardsProps) {
   const [previousCardCount, setPreviousCardCount] = useState(0);
   const [showGlow, setShowGlow] = useState(false);
   const [cardIdentities, setCardIdentities] = useState<string[]>([]);
+  const [showSkeletons, setShowSkeletons] = useState(false);
+  const [prevPhase, setPrevPhase] = useState(phase);
 
   useEffect(() => {
+    if (phase !== prevPhase) {
+      if (phase === 'flop' || phase === 'turn' || phase === 'river') {
+        setShowSkeletons(true);
+        const timer = setTimeout(() => {
+          setShowSkeletons(false);
+        }, 400); // Show skeletons for 400ms
+        setPrevPhase(phase);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [phase, prevPhase]);
+
+  useEffect(() => {
+    if (showSkeletons) return; // Don't run card animations while skeletons are visible
+
     const currentCardCount = cards.length;
     const currentIdentities = cards.map(c => c ? `${c.rank}-${c.suit}` : '');
     
@@ -75,71 +93,80 @@ export function CommunityCards({ cards, phase }: CommunityCardsProps) {
     }
   }, [cards, previousCardCount, cardIdentities]);
 
-  const getCardAnimation = (index: number) => {
-    if (!cards[index] || revealedCards[index]) {
-      return {};
-    }
-
-    if (index <= 2) {
-      return {
-        initial: { opacity: 0, y: -50 },
-        animate: { opacity: 1, y: 0 },
-        transition: { duration: 0.4, ease: "easeOut" }
-      };
-    } else {
-      return {
-        initial: { opacity: 0, x: 80, scale: 0.95 },
-        animate: { opacity: 1, x: 0, scale: 1 },
-        transition: { duration: 0.3, ease: "easeOut" }
-      };
-    }
-  };
-
-  return (
-    <div className="absolute top-[45%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20">
-      <div className="relative">
-        {/* Glow effect container */}
-        <AnimatePresence>
-          {showGlow && (
-            <motion.div
-              className="absolute inset-0 -m-8 rounded-xl pointer-events-none"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ 
-                opacity: [0, 1, 0.5, 0],
-                scale: [0.9, 1.05, 1, 0.95]
-              }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 1.5 }}
-              style={{
-                background: 'radial-gradient(ellipse at center, rgba(255, 215, 0, 0.3) 0%, transparent 70%)',
-                boxShadow: '0 0 40px 10px rgba(255, 215, 0, 0.5), 0 0 80px 20px rgba(255, 215, 0, 0.3)',
-              }}
-            />
-          )}
-        </AnimatePresence>
-
-        {/* Cards */}
-        <div className="flex gap-3 relative" data-testid="community-cards">
-          {[0, 1, 2, 3, 4].map((index) => {
-            const hasCard = !!cards[index];
-            const animation = getCardAnimation(index);
-            const cardKey = hasCard ? `${cards[index].rank}-${cards[index].suit}-${index}` : `empty-${index}`;
-            
-            return (
-              <motion.div 
-                key={cardKey}
-                {...animation}
-              >
-                <PlayingCard 
-                  card={cards[index]}
-                  animateFlip={hasCard && !revealedCards[index]}
-                  className={hasCard ? 'shadow-lg' : ''}
-                />
-              </motion.div>
-            );
-          })}
+    const getCardAnimation = (index: number) => {
+      if (!cards[index] || revealedCards[index] || showSkeletons) {
+        return {};
+      }
+  
+      if (index <= 2) {
+        return {
+          initial: { opacity: 0, y: -50 },
+          animate: { opacity: 1, y: 0 },
+          transition: { duration: 0.4, ease: "easeOut" }
+        };
+      } else {
+        return {
+          initial: { opacity: 0, x: 80, scale: 0.95 },
+          animate: { opacity: 1, x: 0, scale: 1 },
+          transition: { duration: 0.3, ease: "easeOut" }
+        };
+      }
+    };
+  
+    const skeletonsToShow = phase === 'flop' ? 3 : phase === 'turn' ? 1 : phase === 'river' ? 1 : 0;
+    const skeletonStartIndex = phase === 'flop' ? 0 : phase === 'turn' ? 3 : phase === 'river' ? 4 : 0;
+  
+    return (
+      <div className="absolute top-[45%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20">
+        <div className="relative">
+          {/* Glow effect container */}
+          <AnimatePresence>
+            {showGlow && (
+              <motion.div
+                className="absolute inset-0 -m-8 rounded-xl pointer-events-none"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{
+                  opacity: [0, 1, 0.5, 0],
+                  scale: [0.9, 1.05, 1, 0.95]
+                }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1.5 }}
+                style={{
+                  background: 'radial-gradient(ellipse at center, rgba(255, 215, 0, 0.3) 0%, transparent 70%)',
+                  boxShadow: '0 0 40px 10px rgba(255, 215, 0, 0.5), 0 0 80px 20px rgba(255, 215, 0, 0.3)',
+                }}
+              />
+            )}
+          </AnimatePresence>
+  
+          {/* Cards */}
+          <div className="flex gap-3 relative" data-testid="community-cards">
+            {[0, 1, 2, 3, 4].map((index) => {
+              const hasCard = !!cards[index];
+              const animation = getCardAnimation(index);
+              const cardKey = hasCard ? `${cards[index].rank}-${cards[index].suit}-${index}` : `empty-${index}`;
+              
+              const isSkeletonVisible = showSkeletons && index >= skeletonStartIndex && index < skeletonStartIndex + skeletonsToShow;
+  
+              return (
+                <motion.div 
+                  key={cardKey}
+                  {...animation}
+                >
+                  {isSkeletonVisible ? (
+                    <CardSkeleton />
+                  ) : (
+                    <PlayingCard 
+                      card={cards[index]}
+                      animateFlip={hasCard && !revealedCards[index]}
+                      className={hasCard ? 'shadow-lg' : ''}
+                    />
+                  )}
+                </motion.div>
+              );
+            })}
+          </div>
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }

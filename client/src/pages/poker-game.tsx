@@ -59,9 +59,18 @@ export default function PokerGame() {
   const [winningPlayerIds, setWinningPlayerIds] = useState<string[]>([]);
   const [winAmounts, setWinAmounts] = useState<Record<string, number>>({});
   const [phaseKey, setPhaseKey] = useState(0);
+  const [showPhaseTransition, setShowPhaseTransition] = useState(false);
   const [flyingChips, setFlyingChips] = useState<FlyingChipData[]>([]);
   const potPosition = useRef<{ x: number; y: number }>({ x: 400, y: 150 });
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (phaseKey > 0) {
+      setShowPhaseTransition(true);
+      const timer = setTimeout(() => setShowPhaseTransition(false), 700);
+      return () => clearTimeout(timer);
+    }
+  }, [phaseKey]);
 
   const handlePotRef = (node: HTMLDivElement | null) => {
     if (node) {
@@ -528,9 +537,21 @@ export default function PokerGame() {
     return descriptions[phase];
   };
 
+  import { LoadingSpinner } from '@/components/ui/loading-spinner';
+
+// ... (rest of the imports)
+
+// ... (inside PokerGame component)
+
   if (!gameState) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-background text-white">
+        <LoadingSpinner className="w-12 h-12 mb-4 text-poker-chipGold" />
+        <p className="text-lg font-semibold">Shuffling the deck...</p>
+      </div>
+    );
   }
+
 
   const humanPlayer = gameState.players[0];
   const canCheck = gameState.currentBet === 0 || gameState.currentBet === humanPlayer.bet;
@@ -559,6 +580,17 @@ export default function PokerGame() {
             }}
             data-testid="poker-table"
           >
+            <AnimatePresence>
+              {showPhaseTransition && (
+                <motion.div
+                  className="absolute inset-0 bg-black/50 rounded-[200px] z-40 border-4 border-poker-chipGold/80 shadow-lg shadow-poker-chipGold/50"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: [0, 1, 0], transition: { duration: 0.7, ease: "easeInOut" } }}
+                  exit={{ opacity: 0 }}
+                />
+              )}
+            </AnimatePresence>
+
             {/* Community Cards */}
             <CommunityCards cards={gameState.communityCards} phase={gameState.phase} />
 
@@ -581,6 +613,7 @@ export default function PokerGame() {
                 phase={gameState.phase}
                 lastAction={gameState.lastAction}
                 winAmount={winAmounts[player.id] || 0}
+                isProcessing={isProcessing}
               />
             ))}
 

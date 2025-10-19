@@ -74,10 +74,10 @@
 - [ ] Ensure 4.5:1 contrast ratio for all text elements
 
 ### 12. Loading & Performance
-- [ ] Add loading states for game initialization and bot thinking
-- [ ] Implement skeleton screens during game state transitions
-- [ ] Create smooth transitions between game phases
-- [ ] Add progress indicators for long operations
+- [x] Add loading states for game initialization and bot thinking
+- [x] Implement skeleton screens during game state transitions
+- [x] Create smooth transitions between game phases
+- [x] Add progress indicators for long operations
 
 ## Advanced Features (Priority: Medium)
 
