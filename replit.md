@@ -8,6 +8,18 @@ I prefer iterative development with clear communication on major changes. Please
 
 ## Recent Changes
 
+### October 19, 2025: Mobile/iOS Optimization
+- **xs: Breakpoint**: Added xs: (480px) for mobile-first design targeting phones ≤480px width
+- **Safe-Area Support**: Implemented CSS variables (--safe-area-top/bottom/left/right) using env() for iOS notch and home indicator support
+- **MobileBottomSheet**: Created bottom drawer component using Shadcn Sheet with Tabs for Stats and History, replacing sidebar on mobile
+- **Touch Compliance**: All interactive elements meet iOS HIG 44px minimum touch target (buttons use min-h-11 = 44px, FAB is 56px)
+- **FAB Positioning**: Floating action button with full safe-area padding: `bottom-[calc(var(--safe-area-bottom)+5.5rem)] right-[calc(1rem+var(--safe-area-right))]`
+- **Progressive Sizing**: ActionControls (`min-h-11 xs:min-h-11 md:min-h-[52px]`), PlayerSeat (`p-2 xs:p-2.5 md:p-4`), CommunityCards (`gap-2 xs:gap-2.5 md:gap-4`)
+- **Safe-Area Application**: Header (ThemeToggle), bottom controls, FAB, swipe hint, and toggle buttons all respect device safe areas
+- **Responsive Strategy**: xs: (≤480px) mobile → sm: (640px+) large phones → md: (768px+) tablets → lg: (1024px+) desktop
+- **Layout Architecture**: CSS Grid with template areas, 4:3 aspect ratio table, decorative spacers hidden on xs:, visible on sm:+
+- **Known Issue**: Pre-existing pot display bug (shows $0 during active betting) - unrelated to mobile work, needs game engine investigation
+
 ### October 19, 2025: Tablet/iPad Optimization
 - **Responsive Breakpoints**: Added `md:` (768-1023px) breakpoint for tablet-specific styling between mobile (`sm:`) and desktop (`lg:`)
 - **Orientation Detection**: Created `useOrientation` hook (SSR-safe with window guards) to detect portrait vs landscape modes
