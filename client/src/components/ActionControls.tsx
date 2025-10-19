@@ -78,7 +78,7 @@ export function ActionControls({
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [disabled, canCheck, betAmount, onFold, onCheck, onCall, currentBet, onBet, onRaise]);
+  }, [disabled, canCheck, betAmount, onFold, onCheck, onCall, currentBet, onBet, onRaise, maxBet]);
 
   const handleBetChange = (value: number[]) => {
     setBetAmount(value[0]);

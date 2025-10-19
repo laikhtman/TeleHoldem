@@ -12,31 +12,68 @@ export function CommunityCards({ cards, phase }: CommunityCardsProps) {
   const [revealedCards, setRevealedCards] = useState<boolean[]>(new Array(5).fill(false));
   const [previousCardCount, setPreviousCardCount] = useState(0);
   const [showGlow, setShowGlow] = useState(false);
+  const [cardIdentities, setCardIdentities] = useState<string[]>([]);
 
   useEffect(() => {
     const currentCardCount = cards.length;
-    if (currentCardCount > previousCardCount) {
+    const currentIdentities = cards.map(c => c ? `${c.rank}-${c.suit}` : '');
+    
+    // Reset state when cards shrink (new hand starts)
+    if (currentCardCount < previousCardCount) {
+      setRevealedCards(new Array(5).fill(false));
+      setPreviousCardCount(0);
+      setCardIdentities([]);
+      return;
+    }
+    
+    // Check if new cards have been dealt (compare identities, not just count)
+    const hasNewCards = currentCardCount > previousCardCount || 
+      currentIdentities.some((id, idx) => id && id !== cardIdentities[idx]);
+    
+    if (hasNewCards && currentCardCount > 0) {
       const timers: NodeJS.Timeout[] = [];
       
-      // Show glow effect when new cards arrive
-      setShowGlow(true);
-      timers.push(setTimeout(() => setShowGlow(false), 1500));
+      // Reset revealed flags for cards with changed identities
+      setRevealedCards(prev => {
+        const newRevealed = [...prev];
+        currentIdentities.forEach((id, idx) => {
+          if (id && id !== cardIdentities[idx]) {
+            newRevealed[idx] = false;
+          }
+        });
+        return newRevealed;
+      });
       
-      for (let i = previousCardCount; i < currentCardCount; i++) {
-        const delay = (i - previousCardCount) * 200;
-        timers.push(setTimeout(() => {
-          setRevealedCards(prev => {
-            const newRevealed = [...prev];
-            newRevealed[i] = true;
-            return newRevealed;
-          });
-        }, delay));
+      // Determine which cards are new
+      const startIndex = currentIdentities.findIndex((id, idx) => 
+        id && (!cardIdentities[idx] || id !== cardIdentities[idx])
+      );
+      
+      if (startIndex !== -1) {
+        // Show glow effect when new cards arrive
+        setShowGlow(true);
+        timers.push(setTimeout(() => setShowGlow(false), 1500));
+        
+        // Animate new cards
+        for (let i = startIndex; i < currentCardCount; i++) {
+          if (currentIdentities[i] && currentIdentities[i] !== cardIdentities[i]) {
+            const delay = (i - startIndex) * 200;
+            timers.push(setTimeout(() => {
+              setRevealedCards(prev => {
+                const newRevealed = [...prev];
+                newRevealed[i] = true;
+                return newRevealed;
+              });
+            }, delay));
+          }
+        }
       }
       
       setPreviousCardCount(currentCardCount);
+      setCardIdentities(currentIdentities);
       return () => timers.forEach(clearTimeout);
     }
-  }, [cards.length, previousCardCount]);
+  }, [cards, previousCardCount, cardIdentities]);
 
   const getCardAnimation = (index: number) => {
     if (!cards[index] || revealedCards[index]) {
@@ -86,10 +123,11 @@ export function CommunityCards({ cards, phase }: CommunityCardsProps) {
           {[0, 1, 2, 3, 4].map((index) => {
             const hasCard = !!cards[index];
             const animation = getCardAnimation(index);
+            const cardKey = hasCard ? `${cards[index].rank}-${cards[index].suit}-${index}` : `empty-${index}`;
             
             return (
               <motion.div 
-                key={index}
+                key={cardKey}
                 {...animation}
               >
                 <PlayingCard 
