@@ -47,11 +47,19 @@ export class GameEngine {
       position: 0
     });
 
-    // Create bot players
+    // Create bot players with names
+    const botNames = [
+      'Noam Cohen',
+      'Yael Levi',
+      'Itai Ben-David',
+      'Lior Mizrahi',
+      'Shira Goldstein'
+    ];
+
     for (let i = 1; i < numPlayers; i++) {
       players.push({
         id: String(i),
-        name: `Bot ${i}`,
+        name: botNames[i - 1] || `Bot ${i}`,
         chips: 1000,
         hand: [],
         bet: 0,
