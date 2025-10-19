@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { WinnerCelebration } from '@/components/WinnerCelebration';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FlyingChip } from '@/components/Chip';
+import { useSound } from '@/hooks/useSound';
 
 const NUM_PLAYERS = 6;
 
@@ -31,6 +32,7 @@ export default function PokerGame() {
   const [flyingChips, setFlyingChips] = useState<FlyingChipData[]>([]);
   const potPosition = useRef<{ x: number; y: number }>({ x: 400, y: 150 });
   const { toast } = useToast();
+  const { playSound } = useSound();
 
   const handlePotRef = (node: HTMLDivElement | null) => {
     if (node) {
@@ -50,6 +52,9 @@ export default function PokerGame() {
 
   const startNewHand = () => {
     if (!gameState) return;
+    
+    // Play card shuffle sound
+    playSound('card-shuffle', { volume: 0.2 });
     
     setWinningPlayerIds([]);
     setWinAmounts({});
@@ -404,7 +409,12 @@ export default function PokerGame() {
         {winningPlayerIds.length > 0 && winningPlayerIds.map(winnerId => {
           const winner = gameState.players.find(p => p.id === winnerId);
           return winner ? (
-            <WinnerCelebration key={winnerId} isWinner={true} playerName={winner.name} />
+            <WinnerCelebration 
+              key={winnerId} 
+              isWinner={true} 
+              playerName={winner.name} 
+              winAmount={winAmounts[winnerId] || 0}
+            />
           ) : null;
         })}
 
