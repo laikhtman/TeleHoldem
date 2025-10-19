@@ -60,6 +60,7 @@ export class GameEngine {
       currentBet: 0,
       lastAction: null,
       actionHistory: [],
+      roundActionCount: 0,
       sessionStats: {
         handsPlayed: 0,
         handsWonByPlayer: 0,
@@ -172,6 +173,7 @@ export class GameEngine {
 
     newState.currentBet = 0;
     newState.players = newState.players.map(p => ({ ...p, bet: 0 }));
+    newState.roundActionCount = 0;
 
     return newState;
   }
@@ -179,11 +181,20 @@ export class GameEngine {
   playerFold(gameState: GameState, playerIndex: number): GameState {
     const players = [...gameState.players];
     players[playerIndex] = { ...players[playerIndex], folded: true };
-    return { ...gameState, players, lastAction: `${players[playerIndex].name} folds` };
+    return { 
+      ...gameState, 
+      players, 
+      lastAction: `${players[playerIndex].name} folds`,
+      roundActionCount: gameState.roundActionCount + 1
+    };
   }
 
   playerCheck(gameState: GameState, playerIndex: number): GameState {
-    return { ...gameState, lastAction: `${gameState.players[playerIndex].name} checks` };
+    return { 
+      ...gameState, 
+      lastAction: `${gameState.players[playerIndex].name} checks`,
+      roundActionCount: gameState.roundActionCount + 1
+    };
   }
 
   playerBet(gameState: GameState, playerIndex: number, amount: number, isBlind: boolean = false): GameState {
@@ -212,7 +223,8 @@ export class GameEngine {
       ...gameState,
       players,
       currentBet: Math.max(gameState.currentBet, newTotalBet),
-      lastAction: isBlind ? gameState.lastAction : actionText
+      lastAction: isBlind ? gameState.lastAction : actionText,
+      roundActionCount: isBlind ? gameState.roundActionCount : gameState.roundActionCount + 1
     };
   }
 
@@ -232,7 +244,9 @@ export class GameEngine {
     
     const firstActiveBet = activePlayers[0].bet;
     const allMatched = activePlayers.every(p => p.bet === firstActiveBet);
-    const hasBet = firstActiveBet > 0;
+
+    // Check if at least one player has acted in this round
+    const hasAction = gameState.roundActionCount > 0;
 
     // In pre-flop, the big blind can still act if no one raised.
     if (gameState.phase === 'pre-flop') {
@@ -244,7 +258,7 @@ export class GameEngine {
         }
     }
 
-    return allMatched && hasBet;
+    return allMatched && hasAction;
   }
 
   getActivePlayers(gameState: GameState): Player[] {
@@ -270,7 +284,9 @@ export class GameEngine {
 
   calculatePots(gameState: GameState): GameState {
     const playersInHand = gameState.players.filter(p => !p.folded);
-    const bets = playersInHand.map(p => ({ id: p.id, bet: p.bet })).sort((a, b) => a.bet - b.bet);
+    // Create a working copy of player bets to avoid mutating original game state
+    const playerBets = playersInHand.map(p => ({ id: p.id, bet: p.bet }));
+    const bets = [...playerBets].sort((a, b) => a.bet - b.bet);
     const pots: Pot[] = [];
     let lastBetLevel = 0;
 
@@ -278,27 +294,38 @@ export class GameEngine {
         if (betInfo.bet <= lastBetLevel) continue;
 
         const currentBetLevel = betInfo.bet;
-        const potAmount = (currentBetLevel - lastBetLevel) * playersInHand.filter(p => p.bet >= currentBetLevel).length;
+        const potAmount = (currentBetLevel - lastBetLevel) * playerBets.filter(p => p.bet >= currentBetLevel).length;
         
-        const contributingPlayers = playersInHand.filter(p => p.bet > lastBetLevel);
+        const contributingPlayerIds = playerBets.filter(p => p.bet > lastBetLevel).map(p => p.id);
         
-        for (const p of contributingPlayers) {
-            p.bet -= (currentBetLevel - lastBetLevel);
+        // Update working copy of bets, not original player objects
+        for (const p of playerBets) {
+            if (p.bet > lastBetLevel) {
+                p.bet -= Math.min(p.bet, currentBetLevel - lastBetLevel);
+            }
         }
 
         pots.push({
             amount: potAmount,
-            eligiblePlayerIds: contributingPlayers.map(p => p.id)
+            eligiblePlayerIds: contributingPlayerIds
         });
 
         lastBetLevel = currentBetLevel;
     }
     
     // Consolidate pots from previous rounds
-    const totalCurrentPot = pots.reduce((sum, pot) => sum + pot.amount, 0);
     const totalPreviousPot = gameState.pots.reduce((sum, pot) => sum + pot.amount, 0);
     
-    pots[0].amount += totalPreviousPot;
+    // If no pots were created (everyone checked), create a main pot
+    if (pots.length === 0) {
+      pots.push({
+        amount: totalPreviousPot,
+        eligiblePlayerIds: playersInHand.map(p => p.id)
+      });
+    } else {
+      // Add previous pot to the main pot
+      pots[0].amount += totalPreviousPot;
+    }
 
     return { ...gameState, pots };
   }

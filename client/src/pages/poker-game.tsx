@@ -308,17 +308,17 @@ export default function PokerGame() {
       const activePlayers = gameEngine.getActivePlayers(currentState);
       if (activePlayers.length === 1) {
         const { winners, winningHand } = gameEngine.resolveShowdown(currentState);
-        const winnerNames = winners.map(i => currentState.players[i].name).join(', ');
+        const winnerNames = winners.map(player => player.name).join(', ');
         
-        const winnerIds = winners.map(i => currentState.players[i].id);
+        const winnerIds = winners.map(player => player.id);
         setWinningPlayerIds(winnerIds);
         
         // Calculate win amount per winner
         const totalPot = currentState.pots.reduce((sum, pot) => sum + pot.amount, 0);
         const winAmountPerWinner = Math.floor(totalPot / winners.length);
         const newWinAmounts: Record<string, number> = {};
-        winners.forEach(winnerIndex => {
-          newWinAmounts[currentState.players[winnerIndex].id] = winAmountPerWinner;
+        winners.forEach(player => {
+          newWinAmounts[player.id] = winAmountPerWinner;
         });
         setWinAmounts(newWinAmounts);
         
@@ -330,7 +330,7 @@ export default function PokerGame() {
         });
         
         const { newState, unlockedAchievements } = gameEngine.awardPots(currentState);
-        currentState = newState;
+        let finalState = newState;
 
         if (unlockedAchievements.length > 0) {
           unlockedAchievements.forEach(id => {
@@ -343,19 +343,19 @@ export default function PokerGame() {
         }
         
         // Add pot award history
-        winners.forEach(winnerIndex => {
-          currentState = addActionHistory(
-            currentState,
+        winners.forEach(player => {
+          finalState = addActionHistory(
+            finalState,
             'pot-award',
             `won $${winAmountPerWinner} - ${winningHand}`,
-            currentState.players[winnerIndex].name,
+            player.name,
             undefined,
             winAmountPerWinner
           );
         });
         
-        currentState = { ...currentState, phase: 'waiting' as GamePhase };
-        setGameState({ ...currentState });
+        finalState = { ...finalState, phase: 'waiting' as GamePhase };
+        setGameState(finalState);
         setIsProcessing(false);
         return;
       }
@@ -421,17 +421,17 @@ export default function PokerGame() {
     const { winners, winningHand } = gameEngine.resolveShowdown(state);
     
     if (winners.length > 0) {
-      const winnerIds = winners.map(i => state.players[i].id);
+      const winnerIds = winners.map(player => player.id);
       setWinningPlayerIds(winnerIds);
 
-      const winnerNames = winners.map(i => state.players[i].name).join(', ');
+      const winnerNames = winners.map(player => player.name).join(', ');
       
       // Calculate win amount per winner
       const totalPot = state.pots.reduce((sum, pot) => sum + pot.amount, 0);
       const winAmountPerWinner = Math.floor(totalPot / winners.length);
       const newWinAmounts: Record<string, number> = {};
-      winners.forEach(winnerIndex => {
-        newWinAmounts[state.players[winnerIndex].id] = winAmountPerWinner;
+      winners.forEach(player => {
+        newWinAmounts[player.id] = winAmountPerWinner;
       });
       setWinAmounts(newWinAmounts);
       
@@ -457,12 +457,12 @@ export default function PokerGame() {
       }
       
       // Add pot award history
-      winners.forEach(winnerIndex => {
+      winners.forEach(player => {
         finalState = addActionHistory(
           finalState,
           'pot-award',
           `won $${winAmountPerWinner} - ${winningHand}`,
-          finalState.players[winnerIndex].name,
+          player.name,
           undefined,
           winAmountPerWinner
         );
@@ -479,16 +479,16 @@ export default function PokerGame() {
     const activePlayers = gameEngine.getActivePlayers(newState);
     if (activePlayers.length === 1) {
       const { winners, winningHand } = gameEngine.resolveShowdown(newState);
-      const winnerNames = winners.map(i => newState.players[i].name).join(', ');
-      const winnerIds = winners.map(i => newState.players[i].id);
+      const winnerNames = winners.map(player => player.name).join(', ');
+      const winnerIds = winners.map(player => player.id);
       setWinningPlayerIds(winnerIds);
       
       // Calculate win amount per winner
       const totalPot = newState.pots.reduce((sum, pot) => sum + pot.amount, 0);
       const winAmountPerWinner = Math.floor(totalPot / winners.length);
       const newWinAmounts: Record<string, number> = {};
-      winners.forEach(winnerIndex => {
-        newWinAmounts[newState.players[winnerIndex].id] = winAmountPerWinner;
+      winners.forEach(player => {
+        newWinAmounts[player.id] = winAmountPerWinner;
       });
       setWinAmounts(newWinAmounts);
       
@@ -499,7 +499,8 @@ export default function PokerGame() {
         duration: 5000,
       });
       
-      const { newState: finalState, unlockedAchievements } = gameEngine.awardPots(newState);
+      const { newState: awardedState, unlockedAchievements } = gameEngine.awardPots(newState);
+      let finalState = awardedState;
       
       if (unlockedAchievements.length > 0) {
         unlockedAchievements.forEach(id => {
@@ -512,12 +513,12 @@ export default function PokerGame() {
       }
       
       // Add pot award history
-      winners.forEach(winnerIndex => {
+      winners.forEach(player => {
         finalState = addActionHistory(
           finalState,
           'pot-award',
           `won $${winAmountPerWinner} - ${winningHand}`,
-          finalState.players[winnerIndex].name,
+          player.name,
           undefined,
           winAmountPerWinner
         );
