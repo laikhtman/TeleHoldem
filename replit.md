@@ -6,6 +6,28 @@ A complete Texas Hold'em poker web application featuring a realistic poker table
 ## User Preferences
 I prefer iterative development with clear communication on major changes. Please ask before making significant architectural alterations or introducing new external dependencies. I value detailed explanations for complex features or decisions.
 
+## Recent Changes
+
+### October 19, 2025: Tablet/iPad Optimization
+- **Responsive Breakpoints**: Added `md:` (768-1023px) breakpoint for tablet-specific styling between mobile (`sm:`) and desktop (`lg:`)
+- **Orientation Detection**: Created `useOrientation` hook (SSR-safe with window guards) to detect portrait vs landscape modes
+- **Layout Adaptation**: Table scales smoothly with `md:min-h-[60vh]`, `md:rounded-[190px]`, `md:p-[11px]` for optimal tablet viewing
+- **Sidebar Behavior**: Sidebars visible in landscape mode (`md:w-72` left, `md:w-76` right), collapsible in portrait mode with toggle buttons hidden in landscape (`md:hidden`)
+- **Touch Optimization**: Action buttons enlarged to `md:min-h-[52px]` (exceeds 48px iOS standard), slider track increased to `md:h-3`, spacing improved to `md:gap-4`
+- **Component Scaling**: PlayerSeat (`md:p-4`, `md:text-base`), CommunityCards (`md:gap-4`), ActionControls (`md:p-5`, `md:min-w-[140px]`) optimized for tablets
+- **Dual Orientation Support**: Game fully playable in both portrait (768×1024) and landscape (1024×768) on iPad and Android tablets
+
+### October 19, 2025: Telegram Mini App Integration
+- **Backend Architecture**: PostgreSQL database for `telegram_users` (profile + stats) and `sessions`, HMAC-SHA256 signature verification, HTTP-only cookie session management (7-day expiry)
+- **API Routes**: `/api/telegram/auth` (authenticate), `/api/session` (get user), `/api/logout`, `/api/users/me/stats` (get/update), `/api/users/me/bankroll` (update)
+- **Storage Layer**: Migrated from MemStorage to DatabaseStorage with Telegram user CRUD and session management
+- **Frontend Integration**: Telegram Web App SDK, `useTelegramWebApp` hook, `useTelegramAuth` hook with React Query, `TelegramAuthGate` component
+- **Dual-Mode Support**: Works as Telegram Mini App (auto-auth with Telegram account) AND standalone web app (demo mode with default bankroll)
+- **Persistent Stats**: User bankroll and poker stats (hands played/won, biggest pot, winnings, achievements) auto-save after each hand
+- **Security**: HMAC-SHA256 `initData` verification, secure session cookies, protected routes with `requireAuth` middleware
+- **Documentation**: Complete setup guide in `docs/telegram.md` (bot creation, configuration, deployment, troubleshooting)
+- **Critical Fix**: Added explicit queryFn to session query in `useTelegramAuth` to ensure proper authentication flow
+
 ## System Architecture
 
 ### UI/UX Decisions
@@ -26,7 +48,7 @@ Visual polish includes:
 - **Frontend Structure**: Organized into `pages`, `components`, `lib` (game logic, utilities), and `hooks`.
   - Core components include `PlayingCard`, `PlayerSeat`, `CommunityCards`, `ActionControls`, `PotDisplay`, `HandStrengthIndicator`, `ActionHistory`, `Chip`, and `WinnerCelebration`.
   - Game logic resides in `gameEngine.ts` and `handEvaluator.ts`.
-  - Custom React hooks manage animations (`useAnimatedCounter`, `useShake`) and sound (`useSound`).
+  - Custom React hooks manage animations (`useAnimatedCounter`, `useShake`), sound (`useSound`), and responsive behavior (`useOrientation`, `useSwipe`).
 - **Game Engine**: A `GameEngine` class manages deck, dealing, betting rounds, player actions (fold, check, bet, raise, all-in), pot, and game state transitions (waiting → pre-flop → flop → turn → river → showdown).
 - **AI Bot Logic**: The `BotAI` class implements basic decision-making based on game phase and bet amounts, utilizing weighted probabilities for actions.
 - **Data Models**: Defined in `/shared/schema.ts`, including `Card`, `Player`, `GameState`, `ActionHistoryEntry`, `HandEvaluation`, and `DrawInfo`.
