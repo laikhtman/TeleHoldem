@@ -23,7 +23,8 @@ I prefer iterative development with clear communication on major changes. Please
 - **Storage Layer**: Migrated from MemStorage to DatabaseStorage with Telegram user CRUD and session management
 - **Frontend Integration**: Telegram Web App SDK, `useTelegramWebApp` hook, `useTelegramAuth` hook with React Query, `TelegramAuthGate` component
 - **Dual-Mode Support**: Works as Telegram Mini App (auto-auth with Telegram account) AND standalone web app (demo mode with default bankroll)
-- **Persistent Stats**: User bankroll and poker stats (hands played/won, biggest pot, winnings, achievements) auto-save after each hand
+- **Demo Route**: Added `/demo` route for instant gameplay without authentication (uses default "You" player with 1000 chips)
+- **Persistent Stats**: User bankroll and poker stats (hands played/won, biggest pot, winnings, achievements) auto-save after each hand (Telegram users only)
 - **Security**: HMAC-SHA256 `initData` verification, secure session cookies, protected routes with `requireAuth` middleware
 - **Documentation**: Complete setup guide in `docs/telegram.md` (bot creation, configuration, deployment, troubleshooting)
 - **Critical Fix**: Added explicit queryFn to session query in `useTelegramAuth` to ensure proper authentication flow

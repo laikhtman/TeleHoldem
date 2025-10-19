@@ -9,6 +9,9 @@ import PokerGame from "@/pages/poker-game";
 function Router() {
   return (
     <Switch>
+      <Route path="/demo">
+        <PokerGame />
+      </Route>
       <Route path="/">
         <TelegramAuthGate>
           <PokerGame />
