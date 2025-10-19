@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { GameState, GamePhase, Card } from '@shared/schema';
 import { gameEngine } from '@/lib/gameEngine';
 import { botAI } from '@/lib/botAI';
@@ -10,15 +10,37 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { WinnerCelebration } from '@/components/WinnerCelebration';
 import { motion, AnimatePresence } from 'framer-motion';
+import { FlyingChip } from '@/components/Chip';
 
 const NUM_PLAYERS = 6;
+
+interface FlyingChipData {
+  id: number;
+  startX: number;
+  startY: number;
+  endX: number;
+  endY: number;
+}
 
 export default function PokerGame() {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [winningPlayerIds, setWinningPlayerIds] = useState<string[]>([]);
+  const [winAmounts, setWinAmounts] = useState<Record<string, number>>({});
   const [phaseKey, setPhaseKey] = useState(0);
+  const [flyingChips, setFlyingChips] = useState<FlyingChipData[]>([]);
+  const potPosition = useRef<{ x: number; y: number }>({ x: 400, y: 150 });
   const { toast } = useToast();
+
+  const handlePotRef = (node: HTMLDivElement | null) => {
+    if (node) {
+      const rect = node.getBoundingClientRect();
+      potPosition.current = {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2
+      };
+    }
+  };
 
   useEffect(() => {
     // Initialize game
@@ -30,6 +52,8 @@ export default function PokerGame() {
     if (!gameState) return;
     
     setWinningPlayerIds([]);
+    setWinAmounts({});
+    setFlyingChips([]);
     let newState = gameEngine.startNewHand(gameState);
     
     // Post blinds (small blind $10, big blind $20)
@@ -113,6 +137,15 @@ export default function PokerGame() {
         const winnerIds = winners.map(i => currentState.players[i].id);
         setWinningPlayerIds(winnerIds);
         
+        // Calculate win amount per winner
+        const totalPot = currentState.pots.reduce((sum, pot) => sum + pot.amount, 0);
+        const winAmountPerWinner = Math.floor(totalPot / winners.length);
+        const newWinAmounts: Record<string, number> = {};
+        winners.forEach(winnerIndex => {
+          newWinAmounts[currentState.players[winnerIndex].id] = winAmountPerWinner;
+        });
+        setWinAmounts(newWinAmounts);
+        
         toast({
           variant: "success" as any,
           title: "Hand Complete!",
@@ -170,6 +203,16 @@ export default function PokerGame() {
       setWinningPlayerIds(winnerIds);
 
       const winnerNames = winners.map(i => state.players[i].name).join(', ');
+      
+      // Calculate win amount per winner
+      const totalPot = state.pots.reduce((sum, pot) => sum + pot.amount, 0);
+      const winAmountPerWinner = Math.floor(totalPot / winners.length);
+      const newWinAmounts: Record<string, number> = {};
+      winners.forEach(winnerIndex => {
+        newWinAmounts[state.players[winnerIndex].id] = winAmountPerWinner;
+      });
+      setWinAmounts(newWinAmounts);
+      
       toast({
         variant: "success" as any,
         title: "Hand Complete!",
@@ -193,6 +236,15 @@ export default function PokerGame() {
       const winnerNames = winners.map(i => newState.players[i].name).join(', ');
       const winnerIds = winners.map(i => newState.players[i].id);
       setWinningPlayerIds(winnerIds);
+      
+      // Calculate win amount per winner
+      const totalPot = newState.pots.reduce((sum, pot) => sum + pot.amount, 0);
+      const winAmountPerWinner = Math.floor(totalPot / winners.length);
+      const newWinAmounts: Record<string, number> = {};
+      winners.forEach(winnerIndex => {
+        newWinAmounts[newState.players[winnerIndex].id] = winAmountPerWinner;
+      });
+      setWinAmounts(newWinAmounts);
       
       toast({
         variant: "success" as any,
@@ -302,7 +354,10 @@ export default function PokerGame() {
         <CommunityCards cards={gameState.communityCards} phase={gameState.phase} />
 
         {/* Pot Display */}
-        <PotDisplay amount={gameState.pots.reduce((sum, pot) => sum + pot.amount, 0)} />
+        <PotDisplay 
+          amount={gameState.pots.reduce((sum, pot) => sum + pot.amount, 0)} 
+          onRef={handlePotRef}
+        />
 
         {/* Player Seats */}
         {gameState.players.map((player, index) => (
@@ -316,6 +371,7 @@ export default function PokerGame() {
             isWinner={winningPlayerIds.includes(player.id)}
             phase={gameState.phase}
             lastAction={gameState.lastAction}
+            winAmount={winAmounts[player.id] || 0}
           />
         ))}
 

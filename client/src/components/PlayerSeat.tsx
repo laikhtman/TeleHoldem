@@ -3,7 +3,8 @@ import { PlayingCard } from './PlayingCard';
 import { Coins, Trophy } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Chip } from './Chip';
+import { FlyingChip } from './Chip';
+import { useAnimatedCounter } from '@/hooks/useAnimatedCounter';
 
 interface PlayerSeatProps {
   player: Player;
@@ -14,21 +15,40 @@ interface PlayerSeatProps {
   isWinner: boolean;
   phase: GamePhase;
   lastAction: string | null;
+  winAmount?: number;
+  onChipAnimationTrigger?: (position: { x: number; y: number }) => void;
 }
 
-export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, isDealer, isWinner, phase, lastAction }: PlayerSeatProps) {
-  const [animatedChips, setAnimatedChips] = useState(0);
+export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, isDealer, isWinner, phase, lastAction, winAmount = 0, onChipAnimationTrigger }: PlayerSeatProps) {
+  const [flyingChips, setFlyingChips] = useState<Array<{ id: number; startX: number; startY: number }>>([]);
   const [showAction, setShowAction] = useState(false);
+  const [showWinAmount, setShowWinAmount] = useState(false);
   const prevBet = useRef(player.bet);
+  const seatRef = useRef<HTMLDivElement>(null);
+  const animatedChipCount = useAnimatedCounter(player.chips);
 
   useEffect(() => {
-    if (player.bet > prevBet.current) {
-      const chipsToAnimate = Math.max(1, Math.floor((player.bet - prevBet.current) / 20));
-      setAnimatedChips(chipsToAnimate);
-      setTimeout(() => setAnimatedChips(0), 500); // Disappear after animation
+    if (player.bet > prevBet.current && seatRef.current) {
+      const chipsToAnimate = Math.max(1, Math.min(5, Math.floor((player.bet - prevBet.current) / 20)));
+      const rect = seatRef.current.getBoundingClientRect();
+      const seatCenterX = rect.left + rect.width / 2;
+      const seatCenterY = rect.top + rect.height / 2;
+      
+      const newChips = Array.from({ length: chipsToAnimate }, (_, i) => ({
+        id: Date.now() + i,
+        startX: seatCenterX,
+        startY: seatCenterY
+      }));
+      
+      setFlyingChips(newChips);
+      setTimeout(() => setFlyingChips([]), 800);
+      
+      if (onChipAnimationTrigger) {
+        onChipAnimationTrigger({ x: seatCenterX, y: seatCenterY });
+      }
     }
     prevBet.current = player.bet;
-  }, [player.bet]);
+  }, [player.bet, onChipAnimationTrigger]);
 
   useEffect(() => {
     if (lastAction && lastAction.startsWith(player.name)) {
@@ -37,6 +57,14 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
       return () => clearTimeout(timer);
     }
   }, [lastAction, player.name]);
+
+  useEffect(() => {
+    if (winAmount > 0) {
+      setShowWinAmount(true);
+      const timer = setTimeout(() => setShowWinAmount(false), 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [winAmount]);
 
   const getPosition = () => {
     const tableWidth = 800;
@@ -65,33 +93,16 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
 
   return (
     <div
+      ref={seatRef}
       className="absolute z-10"
       style={getPosition()}
       data-testid={`player-seat-${player.id}`}
     >
-      <AnimatePresence>
-        {animatedChips > 0 && Array.from({ length: animatedChips }).map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute"
-            initial={{ x: 0, y: 0 }}
-            animate={{
-              x: -getPosition().left.slice(0,-2) + 400,
-              y: -getPosition().top.slice(0,-2) + 250,
-              transition: { duration: 0.3, ease: 'easeOut' }
-            }}
-            exit={{ opacity: 0 }}
-          >
-            <Chip />
-          </motion.div>
-        ))}
-      </AnimatePresence>
-
       <div className={seatClasses}>
         <AnimatePresence>
           {showAction && (
             <motion.div
-              className="absolute -top-4 left-1/2 -translate-x-1/2 bg-black/70 text-white px-3 py-1 rounded-full text-xs font-bold"
+              className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black/70 text-white px-3 py-1 rounded-full text-xs font-bold z-20"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
@@ -100,8 +111,27 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
             </motion.div>
           )}
         </AnimatePresence>
-        {isWinner && (
+        
+        <AnimatePresence>
+          {showWinAmount && winAmount > 0 && (
+            <motion.div
+              className="absolute -top-4 left-1/2 -translate-x-1/2 bg-poker-success text-white px-4 py-2 rounded-full text-sm font-bold z-20 shadow-lg"
+              initial={{ opacity: 0, y: -20, scale: 0.5 }}
+              animate={{ 
+                opacity: 1, 
+                y: 0, 
+                scale: [0.5, 1.2, 1],
+              }}
+              exit={{ opacity: 0, y: -30, scale: 0.8 }}
+              transition={{ duration: 0.5 }}
+              data-testid={`win-indicator-${player.id}`}
+            >
+              +${winAmount}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
+        {isWinner && !showWinAmount && (
           <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-poker-chipGold text-black px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
             <Trophy className="w-3 h-3" />
             WINNER
@@ -121,7 +151,7 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
           </div>
           <div className="flex items-center justify-center gap-1 text-poker-chipGold font-mono font-bold">
             <Coins className="w-4 h-4" />
-            <span data-testid={`player-chips-${player.id}`}>${player.chips}</span>
+            <span data-testid={`player-chips-${player.id}`}>${animatedChipCount}</span>
           </div>
           {player.bet > 0 && (
             <div className="text-xs text-poker-success mt-1" data-testid={`player-bet-${player.id}`}>

@@ -3,6 +3,7 @@ import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { useState, useEffect } from 'react';
 import { AlertCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface ActionControlsProps {
   onFold: () => void;
@@ -166,17 +167,37 @@ export function ActionControls({
 
       {maxBet >= minBet && (
         <div className="space-y-3">
-          <div className="flex items-center justify-between gap-2 p-3 bg-background/50 rounded-md border border-border">
+          <motion.div 
+            className="flex items-center justify-between gap-2 p-3 bg-background/50 rounded-md border border-border"
+            animate={{
+              borderColor: isSignificantBet 
+                ? ['hsl(var(--border))', 'hsl(var(--destructive))', 'hsl(var(--border))']
+                : 'hsl(var(--border))'
+            }}
+            transition={{ duration: 1.5, repeat: isSignificantBet ? Infinity : 0 }}
+          >
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2">
-                <span className="text-lg font-mono font-bold text-poker-chipGold" data-testid="text-bet-amount">
+                <motion.span 
+                  key={betAmount}
+                  className="text-lg font-mono font-bold text-poker-chipGold" 
+                  data-testid="text-bet-amount"
+                  initial={{ scale: 1 }}
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ duration: 0.2 }}
+                >
                   ${betAmount}
-                </span>
+                </motion.span>
                 {isSignificantBet && (
-                  <Badge variant="destructive" className="text-xs gap-1">
-                    <AlertCircle className="w-3 h-3" />
-                    High Risk
-                  </Badge>
+                  <motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                  >
+                    <Badge variant="destructive" className="text-xs gap-1">
+                      <AlertCircle className="w-3 h-3" />
+                      High Risk
+                    </Badge>
+                  </motion.div>
                 )}
               </div>
               <div className="flex gap-3 text-xs text-muted-foreground">
@@ -185,12 +206,21 @@ export function ActionControls({
                     {betPercentageOfPot.toFixed(0)}% of pot
                   </span>
                 )}
-                <span className={remainingChips < playerChips * 0.2 ? "text-destructive font-semibold" : ""} data-testid="text-remaining-chips">
+                <motion.span 
+                  className={remainingChips < playerChips * 0.2 ? "text-destructive font-semibold" : ""} 
+                  data-testid="text-remaining-chips"
+                  animate={{
+                    color: remainingChips < playerChips * 0.2 
+                      ? ['hsl(var(--muted-foreground))', 'hsl(var(--destructive))', 'hsl(var(--muted-foreground))']
+                      : 'hsl(var(--muted-foreground))'
+                  }}
+                  transition={{ duration: 1, repeat: remainingChips < playerChips * 0.2 ? Infinity : 0 }}
+                >
                   ${remainingChips} remaining
-                </span>
+                </motion.span>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           <div className="flex gap-2 justify-center flex-wrap">
             <Button

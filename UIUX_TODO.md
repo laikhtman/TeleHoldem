@@ -10,10 +10,10 @@
 - [x] Create card slide-in animation when new community cards are revealed
 
 ### 2. Chip Movement & Betting Animations
-- [ ] Animate chips moving from player seats to pot with realistic arc trajectory
-- [ ] Add chip stack animation when pot is awarded to winner
-- [ ] Implement betting slider with smooth value transitions
-- [ ] Create chip counting animation when distributing winnings
+- [x] Animate chips moving from player seats to pot with realistic arc trajectory
+- [x] Add chip stack animation when pot is awarded to winner
+- [x] Implement betting slider with smooth value transitions
+- [x] Create chip counting animation when distributing winnings
 
 ### 3. Player Interaction Feedback
 - [x] Add hover effects on action buttons with subtle glow
