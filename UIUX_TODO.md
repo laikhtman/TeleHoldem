@@ -34,6 +34,7 @@
 - [x] Implement action history sidebar showing recent moves
 - [x] Create clear winner announcement with celebration animation
 - [x] Add phase transition indicators (flop, turn, river announcements)
+- Note: Action badges have been enhanced with context-aware styling and icons.
 
 ### 6. Player Information Display
 - [x] Show hand strength indicator for human player (pair, flush draw, etc.)
@@ -166,10 +167,10 @@
 ## Bug Fixes & Edge Cases (Priority: High)
 
 ### 26. Game Logic Edge Cases
-- [ ] Fix side pot calculations for complex all-in scenarios
-- [ ] Handle network disconnections gracefully
-- [ ] Resolve race conditions in rapid button clicking
-- [ ] Fix card visibility issues during showdown
+- [x] Fix side pot calculations for complex all-in scenarios
+- [ ] Handle network disconnections gracefully (N/A for client-side architecture)
+- [x] Resolve race conditions in rapid button clicking
+- [x] Fix card visibility issues during showdown
 
 ### 27. UI Consistency
 - [ ] Standardize spacing and typography across all components

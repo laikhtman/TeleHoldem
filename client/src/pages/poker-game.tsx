@@ -445,6 +445,7 @@ export default function PokerGame() {
 
   const handleFold = () => {
     if (!gameState || isProcessing) return;
+    setIsProcessing(true);
     let newState = gameEngine.playerFold(gameState, 0);
     newState = addActionHistory(
       newState,
@@ -458,6 +459,7 @@ export default function PokerGame() {
 
   const handleCheck = () => {
     if (!gameState || isProcessing) return;
+    setIsProcessing(true);
     let newState = gameEngine.playerCheck(gameState, 0);
     newState = addActionHistory(
       newState,
@@ -471,6 +473,7 @@ export default function PokerGame() {
 
   const handleCall = () => {
     if (!gameState || isProcessing) return;
+    setIsProcessing(true);
     const amountToCall = gameState.currentBet - gameState.players[0].bet;
     let newState = gameEngine.playerBet(gameState, 0, amountToCall);
     newState = addActionHistory(
@@ -486,6 +489,7 @@ export default function PokerGame() {
 
   const handleBet = (amount: number) => {
     if (!gameState || isProcessing) return;
+    setIsProcessing(true);
     let newState = gameEngine.playerBet(gameState, 0, amount);
     newState = addActionHistory(
       newState,
@@ -500,6 +504,7 @@ export default function PokerGame() {
 
   const handleRaise = (amount: number) => {
     if (!gameState || isProcessing) return;
+    setIsProcessing(true);
     const currentPlayerBet = gameState.players[0].bet;
     let newState = gameEngine.playerBet(gameState, 0, amount);
     newState = addActionHistory(
