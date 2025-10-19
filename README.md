@@ -1,163 +1,82 @@
 
 # Texas Hold'em Poker Web Application
 
-A full-featured Texas Hold'em poker web application built with modern web technologies. Play against intelligent AI opponents in a realistic poker environment with professional table design and smooth gameplay.
+A complete Texas Hold'em poker web application featuring a realistic poker table interface, AI bot opponents, and full game mechanics. Built with React, TypeScript, and Tailwind CSS.
 
 ## 🎮 Features
 
 ### Core Gameplay
-- **Complete Texas Hold'em Implementation**: Pre-flop, flop, turn, river, and showdown phases
-- **AI Opponents**: Smart bot players with varying play styles and difficulty levels
-- **Hand Evaluation**: Advanced poker hand ranking system with proper tie-breaking
-- **Betting System**: Full betting mechanics including call, raise, fold, check, and all-in
-- **Pot Management**: Accurate pot calculation and distribution
+- 6-player Texas Hold'em (1 human + 5 AI bots)
+- Complete betting rounds: pre-flop, flop, turn, river
+- Player actions: fold, check, call, bet, raise, all-in
+- Side pot management for all-in situations
+- Pot tracking and chip management with split pot logic for ties
+- Dealer button rotation and blind posting
 
-### User Interface
-- **Professional Poker Table**: Realistic green felt table with proper positioning
-- **Responsive Design**: Works seamlessly on desktop and mobile devices
-- **Real-time Updates**: Live game state updates and smooth animations
-- **Player Information**: Chip counts, betting amounts, and player status indicators
-- **Community Cards**: Clear display of shared cards with deal animations
-- **Action Controls**: Intuitive betting interface with slider controls
+### Visual Features
+- **Realistic Table Atmosphere**: Green felt texture, polished wood grain border, and ambient lighting.
+- **Advanced Animations**: 3D card flips, staggered dealing, and flying chips with arc trajectories.
+- **Player Feedback**: Pulsing glow for the current player, action badges, and winner celebrations with confetti.
+- **Information Display**: Real-time hand strength indicator with draw detection, and a detailed action history sidebar.
 
-### Technical Features
-- **Real-time Communication**: WebSocket integration for live updates
-- **Database Integration**: PostgreSQL for persistent game state and statistics
-- **Type Safety**: Full TypeScript implementation
-- **Modern UI Components**: Tailwind CSS with custom poker-themed styling
-- **Hot Module Replacement**: Instant development updates with Vite
+### Player Controls
+- **Advanced Betting**: Adjustable bet slider, quick-bet buttons (1/2 Pot, Pot, All-In), and real-time validation.
+- **Keyboard Shortcuts**: `F` for Fold, `C` for Check/Call, `R` for Raise, `A` for All-In.
 
 ## 🛠 Technology Stack
 
 ### Frontend
-- **React 18** - Modern React with hooks and functional components
-- **TypeScript** - Type-safe JavaScript for better development experience
-- **Tailwind CSS** - Utility-first CSS framework with custom poker styling
-- **Vite** - Fast build tool and development server
-- **Lucide React** - Beautiful icon library
+- **React 18** & **TypeScript**
+- **Tailwind CSS** with **Shadcn UI** components
+- **Framer Motion** for animations
+- **Vite** for the build tool
 
 ### Backend
-- **Node.js** - JavaScript runtime environment
-- **Express.js** - Web application framework
-- **TypeScript** - Server-side type safety
-- **PostgreSQL** - Robust relational database
-- **Drizzle ORM** - Type-safe database queries
-
-### Development Tools
-- **ESLint** - Code linting and formatting
-- **PostCSS** - CSS processing and optimization
-- **Tailwind Animate** - Animation utilities
+- **Node.js** & **Express.js**
+- **Drizzle ORM** with **PostgreSQL**
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 - Node.js 20 or higher
-- PostgreSQL 16
+- PostgreSQL 16 (Optional, for database persistence)
 - npm or yarn package manager
 
 ### Installation & Setup
 1. Clone the repository
 2. Install dependencies: `npm install`
-3. Set up environment variables (DATABASE_URL required)
+3. Set up environment variables (e.g., `DATABASE_URL` if using a database)
 4. Start development server: `npm run dev`
-5. Access the application at `http://localhost:5000`
-
-### Database Setup
-The application uses Drizzle ORM with PostgreSQL. Database migrations are handled automatically based on the schema defined in `shared/schema.ts`.
-
-## 🎯 Current Status
-
-### ✅ Completed Features
-- [x] Complete poker game engine with all betting rounds
-- [x] Advanced hand evaluation system with tie-breaking
-- [x] AI bot players with strategic decision making
-- [x] Professional poker table UI with animations
-- [x] Responsive design for all screen sizes
-- [x] Real-time game state management
-- [x] Pot calculation and distribution
-- [x] Player action controls (call, raise, fold, check, all-in)
-- [x] Community cards display with deal animations
-- [x] Player positioning and seat management
-- [x] Game phase indicators and last action display
-- [x] Toast notifications for game events
-- [x] Winner indication and celebration
-- [x] Dynamic and intelligent betting controls
-- [x] Robust game loop and phase progression
-- [x] Database integration with PostgreSQL
-- [x] TypeScript implementation across the stack
-
-### 🚧 In Progress
-- [ ] WebSocket real-time communication (partially implemented)
-- [ ] Player statistics and game history
-- [ ] Tournament mode
-- [ ] Multi-table support
-
-### 📋 Planned Features
-- [ ] User authentication and profiles
-- [ ] Spectator mode
-- [ ] Chat system
-- [ ] Sound effects and music
-- [ ] Customizable avatars
-- [ ] Leaderboards and achievements
-- [ ] Mobile app companion
+5. Access the application at `http://localhost:5173` (or as specified by Vite)
 
 ## 🏗 Project Structure
 
 ```
 ├── client/                 # Frontend React application
 │   ├── src/
-│   │   ├── components/     # Reusable UI components
-│   │   ├── pages/          # Main application pages
-│   │   ├── lib/            # Game logic and utilities
-│   │   └── hooks/          # Custom React hooks
+│   │   ├── components/     # Reusable UI components (PlayerSeat, PlayingCard, etc.)
+│   │   ├── pages/          # Main application pages (poker-game.tsx)
+│   │   ├── lib/            # Core client-side logic (gameEngine, handEvaluator, botAI)
+│   │   └── hooks/          # Custom React hooks (useAnimatedCounter)
 ├── server/                 # Backend Express application
-├── shared/                 # Shared types and schemas
-└── migrations/             # Database migration files
+└── shared/                 # Shared types and schemas (schema.ts)
 ```
-
-## 🎮 How to Play
-
-1. **Join a Game**: The application automatically seats you at a poker table with AI opponents
-2. **Place Bets**: Use the action controls to call, raise, fold, or check
-3. **Watch the Cards**: Community cards are dealt during flop, turn, and river phases
-4. **Showdown**: Best hand wins the pot automatically
-5. **New Hand**: Game continues with rotating dealer position
-
-## 🤖 AI Opponents
-
-The AI players feature sophisticated decision-making algorithms that consider:
-- Hand strength evaluation
-- Pot odds calculation
-- Position awareness
-- Betting patterns analysis
-- Bluffing strategies
-- Risk assessment
 
 ## 🔧 Development
 
 ### Available Scripts
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm start` - Start production server
-- `npm run db:generate` - Generate database migrations
-- `npm run db:migrate` - Run database migrations
+- `npm run dev` - Start development server for client and server.
+- `npm run build` - Build for production.
+- `npm start` - Start production server.
+- `npm run db:push` - Push schema changes to the database using Drizzle.
 
 ### Environment Variables
-- `DATABASE_URL` - PostgreSQL connection string
-- `PORT` - Server port (default: 5000)
+- `DATABASE_URL` - PostgreSQL connection string.
+- `PORT` - Server port (default: 5000).
 
-## 📱 Deployment
+## 🤖 AI Opponents
 
-The application is configured for deployment on Replit with automatic scaling. The build process compiles TypeScript and bundles assets for optimal performance.
-
-## 🎨 Design Philosophy
-
-The application follows a professional poker room aesthetic with:
-- **Green Felt Table**: Classic casino table appearance
-- **Gold Accents**: Poker chip gold color scheme
-- **Clean Typography**: Easy-to-read fonts and clear information hierarchy
-- **Smooth Animations**: Card dealing and betting animations for immersion
-- **Responsive Layout**: Optimal experience on all device sizes
+The AI players feature decision-making algorithms that consider game phase, hand strength, and pot odds to perform actions like bluffing, calling, and raising.
 
 ---
 
