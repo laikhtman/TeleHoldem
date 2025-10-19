@@ -34,14 +34,14 @@ export function PotDisplay({ amount, onRef }: PotDisplayProps) {
       </AnimatePresence>
 
       <motion.div
-        className="bg-black/70 backdrop-blur-sm px-6 py-3 rounded-lg border border-poker-chipGold/40 pot-elevation"
+        className="bg-black/70 backdrop-blur-sm px-4 xs:px-5 sm:px-6 py-2 xs:py-2.5 sm:py-3 rounded-lg border border-poker-chipGold/40 pot-elevation"
         animate={amount > 0 ? {
           scale: [1, 1.05, 1],
           borderColor: ['hsl(var(--poker-chipGold) / 0.4)', 'hsl(var(--poker-chipGold) / 0.8)', 'hsl(var(--poker-chipGold) / 0.4)']
         } : {}}
         transition={{ duration: 0.3 }}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 xs:gap-2">
           <motion.div
             animate={amount > 0 ? {
               rotate: [0, 10, -10, 0],
@@ -49,11 +49,11 @@ export function PotDisplay({ amount, onRef }: PotDisplayProps) {
             } : {}}
             transition={{ duration: 0.5 }}
           >
-            <Coins className="w-6 h-6 text-poker-chipGold" />
+            <Coins className="w-5 h-5 xs:w-6 xs:h-6 text-poker-chipGold" />
           </motion.div>
           <div>
-            <div className="text-xs text-muted-foreground">Pot</div>
-            <div className="text-2xl font-bold font-mono text-poker-chipGold" data-testid="pot-amount">
+            <div className="text-[10px] xs:text-xs text-muted-foreground">Pot</div>
+            <div className="text-lg xs:text-xl sm:text-2xl font-bold font-mono text-poker-chipGold" data-testid="pot-amount">
               ${animatedAmount}
             </div>
           </div>

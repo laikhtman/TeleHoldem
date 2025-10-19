@@ -123,7 +123,7 @@ export function CommunityCards({ cards, phase }: CommunityCardsProps) {
           <AnimatePresence>
             {showGlow && (
               <motion.div
-                className="absolute inset-0 -m-8 rounded-xl pointer-events-none"
+                className="absolute inset-0 -m-4 xs:-m-6 sm:-m-8 rounded-xl pointer-events-none"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{
                   opacity: [0, 1, 0.5, 0],
@@ -140,7 +140,7 @@ export function CommunityCards({ cards, phase }: CommunityCardsProps) {
           </AnimatePresence>
   
           {/* Cards */}
-          <div className="flex gap-3 md:gap-4 relative" data-testid="community-cards">
+          <div className="flex gap-2 xs:gap-2.5 sm:gap-3 md:gap-4 relative" data-testid="community-cards">
             {[0, 1, 2, 3, 4].map((index) => {
               const hasCard = !!cards[index];
               const animation = getCardAnimation(index);

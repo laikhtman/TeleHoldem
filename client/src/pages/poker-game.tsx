@@ -12,6 +12,7 @@ import { SessionStats } from '@/components/SessionStats';
 import { HandDistributionChart } from '@/components/HandDistributionChart';
 import { AchievementsList } from '@/components/AchievementsList';
 import { AchievementToast } from '@/components/AchievementToast';
+import { MobileBottomSheet } from '@/components/MobileBottomSheet';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { WinnerCelebration } from '@/components/WinnerCelebration';
@@ -77,6 +78,7 @@ export default function PokerGame() {
   const [flyingChips, setFlyingChips] = useState<FlyingChipData[]>([]);
   const [isHistoryCollapsed, setIsHistoryCollapsed] = useState(false);
   const [isHandStrengthCollapsed, setIsHandStrengthCollapsed] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const potPosition = useRef<{ x: number; y: number }>({ x: 400, y: 150 });
   const { toast } = useToast();
   const { playSound } = useSound();
@@ -735,8 +737,8 @@ export default function PokerGame() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-2 sm:p-4 lg:p-6 relative overflow-hidden">
-      {/* Theme Toggle - Fixed Top Right */}
-      <div className="fixed top-4 right-4 z-50">
+      {/* Theme Toggle - Fixed Top Right with safe-area padding */}
+      <div className="fixed top-[calc(1rem+var(--safe-area-top))] right-[calc(1rem+var(--safe-area-right))] z-50">
         <ThemeToggle />
       </div>
 
@@ -749,7 +751,7 @@ export default function PokerGame() {
           <Button
             variant="outline"
             size="icon"
-            className={`${isLandscape ? 'md:hidden' : ''} lg:hidden fixed left-2 top-20 z-50 h-11 w-11 rounded-full shadow-lg bg-card/95 backdrop-blur-sm`}
+            className={`${isLandscape ? 'md:hidden' : ''} lg:hidden fixed left-[calc(0.5rem+var(--safe-area-left))] top-[calc(5rem+var(--safe-area-top))] z-50 h-11 w-11 rounded-full shadow-lg bg-card/95 backdrop-blur-sm`}
             onClick={() => setIsHandStrengthCollapsed(!isHandStrengthCollapsed)}
             data-testid="button-toggle-hand-strength"
           >
@@ -898,7 +900,7 @@ export default function PokerGame() {
           <Button
             variant="outline"
             size="icon"
-            className={`${isLandscape ? 'md:hidden' : ''} lg:hidden fixed right-2 top-20 z-50 h-11 w-11 rounded-full shadow-lg bg-card/95 backdrop-blur-sm`}
+            className={`${isLandscape ? 'md:hidden' : ''} lg:hidden fixed right-[calc(0.5rem+var(--safe-area-right))] top-[calc(5rem+var(--safe-area-top))] z-50 h-11 w-11 rounded-full shadow-lg bg-card/95 backdrop-blur-sm`}
             onClick={() => setIsHistoryCollapsed(!isHistoryCollapsed)}
             data-testid="button-toggle-action-history"
           >
@@ -934,11 +936,20 @@ export default function PokerGame() {
         />
       ))}
 
-      {/* Mobile Swipe Hint */}
-      <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 lg:hidden">
+      {/* Mobile Swipe Hint with safe-area padding */}
+      <div className="fixed bottom-[calc(5rem+var(--safe-area-bottom))] left-1/2 transform -translate-x-1/2 lg:hidden">
         <div className="bg-black/50 backdrop-blur-sm px-4 py-2 rounded-full text-xs text-white/70 text-center">
           Swipe left to fold • Swipe right to call/check
         </div>
+      </div>
+
+      {/* Mobile Bottom Sheet - Only visible on xs: and hidden on lg: */}
+      <div className="xs:block lg:hidden">
+        <MobileBottomSheet
+          open={isMobileMenuOpen}
+          onOpenChange={setIsMobileMenuOpen}
+          gameState={gameState}
+        />
       </div>
     </div>
   );
