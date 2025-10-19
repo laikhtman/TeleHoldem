@@ -71,7 +71,8 @@ export class GameEngine {
       dealerIndex: 0,
       phase: 'waiting',
       currentBet: 0,
-      lastAction: null
+      lastAction: null,
+      actionHistory: []
     };
   }
 

@@ -1,10 +1,26 @@
-import { Card, Rank, HandRank, getRankValue } from '@shared/schema';
+import { Card, Rank, HandRank, getRankValue, Suit } from '@shared/schema';
 
 interface HandResult {
   rank: HandRank;
   value: number;
   description: string;
   winningCards: Card[];
+}
+
+export interface DrawInfo {
+  flushDraw?: {
+    suit: Suit;
+    outs: number;
+  };
+  straightDraw?: {
+    type: 'open-ended' | 'gutshot';
+    outs: number;
+  };
+}
+
+export interface HandEvaluation {
+  hand: HandResult;
+  draws: DrawInfo;
 }
 
 export class HandEvaluator {
@@ -170,6 +186,108 @@ export class HandEvaluator {
     // Add some randomness for unpredictability (±10%)
     const randomFactor = 0.9 + Math.random() * 0.2;
     return Math.min(1, baseStrength * randomFactor);
+  }
+
+  evaluateHandWithDraws(hand: Card[], communityCards: Card[]): HandEvaluation {
+    const currentHand = this.evaluateHand(hand, communityCards);
+    const draws = this.detectDraws(hand, communityCards);
+    
+    return {
+      hand: currentHand,
+      draws
+    };
+  }
+
+  private detectDraws(hand: Card[], communityCards: Card[]): DrawInfo {
+    const allCards = [...hand, ...communityCards];
+    const draws: DrawInfo = {};
+
+    const flushDraw = this.detectFlushDraw(allCards);
+    if (flushDraw) {
+      draws.flushDraw = flushDraw;
+    }
+
+    const straightDraw = this.detectStraightDraw(allCards);
+    if (straightDraw) {
+      draws.straightDraw = straightDraw;
+    }
+
+    return draws;
+  }
+
+  private detectFlushDraw(cards: Card[]): { suit: Suit; outs: number } | null {
+    const suitCounts = new Map<Suit, number>();
+    
+    cards.forEach(card => {
+      suitCounts.set(card.suit, (suitCounts.get(card.suit) || 0) + 1);
+    });
+
+    for (const [suit, count] of Array.from(suitCounts.entries())) {
+      if (count === 4) {
+        return { suit, outs: 9 };
+      }
+    }
+
+    return null;
+  }
+
+  private detectStraightDraw(cards: Card[]): { type: 'open-ended' | 'gutshot'; outs: number } | null {
+    const rankValues = cards.map(c => getRankValue(c.rank));
+    const uniqueRankValues = Array.from(new Set(rankValues)).sort((a, b) => b - a);
+
+    if (uniqueRankValues.includes(14)) {
+      const wheelValues = [14, 5, 4, 3, 2];
+      const wheelCount = wheelValues.filter(v => uniqueRankValues.includes(v)).length;
+      if (wheelCount === 4) {
+        return { type: 'open-ended', outs: 8 };
+      }
+    }
+
+    for (let i = 0; i <= uniqueRankValues.length - 4; i++) {
+      const fourCards = uniqueRankValues.slice(i, i + 4);
+      if (this.isConsecutive(fourCards)) {
+        return { type: 'open-ended', outs: 8 };
+      }
+    }
+
+    for (let i = 0; i <= uniqueRankValues.length - 3; i++) {
+      for (let j = i + 1; j <= uniqueRankValues.length - 2; j++) {
+        for (let k = j + 1; k <= uniqueRankValues.length - 1; k++) {
+          for (let l = k + 1; l <= uniqueRankValues.length; l++) {
+            const fourCards = [
+              uniqueRankValues[i],
+              uniqueRankValues[j],
+              uniqueRankValues[k],
+              uniqueRankValues[l]
+            ].sort((a, b) => b - a);
+
+            if (fourCards[0] - fourCards[3] === 4 && this.hasGap(fourCards)) {
+              return { type: 'gutshot', outs: 4 };
+            }
+          }
+        }
+      }
+    }
+
+    return null;
+  }
+
+  private isConsecutive(values: number[]): boolean {
+    for (let i = 0; i < values.length - 1; i++) {
+      if (values[i] - values[i + 1] !== 1) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private hasGap(values: number[]): boolean {
+    for (let i = 0; i < values.length - 1; i++) {
+      if (values[i] - values[i + 1] > 1) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 

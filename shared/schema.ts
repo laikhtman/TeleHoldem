@@ -46,6 +46,25 @@ export type HandRank =
   | 'straight-flush'
   | 'royal-flush';
 
+// Action history types
+export type ActionHistoryType = 
+  | 'player-action'
+  | 'phase-change'
+  | 'cards-dealt'
+  | 'pot-award'
+  | 'blinds-posted';
+
+export interface ActionHistoryEntry {
+  id: string;
+  type: ActionHistoryType;
+  playerName?: string;
+  action?: PlayerAction;
+  amount?: number;
+  phase: GamePhase;
+  timestamp: number;
+  message: string;
+}
+
 // Game state interface
 export interface GameState {
   players: Player[];
@@ -57,6 +76,7 @@ export interface GameState {
   phase: GamePhase;
   currentBet: number;
   lastAction: string | null;
+  actionHistory: ActionHistoryEntry[];
 }
 
 // Bot action result
