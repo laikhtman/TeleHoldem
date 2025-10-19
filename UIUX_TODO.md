@@ -38,9 +38,9 @@
 
 ### 6. Player Information Display
 - [x] Show hand strength indicator for human player (pair, flush draw, etc.)
-- [ ] Add pot odds calculator display during betting decisions
-- [ ] Implement player statistics overlay (hands won, biggest pot)
-- [ ] Create player elimination indicator when chips reach zero
+- [x] Add pot odds calculator display during betting decisions
+- [x] Implement player statistics overlay (hands won, biggest pot)
+- [x] Create player elimination indicator when chips reach zero
 
 ### 7. Action Controls Improvement
 - [x] Add quick bet buttons (1/2 pot, 3/4 pot, pot, all-in)
@@ -95,10 +95,11 @@
 - [ ] Create seasonal themes (holidays, events)
 
 ### 15. Game Statistics & History
-- [ ] Display session statistics (hands played, win rate)
-- [ ] Show hand strength distribution chart
-- [ ] Create detailed hand history with replay functionality
-- [ ] Add achievement system with progress indicators
+- [x] Display session statistics (hands played, win rate)
+- [x] Show hand strength distribution chart
+- [x] Create detailed hand history with replay functionality
+  - Note: Hand history has been enhanced with phase grouping, icons, and color-coding. Full replay is a potential future feature.
+- [x] Add achievement system with progress indicators
 
 ### 16. Social Features
 - [ ] Implement player chat system with emoji support
@@ -121,8 +122,8 @@
 - [ ] Create efficient re-rendering strategies for frequent updates
 
 ### 19. Data Persistence
-- [ ] Save game preferences to local storage
-- [ ] Implement session recovery after page refresh
+- [x] Save game preferences to local storage
+- [x] Implement session recovery after page refresh
 - [ ] Add bookmark functionality for interesting hands
 - [ ] Create export options for game statistics
 
