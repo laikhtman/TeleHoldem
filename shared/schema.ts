@@ -1,4 +1,7 @@
 import { z } from 'zod';
+import { pgTable, serial, varchar, timestamp, integer, json, boolean, text } from 'drizzle-orm/pg-core';
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
+import { sql } from 'drizzle-orm';
 
 export const SUITS = ['H', 'D', 'C', 'S'] as const;
 export const RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'] as const;
@@ -108,3 +111,64 @@ export interface GameState {
   };
   achievements: Record<AchievementId, Achievement>;
 }
+
+// Database Tables
+
+// Telegram Users Table
+export const telegramUsers = pgTable('telegram_users', {
+  id: serial('id').primaryKey(),
+  telegramId: varchar('telegram_id', { length: 255 }).notNull().unique(),
+  username: varchar('username', { length: 255 }),
+  firstName: varchar('first_name', { length: 255 }),
+  lastName: varchar('last_name', { length: 255 }),
+  photoUrl: text('photo_url'),
+  languageCode: varchar('language_code', { length: 10 }),
+  displayName: varchar('display_name', { length: 255 }).notNull(),
+  bankroll: integer('bankroll').notNull().default(1000),
+  stats: json('stats').$type<{
+    handsPlayed: number;
+    handsWon: number;
+    biggestPot: number;
+    totalWinnings: number;
+    achievements: AchievementId[];
+  }>().notNull().default(sql`'{
+    "handsPlayed": 0,
+    "handsWon": 0,
+    "biggestPot": 0,
+    "totalWinnings": 0,
+    "achievements": []
+  }'::json`),
+  authDate: timestamp('auth_date').notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+// Sessions Table
+export const sessions = pgTable('sessions', {
+  id: serial('id').primaryKey(),
+  telegramUserId: integer('telegram_user_id').notNull().references(() => telegramUsers.id, { onDelete: 'cascade' }),
+  sessionToken: varchar('session_token', { length: 255 }).notNull().unique(),
+  expiresAt: timestamp('expires_at').notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
+// Zod Schemas and Types
+export const insertTelegramUserSchema = createInsertSchema(telegramUsers).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const selectTelegramUserSchema = createSelectSchema(telegramUsers);
+
+export const insertSessionSchema = createInsertSchema(sessions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const selectSessionSchema = createSelectSchema(sessions);
+
+export type TelegramUser = typeof telegramUsers.$inferSelect;
+export type InsertTelegramUser = z.infer<typeof insertTelegramUserSchema>;
+export type Session = typeof sessions.$inferSelect;
+export type InsertSession = z.infer<typeof insertSessionSchema>;
