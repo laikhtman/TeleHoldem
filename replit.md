@@ -4,7 +4,7 @@
 A complete Texas Hold'em poker web application featuring a realistic poker table interface, AI bot opponents, and full game mechanics. Built with React, TypeScript, and Tailwind CSS.
 
 ## Recent Changes
-- **October 19, 2025**: Comprehensive UI/UX Enhancement & Polish
+- **October 19, 2025**: Comprehensive UI/UX Enhancement & Polish + Sound Design
   - **Enhanced Card Animations**: Staggered dealing from deck (0.15s delays), 3D flip rotations (0.4s), staggered flop reveals (0.2s delays), turn/river slide-ins with glow effects
   - **Chip Movement & Betting**: Arc trajectory animations from seats to pot (0.6s), pot to winner (0.9s), animated chip counters with smooth transitions, chip stack visuals
   - **Player Interaction Feedback**: Button hover glow effects, press scale animations (0.95x), enhanced pulsing for current player, shake animation for invalid actions
@@ -13,7 +13,8 @@ A complete Texas Hold'em poker web application featuring a realistic poker table
   - **Table Atmosphere**: Realistic felt texture with noise pattern, polished wood grain border, ambient lighting effects, subtle shadows and depth
   - **Hand Strength Indicator**: Real-time hand evaluation showing current hand rank (1-10), draw detection (flush/straight draws with outs), color-coded strength badges, animated improvement feedback
   - **Action History Sidebar**: Complete event tracking, phase-grouped chronological display, player action highlighting, scrollable with sticky headers
-  - **Bug Fixes**: Card animation state management, keyboard shortcut stale closures, useAnimatedCounter runaway re-renders, useShake cleanup on unmount
+  - **Sound Design System**: Web Audio API integration with singleton AudioContext, 12 sound types (card dealing/flip/shuffle, chip movements, player actions, victory fanfare), procedurally generated tones, volume-balanced audio feedback
+  - **Bug Fixes**: Card animation state management, keyboard shortcut stale closures, useAnimatedCounter runaway re-renders, useShake cleanup on unmount, AudioContext singleton pattern to avoid browser limits, React hook TDZ errors
 - **October 18, 2025**: Initial implementation
   - Created complete poker game engine with deck management, card dealing, and game state tracking
   - Implemented AI bot logic with decision-making for fold/check/bet/raise actions
@@ -42,6 +43,7 @@ A complete Texas Hold'em poker web application featuring a realistic poker table
 - **`/client/src/hooks/`**: Custom React hooks
   - `useAnimatedCounter.ts`: Smooth number transitions for chip counts
   - `useShake.ts`: Reusable shake animation for invalid actions
+  - `useSound.ts`: Web Audio API integration with singleton AudioContext pattern
 
 ### Game Engine
 The `GameEngine` class provides:
@@ -109,6 +111,35 @@ The `BotAI` class implements:
 - **Player Positioning**: Trigonometric calculation around oval perimeter
 - **Community Cards**: Centered at 45% from top
 - **Controls**: Bottom-fixed with backdrop blur
+
+### Sound Design
+- **Implementation**: Web Audio API with singleton AudioContext pattern
+- **Architecture**: Module-scope AudioContext shared across all components to avoid browser limits (max 6 contexts)
+- **Sound Types** (12 total):
+  - **Card Sounds**: 
+    - `card-deal` (200Hz, 0.15s) - Card dealing from deck
+    - `card-flip` (300Hz, 0.2s) - Card flip reveal
+    - `card-shuffle` (150Hz, 0.3s) - Deck shuffling
+  - **Chip Sounds**:
+    - `chip-place` (400Hz, 0.1s) - Chip placement
+    - `chip-collect` (350Hz, 0.15s) - Chip collection
+    - `chip-stack` (380Hz, 0.08s) - Chip stacking
+  - **Action Sounds**:
+    - `fold` (250Hz, 0.2s) - Player fold action
+    - `check` (320Hz, 0.15s) - Player check action
+    - `raise` (450Hz, 0.25s) - Player raise/bet action
+    - `button-click` (500Hz, 0.1s) - UI button interactions
+  - **Victory Sounds**:
+    - `victory-small` (ascending 440→550→660Hz, 0.6s) - Wins under $100
+    - `victory-big` (ascending 440→587→740Hz, 1.0s) - Wins over $100
+- **Volume Levels**: 0.1-0.35 range for balanced audio feedback
+- **Procedural Generation**: All sounds synthesized using oscillators (no audio files)
+- **Integration Points**:
+  - PlayingCard: deal/flip sounds on card animations
+  - Chip/FlyingChip: placement/collection sounds on chip movements
+  - ActionControls: fold/check/raise/button-click on player actions
+  - WinnerCelebration: victory fanfare based on win amount
+  - poker-game: shuffle sound on new hand start
 
 ## Game Features
 

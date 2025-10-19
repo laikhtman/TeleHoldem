@@ -152,9 +152,11 @@ export function CommunityCards({ cards, phase }: CommunityCardsProps) {
                 <motion.div 
                   key={cardKey}
                   {...animation}
+                  data-testid={hasCard ? `community-card-${index}` : `community-card-empty-${index}`}
+                  data-card-revealed={hasCard && revealedCards[index] && !isSkeletonVisible ? 'true' : 'false'}
                 >
                   {isSkeletonVisible ? (
-                    <CardSkeleton />
+                    <CardSkeleton data-testid={`community-card-skeleton-${index}`} />
                   ) : (
                     <PlayingCard 
                       card={cards[index]}
