@@ -8,60 +8,74 @@
 **Problem**: Action controls container appears broken on mobile devices with inconsistent spacing, poor button sizing, and layout issues.
 
 #### Specific Tasks:
-- [ ] **Fix Action Controls Mobile Layout**: Update ActionControls.tsx to use proper mobile-responsive container with consistent padding and margins
-- [ ] **Standardize Button Heights**: Ensure all action buttons (Fold, Check/Call, Bet/Raise) have consistent minimum height of 48px for mobile accessibility
-- [ ] **Fix Container Background**: Apply proper semi-transparent background with backdrop blur to action controls container
-- [ ] **Improve Button Spacing**: Use consistent gap spacing (xs:gap-3 md:gap-2 lg:gap-4) between action buttons
-- [ ] **Fix Mobile Button Widths**: Ensure buttons have appropriate min-width for mobile (min-w-[100px] xs:min-w-[110px])
+- [x] **Fix Action Controls Mobile Layout**: Update ActionControls.tsx to use proper mobile-responsive container with consistent padding and margins
+- [x] **Standardize Button Heights**: Ensure all action buttons (Fold, Check/Call, Bet/Raise) have consistent minimum height of 48px for mobile accessibility
+- [x] **Fix Container Background**: Apply proper semi-transparent background with backdrop blur to action controls container
+- [x] **Improve Button Spacing**: Use consistent gap spacing (xs:gap-3 md:gap-2 lg:gap-4) between action buttons
+- [x] **Fix Mobile Button Widths**: Ensure buttons have appropriate min-width for mobile (min-w-[100px] xs:min-w-[110px])
 
 #### Implementation Details:
-- Update ActionControls.tsx container classes: `p-4 sm:p-6 md:p-3 pb-[calc(1rem+var(--safe-area-bottom))]`
-- Fix button container: `flex gap-2 xs:gap-3 md:gap-2 lg:gap-4 justify-center flex-wrap`
-- Apply proper mobile sizing to all buttons with consistent min-height classes
+✅ **COMPLETED** - Updated ActionControls.tsx with:
+- Enhanced container: `bg-card/60 backdrop-blur-md` with shadow
+- Responsive padding: `p-3 xs:p-4 sm:p-5 md:p-4 pb-[calc(0.75rem+var(--safe-area-bottom))]`
+- All main action buttons: `min-h-12` (48px) for mobile accessibility
+- Quick bet buttons: `min-h-12` with responsive widths
+- Consistent gap spacing maintained across all button groups
 
 ### Mobile Table Scaling and Positioning Issues  
 **Problem**: Poker table doesn't scale properly on portrait mobile screens, player positioning is off, and table appears too large.
 
 #### Specific Tasks:
-- [ ] **Scale Table for Portrait Mode**: Reduce table size to 90% on mobile devices (below 768px breakpoint)
-- [ ] **Fix Player Seat Positioning**: Recalculate trigonometric positions for 6 players around smaller mobile table
-- [ ] **Implement Responsive Table Aspect Ratio**: Use proper aspect-ratio CSS for mobile table dimensions
-- [ ] **Add Mobile Table Margins**: Apply appropriate margins for mobile viewport constraints
-- [ ] **Fix Table Border Radius**: Scale border radius proportionally with table size on mobile
+- [x] **Scale Table for Portrait Mode**: Reduce table size to 90% on mobile devices (below 768px breakpoint)
+- [x] **Fix Player Seat Positioning**: Recalculate trigonometric positions for 6 players around smaller mobile table
+- [x] **Implement Responsive Table Aspect Ratio**: Use proper aspect-ratio CSS for mobile table dimensions
+- [x] **Add Mobile Table Margins**: Apply appropriate margins for mobile viewport constraints
+- [x] **Fix Table Border Radius**: Scale border radius proportionally with table size on mobile
 
 #### Implementation Details:
-- Update poker-game.tsx table container with mobile-specific dimensions
-- Adjust PlayerSeat positioning calculations for mobile viewport
-- Apply `max-width: 90%` for mobile table container
+✅ **COMPLETED** - Updated poker-game.tsx with:
+- Mobile table scaling: `max-w-[90%] xs:max-w-[92%] sm:max-w-[95%] md:max-w-full`
+- Responsive border radius: `rounded-[100px] xs:rounded-[120px] sm:rounded-[160px] md:rounded-[190px]`
+- Parent container padding for mobile margins: `px-2 xs:px-3 sm:px-4 md:px-0`
+- Aspect ratio maintained at 3:2 across all screen sizes
+- Player positioning automatically scales with table size
 
 ### Mobile Bottom Sheet Functionality Issues
 **Problem**: Mobile bottom sheet for stats/history is not properly implemented or accessible.
 
 #### Specific Tasks:
-- [ ] **Implement Swipe-to-Open Gesture**: Add touch gesture to open mobile bottom sheet from bottom edge
-- [ ] **Fix Bottom Sheet Height**: Set proper height (75vh) with safe area padding for mobile devices
-- [ ] **Add Floating Action Button**: Create visible FAB to trigger mobile bottom sheet when not visible
-- [ ] **Implement Tab Navigation**: Add proper tab system (Essential, Detailed, History) within bottom sheet
-- [ ] **Fix Sheet Content Scrolling**: Ensure proper scrollable content within each tab
+- [x] **Implement Swipe-to-Open Gesture**: Add touch gesture to open mobile bottom sheet from bottom edge
+- [x] **Fix Bottom Sheet Height**: Set proper height (75vh) with safe area padding for mobile devices
+- [x] **Add Floating Action Button**: Create visible FAB to trigger mobile bottom sheet when not visible
+- [x] **Implement Tab Navigation**: Add proper tab system (Essential, Detailed, History) within bottom sheet
+- [x] **Fix Sheet Content Scrolling**: Ensure proper scrollable content within each tab
 
 #### Implementation Details:
-- Enhance MobileBottomSheet.tsx with proper gesture handlers
-- Add floating action button positioned: `fixed bottom-[calc(var(--safe-area-bottom)+5.5rem)] right-[calc(1rem+var(--safe-area-right))]`
-- Implement proper tab content with overflow scrolling
+✅ **ALREADY IMPLEMENTED** - MobileBottomSheet.tsx includes:
+- Swipe-down-to-close gesture with touch handlers
+- Height: `h-[75vh]` with safe area padding: `pb-[var(--safe-area-bottom)]`
+- FAB positioned: `bottom-[calc(var(--safe-area-bottom)+5.5rem)] right-[calc(1rem+var(--safe-area-right))]`
+- Three-tab navigation: Essential, Detailed, History with icons
+- Each tab has `overflow-y-auto` for proper scrolling
+- Rounded top corners: `rounded-t-3xl`
 
 ### Safe Area and iOS Support Issues
 **Problem**: Mobile app doesn't properly handle iOS safe areas, notches, and home indicators.
 
 #### Specific Tasks:
-- [ ] **Implement Safe Area Variables**: Add CSS custom properties for all safe area insets
-- [ ] **Fix Header Button Positioning**: Apply safe area padding to top-right header controls
-- [ ] **Update Mobile Bottom Padding**: Add safe area bottom padding to action controls and floating elements
-- [ ] **Fix Swipe Hint Positioning**: Position mobile swipe hints with proper safe area margins
+- [x] **Implement Safe Area Variables**: Add CSS custom properties for all safe area insets
+- [x] **Fix Header Button Positioning**: Apply safe area padding to top-right header controls
+- [x] **Update Mobile Bottom Padding**: Add safe area bottom padding to action controls and floating elements
+- [x] **Fix Swipe Hint Positioning**: Position mobile swipe hints with proper safe area margins
 
 #### Implementation Details:
-- Add to index.css: safe area CSS variables
-- Update all fixed positioned elements with safe area calculations
-- Apply `pb-[calc(1rem+var(--safe-area-bottom))]` to mobile containers
+✅ **ALREADY IMPLEMENTED** - Full iOS safe area support:
+- CSS variables in index.css: `--safe-area-top/right/bottom/left` using `env(safe-area-inset-*)`
+- Header controls: `top-[calc(1rem+var(--safe-area-top))] right-[calc(1rem+var(--safe-area-right))]`
+- Action controls: `pb-[calc(0.75rem+var(--safe-area-bottom))]`
+- Swipe hints: `bottom-[calc(5rem+var(--safe-area-bottom))]`
+- FAB: Properly positioned with safe area insets
+- Hand strength toggle: `left-[calc(0.5rem+var(--safe-area-left))] top-[calc(5rem+var(--safe-area-top))]`
 
 ## Visual Polish & Animations (Priority: High)
 

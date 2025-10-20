@@ -75,8 +75,8 @@ export class GameEngine {
         handDistribution: {},
       },
       achievements: Object.fromEntries(
-        Object.entries(ACHIEVEMENT_LIST).map(([id, ach]) => [id, { ...ach }])
-      ),
+        Object.entries(ACHIEVEMENT_LIST).map(([id, ach]) => [id, { ...ach, unlockedAt: undefined }])
+      ) as Record<AchievementId, Achievement>,
     };
   }
 
