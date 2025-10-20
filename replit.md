@@ -16,10 +16,16 @@ I prefer iterative development with clear communication on major changes. Please
   - Error haptic: Invalid bet attempts
   - Selection changed haptic: Quick bet buttons
 - **Touch Target Fixes**: Fixed SidebarTrigger from 28px to 44px minimum, ensuring all interactive elements meet iOS HIG 44×44pt requirement
-- **Button Spacing**: Verified all buttons have ≥8px spacing (gap-2 = 8px, gap-3 = 12px, gap-4 = 16px)
+- **Button Spacing**: Verified all buttons have ≥8px spacing (gap-2 = 8px on mobile, gap-4 = 16px on desktop)
 - **Responsive Button Widths**: Optimized button sizes across breakpoints to prevent overflow
   - xs: 100px → 110px → sm: 120px → md: 110px → lg: 140px
   - Height: 44px mobile, 52px tablets (exceeds 44px minimum)
+- **Layout Strategy Fix**: Changed main container from `md:flex-row` to `lg:flex-row` to prevent button overflow at md: (768px) breakpoint
+  - md: (≤1023px): Vertical layout with full-width ActionControls
+  - lg: (1024px+): Horizontal layout with sidebars
+  - ActionControls container: `md:max-w-none` to use available space
+  - Container padding: `md:p-3` for optimized spacing
+  - Button gaps: `md:gap-2` to minimize horizontal space usage
 - **Visual Feedback**: Enhanced active states with `active-elevate-2` class combined with haptic and sound feedback
 - **Multi-Sensory Feedback**: Buttons provide visual (color/elevation), auditory (sound), and tactile (haptic) feedback on press
 

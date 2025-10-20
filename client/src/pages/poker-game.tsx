@@ -743,7 +743,7 @@ export default function PokerGame() {
       </div>
 
       {/* Cleaner Centered Layout */}
-      <div className="w-full max-w-[2000px] flex flex-col md:flex-row lg:flex-row gap-4 md:gap-5 lg:gap-6 items-start justify-center">
+      <div className="w-full max-w-[2000px] flex flex-col lg:flex-row gap-4 lg:gap-6 items-start justify-center">
         
         {/* Hand Strength Indicator - Floating Panel (Desktop) / Collapsible (Mobile) */}
         <div className="md:sticky lg:sticky md:top-6 lg:top-6 md:self-start lg:self-start order-2 lg:order-1 w-full md:w-72 lg:w-64 xl:w-72">
@@ -863,7 +863,7 @@ export default function PokerGame() {
           </div>
 
           {/* Controls */}
-          <div className="w-full max-w-3xl" style={{ zIndex: 5 }}>
+          <div className="w-full max-w-3xl md:max-w-none" style={{ zIndex: 5 }}>
             {gameState.phase === 'waiting' ? (
               <Button 
                 onClick={startNewHand}

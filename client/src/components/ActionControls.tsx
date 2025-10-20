@@ -178,8 +178,8 @@ export function ActionControls({
   const isSignificantBet = betPercentageOfChips > 50;
 
   return (
-    <div className="flex flex-col gap-4 p-4 sm:p-6 md:p-5 pb-[calc(1rem+var(--safe-area-bottom))] bg-card/50 backdrop-blur-sm rounded-lg border border-card-border">
-      <div className="flex gap-2 xs:gap-3 md:gap-4 justify-center flex-wrap">
+    <div className="flex flex-col gap-4 p-4 sm:p-6 md:p-3 pb-[calc(1rem+var(--safe-area-bottom))] bg-card/50 backdrop-blur-sm rounded-lg border border-card-border">
+      <div className="flex gap-2 xs:gap-3 md:gap-2 lg:gap-4 justify-center flex-wrap">
         <Button
           onClick={handleFold}
           variant="destructive"
@@ -198,7 +198,7 @@ export function ActionControls({
             size="lg"
             disabled={disabled}
             data-testid="button-check"
-            className="min-w-[100px] xs:min-w-[110px] sm:min-w-[120px] md:min-w-[140px] min-h-11 md:min-h-[52px] bg-accent hover:bg-accent/90 poker-button-glow"
+            className="min-w-[100px] xs:min-w-[110px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] min-h-11 md:min-h-[52px] bg-accent hover:bg-accent/90 poker-button-glow"
           >
             Check <span className="text-xs ml-1 opacity-70 hidden sm:inline">(C)</span>
           </Button>
@@ -209,7 +209,7 @@ export function ActionControls({
             size="lg"
             disabled={disabled || amountToCall <= 0}
             data-testid="button-call"
-            className="min-w-[100px] xs:min-w-[110px] sm:min-w-[120px] md:min-w-[140px] min-h-11 md:min-h-[52px] bg-accent hover:bg-accent/90 poker-button-glow"
+            className="min-w-[100px] xs:min-w-[110px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] min-h-11 md:min-h-[52px] bg-accent hover:bg-accent/90 poker-button-glow"
           >
             Call ${amountToCall} <span className="text-xs ml-1 opacity-70 hidden sm:inline">(C)</span>
           </Button>
@@ -284,7 +284,7 @@ export function ActionControls({
             </div>
           </motion.div>
 
-          <div className="flex gap-2 xs:gap-3 md:gap-4 justify-center flex-wrap">
+          <div className="flex gap-2 xs:gap-3 md:gap-2 lg:gap-4 justify-center flex-wrap">
             <Button
               onClick={() => handleQuickBet(halfPot)}
               variant="outline"
