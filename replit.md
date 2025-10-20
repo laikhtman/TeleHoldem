@@ -8,6 +8,21 @@ I prefer iterative development with clear communication on major changes. Please
 
 ## Recent Changes
 
+### October 20, 2025: Mobile UI/UX Enhancements (Apple HIG Compliance)
+- **Haptic Feedback System**: Created `useHaptic` hook with Telegram WebApp HapticFeedback API integration and Vibration API fallback
+  - Light haptic: Fold, Check actions
+  - Medium haptic: Call action
+  - Heavy haptic: Bet, Raise, All-In actions
+  - Error haptic: Invalid bet attempts
+  - Selection changed haptic: Quick bet buttons
+- **Touch Target Fixes**: Fixed SidebarTrigger from 28px to 44px minimum, ensuring all interactive elements meet iOS HIG 44×44pt requirement
+- **Button Spacing**: Verified all buttons have ≥8px spacing (gap-2 = 8px, gap-3 = 12px, gap-4 = 16px)
+- **Responsive Button Widths**: Optimized button sizes across breakpoints to prevent overflow
+  - xs: 100px → 110px → sm: 120px → md: 110px → lg: 140px
+  - Height: 44px mobile, 52px tablets (exceeds 44px minimum)
+- **Visual Feedback**: Enhanced active states with `active-elevate-2` class combined with haptic and sound feedback
+- **Multi-Sensory Feedback**: Buttons provide visual (color/elevation), auditory (sound), and tactile (haptic) feedback on press
+
 ### October 19, 2025: Mobile/iOS Optimization
 - **xs: Breakpoint**: Added xs: (480px) for mobile-first design targeting phones ≤480px width
 - **Safe-Area Support**: Implemented CSS variables (--safe-area-top/bottom/left/right) using env() for iOS notch and home indicator support

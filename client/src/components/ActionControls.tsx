@@ -186,7 +186,7 @@ export function ActionControls({
           size="lg"
           disabled={disabled}
           data-testid="button-fold"
-          className="min-w-[100px] xs:min-w-[110px] sm:min-w-[120px] md:min-w-[140px] min-h-11 md:min-h-[52px] poker-button-glow"
+          className="min-w-[100px] xs:min-w-[110px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] min-h-11 md:min-h-[52px] poker-button-glow"
         >
           Fold <span className="text-xs ml-1 opacity-70 hidden sm:inline">(F)</span>
         </Button>
