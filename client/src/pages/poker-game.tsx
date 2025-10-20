@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useMutation } from '@tanstack/react-query';
+import { Link } from 'wouter';
 import { GameState, GamePhase, Card, ActionHistoryEntry, PlayerAction, ACHIEVEMENT_LIST } from '@shared/schema';
 import { gameEngine } from '@/lib/gameEngine';
 import { botAI } from '@/lib/botAI';
@@ -20,7 +21,7 @@ import { HandStrengthIndicator } from '@/components/HandStrengthIndicator';
 import { PotOddsDisplay } from '@/components/PotOddsDisplay';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FlyingChip } from '@/components/Chip';
-import { Trash2, ChevronRight, ChevronLeft, TrendingUp } from 'lucide-react';
+import { Trash2, ChevronRight, ChevronLeft, TrendingUp, Settings } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useSound } from '@/hooks/useSound';
 import { useSwipe } from '@/hooks/useSwipe';
@@ -814,6 +815,17 @@ export default function PokerGame() {
       
       {/* Header Controls - Fixed Top Right with safe-area padding */}
       <div className="fixed top-[calc(1rem+var(--safe-area-top))] right-[calc(1rem+var(--safe-area-right))] z-50 flex gap-2">
+        <Link href="/settings">
+          <Button 
+            variant="outline" 
+            size="icon"
+            aria-label="Application Settings"
+            data-testid="button-admin-settings"
+            className="min-h-11 min-w-11"
+          >
+            <Settings className="w-5 h-5" />
+          </Button>
+        </Link>
         <ThemeToggle />
         <SettingsPanel 
           settings={settings}
