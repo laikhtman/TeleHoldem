@@ -41,7 +41,7 @@ Visual elements include:
 - **Accessibility**: Comprehensive ARIA labels for screen reader support, keyboard navigation, and colorblind mode with geometric suit indicators.
 - **Mobile Responsiveness**: `xs:` (480px) breakpoint for mobile-first design, safe-area support for iOS devices, and adaptive layouts for tablets (`md:` breakpoint) including orientation detection.
 - **Haptic Feedback**: `useHaptic` hook for Telegram WebApp HapticFeedback and Vibration API integration for enhanced tactile user experience.
-- **Admin Configuration**: Dedicated `/settings` page for backend configuration management, including system status monitoring and game defaults, with data persisted in an `app_settings` table.
+- **Admin Configuration**: Dedicated `/settings` page for backend configuration management, including system status monitoring (database, Telegram bot ✅ configured, environment), game defaults (default bankroll, session duration), with data persisted in an `app_settings` table. Telegram bot token securely stored via Replit Secrets.
 
 ## External Dependencies
 - React

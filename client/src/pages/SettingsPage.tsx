@@ -47,8 +47,10 @@ export default function SettingsPage() {
   const [sessionDuration, setSessionDuration] = useState('7');
 
   // Fetch system status
-  const { data: statusData, isLoading: statusLoading, refetch: refetchStatus } = useQuery<{ data: SystemStatus }>({
+  const { data: statusData, isLoading: statusLoading, refetch: refetchStatus } = useQuery<SystemStatus>({
     queryKey: ['/api/system/status'],
+    staleTime: 0, // Always fetch fresh data
+    gcTime: 0, // Don't cache
   });
 
   // Fetch all settings
@@ -106,7 +108,7 @@ export default function SettingsPage() {
     });
   };
 
-  const system = statusData?.data;
+  const system = statusData;
   const settings = settingsData?.settings || [];
 
   return (
