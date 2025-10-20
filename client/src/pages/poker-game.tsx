@@ -792,7 +792,26 @@ export default function PokerGame() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-2 sm:p-4 lg:p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-background flex items-center justify-center p-2 sm:p-4 lg:p-6 relative overflow-hidden" role="main" aria-label="Poker game table">
+      {/* Skip link for keyboard users */}
+      <a 
+        href="#action-controls" 
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[200] focus:bg-poker-chipGold focus:text-black focus:px-4 focus:py-2 focus:rounded-md focus:font-bold"
+        data-testid="skip-to-controls"
+      >
+        Skip to action controls
+      </a>
+      
+      {/* Live region for game status announcements */}
+      <div 
+        aria-live="polite" 
+        aria-atomic="true" 
+        className="sr-only"
+        role="status"
+      >
+        {gameState.lastAction || `${getPhaseTitle(gameState.phase)} phase`}
+      </div>
+      
       {/* Header Controls - Fixed Top Right with safe-area padding */}
       <div className="fixed top-[calc(1rem+var(--safe-area-top))] right-[calc(1rem+var(--safe-area-right))] z-50 flex gap-2">
         <ThemeToggle />
@@ -855,6 +874,7 @@ export default function PokerGame() {
                 backgroundColor: tableThemeColors[settings.tableTheme]
               }}
               data-testid="poker-table"
+              aria-label={`Poker table - ${getPhaseTitle(gameState.phase)} phase - ${gameState.players.filter(p => !p.folded).length} players active`}
             >
               {/* Community Cards */}
               <CommunityCards 
@@ -947,13 +967,14 @@ export default function PokerGame() {
           </div>
 
           {/* Controls */}
-          <div className="w-full max-w-3xl md:max-w-none" style={{ zIndex: 5 }}>
+          <div id="action-controls" className="w-full max-w-3xl md:max-w-none" style={{ zIndex: 5 }}>
             {gameState.phase === 'waiting' ? (
               <Button 
                 onClick={startNewHand}
                 size="lg"
                 className="w-full min-h-[48px] bg-poker-chipGold text-black hover:bg-poker-chipGold/90 font-bold text-base sm:text-lg"
                 data-testid="button-start-hand"
+                aria-label="Start new hand"
               >
                 Start New Hand
               </Button>

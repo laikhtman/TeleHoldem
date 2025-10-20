@@ -117,8 +117,14 @@ export function CommunityCards({ cards, phase, colorblindMode = false }: Communi
     const skeletonsToShow = phase === 'flop' ? 3 : phase === 'turn' ? 1 : phase === 'river' ? 1 : 0;
     const skeletonStartIndex = phase === 'flop' ? 0 : phase === 'turn' ? 3 : phase === 'river' ? 4 : 0;
   
+    const getCardDescription = (index: number): string => {
+      const card = cards[index];
+      if (!card) return 'Empty card slot';
+      return `${card.rank} of ${card.suit}`;
+    };
+
     return (
-      <div className="absolute top-[45%] left-1/2 transform -translate-x-1/2 -translate-y-1/2" style={{ zIndex: 3 }}>
+      <div className="absolute top-[45%] left-1/2 transform -translate-x-1/2 -translate-y-1/2" style={{ zIndex: 3 }} role="group" aria-label="Community cards">
         <div className="relative">
           {/* Glow effect container */}
           <AnimatePresence>
@@ -155,6 +161,7 @@ export function CommunityCards({ cards, phase, colorblindMode = false }: Communi
                   {...animation}
                   data-testid={hasCard ? `community-card-${index}` : `community-card-empty-${index}`}
                   data-card-revealed={hasCard && revealedCards[index] && !isSkeletonVisible ? 'true' : 'false'}
+                  aria-label={getCardDescription(index)}
                 >
                   {isSkeletonVisible ? (
                     <CardSkeleton data-testid={`community-card-skeleton-${index}`} />

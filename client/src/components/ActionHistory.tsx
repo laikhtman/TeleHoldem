@@ -110,6 +110,10 @@ export function ActionHistory({ history, currentPlayerName }: ActionHistoryProps
     <div 
       className="flex flex-col h-full bg-card/70 backdrop-blur-sm border border-card-border rounded-lg shadow-sm"
       data-testid="action-history-sidebar"
+      role="log"
+      aria-live="polite"
+      aria-atomic="false"
+      aria-label="Action history log"
     >
       <div className="p-4 border-b border-card-border">
         <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
@@ -163,6 +167,7 @@ export function ActionHistory({ history, currentPlayerName }: ActionHistoryProps
                               : 'hover-elevate'
                           }`}
                           data-testid={`action-history-entry-${entry.id}`}
+                          aria-label={`${entry.playerName || 'Game'}: ${entry.message}${entry.amount ? ` for ${entry.amount} dollars` : ''}`}
                         >
                           <div className="mt-0.5">
                             <Badge 

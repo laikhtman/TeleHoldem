@@ -134,6 +134,17 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
     }
   };
 
+  const getPlayerStatusDescription = () => {
+    const parts = [player.name];
+    if (player.chips === 0) parts.push('eliminated');
+    else parts.push(`${player.chips} chips`);
+    if (player.folded) parts.push('folded');
+    else if (player.allIn) parts.push('all-in');
+    if (isCurrentPlayer) parts.push('current turn');
+    if (isDealer) parts.push('dealer');
+    return parts.join(', ');
+  };
+
   return (
     <div
       ref={seatRef}
@@ -142,6 +153,9 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
       data-testid={`player-seat-${player.id}`}
       onMouseEnter={() => setShowStats(true)}
       onMouseLeave={() => setShowStats(false)}
+      role="article"
+      aria-label={getPlayerStatusDescription()}
+      aria-current={isCurrentPlayer ? "true" : undefined}
     >
       <AnimatePresence>{showStats && <PlayerStats player={player} />}</AnimatePresence>
       <div className={seatClasses}>
@@ -209,8 +223,8 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
             )}
           </div>
           <div className="flex items-center justify-center gap-0.5 xs:gap-1 text-poker-chipGold font-mono font-bold text-xs xs:text-sm md:text-base">
-            <Coins className="w-3 h-3 xs:w-4 xs:h-4" />
-            <span data-testid={`player-chips-${player.id}`}>${animatedChipCount}</span>
+            <Coins className="w-3 h-3 xs:w-4 xs:h-4" aria-hidden="true" />
+            <span data-testid={`player-chips-${player.id}`} aria-label={`${player.name} has ${animatedChipCount} dollars in chips`}>${animatedChipCount}</span>
           </div>
           {player.bet > 0 && (
             <div className="text-[10px] xs:text-xs text-poker-success mt-0.5 xs:mt-1" data-testid={`player-bet-${player.id}`}>
@@ -218,12 +232,12 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
             </div>
           )}
           {player.folded && (
-            <div className="text-[10px] xs:text-xs text-destructive mt-0.5 xs:mt-1" data-testid={`player-folded-${player.id}`}>
+            <div className="text-[10px] xs:text-xs text-destructive mt-0.5 xs:mt-1" data-testid={`player-folded-${player.id}`} aria-label={`${player.name} has folded`}>
               Folded
             </div>
           )}
           {player.allIn && (
-            <div className="text-[10px] xs:text-xs text-poker-chipGold mt-0.5 xs:mt-1 font-bold" data-testid={`player-allin-${player.id}`}>
+            <div className="text-[10px] xs:text-xs text-poker-chipGold mt-0.5 xs:mt-1 font-bold" data-testid={`player-allin-${player.id}`} aria-label={`${player.name} is all-in`}>
               ALL IN!
             </div>
           )}

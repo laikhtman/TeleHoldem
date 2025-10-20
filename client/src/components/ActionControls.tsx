@@ -189,6 +189,8 @@ export function ActionControls({
           disabled={disabled}
           data-testid="button-fold"
           className="min-w-[100px] xs:min-w-[110px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] min-h-11 md:min-h-[52px] poker-button-glow"
+          aria-label="Fold your hand. Keyboard shortcut: F key"
+          aria-disabled={disabled}
         >
           Fold <span className="text-xs ml-1 opacity-70 hidden sm:inline">(F)</span>
         </Button>
@@ -201,6 +203,8 @@ export function ActionControls({
             disabled={disabled}
             data-testid="button-check"
             className="min-w-[100px] xs:min-w-[110px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] min-h-11 md:min-h-[52px] bg-accent hover:bg-accent/90 poker-button-glow"
+            aria-label="Check - pass your turn without betting. Keyboard shortcut: C key"
+            aria-disabled={disabled}
           >
             Check <span className="text-xs ml-1 opacity-70 hidden sm:inline">(C)</span>
           </Button>
@@ -212,6 +216,8 @@ export function ActionControls({
             disabled={disabled || amountToCall <= 0}
             data-testid="button-call"
             className="min-w-[100px] xs:min-w-[110px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] min-h-11 md:min-h-[52px] bg-accent hover:bg-accent/90 poker-button-glow"
+            aria-label={`Call ${amountToCall} dollars to match the current bet. Keyboard shortcut: C key`}
+            aria-disabled={disabled || amountToCall <= 0}
           >
             Call ${amountToCall} <span className="text-xs ml-1 opacity-70 hidden sm:inline">(C)</span>
           </Button>
@@ -224,6 +230,8 @@ export function ActionControls({
           disabled={disabled || maxBet < minBet}
           data-testid="button-bet-raise"
           className="min-w-[100px] xs:min-w-[110px] sm:min-w-[120px] md:min-w-[140px] min-h-11 md:min-h-[52px] bg-poker-chipGold text-black hover:bg-poker-chipGold/90 font-bold poker-button-glow"
+          aria-label={currentBet === 0 ? `Bet ${betAmount} dollars. Keyboard shortcut: R key` : `Raise to ${betAmount} dollars. Keyboard shortcut: R key`}
+          aria-disabled={disabled || maxBet < minBet}
         >
           {currentBet === 0 ? `Bet $${betAmount}` : `Raise to $${betAmount}`} <span className="text-xs ml-1 opacity-70 hidden sm:inline">(R)</span>
         </Button>
@@ -293,6 +301,7 @@ export function ActionControls({
               disabled={disabled || halfPot < (currentBet > 0 ? minRaiseAmount : minBet) || halfPot > maxBet}
               data-testid="button-quick-half-pot"
               className="min-w-[90px] min-h-11 md:min-h-[48px] text-sm"
+              aria-label={`Quick bet half pot: ${halfPot} dollars`}
             >
               1/2 Pot
             </Button>
@@ -302,6 +311,7 @@ export function ActionControls({
               disabled={disabled || potSize < (currentBet > 0 ? minRaiseAmount : minBet) || potSize > maxBet}
               data-testid="button-quick-pot"
               className="min-w-[90px] min-h-11 md:min-h-[48px] text-sm"
+              aria-label={`Quick bet pot size: ${potSize} dollars`}
             >
               Pot
             </Button>
@@ -311,6 +321,7 @@ export function ActionControls({
               disabled={disabled || maxBet <= (currentBet > 0 ? minRaiseAmount : minBet)}
               data-testid="button-quick-all-in"
               className="min-w-[90px] min-h-11 md:min-h-[48px] text-sm border-poker-chipGold/50 text-poker-chipGold hover:bg-poker-chipGold/10"
+              aria-label={`Go all-in with all your chips: ${maxBet} dollars. Keyboard shortcut: A key`}
             >
               All-In <span className="text-xs ml-1 opacity-70 hidden sm:inline">(A)</span>
             </Button>
@@ -325,7 +336,12 @@ export function ActionControls({
             disabled={disabled}
             data-testid="slider-bet"
             className="w-full [&>span:first-child]:h-2 [&>span:first-child]:md:h-3"
+            aria-label={`Bet amount slider. Range from ${currentBet > 0 ? minRaiseAmount : minBet} to ${maxBet} dollars. Current value: ${betAmount} dollars`}
+            aria-describedby="bet-amount-description"
           />
+          <span id="bet-amount-description" className="sr-only">
+            Use the slider to adjust your bet amount. Minimum bet is {currentBet > 0 ? minRaiseAmount : minBet} dollars. Maximum bet is {maxBet} dollars.
+          </span>
           <div className="flex justify-between text-xs text-muted-foreground">
             <span>${currentBet > 0 ? minRaiseAmount : minBet}</span>
             <span>${maxBet}</span>

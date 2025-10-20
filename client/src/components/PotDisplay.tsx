@@ -18,6 +18,10 @@ export function PotDisplay({ amount, onRef }: PotDisplayProps) {
       ref={onRef}
       className="absolute top-[30%] left-1/2 transform -translate-x-1/2"
       style={{ zIndex: 3 }}
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+      aria-label={`Current pot: ${amount} dollars`}
     >
       <AnimatePresence>
         {amount > 0 && (
