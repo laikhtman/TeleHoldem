@@ -18,7 +18,7 @@ import {
   RefreshCw,
   Save
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface SystemStatus {
   database: {
@@ -55,6 +55,21 @@ export default function SettingsPage() {
   const { data: settingsData, isLoading: settingsLoading } = useQuery<{ settings: AppSetting[] }>({
     queryKey: ['/api/settings'],
   });
+
+  // Update form inputs when settings are loaded
+  useEffect(() => {
+    if (settingsData?.settings) {
+      const bankrollSetting = settingsData.settings.find(s => s.key === 'default_bankroll');
+      const sessionSetting = settingsData.settings.find(s => s.key === 'session_duration_days');
+      
+      if (bankrollSetting) {
+        setDefaultBankroll(String(bankrollSetting.value));
+      }
+      if (sessionSetting) {
+        setSessionDuration(String(sessionSetting.value));
+      }
+    }
+  }, [settingsData]);
 
   // Mutation to update a setting
   const updateSettingMutation = useMutation({
