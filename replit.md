@@ -8,6 +8,16 @@ I prefer iterative development with clear communication on major changes. Please
 
 ## Recent Changes
 
+### October 20, 2025: Game Settings, Accessibility & Advanced Features
+- **Settings Panel**: Comprehensive settings sheet with sound toggle, animation speed slider (slow/normal/fast), table theme selector (4 themes), colorblind mode toggle, and pause/resume control
+- **Pause/Resume System**: Full pause functionality blocking bot actions, disabling player controls, showing overlay, with state persistence in localStorage
+- **Table Themes**: Four poker table felt themes (Classic Green, Royal Blue, Casino Red, Royal Purple) with dynamic color application
+- **Colorblind Mode**: Geometric suit indicators on cards (spades=filled circle, hearts=filled square, diamonds=rotated square, clubs=circle outline) with ARIA labels for accessibility
+- **Sound System Enhancement**: useSound hook extended with localStorage persistence for mute state
+- **Comprehensive ARIA Labels**: Full screen reader support with role="main" for game, role="status" with aria-live="polite" for pot, role="log" for history, role="article" for player seats, aria-current for active player, and descriptive labels on all interactive elements
+- **Keyboard Navigation**: Skip link for keyboard users, focus management, keyboard shortcut hints in ARIA labels (F=Fold, C=Check/Call)
+- **Settings Persistence**: All user preferences (sound, animation speed, theme, colorblind mode, pause state) saved to localStorage
+
 ### October 20, 2025: Mobile Stats Enhancement & UX Refinements
 - **MobileStatsCompact Component**: Created dedicated essential stats view for mobile showing only crucial information (current chips, hands played, win rate) with large 2xl typography and color-coded icons
 - **Enhanced Bottom Sheet**: Reorganized into three tabs for better information hierarchy
