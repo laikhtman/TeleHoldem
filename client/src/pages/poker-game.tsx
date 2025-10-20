@@ -255,6 +255,12 @@ export default function PokerGame() {
     const bigBlindIndex = (newState.dealerIndex + 2) % NUM_PLAYERS;
     newState = gameEngine.postBlinds(newState, 10, 20);
     
+    // Safety check: ensure players array exists
+    if (!newState.players || newState.players.length === 0) {
+      console.error('Failed to initialize players in new hand');
+      return;
+    }
+    
     // Add blinds history
     newState = addActionHistory(
       newState,
