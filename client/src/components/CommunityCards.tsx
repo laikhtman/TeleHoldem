@@ -7,9 +7,10 @@ import { CardSkeleton } from './ui/card-skeleton';
 interface CommunityCardsProps {
   cards: Card[];
   phase: GamePhase;
+  colorblindMode?: boolean;
 }
 
-export function CommunityCards({ cards, phase }: CommunityCardsProps) {
+export function CommunityCards({ cards, phase, colorblindMode = false }: CommunityCardsProps) {
   const [revealedCards, setRevealedCards] = useState<boolean[]>(new Array(5).fill(false));
   const [previousCardCount, setPreviousCardCount] = useState(0);
   const [showGlow, setShowGlow] = useState(false);
@@ -162,6 +163,7 @@ export function CommunityCards({ cards, phase }: CommunityCardsProps) {
                       card={cards[index]}
                       animateFlip={hasCard && !revealedCards[index]}
                       className={hasCard ? 'shadow-lg' : ''}
+                      colorblindMode={colorblindMode}
                     />
                   )}
                 </motion.div>

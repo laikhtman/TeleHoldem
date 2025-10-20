@@ -1,0 +1,93 @@
+Game table & player positioning
+
+Scale and reposition the poker table for portrait screens: On phones, the elliptical table should fill most of the vertical screen in portrait orientation. Place the player’s seat at the bottom center so that action buttons align naturally below the cards. The Our Poker app case study suggests moving the user to the middle (or bottom) of the table and enlarging the user photo to improve readability
+casino-nonstop.com
+.
+
+Resize and stack opponent players: In the current demo, bot avatars are arranged around the table in fixed positions. On mobile, stack opponents along the top half of the table, making their names and chip counts legible without overlapping. Use scrollable avatars if there are more than five opponents.
+
+Ensure card and chip graphics scale gracefully: Define vector‑based or high‑resolution assets for cards and chips and scale them with CSS/SVG so they remain sharp on Retina displays. Avoid stretching assets that might distort curves, as the case study notes that resizing can damage curves and circular elements
+casino-nonstop.com
+.
+
+Stats, history & achievements
+
+Collapse the right‑hand sidebar into a bottom sheet: On small devices the current sidebar (Action History, Session Stats, Winning Hand Distribution, Achievements) consumes horizontal space and makes the table smaller. Hide this sidebar by default and provide a button (e.g., “Stats”) that opens a bottom sheet or modal overlay when tapped. This follows the recommendation to free space for new functionality and enlarge clickable zones
+casino-nonstop.com
+.
+
+Prioritize essential information: In the mobile view, show only crucial stats (hands played, win rate, current chips) and hide detailed distributions until requested. The case study shows that cutting out user information and enlarging buttons created a lighter interface
+casino-nonstop.com
+.
+
+Use icons with labels: Represent each stat with an intuitive icon (cards for hand history, trophy for achievements) and accompany it with a brief label. Icons should be SF Symbols when developing native iOS to integrate seamlessly with the system look.
+
+Typography & visual hierarchy
+
+Use dynamic type and scalable fonts: Support iOS Dynamic Type so text scales based on user accessibility settings. On the web, use rem units to ensure text scales proportionally. Avoid tiny text; keep body text at 17 pt or larger for readability on small screens
+justinmind.com
+.
+
+Establish a hierarchy through size and color: Primary actions (e.g., “Bet”) should have the highest contrast and largest size
+designshack.net
+; secondary actions (e.g., “Check”) should be slightly smaller or ghost‑style. Use bold fonts for headings and regular weight for body text.
+
+Ensure sufficient contrast for dark modes: Provide a dark theme where card text remains legible against dark felt backgrounds. Dark mode also saves battery life on OLED displays and is highlighted as a good practice in modern app examples
+justinmind.com
+.
+
+Gestures & interactions
+
+Support standard gestures: Users expect to tap to select, drag to move, flick to scroll and pinch to zoom. Avoid overriding these gestures; the HIG emphasises not to assign different actions to standard gestures
+tableless.github.io
+. Use custom gestures only as shortcuts and always provide an alternate method.
+
+Place swipe gestures in accessible areas: If the app uses swipe actions (e.g., swipe to fold or reveal action history), keep the gesture area within the easy‑to‑reach zone and provide enough space (≈45 px) to prevent accidental inputs
+smashingmagazine.com
+. Allow swipes to start anywhere in the relevant card or row.
+
+Avoid gesture conflicts: Ensure that pinch‑to‑zoom doesn’t conflict with panning around the table. Provide clear instructions if using multi‑finger gestures on iPad
+tableless.github.io
+.
+
+Graphics, animations & feedback
+
+Use subtle animations: The HIG recommends using subtle animation to communicate status or feedback without slowing users down
+tableless.github.io
+. Animate card dealing, chip movements and button transitions smoothly at 60 fps; avoid distracting or gratuitous effects that could hinder gameplay.
+
+Provide haptic feedback: On iOS devices, use UIImpactFeedbackGenerator to add vibration feedback when players deal cards, place bets or receive achievements
+justinmind.com
+. This makes interactions more immersive.
+
+Optimize assets for performance: Detect device capabilities (as suggested by the case study
+casino-nonstop.com
+) and load high‑resolution textures on capable devices while providing lower‑resolution assets for older phones to maintain smooth performance.
+
+Device‑specific considerations
+
+Landscape vs. portrait: Offer both orientations. In portrait, present a simplified table with a bottom action bar; in landscape, expand the table and reposition players around it. Respect user orientation preferences and avoid forcing orientation changes unless necessary (e.g., a button to enter full‑screen landscape mode).
+
+Adaptive layouts for iPhone vs. iPad: For iPad, you can keep the current desktop‑like two‑column layout (table + sidebar) because of the extra space. For iPhone, use single‑column views and overlays
+justinmind.com
+.
+
+Thumb‑zone design: Map the thumb zone for both right‑ and left‑handed users and place primary actions in easy‑to‑reach areas
+smashingmagazine.com
+. For example, in portrait mode, put the Bet button near the lower right (for right‑handed) or provide an option to mirror controls for left‑handed players.
+
+Respect system gestures and safe areas: Keep edge swipe areas free so users can still perform iOS system gestures (swipe up for home, swipe down for notifications). Use safe‑area insets to avoid collisions
+justinmind.com
+.
+
+Additional improvements
+
+Implement a settings/gear menu accessible via an icon: Provide access to options such as sound, language, and table themes without cluttering the main interface. Use a modal or slide‑in panel triggered by a 44 × 44 pt icon.
+
+Allow dark/light felt themes and custom card backs: Offer personalization that doesn’t hinder gameplay; ensure color choices maintain sufficient contrast for accessibility
+designshack.net
+.
+
+Optimize fonts and icons for Retina displays: Use vector or high‑resolution assets and test on various iPhone models to ensure crisp appearance.
+
+Provide tutorial/onboarding overlay for first‑time users: Use concise tooltips to explain interface elements and gestures. Keep help minimal, as mobile users prefer quick start experiences

@@ -21,7 +21,9 @@ type SoundType =
 
 // Singleton AudioContext - shared across all components
 let audioContextInstance: AudioContext | null = null;
-let isMuted = false;
+
+// Load muted state from localStorage
+let isMuted = typeof window !== 'undefined' ? localStorage.getItem('soundMuted') === 'true' : false;
 
 function getAudioContext(): AudioContext {
   if (!audioContextInstance) {
@@ -344,11 +346,17 @@ export function useSound() {
 
   const toggleMute = useCallback(() => {
     isMuted = !isMuted;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('soundMuted', String(isMuted));
+    }
     return isMuted;
   }, []);
 
   const setMuted = useCallback((muted: boolean) => {
     isMuted = muted;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('soundMuted', String(muted));
+    }
   }, []);
 
   return {

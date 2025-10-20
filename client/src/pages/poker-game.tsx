@@ -25,6 +25,7 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useSound } from '@/hooks/useSound';
 import { useSwipe } from '@/hooks/useSwipe';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { SettingsPanel, GameSettings } from '@/components/SettingsPanel';
 import { useTelegramAuth } from '@/hooks/useTelegramAuth';
 import { apiRequest } from '@/lib/queryClient';
 import { useOrientation } from '@/hooks/useOrientation';
@@ -85,6 +86,25 @@ export default function PokerGame() {
   const { user, isAuthenticated, isStandalone } = useTelegramAuth();
   const { isLandscape } = useOrientation();
 
+  // Settings state with localStorage persistence
+  const [settings, setSettings] = useState<GameSettings>(() => {
+    try {
+      const savedSettings = localStorage.getItem('pokerGameSettings');
+      if (savedSettings) {
+        return JSON.parse(savedSettings);
+      }
+    } catch (error) {
+      console.error('Failed to load settings from localStorage:', error);
+    }
+    return {
+      soundEnabled: true,
+      animationSpeed: 1,
+      tableTheme: 'classic',
+      colorblindMode: false,
+      isPaused: false
+    };
+  });
+
   // Mutation to save stats to backend (only for authenticated Telegram users)
   const saveStatsMutation = useMutation({
     mutationFn: async (stats: { handsPlayed: number; handsWon: number; biggestPot: number; totalWinnings: number; achievements: string[] }) => {
@@ -105,13 +125,30 @@ export default function PokerGame() {
     },
   });
 
+  // Save settings to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem('pokerGameSettings', JSON.stringify(settings));
+    } catch (error) {
+      console.error('Failed to save settings to localStorage:', error);
+    }
+  }, [settings]);
+
+  const handleSettingsChange = (newSettings: Partial<GameSettings>) => {
+    setSettings(prev => ({ ...prev, ...newSettings }));
+  };
+
+  const handlePauseToggle = () => {
+    setSettings(prev => ({ ...prev, isPaused: !prev.isPaused }));
+  };
+
   useSwipe({
     onSwipeLeft: () => {
-      if (!gameState || gameState.currentPlayerIndex !== 0 || isProcessing) return;
+      if (!gameState || gameState.currentPlayerIndex !== 0 || isProcessing || settings.isPaused) return;
       handleFold();
     },
     onSwipeRight: () => {
-      if (!gameState || gameState.currentPlayerIndex !== 0 || isProcessing) return;
+      if (!gameState || gameState.currentPlayerIndex !== 0 || isProcessing || settings.isPaused) return;
       const canCheck = gameState.currentBet === 0 || gameState.currentBet === gameState.players[0].bet;
       if (canCheck) {
         handleCheck();
@@ -302,6 +339,11 @@ export default function PokerGame() {
   };
 
   const processBotActions = async (state: GameState) => {
+    // Don't process bot actions if game is paused
+    if (settings.isPaused) {
+      return;
+    }
+    
     setIsProcessing(true);
     let currentState = state;
 
@@ -627,7 +669,7 @@ export default function PokerGame() {
   };
 
   const handleFold = () => {
-    if (!gameState || isProcessing) return;
+    if (!gameState || isProcessing || settings.isPaused) return;
     setIsProcessing(true);
     let newState = gameEngine.playerFold(gameState, 0);
     newState = addActionHistory(
@@ -641,7 +683,7 @@ export default function PokerGame() {
   };
 
   const handleCheck = () => {
-    if (!gameState || isProcessing) return;
+    if (!gameState || isProcessing || settings.isPaused) return;
     setIsProcessing(true);
     let newState = gameEngine.playerCheck(gameState, 0);
     newState = addActionHistory(
@@ -655,7 +697,7 @@ export default function PokerGame() {
   };
 
   const handleCall = () => {
-    if (!gameState || isProcessing) return;
+    if (!gameState || isProcessing || settings.isPaused) return;
     setIsProcessing(true);
     const amountToCall = gameState.currentBet - gameState.players[0].bet;
     let newState = gameEngine.playerBet(gameState, 0, amountToCall);
@@ -671,7 +713,7 @@ export default function PokerGame() {
   };
 
   const handleBet = (amount: number) => {
-    if (!gameState || isProcessing) return;
+    if (!gameState || isProcessing || settings.isPaused) return;
     setIsProcessing(true);
     let newState = gameEngine.playerBet(gameState, 0, amount);
     newState = addActionHistory(
@@ -686,7 +728,7 @@ export default function PokerGame() {
   };
 
   const handleRaise = (amount: number) => {
-    if (!gameState || isProcessing) return;
+    if (!gameState || isProcessing || settings.isPaused) return;
     setIsProcessing(true);
     const currentPlayerBet = gameState.players[0].bet;
     let newState = gameEngine.playerBet(gameState, 0, amount);
@@ -741,11 +783,25 @@ export default function PokerGame() {
   const maxBet = humanPlayer.chips;
   const minRaiseAmount = gameState.currentBet + (gameState.currentBet - (gameState.players.find(p => p.bet < gameState.currentBet)?.bet || 0));
 
+  // Table theme colors
+  const tableThemeColors = {
+    classic: 'hsl(140 70% 25%)',
+    blue: 'hsl(220 70% 30%)',
+    red: 'hsl(0 60% 30%)',
+    purple: 'hsl(280 60% 28%)'
+  };
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-2 sm:p-4 lg:p-6 relative overflow-hidden">
-      {/* Theme Toggle - Fixed Top Right with safe-area padding */}
-      <div className="fixed top-[calc(1rem+var(--safe-area-top))] right-[calc(1rem+var(--safe-area-right))] z-50">
+      {/* Header Controls - Fixed Top Right with safe-area padding */}
+      <div className="fixed top-[calc(1rem+var(--safe-area-top))] right-[calc(1rem+var(--safe-area-right))] z-50 flex gap-2">
         <ThemeToggle />
+        <SettingsPanel 
+          settings={settings}
+          onSettingsChange={handleSettingsChange}
+          onPauseToggle={handlePauseToggle}
+          disabled={isProcessing}
+        />
       </div>
 
       {/* Cleaner Centered Layout */}
@@ -794,11 +850,18 @@ export default function PokerGame() {
             {/* Poker Table Felt Surface */}
             <div 
               className="relative felt-texture vignette table-depth rounded-[113px] sm:rounded-[152px] md:rounded-[181px] lg:rounded-[210px] overflow-visible w-full h-full"
-              style={{ zIndex: 0 }}
+              style={{ 
+                zIndex: 0,
+                backgroundColor: tableThemeColors[settings.tableTheme]
+              }}
               data-testid="poker-table"
             >
               {/* Community Cards */}
-              <CommunityCards cards={gameState.communityCards} phase={gameState.phase} />
+              <CommunityCards 
+                cards={gameState.communityCards} 
+                phase={gameState.phase}
+                colorblindMode={settings.colorblindMode}
+              />
 
               {/* Pot Display */}
               <PotDisplay 
@@ -820,6 +883,7 @@ export default function PokerGame() {
                   lastAction={gameState.lastAction}
                   winAmount={winAmounts[player.id] || 0}
                   isProcessing={isProcessing}
+                  colorblindMode={settings.colorblindMode}
                 />
               ))}
 
@@ -865,6 +929,20 @@ export default function PokerGame() {
                   </div>
                 </div>
               )}
+
+              {/* Game Paused Overlay */}
+              {settings.isPaused && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm rounded-[113px] sm:rounded-[152px] md:rounded-[181px] lg:rounded-[210px]" style={{ zIndex: 100 }}>
+                  <div className="bg-card/95 backdrop-blur-md px-8 py-6 rounded-lg border-2 border-poker-chipGold shadow-2xl">
+                    <div className="text-2xl font-bold text-center text-poker-chipGold" data-testid="text-game-paused">
+                      Game Paused
+                    </div>
+                    <p className="text-sm text-muted-foreground text-center mt-2">
+                      Click Resume in Settings to continue
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -894,7 +972,8 @@ export default function PokerGame() {
                 minRaiseAmount={minRaiseAmount}
                 potSize={gameState.pots.reduce((sum, pot) => sum + pot.amount, 0)}
                 playerChips={humanPlayer.chips}
-                disabled={gameState.currentPlayerIndex !== 0 || isProcessing || humanPlayer.folded}
+                disabled={gameState.currentPlayerIndex !== 0 || isProcessing || humanPlayer.folded || settings.isPaused}
+                animationSpeed={settings.animationSpeed}
               />
             )}
           </div>

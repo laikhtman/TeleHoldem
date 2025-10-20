@@ -24,6 +24,7 @@ interface ActionControlsProps {
   potSize: number;
   playerChips: number;
   disabled?: boolean;
+  animationSpeed?: number;
 }
 
 export function ActionControls({ 
@@ -40,7 +41,8 @@ export function ActionControls({
   minRaiseAmount,
   potSize,
   playerChips,
-  disabled = false
+  disabled = false,
+  animationSpeed = 1
 }: ActionControlsProps) {
   const [betAmount, setBetAmount] = useState(minBet);
   const { isShaking: isSliderShaking, triggerShake: triggerSliderShake } = useShake(400);

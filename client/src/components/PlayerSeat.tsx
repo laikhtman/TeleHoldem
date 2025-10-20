@@ -27,9 +27,10 @@ interface PlayerSeatProps {
   winAmount?: number;
   onChipAnimationTrigger?: (position: { x: number; y: number }) => void;
   isProcessing: boolean;
+  colorblindMode?: boolean;
 }
 
-export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, isDealer, isWinner, phase, lastAction, winAmount = 0, onChipAnimationTrigger, isProcessing }: PlayerSeatProps) {
+export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, isDealer, isWinner, phase, lastAction, winAmount = 0, onChipAnimationTrigger, isProcessing, colorblindMode = false }: PlayerSeatProps) {
   const [flyingChips, setFlyingChips] = useState<Array<{ id: number; startX: number; startY: number }>>([]);
   const [actionBadge, setActionBadge] = useState<ActionBadge | null>(null);
   const [showWinAmount, setShowWinAmount] = useState(false);
@@ -239,6 +240,7 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
                 dealDelay={position * 2 * 150}
                 animateFlip={player.isHuman && phase === 'pre-flop'}
                 className="transform scale-90"
+                colorblindMode={colorblindMode}
               />
               <PlayingCard 
                 card={player.hand[1]} 
@@ -247,6 +249,7 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
                 dealDelay={position * 2 * 150 + 150}
                 animateFlip={player.isHuman && phase === 'pre-flop'}
                 className="transform scale-90"
+                colorblindMode={colorblindMode}
               />
             </>
           )}
