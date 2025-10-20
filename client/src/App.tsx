@@ -5,10 +5,14 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { TelegramAuthGate } from "@/components/TelegramAuthGate";
 import PokerGame from "@/pages/poker-game";
+import SettingsPage from "@/pages/SettingsPage";
 
 function Router() {
   return (
     <Switch>
+      <Route path="/settings">
+        <SettingsPage />
+      </Route>
       <Route path="/demo">
         <PokerGame />
       </Route>
