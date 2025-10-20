@@ -9,7 +9,14 @@ I prefer iterative development with clear communication on major changes. Please
 ## System Architecture
 
 ### UI/UX Decisions
-The application features a professional, centered flexbox layout with the poker table as the focal point, utilizing a a 3:2 aspect ratio. Player positioning is calculated trigonometrically around the table. A robust z-index system and semi-transparent sidebars with backdrop blur are implemented. The design emphasizes a mobile-first approach with responsive breakpoints.
+The application features a professional, centered flexbox layout with the poker table as the focal point, utilizing a 3:2 aspect ratio. Player positioning is calculated trigonometrically around the table. A robust z-index system and semi-transparent sidebars with backdrop blur are implemented. The design emphasizes a mobile-first approach with responsive breakpoints.
+
+**Mobile Optimizations (October 2025):**
+- **Apple HIG Compliance**: All action buttons use explicit `min-h-[48px]` (48px minimum) to guarantee ≥44pt touch targets regardless of root font scaling
+- **Safe Area Support**: Comprehensive iOS safe area inset handling via CSS variables (`--safe-area-top/right/bottom/left`) applied to all fixed/absolute elements (header, action controls, FAB, swipe hints, table container)
+- **Responsive Table Scaling**: Poker table scales from 90% width on mobile (portrait) to 100% on desktop with proportional border radius and landscape constraints (`max-h-[min(75vh,800px)]`)
+- **Enhanced Action Controls**: Semi-transparent container (`bg-card/60 backdrop-blur-md`) with responsive padding and safe area bottom padding
+- **MobileBottomSheet**: Fully functional 75vh height sheet with swipe-down-to-close gesture, FAB, and three-tab navigation (Essential, Detailed, History)
 Visual elements include:
 - Enhanced card animations (staggered dealing, 3D flips, glow effects).
 - Realistic chip movement with arc trajectories and animated counters.
