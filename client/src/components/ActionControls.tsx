@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { useShake } from '@/hooks/useShake';
 import { useToast } from '@/hooks/use-toast';
 import { useSound } from '@/hooks/useSound';
+import { useHaptic } from '@/hooks/useHaptic';
 
 interface ActionControlsProps {
   onFold: () => void;
@@ -45,26 +46,30 @@ export function ActionControls({
   const { isShaking: isSliderShaking, triggerShake: triggerSliderShake } = useShake(400);
   const { toast } = useToast();
   const { playSound } = useSound();
+  const { triggerHaptic } = useHaptic();
 
   useEffect(() => {
     setBetAmount(currentBet > 0 ? minRaiseAmount : minBet);
   }, [minBet, minRaiseAmount, currentBet]);
 
-  // Wrapped action handlers with sound effects
+  // Wrapped action handlers with sound effects and haptic feedback
   const handleFold = useCallback(() => {
+    triggerHaptic('light');
     playSound('fold', { volume: 0.2 });
     onFold();
-  }, [playSound, onFold]);
+  }, [triggerHaptic, playSound, onFold]);
 
   const handleCheck = useCallback(() => {
+    triggerHaptic('light');
     playSound('check', { volume: 0.15 });
     onCheck();
-  }, [playSound, onCheck]);
+  }, [triggerHaptic, playSound, onCheck]);
 
   const handleCall = useCallback(() => {
+    triggerHaptic('medium');
     playSound('button-click', { volume: 0.15 });
     onCall();
-  }, [playSound, onCall]);
+  }, [triggerHaptic, playSound, onCall]);
 
   const handleBetChange = (value: number[]) => {
     setBetAmount(value[0]);
@@ -74,6 +79,7 @@ export function ActionControls({
     const minRequired = currentBet > 0 ? minRaiseAmount : minBet;
     
     if (betAmount < minRequired) {
+      triggerHaptic('error');
       triggerSliderShake();
       toast({
         variant: "destructive",
@@ -85,6 +91,7 @@ export function ActionControls({
     }
 
     if (betAmount > maxBet) {
+      triggerHaptic('error');
       triggerSliderShake();
       toast({
         variant: "destructive",
@@ -95,6 +102,7 @@ export function ActionControls({
       return;
     }
 
+    triggerHaptic('heavy');
     playSound('raise', { volume: 0.25 });
     
     if (currentBet === 0) {
@@ -102,7 +110,7 @@ export function ActionControls({
     } else {
       onRaise(betAmount);
     }
-  }, [betAmount, currentBet, maxBet, minBet, minRaiseAmount, onBet, onRaise, playSound, toast, triggerSliderShake]);
+  }, [betAmount, currentBet, maxBet, minBet, minRaiseAmount, onBet, onRaise, playSound, toast, triggerHaptic, triggerSliderShake]);
 
   const handleQuickBet = useCallback((amount: number) => {
     const clampedAmount = Math.max(
@@ -110,10 +118,12 @@ export function ActionControls({
       Math.min(amount, maxBet)
     );
     setBetAmount(clampedAmount);
+    triggerHaptic('selection_changed');
     playSound('button-click', { volume: 0.1 });
-  }, [currentBet, maxBet, minBet, minRaiseAmount, playSound]);
+  }, [currentBet, maxBet, minBet, minRaiseAmount, playSound, triggerHaptic]);
 
   const handleAllIn = useCallback(() => {
+    triggerHaptic('heavy');
     playSound('raise', { volume: 0.3 });
     
     if (currentBet === 0) {
@@ -121,7 +131,7 @@ export function ActionControls({
     } else {
       onRaise(maxBet);
     }
-  }, [currentBet, maxBet, onBet, onRaise, playSound]);
+  }, [currentBet, maxBet, onBet, onRaise, playSound, triggerHaptic]);
 
   // Keyboard shortcuts - must be after all handler definitions
   useEffect(() => {

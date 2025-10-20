@@ -1,0 +1,35 @@
+Interactive elements & buttons
+
+Ensure all tappable controls are at least 44 × 44 points: Apple’s HIG notes that the comfortable minimum size of tappable UI elements is 44 × 44 pt
+tableless.github.io
+ and recommends giving each control a target area of about 44 × 44 pt
+tableless.github.io
+. On the TeleHoldem demo, buttons such as Start New Hand, Check, Raise and others should meet this size. Smaller icons (e.g., gear or info) should still have a 44 pt hit area with invisible padding.
+
+Add padding around tap targets: Besides the minimum size, include at least 8 px of padding around tap targets. Modern guidelines suggest that, in addition to making the tap element 44 px, another 8 px of space around it helps prevent accidental taps
+designshack.net
+.
+
+Follow thumb‑friendly placement: Frequently used buttons should appear within the easy‑to‑reach “thumb zone.” Research on thumb usage shows that almost half of smartphone users interact one‑handed and that important links should be in the easy‑to‑reach zone while infrequent actions can be placed farther away
+smashingmagazine.com
+. Consider moving betting actions (fold, check, call) to a bottom toolbar that is reachable with the user’s thumb, while less‑used features (help, settings) can be placed toward the top.
+
+Provide clear visual affordances: Buttons should look interactive through color contrast, drop shadows or rounded shapes. Design guidelines recommend using recognizable patterns (underlines for links, drop shadows, rounded corners)
+designshack.net
+ so users know what is tappable.
+
+Provide active/pressed states: Add visual feedback (color change, scale‑down animation) when buttons are pressed so users can see their input was registered. On iOS, include haptic feedback where appropriate
+justinmind.com
+.
+
+Game table & player positioning
+
+Scale and reposition the poker table for portrait screens: On phones, the elliptical table should fill most of the vertical screen in portrait orientation. Place the player’s seat at the bottom center so that action buttons align naturally below the cards. The Our Poker app case study suggests moving the user to the middle (or bottom) of the table and enlarging the user photo to improve readability
+casino-nonstop.com
+.
+
+Resize and stack opponent players: In the current demo, bot avatars are arranged around the table in fixed positions. On mobile, stack opponents along the top half of the table, making their names and chip counts legible without overlapping. Use scrollable avatars if there are more than five opponents.
+
+Ensure card and chip graphics scale gracefully: Define vector‑based or high‑resolution assets for cards and chips and scale them with CSS/SVG so they remain sharp on Retina displays. Avoid stretching assets that might distort curves, as the case study notes that resizing can damage curves and circular elements
+casino-nonstop.com
+.
