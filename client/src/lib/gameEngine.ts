@@ -2,6 +2,14 @@ import { Card, Player, GameState, SUITS, RANKS, GamePhase, Pot, ACHIEVEMENT_LIST
 import { handEvaluator } from './handEvaluator';
 import { achievementEngine } from './achievementEngine';
 
+const BOT_NAMES = [
+  'Sarah Chen',
+  'Marcus Rivera',
+  'Elena Volkov',
+  'Raj Patel',
+  'Sofia Martinez'
+];
+
 export class GameEngine {
   createDeck(): Card[] {
     const deck: Card[] = [];
@@ -35,7 +43,7 @@ export class GameEngine {
   createInitialGameState(numPlayers: number): GameState {
     const players: Player[] = Array.from({ length: numPlayers }, (_, i) => ({
       id: String(i),
-      name: i === 0 ? 'You' : `Bot ${i}`,
+      name: i === 0 ? 'You' : BOT_NAMES[i - 1] || `Bot ${i}`,
       chips: 1000,
       hand: [],
       bet: 0,
