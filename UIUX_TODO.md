@@ -1,5 +1,67 @@
 
+
 # UI/UX Improvement Tasks for Texas Hold'em Poker Application
+
+## URGENT: Mobile UI/UX Critical Issues (Priority: CRITICAL)
+
+### Mobile Action Controls Container Issues
+**Problem**: Action controls container appears broken on mobile devices with inconsistent spacing, poor button sizing, and layout issues.
+
+#### Specific Tasks:
+- [ ] **Fix Action Controls Mobile Layout**: Update ActionControls.tsx to use proper mobile-responsive container with consistent padding and margins
+- [ ] **Standardize Button Heights**: Ensure all action buttons (Fold, Check/Call, Bet/Raise) have consistent minimum height of 48px for mobile accessibility
+- [ ] **Fix Container Background**: Apply proper semi-transparent background with backdrop blur to action controls container
+- [ ] **Improve Button Spacing**: Use consistent gap spacing (xs:gap-3 md:gap-2 lg:gap-4) between action buttons
+- [ ] **Fix Mobile Button Widths**: Ensure buttons have appropriate min-width for mobile (min-w-[100px] xs:min-w-[110px])
+
+#### Implementation Details:
+- Update ActionControls.tsx container classes: `p-4 sm:p-6 md:p-3 pb-[calc(1rem+var(--safe-area-bottom))]`
+- Fix button container: `flex gap-2 xs:gap-3 md:gap-2 lg:gap-4 justify-center flex-wrap`
+- Apply proper mobile sizing to all buttons with consistent min-height classes
+
+### Mobile Table Scaling and Positioning Issues  
+**Problem**: Poker table doesn't scale properly on portrait mobile screens, player positioning is off, and table appears too large.
+
+#### Specific Tasks:
+- [ ] **Scale Table for Portrait Mode**: Reduce table size to 90% on mobile devices (below 768px breakpoint)
+- [ ] **Fix Player Seat Positioning**: Recalculate trigonometric positions for 6 players around smaller mobile table
+- [ ] **Implement Responsive Table Aspect Ratio**: Use proper aspect-ratio CSS for mobile table dimensions
+- [ ] **Add Mobile Table Margins**: Apply appropriate margins for mobile viewport constraints
+- [ ] **Fix Table Border Radius**: Scale border radius proportionally with table size on mobile
+
+#### Implementation Details:
+- Update poker-game.tsx table container with mobile-specific dimensions
+- Adjust PlayerSeat positioning calculations for mobile viewport
+- Apply `max-width: 90%` for mobile table container
+
+### Mobile Bottom Sheet Functionality Issues
+**Problem**: Mobile bottom sheet for stats/history is not properly implemented or accessible.
+
+#### Specific Tasks:
+- [ ] **Implement Swipe-to-Open Gesture**: Add touch gesture to open mobile bottom sheet from bottom edge
+- [ ] **Fix Bottom Sheet Height**: Set proper height (75vh) with safe area padding for mobile devices
+- [ ] **Add Floating Action Button**: Create visible FAB to trigger mobile bottom sheet when not visible
+- [ ] **Implement Tab Navigation**: Add proper tab system (Essential, Detailed, History) within bottom sheet
+- [ ] **Fix Sheet Content Scrolling**: Ensure proper scrollable content within each tab
+
+#### Implementation Details:
+- Enhance MobileBottomSheet.tsx with proper gesture handlers
+- Add floating action button positioned: `fixed bottom-[calc(var(--safe-area-bottom)+5.5rem)] right-[calc(1rem+var(--safe-area-right))]`
+- Implement proper tab content with overflow scrolling
+
+### Safe Area and iOS Support Issues
+**Problem**: Mobile app doesn't properly handle iOS safe areas, notches, and home indicators.
+
+#### Specific Tasks:
+- [ ] **Implement Safe Area Variables**: Add CSS custom properties for all safe area insets
+- [ ] **Fix Header Button Positioning**: Apply safe area padding to top-right header controls
+- [ ] **Update Mobile Bottom Padding**: Add safe area bottom padding to action controls and floating elements
+- [ ] **Fix Swipe Hint Positioning**: Position mobile swipe hints with proper safe area margins
+
+#### Implementation Details:
+- Add to index.css: safe area CSS variables
+- Update all fixed positioned elements with safe area calculations
+- Apply `pb-[calc(1rem+var(--safe-area-bottom))]` to mobile containers
 
 ## Visual Polish & Animations (Priority: High)
 
@@ -65,11 +127,14 @@
 - Note: Comprehensive ARIA labels added to all components with role="main" for game, role="status" with aria-live="polite" for pot display, role="log" for action history, role="article" for player seats, aria-current for active player, skip link for keyboard navigation, and descriptive aria-label on all interactive elements with keyboard shortcut hints.
 
 ### 10. Mobile Responsiveness
-- [x] Optimize table layout for portrait mobile screens
+- [ ] **CRITICAL: Fix mobile action controls layout and spacing**
+- [ ] **CRITICAL: Scale poker table properly for portrait mobile screens**
+- [ ] **CRITICAL: Implement working mobile bottom sheet with proper gestures**
+- [ ] **CRITICAL: Add proper iOS safe area support for all elements**
 - [x] Implement touch-friendly button sizes (minimum 44px)
 - [x] Add swipe gestures for common actions
 - [x] Create collapsible UI elements for small screens
-- Note: Mobile optimization complete with xs: breakpoint (480px), iOS safe-area support, 44px minimum touch targets, swipe-to-close bottom sheet, FAB, and responsive layouts for mobile/tablet/desktop.
+- Note: Mobile optimization needs critical fixes - current implementation has layout issues on mobile devices.
 
 ### 11. Color & Contrast
 - [x] Implement high contrast mode for accessibility
@@ -178,6 +243,7 @@
 - [x] Fix card visibility issues during showdown
 
 ### 27. UI Consistency
+- [ ] **CRITICAL: Fix mobile action controls container styling and layout**
 - [ ] Standardize spacing and typography across all components
 - [ ] Ensure consistent color usage throughout the application
 - [ ] Fix alignment issues in different screen resolutions
@@ -216,12 +282,29 @@
 - [ ] Create developer API for third-party integrations
 
 ## Implementation Priority Legend
+- **CRITICAL**: Mobile UI issues that break core functionality
 - **High Priority**: Core user experience improvements that directly impact gameplay
 - **Medium Priority**: Quality of life features that enhance the overall experience
 - **Low Priority**: Advanced features for power users and long-term engagement
 
 ## Notes
-- Focus on completing high-priority tasks first to ensure a solid foundation
+- **CRITICAL MOBILE ISSUES must be addressed first** - current mobile experience is broken
+- Focus on completing critical mobile fixes before other high-priority tasks
 - Test each feature thoroughly across different devices and screen sizes
 - Consider user feedback and analytics to prioritize future improvements
 - Maintain consistent design language throughout all implementations
+
+## Agent Implementation Instructions
+When fixing mobile issues, test on:
+- iPhone Safari (portrait orientation)
+- Android Chrome (portrait orientation)  
+- iPad Safari (both orientations)
+- Various viewport sizes using developer tools
+
+Priority order for agent:
+1. Fix ActionControls mobile layout issues
+2. Fix poker table scaling for mobile
+3. Implement proper mobile bottom sheet
+4. Add iOS safe area support
+5. Continue with other high-priority tasks
+
