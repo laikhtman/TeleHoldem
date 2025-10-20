@@ -8,6 +8,17 @@ I prefer iterative development with clear communication on major changes. Please
 
 ## Recent Changes
 
+### October 20, 2025: Mobile Stats Enhancement & UX Refinements
+- **MobileStatsCompact Component**: Created dedicated essential stats view for mobile showing only crucial information (current chips, hands played, win rate) with large 2xl typography and color-coded icons
+- **Enhanced Bottom Sheet**: Reorganized into three tabs for better information hierarchy
+  - Essential: Quick-glance stats with card-based layout
+  - Detailed: Full session stats, hand distribution chart, achievements
+  - History: Complete action history
+- **Swipe-to-Close Gesture**: Implemented dedicated 64px swipe area at sheet top with visual handle (48×6px bar), 80px threshold to close
+- **Typography Improvements**: Upgraded tab labels from text-xs to text-sm for better readability, larger icons (w-4 h-4)
+- **Bug Fix**: Added safety check in startNewHand to prevent runtime crash when players array is undefined
+- **Layout Fix**: Resolved button overflow at md: breakpoint by deferring flex-row layout to lg: (1024px+), giving ActionControls full viewport width on mobile/tablet
+
 ### October 20, 2025: Mobile UI/UX Enhancements (Apple HIG Compliance)
 - **Haptic Feedback System**: Created `useHaptic` hook with Telegram WebApp HapticFeedback API integration and Vibration API fallback
   - Light haptic: Fold, Check actions
