@@ -25,6 +25,7 @@ import { FlyingChip } from '@/components/Chip';
 import { Trash2, ChevronRight, ChevronLeft, TrendingUp, Settings } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useSound } from '@/hooks/useSound';
+import { useHaptic } from '@/hooks/useHaptic';
 import { useSwipe } from '@/hooks/useSwipe';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { SettingsPanel, GameSettings } from '@/components/SettingsPanel';
@@ -85,6 +86,7 @@ export default function PokerGame() {
   const potPosition = useRef<{ x: number; y: number }>({ x: 400, y: 150 });
   const { toast } = useToast();
   const { playSound } = useSound();
+  const { triggerHaptic } = useHaptic();
   const { user, isAuthenticated, isStandalone } = useTelegramAuth();
   const { isLandscape } = useOrientation();
 
@@ -562,6 +564,11 @@ export default function PokerGame() {
       });
       setWinAmounts(newWinAmounts);
       
+      // Trigger haptic feedback for winning
+      if (winners.some(w => w.id === 'player-0')) {
+        triggerHaptic('success');
+      }
+      
       toast({
         variant: "success" as any,
         title: "Hand Complete!",
@@ -618,6 +625,11 @@ export default function PokerGame() {
         newWinAmounts[player.id] = winAmountPerWinner;
       });
       setWinAmounts(newWinAmounts);
+      
+      // Trigger haptic feedback for winning
+      if (winners.some(w => w.id === 'player-0')) {
+        triggerHaptic('success');
+      }
       
       toast({
         variant: "success" as any,
