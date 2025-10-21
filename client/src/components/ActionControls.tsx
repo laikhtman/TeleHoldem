@@ -403,36 +403,59 @@ export function ActionControls({
             </div>
           </div>
 
-          <div className="flex gap-2 xs:gap-3 md:gap-2 lg:gap-4 justify-center flex-wrap">
+          {/* Quick bet buttons optimized for thumb reach on mobile */}
+          <div className="grid grid-cols-2 xs:flex gap-2 xs:gap-3 md:gap-2 lg:gap-4 xs:justify-center xs:flex-wrap">
             <Button
               onClick={() => handleQuickBet(halfPot)}
               variant="outline"
               disabled={disabled || halfPot < (currentBet > 0 ? minRaiseAmount : minBet) || halfPot > maxBet}
               data-testid="button-quick-half-pot"
-              className="min-w-[90px] xs:min-w-[100px] min-h-[48px] text-sm"
+              className="min-h-[52px] text-sm font-semibold bg-background/50 backdrop-blur-sm border-2 hover:bg-accent/20"
               aria-label={`Quick bet half pot: ${halfPot} dollars`}
             >
-              1/2 Pot
+              <div className="flex flex-col items-center">
+                <span>½ POT</span>
+                <span className="text-xs opacity-70">${halfPot}</span>
+              </div>
             </Button>
             <Button
               onClick={() => handleQuickBet(potSize)}
               variant="outline"
               disabled={disabled || potSize < (currentBet > 0 ? minRaiseAmount : minBet) || potSize > maxBet}
               data-testid="button-quick-pot"
-              className="min-w-[90px] xs:min-w-[100px] min-h-[48px] text-sm"
+              className="min-h-[52px] text-sm font-semibold bg-background/50 backdrop-blur-sm border-2 hover:bg-accent/20"
               aria-label={`Quick bet pot size: ${potSize} dollars`}
             >
-              Pot
+              <div className="flex flex-col items-center">
+                <span>POT</span>
+                <span className="text-xs opacity-70">${potSize}</span>
+              </div>
+            </Button>
+            <Button
+              onClick={() => handleQuickBet(potSize * 2)}
+              variant="outline"
+              disabled={disabled || potSize * 2 < (currentBet > 0 ? minRaiseAmount : minBet) || potSize * 2 > maxBet}
+              data-testid="button-quick-2x-pot"
+              className="min-h-[52px] text-sm font-semibold bg-background/50 backdrop-blur-sm border-2 hover:bg-accent/20"
+              aria-label={`Quick bet double pot: ${potSize * 2} dollars`}
+            >
+              <div className="flex flex-col items-center">
+                <span>2× POT</span>
+                <span className="text-xs opacity-70">${potSize * 2}</span>
+              </div>
             </Button>
             <Button
               onClick={handleAllIn}
               variant="outline"
               disabled={disabled || maxBet <= (currentBet > 0 ? minRaiseAmount : minBet)}
               data-testid="button-quick-all-in"
-              className="min-w-[90px] xs:min-w-[100px] min-h-[48px] text-sm border-poker-chipGold/50 text-poker-chipGold hover:bg-poker-chipGold/10"
+              className="min-h-[52px] text-sm font-bold bg-poker-chipGold/10 backdrop-blur-sm border-2 border-poker-chipGold/50 text-poker-chipGold hover:bg-poker-chipGold/20"
               aria-label={`Go all-in with all your chips: ${maxBet} dollars. Keyboard shortcut: A key`}
             >
-              All-In <span className="text-xs ml-1 opacity-70 hidden sm:inline">(A)</span>
+              <div className="flex flex-col items-center">
+                <span>ALL-IN</span>
+                <span className="text-xs opacity-90">${maxBet}</span>
+              </div>
             </Button>
           </div>
 
