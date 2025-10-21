@@ -14,6 +14,7 @@ import { HandDistributionChart } from '@/components/HandDistributionChart';
 import { AchievementsList } from '@/components/AchievementsList';
 import { AchievementToast } from '@/components/AchievementToast';
 import { MobileBottomSheet } from '@/components/MobileBottomSheet';
+import { FloatingActionMenu } from '@/components/FloatingActionMenu';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { WinnerCelebration } from '@/components/WinnerCelebration';
@@ -1059,6 +1060,14 @@ export default function PokerGame() {
           Swipe left to fold • Swipe right to call/check
         </div>
       </div>
+
+      {/* Floating Action Menu for easy access to secondary features */}
+      <FloatingActionMenu
+        onStatsClick={() => setIsMobileMenuOpen(true)}
+        onHistoryClick={() => setIsMobileMenuOpen(true)}
+        onTableInfoClick={() => setIsMobileMenuOpen(true)}
+        className="lg:hidden"
+      />
 
       {/* Mobile Bottom Sheet - Only visible on xs: and hidden on lg: */}
       <div className="xs:block lg:hidden">
