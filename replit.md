@@ -15,7 +15,9 @@ The application features a professional, centered flexbox layout with the poker 
 - **Apple HIG Compliance**: All action buttons use explicit `min-h-[48px]` (48px minimum) to guarantee ≥44pt touch targets regardless of root font scaling
 - **Safe Area Support**: Comprehensive iOS safe area inset handling via CSS variables (`--safe-area-top/right/bottom/left`) applied to all fixed/absolute elements (header, action controls, FAB, swipe hints, table container)
 - **Responsive Table Scaling**: Poker table scales from 90% width on mobile (portrait) to 100% on desktop with proportional border radius and landscape constraints (`max-h-[min(75vh,800px)]`)
-- **Enhanced Action Controls**: Semi-transparent container (`bg-card/60 backdrop-blur-md`) with responsive padding and safe area bottom padding
+- **Enhanced Action Controls**: Semi-transparent container (`bg-card/80 backdrop-blur-lg`) with improved opacity and blur for better visual contrast on mobile
+- **Hand Strength Panel**: Desktop-only sidebar panel (`hidden md:block`) - completely hidden on mobile phones (< 768px) to prevent table overlap, visible on tablets with collapsible toggle
+- **Responsive Card Scaling**: Player hole cards use adaptive scaling (`scale-100` on mobile, `scale-95` on xs screens, `scale-90` on md+ devices) for improved visibility on small screens
 - **MobileBottomSheet**: Fully functional 75vh height sheet with swipe-down-to-close gesture, FAB, and three-tab navigation (Essential, Detailed, History)
 Visual elements include:
 - Enhanced card animations (staggered dealing, 3D flips, glow effects).

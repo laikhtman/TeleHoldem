@@ -852,7 +852,7 @@ export default function PokerGame() {
           </Button>
 
           {/* Panel Content */}
-          <div className={`bg-card/70 backdrop-blur-sm border border-card-border rounded-lg p-3 shadow-sm ${isHandStrengthCollapsed ? 'hidden lg:block' : ''}`}>
+          <div className={`bg-card/70 backdrop-blur-sm border border-card-border rounded-lg p-3 shadow-sm ${isHandStrengthCollapsed ? 'md:hidden lg:block' : ''}`}>
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-semibold flex items-center gap-1.5 text-muted-foreground">
                 <TrendingUp className="w-3.5 h-3.5 text-poker-chipGold" />
@@ -978,7 +978,7 @@ export default function PokerGame() {
           </div>
 
           {/* Controls */}
-          <div id="action-controls" className="w-full max-w-3xl md:max-w-none" style={{ zIndex: 5 }}>
+          <div id="action-controls" className="w-full max-w-3xl md:max-w-none bg-card/80 backdrop-blur-lg rounded-lg border border-card-border shadow-lg p-3 xs:p-4 sm:p-5 md:p-4 pb-[calc(0.75rem+var(--safe-area-bottom))] sm:pb-[calc(1rem+var(--safe-area-bottom))]" style={{ zIndex: 5 }}>
             {gameState.phase === 'waiting' ? (
               <Button 
                 onClick={startNewHand}

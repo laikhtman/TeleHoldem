@@ -180,7 +180,7 @@ export function ActionControls({
   const isSignificantBet = betPercentageOfChips > 50;
 
   return (
-    <div className="flex flex-col gap-3 xs:gap-4 p-3 xs:p-4 sm:p-5 md:p-4 pb-[calc(0.75rem+var(--safe-area-bottom))] sm:pb-[calc(1rem+var(--safe-area-bottom))] bg-card/80 backdrop-blur-lg rounded-lg border border-card-border shadow-lg">
+    <div className="flex flex-col gap-3 xs:gap-4">
       <div className="flex gap-2 xs:gap-3 md:gap-2 lg:gap-4 justify-center flex-wrap">
         <Button
           onClick={handleFold}
