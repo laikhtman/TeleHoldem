@@ -991,23 +991,41 @@ export default function PokerGame() {
                 Start New Hand
               </Button>
             ) : (
-              <ActionControls
-                onFold={handleFold}
-                onCheck={handleCheck}
-                onCall={handleCall}
-                onBet={handleBet}
-                onRaise={handleRaise}
-                canCheck={canCheck}
-                minBet={minBet}
-                maxBet={maxBet}
-                amountToCall={gameState.currentBet - humanPlayer.bet}
-                currentBet={gameState.currentBet}
-                minRaiseAmount={minRaiseAmount}
-                potSize={gameState.pots.reduce((sum, pot) => sum + pot.amount, 0)}
-                playerChips={humanPlayer.chips}
-                disabled={gameState.currentPlayerIndex !== 0 || isProcessing || humanPlayer.folded || settings.isPaused}
-                animationSpeed={settings.animationSpeed}
-              />
+              <>
+                {/* Pot Odds and Win Probability Display */}
+                {gameState.currentPlayerIndex === 0 && 
+                 !humanPlayer.folded && 
+                 gameState.phase !== 'waiting' &&
+                 gameState.currentBet > humanPlayer.bet && (
+                  <div className="mb-3">
+                    <PotOddsDisplay
+                      amountToCall={gameState.currentBet - humanPlayer.bet}
+                      potSize={gameState.pots.reduce((sum, pot) => sum + pot.amount, 0)}
+                      playerCards={humanPlayer.hand}
+                      communityCards={gameState.communityCards}
+                      numOpponents={gameState.players.filter(p => !p.folded && p !== humanPlayer).length}
+                    />
+                  </div>
+                )}
+
+                <ActionControls
+                  onFold={handleFold}
+                  onCheck={handleCheck}
+                  onCall={handleCall}
+                  onBet={handleBet}
+                  onRaise={handleRaise}
+                  canCheck={canCheck}
+                  minBet={minBet}
+                  maxBet={maxBet}
+                  amountToCall={gameState.currentBet - humanPlayer.bet}
+                  currentBet={gameState.currentBet}
+                  minRaiseAmount={minRaiseAmount}
+                  potSize={gameState.pots.reduce((sum, pot) => sum + pot.amount, 0)}
+                  playerChips={humanPlayer.chips}
+                  disabled={gameState.currentPlayerIndex !== 0 || isProcessing || humanPlayer.folded || settings.isPaused}
+                  animationSpeed={settings.animationSpeed}
+                />
+              </>
             )}
           </div>
         </div>
