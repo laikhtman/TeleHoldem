@@ -1,0 +1,232 @@
+TeleHoldem Beta Web‑App – QA Report
+Overview and Objective
+
+This report evaluates the user experience of the TeleHoldem beta web‑app (played at teleholdem.replit.app/demo
+) on mobile devices. The goal is to identify UX problems, propose tasks to fix them and provide quality‑assurance (QA) guidelines to verify each fix. The focus is on iOS mobile devices, but recommendations also apply to Android.
+
+Methodology
+
+To understand the typical player journey, the web‑app was loaded on a mobile simulator. The following interactions were performed:
+
+Landing and first hand – Observed the layout on the initial screen and tapped Start New Hand to begin a game. All panels (table, hand strength, action history, session stats, hand distribution and achievements) were examined.
+
+Gameplay actions – During a hand, the available actions (Fold, Call, Raise and preset bet multipliers) were triggered. The slider for specifying raises, the display of pot odds and the floating “bot action” bubbles were inspected.
+
+Panel interactions – The small arrow used to collapse the Hand Strength panel and the gear icon on the Action History panel were tested for responsiveness. Reloading the page while in a hand was attempted to see how sessions persist.
+
+Findings were compared against mobile design guidelines, including Apple’s Human Interface Guidelines which recommend that tap targets measure at least 44×44 points and text be at least 11 pt for legibility
+developer.apple.com
+, and UX articles that emphasize large, easily tapped controls, safe zones for thumbs and responsive designs across different aspect ratios
+punchev.com
+punchev.com
+. Research on accessible tap targets notes that WCAG 2.1 requires a minimum size of 44×44 px and suggests larger targets near screen edges to avoid “rage taps”
+smashingmagazine.com
+.
+
+UX Issues and Tasks
+
+Below are the most significant issues uncovered during testing, grouped by category. Each issue includes suggested tasks to correct it.
+
+1. Tap targets and controls are too small
+
+Issue: Many interactive elements—such as the Fold, Call and Raise buttons, the preset bet buttons (1/2 pot, pot, 2× pot, all‑in), and the circular slider handle—are smaller than the 44×44 pt minimum recommended by Apple
+developer.apple.com
+ and WCAG
+smashingmagazine.com
+. Users must be precise when tapping, leading to mis‑taps and frustration. The small collapse arrow for the Hand Strength panel is hard to hit.
+
+Tasks to fix:
+
+Increase the minimum size of all actionable buttons, sliders and icons to at least 44×44 pt (or larger near screen edges)
+smashingmagazine.com
+.
+
+Add generous padding around icons (e.g., the Hand Strength collapse arrow) so the tap area extends beyond the visible icon.
+
+Enlarge the slider thumb and ensure it remains responsive to drag gestures. Provide numeric input as an alternative for specifying raise amounts.
+
+2. Cluttered layout and lack of responsive design
+
+Issue: On a phone‑sized screen, the central poker table is squeezed by persistent side panels. The right column contains Action History, Session Stats, Winning Hand Distribution and Achievements simultaneously. This leaves little room for cards and chips, especially in portrait orientation, and may force players to scroll horizontally.
+
+Tasks to fix:
+
+Adopt a drawer or tabbed layout on mobile. Place secondary panels in a slide‑out drawer or bottom sheet so the table remains dominant. For example, show only the table and the Hand Strength panel by default, and provide tabs to switch to History or Stats.
+
+Ensure the app adapts to different aspect ratios (16:9, 19.5:9, 4:3, etc.) and safe areas for notches. The design guidelines recommend building scalable layouts that adjust to various screen sizes and respect the notch area
+punchev.com
+.
+
+Provide a landscape mode. In landscape orientation the user can use two hands, making it easier to access controls
+punchev.com
+; reposition elements accordingly (e.g., place controls on the right and info panels on the left).
+
+3. Text legibility and contrast
+
+Issue: Some text, especially in the Hand Strength panel and bottom decision helper, appears light against dark backgrounds. Font sizes are small for body text and button labels; some notes use faint grey on dark green, reducing legibility.
+
+Tasks to fix:
+
+Use at least 11 pt type for body text and avoid fonts smaller than 9 pt for any on‑screen information
+developer.apple.com
+.
+
+Increase contrast between text and background. For example, use white or very light text on dark backgrounds and ensure the contrast ratio meets WCAG 2.1 AA (4.5:1 or higher).
+
+Provide a high‑contrast mode or theme that uses larger text and simplified colors for users with visual impairments
+punchev.com
+.
+
+4. Ambiguous or incorrect messages
+
+Issue: Toast notifications sometimes contain grammatical errors (“You folds” instead of “You fold” or “You folded”). Some prompts use informal language (“It’s high risk!”) without explaining pot odds or risks.
+
+Tasks to fix:
+
+Correct grammar and maintain consistent tone. Example: use “You folded” or “You fold” as appropriate.
+
+Provide context for notifications. When a user attempts to call or raise, explain why a move is risky or beneficial (e.g., show pot odds or hand equity).
+
+Use icons (e.g., thumbs up, caution signs) alongside text to quickly convey sentiment.
+
+5. Disabled controls without feedback
+
+Issue: When a player folds, the Call and Raise buttons remain visible but disabled. This may confuse players, especially if there is no explanation of why they can’t act. Similarly, the preset bet buttons are disabled in early rounds but not clearly labeled as such.
+
+Tasks to fix:
+
+Replace disabled controls with contextual messaging such as “You have folded” and remove irrelevant buttons after folding. Provide a visible state change (e.g., greyed out table overlay with text “Waiting for next hand”).
+
+For disabled preset buttons, add tooltips or notes explaining why these options aren’t available at the current stage.
+
+6. Hidden or non‑functional interactions
+
+Issue: The gear icon in the Action History panel appears clickable but does nothing. The collapse arrow on the Hand Strength panel is very small and not obviously a control. Reloading the page resets the UI but continues the same game without a way to start over.
+
+Tasks to fix:
+
+Either remove the gear icon or implement its intended function (e.g., filter or clear history). Provide a tooltip when hovering/tapping.
+
+Redesign the Hand Strength collapse control: enlarge it, label it (“hide strength”) and consider using a familiar down‑arrow icon.
+
+Add session control: allow users to end a session, start a new game, or confirm before reloading the page. This prevents accidental reloads.
+
+7. Lack of accessibility features
+
+Issue: The app doesn’t offer features for users with disabilities. There are no hints for screen readers, no keyboard navigation, and no high‑contrast or color‑blind modes.
+
+Tasks to fix:
+
+Ensure all buttons and interactive elements have ARIA labels and alt text, enabling VoiceOver/Screen Reader support.
+
+Provide keyboard navigation for desktop users (Tab navigation with visible focus outlines).
+
+Offer color‑blind‑friendly palettes and a toggle for high‑contrast mode
+punchev.com
+.
+
+Support dynamic type or adjustable font sizes; avoid absolute pixel units.
+
+8. Overlapping notifications and animations
+
+Issue: Floating bubbles showing bot actions (“3 checks”, “2 raises”) appear near the center of the table and sometimes overlap the player’s cards, chips or slider. Toast notifications at the bottom right may overlay the decision helper.
+
+Tasks to fix:
+
+Move bot action indicators above or next to each bot’s avatar rather than floating over the table.
+
+Use a non‑overlapping area for toast notifications (e.g., top centre). Provide an option to hide or shorten them.
+
+Allow the decision helper to slide up or down so that notifications do not obstruct it.
+
+9. Right‑panel overload and redundant information
+
+Issue: The right panel contains four sections that may not all be needed at once. The Winning Hand Distribution shows a pie chart that might not update in real‑time, and Achievements may be empty during early play.
+
+Tasks to fix:
+
+Combine or reorder panels: for mobile, display only the most relevant data (e.g., action history and session stats) and make others accessible via tabs or modals.
+
+Make charts interactive—allow users to tap to see details or hide the entire section if not needed.
+
+10. Lack of robust error handling
+
+Issue: If the game loses connection or encounters errors, the UI doesn’t provide clear feedback or recovery options.
+
+Tasks to fix:
+
+Implement network‑error messages and reconnection logic. Show a spinner and text like “Reconnecting…” if the connection drops.
+
+Provide an error page if the server fails (e.g., “Unable to load game. Please try again later”).
+
+Log errors to a monitoring service and allow users to report issues.
+
+QA Guidelines for Verification
+
+To ensure that the issues above are resolved and do not regress, the QA team should follow these guidelines:
+
+Device and orientation testing:
+
+Test on multiple iOS (e.g., iPhone SE, iPhone 13/14 Pro Max) and Android devices (different brands and screen sizes) in both portrait and landscape orientations. Verify that the layout adapts gracefully across aspect ratios and safe‑area notches
+punchev.com
+.
+
+Check that the primary content (cards and table) is visible without horizontal scrolling and that there’s sufficient padding around the notch and home indicator.
+
+Tap target size and spacing:
+
+Measure the size of all interactive elements to confirm they meet or exceed the 44×44 pt guideline
+developer.apple.com
+. Ensure icons near edges are larger (46 pt or more)
+smashingmagazine.com
+.
+
+Perform user testing to detect “rage taps” or mis‑taps. Users should be able to operate controls with one hand comfortably
+punchev.com
+.
+
+Text legibility and contrast:
+
+Verify font sizes are at least 11 pt for body text and that there is adequate contrast between text and background
+developer.apple.com
+. Use tools to check contrast ratios against WCAG 2.1 AA.
+
+Test the high‑contrast mode and dynamic type settings if implemented. Ensure the UI remains usable when fonts are scaled.
+
+Interaction flows and feedback:
+
+Simulate all player actions (fold, call, raise, adjust slider) and confirm that states update correctly: disabled buttons vanish or are replaced with explanatory messages; pot and chip counts update immediately.
+
+Check notifications for correct grammar and timing. No message should overlap vital controls.
+
+Confirm that hidden icons (e.g., collapse arrows, gear icons) either perform their function or are removed.
+
+Panel navigation and content:
+
+Test the slide‑out or tabbed panels to ensure they open and close smoothly. Secondary panels should not obscure the table.
+
+Interact with charts and stats to confirm that data updates after each hand. If achievements exist, verify that they unlock properly.
+
+Accessibility:
+
+Use screen readers (VoiceOver on iOS, TalkBack on Android) to navigate the app. All controls should announce descriptive labels and states.
+
+Navigate using an external keyboard (Tab key) and ensure focus outlines are visible.
+
+Test color‑blind and high‑contrast modes, verifying that information (e.g., suits and chip amounts) remains clear without color cues.
+
+Error and session handling:
+
+Simulate network interruptions by disconnecting internet mid‑hand. Verify that the app handles reconnection gracefully and informs the user.
+
+Reload the app and confirm that it prompts the user to resume or start a new session. Ensure session persistence and clear data resets when a new game is requested.
+
+Performance and analytics:
+
+Measure loading times and ensure the game starts quickly. Long delays should display a spinner or skeleton UI.
+
+Check that analytics events are logged for key actions (start hand, fold, call, raise) so developers can monitor user behaviour and detect drop‑off points.
+
+Conclusion
+
+While TeleHoldem provides an engaging concept for a poker game, the current beta suffers from usability issues that hinder its adoption on mobile. By enlarging interactive controls, reorganizing the layout for small screens, improving text contrast and grammar, and adding accessibility and error‑handling features, the app can offer a polished and inclusive experience. The tasks and QA guidelines outlined here provide a roadmap to address these deficiencies and ensure future iterations meet modern mobile UX standards.

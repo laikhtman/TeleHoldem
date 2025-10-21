@@ -340,6 +340,38 @@
       --foreground: 210 40% 98%;
       /* ... */
     }
+    
+    /* Improved text legibility - minimum 11pt (15px) for body text */
+    html {
+      font-size: 16px; /* Base font size for better mobile readability */
+    }
+    
+    body {
+      font-size: 15px; /* 11.25pt - meets WCAG minimum */
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    
+    /* Ensure minimum text sizes for accessibility */
+    p, span, div {
+      min-font-size: 14px; /* Approx 11pt */
+    }
+    
+    /* Small text should never go below 12px */
+    .text-xs {
+      font-size: 12px !important; /* Override to meet minimum */
+    }
+    
+    .text-sm {
+      font-size: 14px !important; /* 11pt minimum */
+    }
+    
+    /* Button text should be clearly readable */
+    button, .btn {
+      font-size: 15px !important;
+      font-weight: 500;
+    }
   }
 
   @keyframes pulse-dots {
@@ -761,5 +793,35 @@
 
   .ambient-pulse {
     animation: ambient-pulse 2s ease-in-out infinite;
+  }
+}
+
+/* Reduced motion support for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  /* Disable framer-motion animations */
+  [data-framer-motion] {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  /* Preserve essential visual indicators */
+  .focus-visible:focus,
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 3px solid hsl(var(--poker-chipGold)) !important;
+    outline-offset: 2px !important;
   }
 }

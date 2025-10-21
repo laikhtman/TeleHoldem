@@ -6,8 +6,16 @@ interface TurnTimerProps {
 
 export function TurnTimer({ duration }: TurnTimerProps) {
   return (
-    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-      <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 100 100">
+    <div 
+      className="absolute inset-0 flex items-center justify-center pointer-events-none"
+      role="progressbar"
+      aria-label="Bot thinking timer"
+      aria-valuenow={0}
+      aria-valuemin={0}
+      aria-valuemax={duration}
+      aria-live="polite"
+    >
+      <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 100 100" aria-hidden="true">
         <circle
           cx="50"
           cy="50"

@@ -44,8 +44,9 @@ export function ActionControls({
   potSize,
   playerChips,
   disabled = false,
-  animationSpeed = 1
-}: ActionControlsProps) {
+  animationSpeed = 1,
+  playerFolded = false
+}: ActionControlsProps & { playerFolded?: boolean }) {
   const [betAmount, setBetAmount] = useState(minBet);
   const { isShaking: isSliderShaking, triggerShake: triggerSliderShake } = useShake(400);
   const { toast } = useToast();
@@ -224,6 +225,23 @@ export function ActionControls({
       maxSwipeTime: 400
     }
   );
+
+  // If player has folded, show a clear message instead of disabled controls
+  if (playerFolded) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 p-6 bg-card/50 backdrop-blur-sm rounded-lg border border-card-border">
+        <div className="text-center space-y-2">
+          <h3 className="text-lg font-semibold text-muted-foreground">You have folded</h3>
+          <p className="text-sm text-muted-foreground/70">Waiting for the hand to complete...</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="animate-pulse w-2 h-2 bg-muted-foreground/50 rounded-full"></div>
+          <div className="animate-pulse w-2 h-2 bg-muted-foreground/50 rounded-full" style={{ animationDelay: '0.2s' }}></div>
+          <div className="animate-pulse w-2 h-2 bg-muted-foreground/50 rounded-full" style={{ animationDelay: '0.4s' }}></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-3 xs:gap-4 relative" ref={swipeRef}>

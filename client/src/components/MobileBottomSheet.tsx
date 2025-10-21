@@ -66,38 +66,64 @@ export function MobileBottomSheet({
       
       <SheetContent 
         side="bottom" 
-        className="h-[75vh] rounded-t-3xl pb-[var(--safe-area-bottom)]"
+        className="h-[75vh] max-h-[75vh] rounded-t-3xl pb-[var(--safe-area-bottom)] z-[100] overflow-hidden"
         data-testid="mobile-bottom-sheet"
+        aria-label="Game information panel"
+        aria-describedby="mobile-sheet-description"
       >
         <div 
-          className="absolute top-0 left-0 right-0 h-16 flex items-center justify-center cursor-grab active:cursor-grabbing"
+          className="absolute top-0 left-0 right-0 h-16 flex items-center justify-center cursor-grab active:cursor-grabbing touch-none"
           onTouchStart={handleHeaderTouchStart}
           onTouchMove={handleHeaderTouchMove}
           onTouchEnd={handleHeaderTouchEnd}
           data-testid="swipe-area"
+          role="button"
+          aria-label="Swipe down to close panel"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape' || e.key === 'ArrowDown') {
+              onOpenChange(false);
+            }
+          }}
         >
           <div 
             className="w-12 h-1.5 bg-muted-foreground/30 rounded-full"
             data-testid="swipe-handle"
+            aria-hidden="true"
           />
         </div>
         
         <SheetHeader className="mt-2">
-          <SheetTitle className="text-center">Game Info</SheetTitle>
+          <SheetTitle className="text-center" id="mobile-sheet-description">Game Info</SheetTitle>
         </SheetHeader>
         
         <Tabs defaultValue="essential" className="mt-4 h-[calc(100%-4rem)] overflow-hidden">
-          <TabsList className="grid w-full grid-cols-3 mb-4 h-11">
-            <TabsTrigger value="essential" data-testid="tab-essential" className="text-sm min-h-11">
-              <TrendingUp className="w-4 h-4 mr-1.5" />
+          <TabsList className="grid w-full grid-cols-3 mb-4 h-11" aria-label="Game information tabs">
+            <TabsTrigger 
+              value="essential" 
+              data-testid="tab-essential" 
+              className="text-sm min-h-11"
+              aria-label="Essential stats tab"
+            >
+              <TrendingUp className="w-4 h-4 mr-1.5" aria-hidden="true" />
               Essential
             </TabsTrigger>
-            <TabsTrigger value="detailed" data-testid="tab-detailed" className="text-sm min-h-11">
-              <BarChart3 className="w-4 h-4 mr-1.5" />
+            <TabsTrigger 
+              value="detailed" 
+              data-testid="tab-detailed" 
+              className="text-sm min-h-11"
+              aria-label="Detailed stats and achievements tab"
+            >
+              <BarChart3 className="w-4 h-4 mr-1.5" aria-hidden="true" />
               Detailed
             </TabsTrigger>
-            <TabsTrigger value="history" data-testid="tab-history" className="text-sm min-h-11">
-              <History className="w-4 h-4 mr-1.5" />
+            <TabsTrigger 
+              value="history" 
+              data-testid="tab-history" 
+              className="text-sm min-h-11"
+              aria-label="Action history tab"
+            >
+              <History className="w-4 h-4 mr-1.5" aria-hidden="true" />
               History
             </TabsTrigger>
           </TabsList>

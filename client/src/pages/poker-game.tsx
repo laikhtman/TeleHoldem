@@ -32,6 +32,7 @@ import { SettingsPanel, GameSettings } from '@/components/SettingsPanel';
 import { useTelegramAuth } from '@/hooks/useTelegramAuth';
 import { apiRequest } from '@/lib/queryClient';
 import { useOrientation } from '@/hooks/useOrientation';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 
 const NUM_PLAYERS = 6;
 const MAX_HISTORY_ENTRIES = 30;
@@ -89,6 +90,7 @@ export default function PokerGame() {
   const { triggerHaptic } = useHaptic();
   const { user, isAuthenticated, isStandalone } = useTelegramAuth();
   const { isLandscape } = useOrientation();
+  const { isOnline, isReconnecting, checkConnection } = useNetworkStatus();
 
   // Settings state with localStorage persistence
   const [settings, setSettings] = useState<GameSettings>(() => {
@@ -112,20 +114,38 @@ export default function PokerGame() {
   // Mutation to save stats to backend (only for authenticated Telegram users)
   const saveStatsMutation = useMutation({
     mutationFn: async (stats: { handsPlayed: number; handsWon: number; biggestPot: number; totalWinnings: number; achievements: string[] }) => {
+      if (!isOnline) {
+        throw new Error('Cannot save stats while offline');
+      }
       await apiRequest('PATCH', '/api/users/me/stats', { stats });
     },
     onError: (error) => {
       console.error('Failed to save stats:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Failed to save stats',
+        description: 'Your stats will be saved when connection is restored',
+        duration: 3000,
+      });
     },
   });
 
   // Mutation to save bankroll to backend (only for authenticated Telegram users)
   const saveBankrollMutation = useMutation({
     mutationFn: async (bankroll: number) => {
+      if (!isOnline) {
+        throw new Error('Cannot save bankroll while offline');
+      }
       await apiRequest('PATCH', '/api/users/me/bankroll', { bankroll });
     },
     onError: (error) => {
       console.error('Failed to save bankroll:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Failed to save bankroll',
+        description: 'Your bankroll will be saved when connection is restored',
+        duration: 3000,
+      });
     },
   });
 
@@ -237,11 +257,38 @@ export default function PokerGame() {
     if (gameState) {
       try {
         localStorage.setItem('pokerGameState', JSON.stringify(gameState));
+        
+        // Also save a recovery timestamp for session recovery
+        localStorage.setItem('pokerGameRecoveryTime', Date.now().toString());
       } catch (error) {
         console.error("Failed to save game state to local storage:", error);
+        
+        // Show user-friendly error message
+        toast({
+          variant: 'destructive',
+          title: 'Storage Error',
+          description: 'Unable to save game progress. Your browser storage might be full.',
+          duration: 4000,
+        });
+        
+        // Try to clear old data if storage is full
+        try {
+          const recoveryTime = localStorage.getItem('pokerGameRecoveryTime');
+          if (recoveryTime && Date.now() - parseInt(recoveryTime) > 7 * 24 * 60 * 60 * 1000) {
+            // Clear old game state if older than 7 days
+            localStorage.removeItem('pokerGameState');
+            localStorage.removeItem('pokerGameRecoveryTime');
+            
+            // Try saving again
+            localStorage.setItem('pokerGameState', JSON.stringify(gameState));
+            localStorage.setItem('pokerGameRecoveryTime', Date.now().toString());
+          }
+        } catch (retryError) {
+          console.error("Failed to clear and retry save:", retryError);
+        }
       }
     }
-  }, [gameState]);
+  }, [gameState, toast]);
 
   // Save stats and bankroll to backend when hand ends (for authenticated users)
   useEffect(() => {
@@ -819,6 +866,31 @@ export default function PokerGame() {
         Skip to action controls
       </a>
       
+      {/* Network Status Indicator */}
+      {(!isOnline || isReconnecting) && (
+        <div 
+          className="fixed top-[calc(var(--safe-area-top,0px)+4.5rem)] left-1/2 -translate-x-1/2 z-[140] 
+                     bg-destructive/95 text-destructive-foreground px-4 py-2 rounded-full 
+                     shadow-lg backdrop-blur-sm flex items-center gap-2 animate-pulse"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          data-testid="network-status-indicator"
+        >
+          {isReconnecting ? (
+            <>
+              <LoadingSpinner className="w-4 h-4" />
+              <span className="text-xs font-medium">Reconnecting...</span>
+            </>
+          ) : (
+            <>
+              <span className="w-2 h-2 bg-destructive-foreground rounded-full animate-pulse" />
+              <span className="text-xs font-medium">Offline Mode</span>
+            </>
+          )}
+        </div>
+      )}
+      
       {/* Live region for game status announcements */}
       <div 
         aria-live="polite" 
@@ -856,15 +928,16 @@ export default function PokerGame() {
         
         {/* Hand Strength Indicator - Desktop Only (Hidden on Mobile < 768px) */}
         <div className="hidden md:block md:sticky lg:sticky md:top-6 lg:top-6 md:self-start lg:self-start order-2 lg:order-1 w-full md:w-72 lg:w-64 xl:w-72">
-          {/* Toggle Button - Tablet Only (Hidden on Mobile Phones and Desktop) */}
+          {/* Toggle Button - Tablet Only (Hidden on Mobile Phones and Desktop) - Made larger for better tap targets */}
           <Button
             variant="outline"
-            size="icon"
-            className={`hidden md:block lg:hidden fixed left-[calc(0.5rem+var(--safe-area-left))] top-[calc(5rem+var(--safe-area-top))] z-50 h-11 w-11 rounded-full shadow-lg bg-card/95 backdrop-blur-sm`}
+            size="lg"
+            className={`hidden md:block lg:hidden fixed left-[calc(0.5rem+var(--safe-area-left))] top-[calc(5rem+var(--safe-area-top))] z-50 h-12 w-12 rounded-full shadow-lg bg-card/95 backdrop-blur-sm border-2`}
             onClick={() => setIsHandStrengthCollapsed(!isHandStrengthCollapsed)}
             data-testid="button-toggle-hand-strength"
+            aria-label={isHandStrengthCollapsed ? "Show Hand Strength panel" : "Hide Hand Strength panel"}
           >
-            {isHandStrengthCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
+            {isHandStrengthCollapsed ? <ChevronRight className="w-6 h-6" /> : <ChevronLeft className="w-6 h-6" />}
           </Button>
 
           {/* Panel Content */}
@@ -1037,29 +1110,18 @@ export default function PokerGame() {
                   minRaiseAmount={minRaiseAmount}
                   potSize={gameState.pots.reduce((sum, pot) => sum + pot.amount, 0)}
                   playerChips={humanPlayer.chips}
-                  disabled={gameState.currentPlayerIndex !== 0 || isProcessing || humanPlayer.folded || settings.isPaused}
+                  disabled={gameState.currentPlayerIndex !== 0 || isProcessing || settings.isPaused}
                   animationSpeed={settings.animationSpeed}
+                  playerFolded={humanPlayer.folded}
                 />
               </>
             )}
           </div>
         </div>
 
-        {/* Action History - Right Sidebar (Desktop) / Collapsible (Mobile) */}
-        <div className="md:sticky lg:sticky md:top-6 lg:top-6 md:self-start lg:self-start md:max-h-[calc(100vh-3rem)] lg:max-h-[calc(100vh-3rem)] order-3 w-full md:w-76 lg:w-72 xl:w-80">
-          {/* Mobile/Portrait Toggle Button - Hidden in landscape on tablets */}
-          <Button
-            variant="outline"
-            size="icon"
-            className={`${isLandscape ? 'md:hidden' : ''} lg:hidden fixed right-[calc(0.5rem+var(--safe-area-right))] top-[calc(5rem+var(--safe-area-top))] z-50 h-11 w-11 rounded-full shadow-lg bg-card/95 backdrop-blur-sm`}
-            onClick={() => setIsHistoryCollapsed(!isHistoryCollapsed)}
-            data-testid="button-toggle-action-history"
-          >
-            {isHistoryCollapsed ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
-          </Button>
-
-          {/* Panel Content */}
-          <div className={`flex flex-col gap-3 ${isHistoryCollapsed ? `hidden ${isLandscape ? 'md:flex' : ''} lg:flex pointer-events-none ${isLandscape ? 'md:pointer-events-auto' : ''} lg:pointer-events-auto` : 'flex pointer-events-auto'}`}>
+        {/* Action History - Right Sidebar (Desktop Only) - Completely Hidden on Mobile */}
+        <div className="hidden lg:block lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-3rem)] order-3 lg:w-72 xl:w-80">
+          <div className="flex flex-col gap-3 pointer-events-auto">
             <div className="lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto lg:pr-2 space-y-3">
               <ActionHistory 
                 history={gameState.actionHistory} 

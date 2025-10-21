@@ -1,4 +1,4 @@
-import { Card, Player, GameState, SUITS, RANKS, GamePhase, Pot, ACHIEVEMENT_LIST, AchievementId } from '@shared/schema';
+import { Card, Player, GameState, SUITS, RANKS, GamePhase, Pot, ACHIEVEMENT_LIST, Achievement, AchievementId } from '@shared/schema';
 import { handEvaluator } from './handEvaluator';
 import { achievementEngine } from './achievementEngine';
 
@@ -192,7 +192,7 @@ export class GameEngine {
     return { 
       ...gameState, 
       players, 
-      lastAction: `${players[playerIndex].name} folds`,
+      lastAction: `${players[playerIndex].name} folded`,
       roundActionCount: gameState.roundActionCount + 1
     };
   }
@@ -200,7 +200,7 @@ export class GameEngine {
   playerCheck(gameState: GameState, playerIndex: number): GameState {
     return { 
       ...gameState, 
-      lastAction: `${gameState.players[playerIndex].name} checks`,
+      lastAction: `${gameState.players[playerIndex].name} checked`,
       roundActionCount: gameState.roundActionCount + 1
     };
   }
@@ -214,10 +214,10 @@ export class GameEngine {
 
     let actionText = '';
     if (!isBlind) {
-      if (gameState.currentBet === 0) actionText = `${player.name} bets $${actualBet}`;
-      else if (newTotalBet < gameState.currentBet) actionText = `${player.name} calls $${actualBet} (all-in)`;
-      else if (newTotalBet === gameState.currentBet) actionText = `${player.name} calls $${actualBet}`;
-      else actionText = `${player.name} raises to $${newTotalBet}`;
+      if (gameState.currentBet === 0) actionText = `${player.name} bet $${actualBet}`;
+      else if (newTotalBet < gameState.currentBet) actionText = `${player.name} called $${actualBet} (all-in)`;
+      else if (newTotalBet === gameState.currentBet) actionText = `${player.name} called $${actualBet}`;
+      else actionText = `${player.name} raised to $${newTotalBet}`;
     }
     
     players[playerIndex] = {

@@ -167,11 +167,15 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
         <AnimatePresence>
           {actionBadge && (
             <motion.div
-              className={`absolute -top-10 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full text-sm font-bold z-20 flex items-center gap-2 shadow-lg ${getBadgeStyle(actionBadge.type).class}`}
+              className={`absolute -top-12 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-full text-xs font-bold z-[60] flex items-center gap-1.5 shadow-lg ${getBadgeStyle(actionBadge.type).class}`}
               initial={{ opacity: 0, y: 10, scale: 0.8 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.8 }}
               transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+              aria-label={`${player.name} ${actionBadge.text}`}
             >
               {getBadgeStyle(actionBadge.type).icon}
               <span className="capitalize">{actionBadge.text}</span>
@@ -182,7 +186,7 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
         <AnimatePresence>
           {showWinAmount && winAmount > 0 && (
             <motion.div
-              className="absolute -top-4 left-1/2 -translate-x-1/2 bg-poker-success text-white px-4 py-2 rounded-full text-sm font-bold z-20 shadow-lg"
+              className="absolute -top-6 left-1/2 -translate-x-1/2 bg-poker-success text-white px-3 py-1 rounded-full text-xs font-bold z-[60] shadow-lg"
               initial={{ opacity: 0, y: -20, scale: 0.5 }}
               animate={{ 
                 opacity: 1, 
@@ -192,6 +196,9 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
               exit={{ opacity: 0, y: -30, scale: 0.8 }}
               transition={{ duration: 0.5 }}
               data-testid={`win-indicator-${player.id}`}
+              role="status"
+              aria-live="polite"
+              aria-label={`${player.name} won ${winAmount} dollars`}
             >
               +${winAmount}
             </motion.div>

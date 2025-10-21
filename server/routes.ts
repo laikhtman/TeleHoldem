@@ -46,6 +46,14 @@ async function requireAuth(req: Request, res: Response, next: NextFunction) {
 export async function registerRoutes(app: Express): Promise<Server> {
   const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 
+  // GET /api/health - Health check endpoint
+  app.get('/api/health', async (req: Request, res: Response) => {
+    res.json({ 
+      status: 'ok',
+      timestamp: Date.now()
+    });
+  });
+
   // POST /api/telegram/auth - Authenticate with Telegram initData
   app.post('/api/telegram/auth', async (req: Request, res: Response) => {
     try {
