@@ -838,13 +838,13 @@ export default function PokerGame() {
       {/* Cleaner Centered Layout */}
       <div className="w-full max-w-[2000px] flex flex-col lg:flex-row gap-4 lg:gap-6 items-start justify-center">
         
-        {/* Hand Strength Indicator - Floating Panel (Desktop) / Collapsible (Mobile) */}
-        <div className="md:sticky lg:sticky md:top-6 lg:top-6 md:self-start lg:self-start order-2 lg:order-1 w-full md:w-72 lg:w-64 xl:w-72">
-          {/* Mobile/Portrait Toggle Button - Hidden in landscape on tablets */}
+        {/* Hand Strength Indicator - Desktop Only (Hidden on Mobile < 768px) */}
+        <div className="hidden md:block md:sticky lg:sticky md:top-6 lg:top-6 md:self-start lg:self-start order-2 lg:order-1 w-full md:w-72 lg:w-64 xl:w-72">
+          {/* Toggle Button - Tablet Only (Hidden on Mobile Phones and Desktop) */}
           <Button
             variant="outline"
             size="icon"
-            className={`${isLandscape ? 'md:hidden' : ''} lg:hidden fixed left-[calc(0.5rem+var(--safe-area-left))] top-[calc(5rem+var(--safe-area-top))] z-50 h-11 w-11 rounded-full shadow-lg bg-card/95 backdrop-blur-sm`}
+            className={`hidden md:block lg:hidden fixed left-[calc(0.5rem+var(--safe-area-left))] top-[calc(5rem+var(--safe-area-top))] z-50 h-11 w-11 rounded-full shadow-lg bg-card/95 backdrop-blur-sm`}
             onClick={() => setIsHandStrengthCollapsed(!isHandStrengthCollapsed)}
             data-testid="button-toggle-hand-strength"
           >
@@ -852,7 +852,7 @@ export default function PokerGame() {
           </Button>
 
           {/* Panel Content */}
-          <div className={`bg-card/70 backdrop-blur-sm border border-card-border rounded-lg p-3 shadow-sm ${isHandStrengthCollapsed ? `hidden ${isLandscape ? 'md:block' : ''} lg:block pointer-events-none ${isLandscape ? 'md:pointer-events-auto' : ''} lg:pointer-events-auto` : 'pointer-events-auto'}`}>
+          <div className={`bg-card/70 backdrop-blur-sm border border-card-border rounded-lg p-3 shadow-sm ${isHandStrengthCollapsed ? 'hidden lg:block' : ''}`}>
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-semibold flex items-center gap-1.5 text-muted-foreground">
                 <TrendingUp className="w-3.5 h-3.5 text-poker-chipGold" />

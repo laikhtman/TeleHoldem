@@ -253,7 +253,7 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
                 animateDeal={phase === 'pre-flop'}
                 dealDelay={position * 2 * 150}
                 animateFlip={player.isHuman && phase === 'pre-flop'}
-                className="transform scale-90"
+                className="transform scale-100 xs:scale-95 md:scale-90"
                 colorblindMode={colorblindMode}
               />
               <PlayingCard 
@@ -262,7 +262,7 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
                 animateDeal={phase === 'pre-flop'}
                 dealDelay={position * 2 * 150 + 150}
                 animateFlip={player.isHuman && phase === 'pre-flop'}
-                className="transform scale-90"
+                className="transform scale-100 xs:scale-95 md:scale-90"
                 colorblindMode={colorblindMode}
               />
             </>
