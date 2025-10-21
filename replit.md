@@ -3,6 +3,21 @@
 ## Overview
 A comprehensive Texas Hold'em poker web application designed to provide a realistic and engaging poker experience. It features a professional poker table interface, AI bot opponents, and full game mechanics. The application integrates seamlessly as a Telegram Mini App while also functioning as a standalone web application. Key capabilities include persistent user statistics, bankroll management, and a focus on intuitive UI/UX, aiming to be a professional-grade platform for poker enthusiasts.
 
+## Important: Routes & Testing Access
+
+### For QA Testers
+- **Demo Mode**: `/demo` - No authentication required, full game features available
+- **Landing Page**: `/` - Shows options for Demo Mode or Telegram authentication
+- **Telegram Mode**: `/game` - Requires Telegram authentication (for production use)
+
+### Route Structure
+- `/` - Landing page with clear options for testers and Telegram users
+- `/demo` - Direct access to game without authentication (for QA testing)
+- `/game` - Telegram authenticated game experience with persistent stats
+- `/settings` - Admin configuration page
+
+**Note for Testers**: Always use `https://teleholdem.replit.app/demo` to bypass authentication and test all features.
+
 ## User Preferences
 I prefer iterative development with clear communication on major changes. Please ask before making significant architectural alterations or introducing new external dependencies. I value detailed explanations for complex features or decisions.
 
