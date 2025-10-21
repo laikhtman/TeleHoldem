@@ -52,9 +52,9 @@ export function FlyingChip({
 }: FlyingChipProps) {
   const { playSound } = useSound();
 
-  // Calculate arc trajectory
+  // Calculate arc trajectory with more dramatic curve
   const midX = (startX + endX) / 2;
-  const midY = Math.min(startY, endY) - 100; // Arc peak
+  const midY = Math.min(startY, endY) - 150; // Higher arc peak for more dramatic effect
 
   const sizeClasses = {
     sm: 'w-4 h-4',
@@ -93,15 +93,15 @@ export function FlyingChip({
       animate={{ 
         x: [startX, midX, endX],
         y: [startY, midY, endY],
-        opacity: [1, 1, 0.8],
-        scale: [1, 1.1, 0.9],
-        rotate: [0, 180, 360]
+        opacity: [1, 1, 0.9],
+        scale: [1, 1.2, 0.95],
+        rotate: [0, 360, 720]
       }}
       transition={{ 
-        duration: 0.6,
+        duration: 0.8,
         delay,
-        ease: "easeInOut",
-        times: [0, 0.5, 1]
+        ease: [0.4, 0, 0.2, 1],
+        times: [0, 0.4, 1]
       }}
       onAnimationComplete={handleAnimationComplete}
       data-testid="flying-chip"

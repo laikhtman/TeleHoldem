@@ -130,10 +130,15 @@ export function PlayingCard({
       initial={getInitialState()}
       animate={getAnimateState()}
       transition={{ 
-        duration: animateDeal ? 0.6 : 0.4, 
-        ease: animateDeal ? "easeOut" : "easeInOut",
+        duration: animateDeal ? 0.8 : 0.4, 
+        ease: animateDeal ? [0.4, 0, 0.2, 1] : "easeInOut",
         delay: animateDeal ? dealDelay / 1000 : 0
       }}
+      whileHover={isVisible && !disabled ? { 
+        y: -8, 
+        scale: 1.05,
+        transition: { duration: 0.2, ease: 'easeOut' }
+      } : undefined}
       style={{ transformStyle: 'preserve-3d' }}
     >
       {/* Card Back */}
