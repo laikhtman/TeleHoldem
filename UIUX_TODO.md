@@ -279,9 +279,266 @@
 ✅ **Touch Controls**: Swipe gestures and touch-friendly buttons implemented
 ✅ **Safe Areas**: Complete iOS notch and home indicator support
 
+## CRITICAL: Mobile Visual Polish & Consistency (Priority: IMMEDIATE)
+
+### 📱 Current Mobile Issues Identified from iPhone Screenshots:
+
+#### Issue Analysis from Screenshots:
+1. **Hand Strength Panel Positioning**: Left sidebar panel is overlapping/interfering with table view
+2. **Action Controls Container**: Background opacity and positioning needs refinement
+3. **Player Seat Scaling**: Bot player seats and cards appear too small/cramped
+4. **Table Proportions**: Poker table aspect ratio may need mobile-specific adjustments
+5. **Card Visibility**: Community cards and player cards need better sizing for mobile
+6. **Safe Area Integration**: Header elements may not be properly accounting for iOS safe areas
+
+---
+
+### Phase 1: Critical Mobile Layout Fixes (IMMEDIATE)
+
+#### Task 1: Fix Hand Strength Panel Mobile Behavior
+**Problem**: Left panel is visible and interfering with gameplay on mobile
+
+**Micro-tasks**:
+- [ ] **1.1**: Modify `poker-game.tsx` Hand Strength panel visibility logic
+  - Current: `${isHandStrengthCollapsed ? 'hidden md:block lg:block' : 'pointer-events-auto'}`
+  - Fix: Should be completely hidden on mobile (`xs:` and `sm:` breakpoints)
+- [ ] **1.2**: Update toggle button visibility logic
+  - Should only show on `md:` and above, not on small mobile screens
+- [ ] **1.3**: Test panel behavior on different screen sizes
+
+**QA Checklist**:
+- [ ] Hand strength panel completely hidden on iPhone (< 768px width)
+- [ ] Toggle button not visible on mobile phones
+- [ ] No visual interference with poker table on mobile
+- [ ] Panel appears correctly on tablet landscape (≥ 768px)
+
+#### Task 2: Refine Action Controls Container
+**Problem**: Action controls background and positioning needs visual polish
+
+**Micro-tasks**:
+- [ ] **2.1**: Adjust action controls container background opacity
+  - Current: `bg-card/60 backdrop-blur-md`
+  - Test: `bg-card/80 backdrop-blur-lg` for better contrast
+- [ ] **2.2**: Fine-tune padding and margins for mobile
+  - Ensure proper spacing from table edge
+  - Add consistent safe-area-bottom padding
+- [ ] **2.3**: Improve button sizing and spacing consistency
+  - Verify all buttons meet 48px minimum height
+  - Check horizontal spacing between buttons
+
+**QA Checklist**:
+- [ ] Action controls clearly visible over table background
+- [ ] No visual bleed or overlap with table elements
+- [ ] Buttons properly sized for thumb interaction (≥ 48px)
+- [ ] Consistent spacing on all mobile orientations
+
+#### Task 3: Optimize Player Seat Scaling & Layout
+**Problem**: Player seats appear cramped and cards are too small on mobile
+
+**Micro-tasks**:
+- [ ] **3.1**: Review player positioning algorithm for mobile
+  - Check trigonometric calculations in `PlayerSeat.tsx` `getPosition()`
+  - May need mobile-specific radius adjustments
+- [ ] **3.2**: Increase card scale for mobile screens
+  - Current: `transform scale-90` on cards in `PlayerSeat.tsx`
+  - Test: Remove scale reduction or use `scale-95` for mobile
+- [ ] **3.3**: Adjust player info text sizing
+  - Player names: currently `text-xs xs:text-sm md:text-base`
+  - Chip counts: currently `text-xs xs:text-sm md:text-base`
+  - Consider increasing base mobile sizes
+
+**QA Checklist**:
+- [ ] Player names clearly readable without zooming
+- [ ] Chip counts easily readable with proper contrast
+- [ ] Player cards visible and distinguishable
+- [ ] No overlap between adjacent player seats
+- [ ] Dealer button (D) clearly visible
+
+#### Task 4: Perfect Table Aspect Ratio & Scaling
+**Problem**: Table proportions may need mobile-specific optimization
+
+**Micro-tasks**:
+- [ ] **4.1**: Review table container sizing logic
+  - Current: `max-w-[90%] xs:max-w-[92%] sm:max-w-[95%]`
+  - Test different max-widths for optimal mobile viewing
+- [ ] **4.2**: Adjust table height constraints
+  - Current: `max-h-[min(75vh,800px)]`
+  - Consider mobile-specific height limits
+- [ ] **4.3**: Fine-tune border radius scaling
+  - Current: `rounded-[93px] xs:rounded-[113px] sm:rounded-[152px]`
+  - Ensure consistent oval shape across all mobile sizes
+
+**QA Checklist**:
+- [ ] Table fills screen appropriately without excessive whitespace
+- [ ] Oval shape maintains proper proportions on all mobile sizes
+- [ ] Table doesn't clip or overflow viewport
+- [ ] All 6 player positions clearly visible and accessible
+
+#### Task 5: Enhance Community Cards & Pot Display
+**Problem**: Community cards and pot may be too small for mobile interaction
+
+**Micro-tasks**:
+- [ ] **5.1**: Review community card sizing in `CommunityCards.tsx`
+  - Verify card dimensions are appropriate for mobile
+  - Test larger cards if needed
+- [ ] **5.2**: Check pot display positioning and sizing
+  - Ensure pot amount is clearly readable
+  - Verify central positioning doesn't interfere with gameplay
+- [ ] **5.3**: Validate card dealing animations on mobile
+  - Ensure smooth performance on slower mobile devices
+
+**QA Checklist**:
+- [ ] Community cards clearly visible and distinguishable
+- [ ] Card suits and ranks easily readable without zooming
+- [ ] Pot amount prominently displayed and readable
+- [ ] Card animations smooth on mobile devices
+
+### Phase 2: Mobile UX Refinements (HIGH)
+
+#### Task 6: Safe Area Integration Audit
+**Problem**: Ensure all UI elements respect iOS safe areas properly
+
+**Micro-tasks**:
+- [ ] **6.1**: Audit all fixed/absolute positioned elements
+  - Header controls: `top-[calc(1rem+var(--safe-area-top))]`
+  - Action controls: `pb-[calc(0.5rem+var(--safe-area-bottom))]`
+  - Mobile menu button: uses safe area variables correctly
+- [ ] **6.2**: Test on various iOS devices with different notch configurations
+- [ ] **6.3**: Verify safe area CSS variables are loaded correctly
+
+**QA Checklist**:
+- [ ] No UI elements hidden behind iOS notch
+- [ ] No UI elements hidden behind home indicator
+- [ ] Consistent margins on devices with and without notches
+- [ ] Safe area respected in both portrait and landscape
+
+#### Task 7: Touch Target Optimization
+**Problem**: Ensure all interactive elements are properly sized for touch
+
+**Micro-tasks**:
+- [ ] **7.1**: Audit all button minimum sizes
+  - Action buttons: verify `min-h-[48px]` applied consistently
+  - Toggle buttons: verify `h-11 w-11` meets requirements
+  - Slider controls: verify proper touch area
+- [ ] **7.2**: Check spacing between interactive elements
+  - Minimum 8px spacing between adjacent buttons
+  - Adequate spacing around slider controls
+- [ ] **7.3**: Test tap accuracy on actual mobile devices
+
+**QA Checklist**:
+- [ ] All buttons can be tapped accurately without zooming
+- [ ] No accidental taps on adjacent elements
+- [ ] Slider can be dragged smoothly with thumb
+- [ ] Toggle buttons respond consistently to taps
+
+#### Task 8: Typography & Contrast Mobile Optimization
+**Problem**: Ensure all text is readable on mobile screens
+
+**Micro-tasks**:
+- [ ] **8.1**: Review font sizes across all mobile breakpoints
+  - Player names, chip counts, pot display, action history
+  - Ensure minimum readable sizes are maintained
+- [ ] **8.2**: Verify contrast ratios on mobile screens
+  - Test under different lighting conditions
+  - Ensure backdrop blur doesn't reduce readability
+- [ ] **8.3**: Check text truncation and wrapping behavior
+
+**QA Checklist**:
+- [ ] All text readable without zooming on iPhone
+- [ ] High contrast maintained in all lighting conditions
+- [ ] No text truncation in critical game information
+- [ ] Consistent font rendering across iOS Safari
+
+### Phase 3: Mobile-Specific Feature Polish (MEDIUM)
+
+#### Task 9: Swipe Gesture Refinement
+**Problem**: Ensure swipe gestures work reliably and provide proper feedback
+
+**Micro-tasks**:
+- [ ] **9.1**: Test swipe gesture sensitivity and accuracy
+  - Verify `minSwipeDistance: 80` is appropriate for all hand sizes
+  - Test on different screen sizes and orientations
+- [ ] **9.2**: Improve swipe feedback visibility
+  - Current hint: positioned at `bottom-[calc(5rem+var(--safe-area-bottom))]`
+  - Consider better positioning or styling
+- [ ] **9.3**: Add haptic feedback for successful swipes (if available)
+
+**QA Checklist**:
+- [ ] Swipe left to fold works consistently
+- [ ] Swipe right to call/check works consistently
+- [ ] No false triggers from scrolling gestures
+- [ ] Swipe hint clearly visible and helpful
+
+#### Task 10: Bottom Sheet Polish
+**Problem**: Mobile bottom sheet needs visual and UX refinements
+
+**Micro-tasks**:
+- [ ] **10.1**: Refine bottom sheet header and drag handle
+  - Improve swipe-to-close gesture responsiveness
+  - Better visual indication of draggable area
+- [ ] **10.2**: Optimize tab switching performance
+  - Ensure smooth transitions between Essential/Detailed/History
+  - Proper content loading and scrolling behavior
+- [ ] **10.3**: Improve floating action button (FAB) positioning
+  - Current: `bottom-[calc(var(--safe-area-bottom)+5.5rem)]`
+  - Verify optimal placement for thumb reach
+
+**QA Checklist**:
+- [ ] Bottom sheet opens/closes smoothly
+- [ ] Drag handle clearly indicates swipe-to-close
+- [ ] All three tabs load quickly and scroll smoothly
+- [ ] FAB positioned for easy thumb access
+- [ ] No visual conflicts with game controls
+
+### Comprehensive Mobile QA Testing Protocol
+
+#### Device Testing Matrix:
+- [ ] **iPhone SE (small screen)**: 375x667px
+- [ ] **iPhone 12/13/14 (standard)**: 390x844px  
+- [ ] **iPhone 12/13/14 Pro Max (large)**: 428x926px
+- [ ] **iPhone with Dynamic Island**: Test notch area
+- [ ] **iPhone with Home Button**: Test without safe areas
+
+#### Orientation Testing:
+- [ ] **Portrait**: Primary gameplay orientation
+- [ ] **Landscape**: Verify graceful handling or rotation lock
+
+#### Performance Testing:
+- [ ] **Smooth animations**: 60fps on target devices
+- [ ] **Touch responsiveness**: <100ms response time
+- [ ] **Memory usage**: No memory leaks during extended play
+- [ ] **Battery impact**: Reasonable power consumption
+
+#### Visual Consistency Testing:
+- [ ] **Color accuracy**: Consistent across different iOS versions
+- [ ] **Font rendering**: Sharp text on Retina displays
+- [ ] **Component alignment**: Pixel-perfect positioning
+- [ ] **Animation smoothness**: No jitter or frame drops
+
+#### Accessibility Testing:
+- [ ] **VoiceOver compatibility**: Screen reader navigation
+- [ ] **High contrast mode**: Readable in accessibility modes
+- [ ] **Text size scaling**: Supports iOS text size settings
+- [ ] **Touch accommodations**: Works with AssistiveTouch
+
+#### Network Condition Testing:
+- [ ] **Offline mode**: Graceful handling of network loss
+- [ ] **Slow connections**: UI remains responsive
+- [ ] **Connection recovery**: Smooth reconnection behavior
+
+---
+
 ## Next Steps Priority:
-1. ✅ Mobile implementation - COMPLETED
-2. Improve action controls visibility during active gameplay
-3. Enhance turn management and visual feedback
-4. Continue with other high-priority gameplay improvements
+1. 🔥 **IMMEDIATE**: Complete Phase 1 Critical Mobile Layout Fixes
+2. 📱 **HIGH**: Execute Phase 2 Mobile UX Refinements  
+3. ✨ **MEDIUM**: Apply Phase 3 Mobile-Specific Feature Polish
+4. 🧪 **ONGOING**: Run Comprehensive Mobile QA Testing Protocol
+5. Continue with other high-priority gameplay improvements
+
+## Success Metrics:
+- [ ] App receives 5-star visual quality rating on iPhone
+- [ ] Zero UI layout issues reported on mobile devices
+- [ ] All interactive elements pass touch accessibility standards
+- [ ] Smooth 60fps performance on target mobile devices
+- [ ] 100% pass rate on comprehensive mobile QA checklist
 
