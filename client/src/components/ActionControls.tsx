@@ -2,12 +2,13 @@ import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { useState, useEffect, useCallback } from 'react';
-import { AlertCircle } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useShake } from '@/hooks/useShake';
 import { useToast } from '@/hooks/use-toast';
 import { useSound } from '@/hooks/useSound';
 import { useHaptic } from '@/hooks/useHaptic';
+import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 
 interface ActionControlsProps {
   onFold: () => void;
@@ -179,8 +180,86 @@ export function ActionControls({
   const betPercentageOfChips = playerChips > 0 ? (betAmount / playerChips) * 100 : 0;
   const isSignificantBet = betPercentageOfChips > 50;
 
+  // Swipe gesture handlers for mobile
+  const handleSwipeLeft = useCallback(() => {
+    if (!disabled) {
+      handleFold();
+      toast({
+        title: "Folded",
+        description: "You folded your hand",
+        duration: 1500
+      });
+    }
+  }, [disabled, handleFold, toast]);
+
+  const handleSwipeRight = useCallback(() => {
+    if (!disabled) {
+      if (canCheck) {
+        handleCheck();
+        toast({
+          title: "Checked",
+          description: "You checked",
+          duration: 1500
+        });
+      } else if (amountToCall > 0) {
+        handleCall();
+        toast({
+          title: "Called",
+          description: `You called $${amountToCall}`,
+          duration: 1500
+        });
+      }
+    }
+  }, [disabled, canCheck, amountToCall, handleCheck, handleCall, toast]);
+
+  const { ref: swipeRef, isSwipingLeft, isSwipingRight } = useSwipeGesture(
+    {
+      onSwipeLeft: handleSwipeLeft,
+      onSwipeRight: handleSwipeRight
+    },
+    {
+      disabled: disabled,
+      minSwipeDistance: 75,
+      maxSwipeTime: 400
+    }
+  );
+
   return (
-    <div className="flex flex-col gap-3 xs:gap-4">
+    <div className="flex flex-col gap-3 xs:gap-4 relative" ref={swipeRef}>
+      {/* Swipe visual feedback indicators for mobile */}
+      <AnimatePresence>
+        {(isSwipingLeft || isSwipingRight) && (
+          <motion.div
+            className="absolute inset-x-0 -top-12 flex justify-center items-center z-50 md:hidden"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className={`flex items-center gap-2 px-4 py-2 rounded-full ${
+              isSwipingLeft ? 'bg-destructive/80' : 'bg-accent/80'
+            } backdrop-blur-sm text-white text-sm font-medium`}>
+              {isSwipingLeft ? (
+                <>
+                  <ChevronLeft className="w-4 h-4" />
+                  <span>Swipe to Fold</span>
+                </>
+              ) : (
+                <>
+                  <span>Swipe to {canCheck ? 'Check' : 'Call'}</span>
+                  <ChevronRight className="w-4 h-4" />
+                </>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Swipe hint for mobile users */}
+      <div className="text-xs text-muted-foreground text-center py-1 md:hidden">
+        Swipe left to fold • Swipe right to {canCheck ? 'check' : 'call'}
+      </div>
+
       <div className="flex gap-2 xs:gap-3 md:gap-2 lg:gap-4 justify-center flex-wrap">
         <Button
           onClick={handleFold}
