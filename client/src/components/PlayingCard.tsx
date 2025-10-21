@@ -1,7 +1,8 @@
-import { Card, getCardColor } from '@shared/schema';
+import { Card } from '@shared/schema';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useSound } from '@/hooks/useSound';
+import svgCardsPath from '@assets/svg-cards.svg';
 
 interface PlayingCardProps {
   card?: Card;
@@ -13,6 +14,30 @@ interface PlayingCardProps {
   colorblindMode?: boolean;
 }
 
+// Convert our card format to SVG-cards naming convention
+const getCardSvgId = (card: Card): string => {
+  // Map suits: S->spade, H->heart, D->diamond, C->club
+  const suitMap: Record<string, string> = {
+    'S': 'spade',
+    'H': 'heart',
+    'D': 'diamond',
+    'C': 'club'
+  };
+  
+  // Map ranks: A->1, J->jack, Q->queen, K->king, 2-10->2-10
+  const rankMap: Record<string, string> = {
+    'A': '1',
+    'J': 'jack',
+    'Q': 'queen',
+    'K': 'king'
+  };
+  
+  const suit = suitMap[card.suit] || 'spade';
+  const rank = rankMap[card.rank] || card.rank.toLowerCase();
+  
+  return `${suit}_${rank}`;
+};
+
 // Get the actual suit symbol (♠ ♥ ♦ ♣)
 const getSuitSymbol = (suit: string) => {
   switch (suit) {
@@ -22,125 +47,6 @@ const getSuitSymbol = (suit: string) => {
     case 'C': return '♣';
     default: return suit;
   }
-};
-
-// Get the suit pattern layout for the card center
-const getSuitPattern = (rank: string, suit: string) => {
-  const symbol = getSuitSymbol(suit);
-  const positions: { top: string; left: string }[] = [];
-
-  switch (rank) {
-    case 'A':
-      positions.push({ top: '50%', left: '50%' });
-      break;
-    case '2':
-      positions.push({ top: '25%', left: '50%' }, { top: '75%', left: '50%' });
-      break;
-    case '3':
-      positions.push(
-        { top: '25%', left: '50%' },
-        { top: '50%', left: '50%' },
-        { top: '75%', left: '50%' }
-      );
-      break;
-    case '4':
-      positions.push(
-        { top: '25%', left: '30%' },
-        { top: '25%', left: '70%' },
-        { top: '75%', left: '30%' },
-        { top: '75%', left: '70%' }
-      );
-      break;
-    case '5':
-      positions.push(
-        { top: '25%', left: '30%' },
-        { top: '25%', left: '70%' },
-        { top: '50%', left: '50%' },
-        { top: '75%', left: '30%' },
-        { top: '75%', left: '70%' }
-      );
-      break;
-    case '6':
-      positions.push(
-        { top: '25%', left: '30%' },
-        { top: '25%', left: '70%' },
-        { top: '50%', left: '30%' },
-        { top: '50%', left: '70%' },
-        { top: '75%', left: '30%' },
-        { top: '75%', left: '70%' }
-      );
-      break;
-    case '7':
-      positions.push(
-        { top: '20%', left: '30%' },
-        { top: '20%', left: '70%' },
-        { top: '37.5%', left: '50%' },
-        { top: '55%', left: '30%' },
-        { top: '55%', left: '70%' },
-        { top: '80%', left: '30%' },
-        { top: '80%', left: '70%' }
-      );
-      break;
-    case '8':
-      positions.push(
-        { top: '20%', left: '30%' },
-        { top: '20%', left: '70%' },
-        { top: '37.5%', left: '50%' },
-        { top: '55%', left: '30%' },
-        { top: '55%', left: '70%' },
-        { top: '62.5%', left: '50%' },
-        { top: '80%', left: '30%' },
-        { top: '80%', left: '70%' }
-      );
-      break;
-    case '9':
-      positions.push(
-        { top: '18%', left: '30%' },
-        { top: '18%', left: '70%' },
-        { top: '35%', left: '30%' },
-        { top: '35%', left: '70%' },
-        { top: '50%', left: '50%' },
-        { top: '65%', left: '30%' },
-        { top: '65%', left: '70%' },
-        { top: '82%', left: '30%' },
-        { top: '82%', left: '70%' }
-      );
-      break;
-    case '10':
-      positions.push(
-        { top: '18%', left: '30%' },
-        { top: '18%', left: '70%' },
-        { top: '30%', left: '50%' },
-        { top: '42%', left: '30%' },
-        { top: '42%', left: '70%' },
-        { top: '58%', left: '30%' },
-        { top: '58%', left: '70%' },
-        { top: '70%', left: '50%' },
-        { top: '82%', left: '30%' },
-        { top: '82%', left: '70%' }
-      );
-      break;
-    default: // Face cards (J, Q, K)
-      return (
-        <div className="text-5xl font-bold flex items-center justify-center h-full">
-          {rank}
-        </div>
-      );
-  }
-
-  return (
-    <div className="absolute inset-0">
-      {positions.map((pos, i) => (
-        <div
-          key={i}
-          className="absolute text-2xl font-bold transform -translate-x-1/2 -translate-y-1/2"
-          style={{ top: pos.top, left: pos.left }}
-        >
-          {symbol}
-        </div>
-      ))}
-    </div>
-  );
 };
 
 export function PlayingCard({ 
@@ -185,10 +91,6 @@ export function PlayingCard({
     );
   }
 
-  const color = getCardColor(card.suit);
-  const colorClass = color === 'red' ? 'text-poker-cardRed' : 'text-poker-cardBlack';
-  const suitSymbol = getSuitSymbol(card.suit);
-  
   // Colorblind-friendly suit indicators (small geometric shapes)
   const getSuitIndicator = () => {
     const baseClass = "absolute top-1 right-1 w-2.5 h-2.5 z-10";
@@ -220,6 +122,8 @@ export function PlayingCard({
     return { opacity: 1, scale: 1, y: 0, rotateY: isFlipped ? 180 : 0 };
   };
 
+  const cardSvgId = card ? getCardSvgId(card) : '';
+
   return (
     <motion.div
       className={`relative w-[70px] h-[100px] ${className}`}
@@ -238,12 +142,16 @@ export function PlayingCard({
         style={{ backfaceVisibility: 'hidden' }}
       >
         <div 
-          className="w-full h-full rounded-md bg-gradient-to-br from-blue-600 to-blue-800 border-2 border-blue-900 flex items-center justify-center"
+          className="w-full h-full rounded-md overflow-hidden border border-gray-400 shadow-md"
           data-testid="card-back"
         >
-          <div className="w-full h-full p-2 flex items-center justify-center">
-            <div className="w-full h-full border-2 border-blue-400/30 rounded-sm" />
-          </div>
+          <svg
+            viewBox="0 0 169.075 244.640"
+            className="w-full h-full"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <use href={`${svgCardsPath}#back`} fill="#0062ff" />
+          </svg>
         </div>
       </motion.div>
       
@@ -253,28 +161,20 @@ export function PlayingCard({
         style={{ backfaceVisibility: 'hidden', rotateY: 180 }}
       >
         <div 
-          className={`w-full h-full rounded-md bg-poker-cardBg border-2 border-gray-300 shadow-md relative overflow-hidden`}
+          className={`w-full h-full rounded-md overflow-hidden border border-gray-400 shadow-md relative`}
           data-testid={`card-${card.id}`}
         >
           {/* Colorblind-friendly suit indicator badge (only in colorblind mode) */}
           {colorblindMode && getSuitIndicator()}
           
-          {/* Top-left corner index */}
-          <div className={`absolute top-1 left-1 flex flex-col items-center leading-none ${colorClass}`}>
-            <div className="text-xs font-bold">{card.rank}</div>
-            <div className="text-sm">{suitSymbol}</div>
-          </div>
-          
-          {/* Bottom-right corner index (rotated) */}
-          <div className={`absolute bottom-1 right-1 flex flex-col items-center leading-none ${colorClass} rotate-180`}>
-            <div className="text-xs font-bold">{card.rank}</div>
-            <div className="text-sm">{suitSymbol}</div>
-          </div>
-          
-          {/* Card center pattern */}
-          <div className={`absolute inset-0 ${colorClass}`}>
-            {getSuitPattern(card.rank, card.suit)}
-          </div>
+          {/* SVG Card from professional deck */}
+          <svg
+            viewBox="0 0 169.075 244.640"
+            className="w-full h-full"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <use href={`${svgCardsPath}#${cardSvgId}`} />
+          </svg>
         </div>
       </motion.div>
     </motion.div>
