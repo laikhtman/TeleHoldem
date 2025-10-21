@@ -1,0 +1,33 @@
+Items I could not verify
+
+Button/tap target sizing: I didn’t reach a betting decision screen before the authentication flow kicked in, so I couldn’t measure whether the Fold, Call, Raise, and slider controls were enlarged to meet the 44×44 pt guideline.
+
+Text size and contrast improvements: Without seeing the updated decision helper, I couldn’t check whether type sizes and contrast were increased to improve legibility.
+
+High‑contrast / accessibility modes: I didn’t see any settings for alternative themes or screen‑reader support, but the new login flow prevented a full accessibility test.
+
+Session reset or start‑new‑hand control: It’s still unclear if users can start a new hand or session without waiting for bots to finish, because the game session didn’t fully load before authentication intervened.
+
+Tooltips / disabled‑button explanations: Since I couldn’t play a hand, I couldn’t confirm whether bet buttons or sliders now display explanatory tooltips when disabled.
+
+⚠️ New blocking issue
+
+A new “Authenticating… Verifying your Telegram account” page appears after some navigation. It currently stays indefinitely and prevents further gameplay
+teleholdem.replit.app
+. If this is unintentional for testing, consider adding a bypass parameter in the demo or a fallback for unauthenticated users so testers can still access the game.
+
+📌 Remaining tasks / follow‑ups
+
+Allow testers to bypass Telegram authentication to continue QA on the game interface.
+
+Ensure control sizes meet accessibility guidelines (≥ 44 × 44 pt tap area) and check that the slider thumb is easy to drag.
+
+Test text contrast and high‑contrast mode, ensuring body text is ≥ 11 pt and legible.
+
+Verify new panel toggles for stats, winning hand distribution, etc., and ensure they don’t crowd the main table.
+
+Confirm that disabled controls provide feedback when unavailable (e.g., explaining why a betting option is greyed out).
+
+Assess session control options to let users start a new hand or reset the game without reloading.
+
+Once the authentication barrier is resolved, another round of testing can verify whether these remaining issues have been addressed.

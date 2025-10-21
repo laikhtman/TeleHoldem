@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { TelegramAuthGate } from "@/components/TelegramAuthGate";
 import PokerGame from "@/pages/poker-game";
 import SettingsPage from "@/pages/SettingsPage";
+import LandingPage from "@/pages/LandingPage";
 
 function Router() {
   return (
@@ -16,10 +17,13 @@ function Router() {
       <Route path="/demo">
         <PokerGame />
       </Route>
-      <Route path="/">
+      <Route path="/game">
         <TelegramAuthGate>
           <PokerGame />
         </TelegramAuthGate>
+      </Route>
+      <Route path="/">
+        <LandingPage />
       </Route>
     </Switch>
   );
