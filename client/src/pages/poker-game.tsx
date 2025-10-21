@@ -377,6 +377,7 @@ export default function PokerGame() {
           currentPlayer.name,
           'fold'
         );
+        setGameState(currentState);
       } else if (botAction.action === 'check') {
         currentState = gameEngine.playerCheck(currentState, currentState.currentPlayerIndex);
         currentState = addActionHistory(
@@ -386,6 +387,7 @@ export default function PokerGame() {
           currentPlayer.name,
           'check'
         );
+        setGameState(currentState);
       } else if (botAction.action === 'bet' || botAction.action === 'call' || botAction.action === 'raise') {
         const prevBet = currentPlayer.bet;
         const prevCurrentBet = currentState.currentBet;
@@ -413,6 +415,7 @@ export default function PokerGame() {
           actualAction,
           botAction.amount
         );
+        setGameState(currentState);
       }
 
       toast({

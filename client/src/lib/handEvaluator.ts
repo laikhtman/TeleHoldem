@@ -24,8 +24,8 @@ export interface HandEvaluation {
 }
 
 export class HandEvaluator {
-  evaluateHand(hand: Card[], communityCards: Card[]): HandResult {
-    const allCards = [...hand, ...communityCards];
+  evaluateHand(hand: Card[], communityCards: Card[] = []): HandResult {
+    const allCards = [...hand, ...(communityCards || [])];
     
     // Get best 5-card combination
     const combinations = this.getCombinations(allCards, 5);

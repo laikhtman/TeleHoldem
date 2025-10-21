@@ -134,7 +134,7 @@ export function PlayingCard({
         ease: animateDeal ? [0.4, 0, 0.2, 1] : "easeInOut",
         delay: animateDeal ? dealDelay / 1000 : 0
       }}
-      whileHover={isVisible && !disabled ? { 
+      whileHover={!faceDown ? { 
         y: -8, 
         scale: 1.05,
         transition: { duration: 0.2, ease: 'easeOut' }

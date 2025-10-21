@@ -253,8 +253,11 @@ export class GameEngine {
     const firstActiveBet = activePlayers[0].bet;
     const allMatched = activePlayers.every(p => p.bet === firstActiveBet);
 
-    // Check if at least one player has acted in this round
-    const hasAction = gameState.roundActionCount > 0;
+    // Check if enough players have acted
+    // For a round to be complete, all active players must have acted at least once
+    // or the number of actions should be at least equal to active players
+    const minActionsNeeded = activePlayers.length;
+    const hasEnoughActions = gameState.roundActionCount >= minActionsNeeded;
 
     // In pre-flop, the big blind can still act if no one raised.
     if (gameState.phase === 'pre-flop') {
@@ -266,7 +269,7 @@ export class GameEngine {
         }
     }
 
-    return allMatched && hasAction;
+    return allMatched && hasEnoughActions;
   }
 
   getActivePlayers(gameState: GameState): Player[] {
