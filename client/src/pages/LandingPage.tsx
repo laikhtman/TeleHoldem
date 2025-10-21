@@ -6,15 +6,16 @@ import { Spade, Heart, Diamond, Club, ArrowRight, TestTube, MessageCircle } from
 import { useTelegramWebApp } from "@/hooks/useTelegramWebApp";
 
 export default function LandingPage() {
-  const { isInTelegram } = useTelegramWebApp();
+  const { isInTelegram, initData } = useTelegramWebApp();
   const [, navigate] = useLocation();
   
-  // If in Telegram, redirect to /game for authentication
+  // Only redirect if truly in Telegram (has initData from Telegram)
   useEffect(() => {
-    if (isInTelegram) {
+    // Check if we have actual Telegram initData (not just the SDK loaded)
+    if (isInTelegram && initData && initData.length > 0) {
       navigate("/game");
     }
-  }, [isInTelegram, navigate]);
+  }, [isInTelegram, initData, navigate]);
   
   // Landing page for non-Telegram users
   return (
