@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useSound } from '@/hooks/useSound';
 import { useHaptic } from '@/hooks/useHaptic';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
+import { DraggableChip } from '@/components/DraggableChip';
 
 interface ActionControlsProps {
   onFold: () => void;
@@ -372,6 +373,35 @@ export function ActionControls({
               </div>
             </div>
           </motion.div>
+
+          {/* Draggable chips for mobile quick betting */}
+          <div className="flex flex-col gap-2 md:hidden mb-3">
+            <div className="text-xs text-muted-foreground text-center">
+              Drag chips to pot to bet
+            </div>
+            <div className="flex gap-3 justify-center">
+              <DraggableChip 
+                value={10}
+                onDrop={(value) => handleQuickBet(value)}
+                disabled={disabled || 10 < minBet || 10 > maxBet}
+              />
+              <DraggableChip 
+                value={25}
+                onDrop={(value) => handleQuickBet(value)}
+                disabled={disabled || 25 < minBet || 25 > maxBet}
+              />
+              <DraggableChip 
+                value={50}
+                onDrop={(value) => handleQuickBet(value)}
+                disabled={disabled || 50 < minBet || 50 > maxBet}
+              />
+              <DraggableChip 
+                value={100}
+                onDrop={(value) => handleQuickBet(value)}
+                disabled={disabled || 100 < minBet || 100 > maxBet}
+              />
+            </div>
+          </div>
 
           <div className="flex gap-2 xs:gap-3 md:gap-2 lg:gap-4 justify-center flex-wrap">
             <Button
