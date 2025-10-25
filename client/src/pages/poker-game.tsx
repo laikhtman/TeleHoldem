@@ -961,7 +961,7 @@ export default function PokerGame() {
         <div className="flex flex-col gap-4 items-center flex-1 order-1 lg:order-2 w-full max-w-5xl mx-auto px-[calc(0.5rem+var(--safe-area-left))] xs:px-[calc(0.75rem+var(--safe-area-left))] sm:px-[calc(1rem+var(--safe-area-left))] md:px-0 pb-[calc(0.5rem+var(--safe-area-bottom))]">
           {/* Poker Table with Wood Border */}
           <div 
-            className="rounded-[100px] xs:rounded-[120px] sm:rounded-[160px] md:rounded-[190px] lg:rounded-[220px] wood-grain p-[7px] xs:p-[8px] sm:p-[10px] md:p-[11px] lg:p-[12px] table-edge-glow w-full max-w-[90%] xs:max-w-[92%] sm:max-w-[95%] md:max-w-full md:min-h-[60vh] lg:min-h-[70vh] max-h-[min(75vh,800px)] mx-auto"
+            className="rounded-[100px] xs:rounded-[120px] sm:rounded-[160px] md:rounded-[190px] lg:rounded-[220px] wood-grain p-[7px] xs:p-[8px] sm:p-[10px] md:p-[11px] lg:p-[12px] table-edge-glow w-full max-w-full md:min-h-[60vh] lg:min-h-[70vh] max-h-[min(75vh,800px)] mx-auto"
             style={{ 
               aspectRatio: '3 / 2',
             }}

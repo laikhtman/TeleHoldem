@@ -61,6 +61,7 @@ export function PlayingCard({
   const [isFlipped, setIsFlipped] = useState(!animateFlip);
   const [isDealt, setIsDealt] = useState(!animateDeal);
   const [isTouched, setIsTouched] = useState(false);
+  const [cardDimensions, setCardDimensions] = useState({ width: '90px', height: '129px' });
   const { playSound } = useSound();
 
   useEffect(() => {
@@ -83,10 +84,37 @@ export function PlayingCard({
     }
   }, [animateDeal, dealDelay, playSound]);
 
+  useEffect(() => {
+    const updateCardSize = () => {
+      const vw = window.innerWidth;
+      if (vw >= 1024) {
+        setCardDimensions({ width: '75px', height: '107px' });  // lg
+      } else if (vw >= 768) {
+        setCardDimensions({ width: '70px', height: '100px' });   // md
+      } else if (vw >= 640) {
+        setCardDimensions({ width: '85px', height: '121px' });   // sm
+      } else if (vw >= 480) {
+        setCardDimensions({ width: '100px', height: '143px' });  // xs
+      } else {
+        setCardDimensions({ width: '90px', height: '129px' });   // mobile
+      }
+    };
+
+    updateCardSize();
+    window.addEventListener('resize', updateCardSize);
+    return () => window.removeEventListener('resize', updateCardSize);
+  }, []);
+
   if (!card) {
     return (
       <div 
-        className={`w-[90px] h-[129px] xs:w-[100px] xs:h-[143px] sm:w-[85px] sm:h-[121px] md:w-[70px] md:h-[100px] lg:w-[75px] lg:h-[107px] rounded-lg border-2 border-dashed border-border/40 bg-background/20 ${className}`}
+        className={`rounded-lg border-2 border-dashed border-border/40 bg-background/20 ${className}`}
+        style={{
+          width: cardDimensions.width,
+          height: cardDimensions.height,
+          minWidth: cardDimensions.width,
+          minHeight: cardDimensions.height
+        }}
         data-testid="card-placeholder"
       />
     );
@@ -137,9 +165,18 @@ export function PlayingCard({
     setIsTouched(false);
   };
 
+
   return (
     <motion.div
-      className={`relative w-[90px] h-[129px] xs:w-[100px] xs:h-[143px] sm:w-[85px] sm:h-[121px] md:w-[70px] md:h-[100px] lg:w-[75px] lg:h-[107px] ${className}`}
+      className={`relative ${className}`}
+      style={{ 
+        width: cardDimensions.width, 
+        height: cardDimensions.height,
+        minWidth: cardDimensions.width,
+        minHeight: cardDimensions.height,
+        flexShrink: 0,
+        transformStyle: 'preserve-3d'
+      }}
       initial={getInitialState()}
       animate={getAnimateState()}
       transition={{ 
@@ -159,7 +196,6 @@ export function PlayingCard({
       } : undefined}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
-      style={{ transformStyle: 'preserve-3d' }}
     >
       {/* Card Back */}
       <motion.div 
