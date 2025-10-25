@@ -86,7 +86,7 @@ export function PlayingCard({
   if (!card) {
     return (
       <div 
-        className={`w-[85px] h-[120px] xs:w-[90px] xs:h-[126px] sm:w-[70px] sm:h-[100px] rounded-lg border-2 border-dashed border-border/40 bg-background/20 ${className}`}
+        className={`w-[90px] h-[129px] xs:w-[100px] xs:h-[143px] sm:w-[85px] sm:h-[121px] md:w-[70px] md:h-[100px] lg:w-[75px] lg:h-[107px] rounded-lg border-2 border-dashed border-border/40 bg-background/20 ${className}`}
         data-testid="card-placeholder"
       />
     );
@@ -139,7 +139,7 @@ export function PlayingCard({
 
   return (
     <motion.div
-      className={`relative w-[85px] h-[120px] xs:w-[90px] xs:h-[126px] sm:w-[70px] sm:h-[100px] ${className}`}
+      className={`relative w-[90px] h-[129px] xs:w-[100px] xs:h-[143px] sm:w-[85px] sm:h-[121px] md:w-[70px] md:h-[100px] lg:w-[75px] lg:h-[107px] ${className}`}
       initial={getInitialState()}
       animate={getAnimateState()}
       transition={{ 

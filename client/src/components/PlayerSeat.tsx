@@ -220,31 +220,31 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
         {/* Player info */}
         <div className="text-center mb-2 xs:mb-2.5 sm:mb-1.5">
           <div className="flex items-center justify-between gap-2 xs:gap-2.5 mb-1 xs:mb-1.5">
-            <div className="text-sm xs:text-base sm:text-sm md:text-base font-bold text-white tracking-wide">
+            <div className="text-base xs:text-lg sm:text-base md:text-base lg:text-lg font-bold text-white tracking-wide">
               {player.name}
             </div>
             {isDealer && (
-              <div className="w-6 h-6 xs:w-7 xs:h-7 sm:w-6 sm:h-6 rounded-full bg-white text-black text-xs xs:text-sm sm:text-xs font-bold flex items-center justify-center shadow-md">
+              <div className="w-7 h-7 xs:w-8 xs:h-8 sm:w-6 sm:h-6 md:w-7 md:h-7 rounded-full bg-white text-black text-sm xs:text-base sm:text-xs md:text-sm font-bold flex items-center justify-center shadow-md">
                 D
               </div>
             )}
           </div>
-          <div className="flex items-center justify-center gap-1 xs:gap-1.5 text-poker-chipGold font-mono font-bold text-sm xs:text-base sm:text-sm md:text-base">
-            <Coins className="w-4 h-4 xs:w-5 xs:h-5 sm:w-4 sm:h-4" aria-hidden="true" />
+          <div className="flex items-center justify-center gap-1 xs:gap-1.5 text-poker-chipGold font-mono font-bold text-base xs:text-lg sm:text-base md:text-base lg:text-lg">
+            <Coins className="w-5 h-5 xs:w-6 xs:h-6 sm:w-4 sm:h-4 md:w-5 md:h-5" aria-hidden="true" />
             <span data-testid={`player-chips-${player.id}`} aria-label={`${player.name} has ${animatedChipCount} dollars in chips`}>${animatedChipCount}</span>
           </div>
           {player.bet > 0 && (
-            <div className="text-xs xs:text-sm sm:text-xs text-poker-success mt-1 font-semibold" data-testid={`player-bet-${player.id}`}>
+            <div className="text-sm xs:text-base sm:text-sm md:text-sm text-poker-success mt-1 font-semibold" data-testid={`player-bet-${player.id}`}>
               Bet: ${player.bet}
             </div>
           )}
           {player.folded && (
-            <div className="text-xs xs:text-sm sm:text-xs text-destructive mt-1 font-semibold" data-testid={`player-folded-${player.id}`} aria-label={`${player.name} has folded`}>
+            <div className="text-sm xs:text-base sm:text-sm md:text-sm text-destructive mt-1 font-semibold" data-testid={`player-folded-${player.id}`} aria-label={`${player.name} has folded`}>
               Folded
             </div>
           )}
           {player.allIn && (
-            <div className="text-xs xs:text-sm sm:text-xs text-poker-chipGold mt-1 font-bold animate-pulse" data-testid={`player-allin-${player.id}`} aria-label={`${player.name} is all-in`}>
+            <div className="text-sm xs:text-base sm:text-sm md:text-sm text-poker-chipGold mt-1 font-bold animate-pulse" data-testid={`player-allin-${player.id}`} aria-label={`${player.name} is all-in`}>
               ALL IN!
             </div>
           )}
