@@ -130,24 +130,24 @@ export function CommunityCards({ cards, phase, colorblindMode = false }: Communi
           <AnimatePresence>
             {showGlow && (
               <motion.div
-                className="absolute inset-0 -m-4 xs:-m-6 sm:-m-8 rounded-xl pointer-events-none"
+                className="absolute inset-0 -m-8 xs:-m-10 sm:-m-8 rounded-2xl pointer-events-none"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{
-                  opacity: [0, 1, 0.5, 0],
-                  scale: [0.9, 1.05, 1, 0.95]
+                  opacity: [0, 1, 0.6, 0],
+                  scale: [0.9, 1.1, 1, 0.95]
                 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 1.5 }}
+                transition={{ duration: 1.8 }}
                 style={{
-                  background: 'radial-gradient(ellipse at center, rgba(255, 215, 0, 0.3) 0%, transparent 70%)',
-                  boxShadow: '0 0 40px 10px rgba(255, 215, 0, 0.5), 0 0 80px 20px rgba(255, 215, 0, 0.3)',
+                  background: 'radial-gradient(ellipse at center, rgba(255, 215, 0, 0.4) 0%, transparent 70%)',
+                  boxShadow: '0 0 50px 15px rgba(255, 215, 0, 0.6), 0 0 100px 30px rgba(255, 215, 0, 0.4)',
                 }}
               />
             )}
           </AnimatePresence>
   
           {/* Cards */}
-          <div className="flex gap-2 xs:gap-2.5 sm:gap-3 md:gap-4 relative" data-testid="community-cards">
+          <div className="flex gap-2.5 xs:gap-3 sm:gap-3 md:gap-4 relative" data-testid="community-cards">
             {[0, 1, 2, 3, 4].map((index) => {
               const hasCard = !!cards[index];
               const animation = getCardAnimation(index);

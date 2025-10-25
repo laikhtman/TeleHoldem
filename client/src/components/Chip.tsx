@@ -122,21 +122,26 @@ export function ChipStack({ count, className }: ChipStackProps) {
       {Array.from({ length: displayCount }).map((_, i) => (
         <motion.div
           key={i}
-          className="absolute w-6 h-6 rounded-full bg-poker-chipGold border-2 border-yellow-600 shadow-md chip-shine"
+          className="absolute w-8 h-8 xs:w-9 xs:h-9 sm:w-6 sm:h-6 rounded-full bg-poker-chipGold border-2 border-yellow-600 shadow-lg chip-shine"
           style={{
-            top: `-${i * 2}px`,
+            top: `-${i * 3}px`,
             left: 0,
             zIndex: displayCount - i
           }}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.05 }}
+          initial={{ opacity: 0, y: 20, scale: 0.8 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ delay: i * 0.08, type: "spring", stiffness: 300 }}
         />
       ))}
       {count > 5 && (
-        <div className="absolute -top-2 -right-2 bg-black/70 text-poker-chipGold text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center border border-poker-chipGold">
+        <motion.div 
+          className="absolute -top-3 -right-3 bg-black/80 text-poker-chipGold text-sm font-bold rounded-full w-6 h-6 flex items-center justify-center border-2 border-poker-chipGold shadow-lg"
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 400, delay: 0.3 }}
+        >
           {count}
-        </div>
+        </motion.div>
       )}
     </div>
   );

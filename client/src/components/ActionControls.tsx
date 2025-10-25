@@ -286,7 +286,7 @@ export function ActionControls({
           size="lg"
           disabled={disabled}
           data-testid="button-fold"
-          className="min-w-[100px] xs:min-w-[110px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] min-h-[48px] sm:min-h-[52px] poker-button-glow"
+          className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] min-h-[52px] xs:min-h-[56px] sm:min-h-[52px] text-base font-bold poker-button-glow"
           aria-label="Fold your hand. Keyboard shortcut: F key"
           aria-disabled={disabled}
         >
@@ -300,7 +300,7 @@ export function ActionControls({
             size="lg"
             disabled={disabled}
             data-testid="button-check"
-            className="min-w-[100px] xs:min-w-[110px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] min-h-[48px] sm:min-h-[52px] bg-accent hover:bg-accent/90 poker-button-glow"
+            className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] min-h-[52px] xs:min-h-[56px] sm:min-h-[52px] text-base font-bold bg-accent hover:bg-accent/90 poker-button-glow"
             aria-label="Check - pass your turn without betting. Keyboard shortcut: C key"
             aria-disabled={disabled}
           >
@@ -313,7 +313,7 @@ export function ActionControls({
             size="lg"
             disabled={disabled || amountToCall <= 0}
             data-testid="button-call"
-            className="min-w-[100px] xs:min-w-[110px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] min-h-[48px] sm:min-h-[52px] bg-accent hover:bg-accent/90 poker-button-glow"
+            className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] min-h-[52px] xs:min-h-[56px] sm:min-h-[52px] text-base font-bold bg-accent hover:bg-accent/90 poker-button-glow"
             aria-label={`Call ${amountToCall} dollars to match the current bet. Keyboard shortcut: C key`}
             aria-disabled={disabled || amountToCall <= 0}
           >
@@ -327,7 +327,7 @@ export function ActionControls({
           size="lg"
           disabled={disabled || maxBet < minBet}
           data-testid="button-bet-raise"
-          className="min-w-[100px] xs:min-w-[110px] sm:min-w-[120px] md:min-w-[140px] min-h-[48px] sm:min-h-[52px] bg-poker-chipGold text-black hover:bg-poker-chipGold/90 font-bold poker-button-glow"
+          className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[140px] min-h-[52px] xs:min-h-[56px] sm:min-h-[52px] text-base bg-poker-chipGold text-black hover:bg-poker-chipGold/90 font-bold poker-button-glow"
           aria-label={currentBet === 0 ? `Bet ${betAmount} dollars. Keyboard shortcut: R key` : `Raise to ${betAmount} dollars. Keyboard shortcut: R key`}
           aria-disabled={disabled || maxBet < minBet}
         >
@@ -422,18 +422,18 @@ export function ActionControls({
           </div>
 
           {/* Quick bet buttons optimized for thumb reach on mobile */}
-          <div className="grid grid-cols-2 xs:flex gap-2 xs:gap-3 md:gap-2 lg:gap-4 xs:justify-center xs:flex-wrap">
+          <div className="grid grid-cols-2 xs:flex gap-3 xs:gap-4 md:gap-2 lg:gap-4 xs:justify-center xs:flex-wrap">
             <Button
               onClick={() => handleQuickBet(halfPot)}
               variant="outline"
               disabled={disabled || halfPot < (currentBet > 0 ? minRaiseAmount : minBet) || halfPot > maxBet}
               data-testid="button-quick-half-pot"
-              className="min-h-[52px] text-sm font-semibold bg-background/50 backdrop-blur-sm border-2 hover:bg-accent/20"
+              className="min-h-[56px] xs:min-h-[60px] sm:min-h-[52px] text-base font-bold bg-background/60 backdrop-blur-sm border-2 hover:bg-accent/30 active:scale-95 transition-transform"
               aria-label={`Quick bet half pot: ${halfPot} dollars`}
             >
-              <div className="flex flex-col items-center">
-                <span>½ POT</span>
-                <span className="text-xs opacity-70">${halfPot}</span>
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-sm xs:text-base">½ POT</span>
+                <span className="text-xs xs:text-sm opacity-80">${halfPot}</span>
               </div>
             </Button>
             <Button
@@ -441,12 +441,12 @@ export function ActionControls({
               variant="outline"
               disabled={disabled || potSize < (currentBet > 0 ? minRaiseAmount : minBet) || potSize > maxBet}
               data-testid="button-quick-pot"
-              className="min-h-[52px] text-sm font-semibold bg-background/50 backdrop-blur-sm border-2 hover:bg-accent/20"
+              className="min-h-[56px] xs:min-h-[60px] sm:min-h-[52px] text-base font-bold bg-background/60 backdrop-blur-sm border-2 hover:bg-accent/30 active:scale-95 transition-transform"
               aria-label={`Quick bet pot size: ${potSize} dollars`}
             >
-              <div className="flex flex-col items-center">
-                <span>POT</span>
-                <span className="text-xs opacity-70">${potSize}</span>
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-sm xs:text-base">POT</span>
+                <span className="text-xs xs:text-sm opacity-80">${potSize}</span>
               </div>
             </Button>
             <Button
@@ -454,12 +454,12 @@ export function ActionControls({
               variant="outline"
               disabled={disabled || potSize * 2 < (currentBet > 0 ? minRaiseAmount : minBet) || potSize * 2 > maxBet}
               data-testid="button-quick-2x-pot"
-              className="min-h-[52px] text-sm font-semibold bg-background/50 backdrop-blur-sm border-2 hover:bg-accent/20"
+              className="min-h-[56px] xs:min-h-[60px] sm:min-h-[52px] text-base font-bold bg-background/60 backdrop-blur-sm border-2 hover:bg-accent/30 active:scale-95 transition-transform"
               aria-label={`Quick bet double pot: ${potSize * 2} dollars`}
             >
-              <div className="flex flex-col items-center">
-                <span>2× POT</span>
-                <span className="text-xs opacity-70">${potSize * 2}</span>
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-sm xs:text-base">2× POT</span>
+                <span className="text-xs xs:text-sm opacity-80">${potSize * 2}</span>
               </div>
             </Button>
             <Button
@@ -467,12 +467,12 @@ export function ActionControls({
               variant="outline"
               disabled={disabled || maxBet <= (currentBet > 0 ? minRaiseAmount : minBet)}
               data-testid="button-quick-all-in"
-              className="min-h-[52px] text-sm font-bold bg-poker-chipGold/10 backdrop-blur-sm border-2 border-poker-chipGold/50 text-poker-chipGold hover:bg-poker-chipGold/20"
+              className="min-h-[56px] xs:min-h-[60px] sm:min-h-[52px] text-base font-bold bg-poker-chipGold/20 backdrop-blur-sm border-2 border-poker-chipGold/60 text-poker-chipGold hover:bg-poker-chipGold/30 active:scale-95 transition-transform shadow-lg"
               aria-label={`Go all-in with all your chips: ${maxBet} dollars. Keyboard shortcut: A key`}
             >
-              <div className="flex flex-col items-center">
-                <span>ALL-IN</span>
-                <span className="text-xs opacity-90">${maxBet}</span>
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-sm xs:text-base">ALL-IN</span>
+                <span className="text-xs xs:text-sm opacity-90">${maxBet}</span>
               </div>
             </Button>
           </div>

@@ -113,9 +113,9 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
   };
 
   const seatClasses = [
-    'rounded-lg p-2 xs:p-2.5 sm:p-3 md:p-4 backdrop-blur-sm transition-all duration-300 relative',
-    isCurrentPlayer ? 'bg-black/80 border-2 border-poker-chipGold animate-pulse-glow' : 'bg-black/70 border border-white/20',
-    isWinner ? 'bg-poker-chipGold/20 border-2 border-poker-chipGold shadow-lg' : '',
+    'rounded-lg p-3 xs:p-3.5 sm:p-3 md:p-4 backdrop-blur-sm transition-all duration-300 relative',
+    isCurrentPlayer ? 'bg-black/85 border-2 xs:border-[3px] border-poker-chipGold animate-pulse-glow shadow-2xl' : 'bg-black/75 border border-white/30',
+    isWinner ? 'bg-poker-chipGold/25 border-2 xs:border-[3px] border-poker-chipGold shadow-2xl' : '',
     player.chips === 0 ? 'opacity-50 grayscale' : ''
   ].join(' ');
 
@@ -218,40 +218,40 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
           </div>
         )}
         {/* Player info */}
-        <div className="text-center mb-1.5 xs:mb-2">
-          <div className="flex items-center justify-between gap-1.5 xs:gap-2 mb-0.5 xs:mb-1">
-            <div className="text-xs xs:text-sm md:text-base font-semibold text-white">
+        <div className="text-center mb-2 xs:mb-2.5 sm:mb-1.5">
+          <div className="flex items-center justify-between gap-2 xs:gap-2.5 mb-1 xs:mb-1.5">
+            <div className="text-sm xs:text-base sm:text-sm md:text-base font-bold text-white tracking-wide">
               {player.name}
             </div>
             {isDealer && (
-              <div className="w-5 h-5 xs:w-6 xs:h-6 rounded-full bg-white text-black text-[10px] xs:text-xs font-bold flex items-center justify-center">
+              <div className="w-6 h-6 xs:w-7 xs:h-7 sm:w-6 sm:h-6 rounded-full bg-white text-black text-xs xs:text-sm sm:text-xs font-bold flex items-center justify-center shadow-md">
                 D
               </div>
             )}
           </div>
-          <div className="flex items-center justify-center gap-0.5 xs:gap-1 text-poker-chipGold font-mono font-bold text-xs xs:text-sm md:text-base">
-            <Coins className="w-3 h-3 xs:w-4 xs:h-4" aria-hidden="true" />
+          <div className="flex items-center justify-center gap-1 xs:gap-1.5 text-poker-chipGold font-mono font-bold text-sm xs:text-base sm:text-sm md:text-base">
+            <Coins className="w-4 h-4 xs:w-5 xs:h-5 sm:w-4 sm:h-4" aria-hidden="true" />
             <span data-testid={`player-chips-${player.id}`} aria-label={`${player.name} has ${animatedChipCount} dollars in chips`}>${animatedChipCount}</span>
           </div>
           {player.bet > 0 && (
-            <div className="text-[10px] xs:text-xs text-poker-success mt-0.5 xs:mt-1" data-testid={`player-bet-${player.id}`}>
+            <div className="text-xs xs:text-sm sm:text-xs text-poker-success mt-1 font-semibold" data-testid={`player-bet-${player.id}`}>
               Bet: ${player.bet}
             </div>
           )}
           {player.folded && (
-            <div className="text-[10px] xs:text-xs text-destructive mt-0.5 xs:mt-1" data-testid={`player-folded-${player.id}`} aria-label={`${player.name} has folded`}>
+            <div className="text-xs xs:text-sm sm:text-xs text-destructive mt-1 font-semibold" data-testid={`player-folded-${player.id}`} aria-label={`${player.name} has folded`}>
               Folded
             </div>
           )}
           {player.allIn && (
-            <div className="text-[10px] xs:text-xs text-poker-chipGold mt-0.5 xs:mt-1 font-bold" data-testid={`player-allin-${player.id}`} aria-label={`${player.name} is all-in`}>
+            <div className="text-xs xs:text-sm sm:text-xs text-poker-chipGold mt-1 font-bold animate-pulse" data-testid={`player-allin-${player.id}`} aria-label={`${player.name} is all-in`}>
               ALL IN!
             </div>
           )}
         </div>
 
         {/* Player cards */}
-        <div className="flex gap-1 justify-center" data-testid={`player-cards-${player.id}`}>
+        <div className="flex gap-1 xs:gap-1.5 justify-center" data-testid={`player-cards-${player.id}`}>
           {player.hand.length > 0 && (
             <>
               <PlayingCard 
@@ -260,7 +260,7 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
                 animateDeal={phase === 'pre-flop'}
                 dealDelay={position * 2 * 150}
                 animateFlip={player.isHuman && phase === 'pre-flop'}
-                className="transform scale-100 xs:scale-95 md:scale-90"
+                className=""
                 colorblindMode={colorblindMode}
               />
               <PlayingCard 
@@ -269,7 +269,7 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
                 animateDeal={phase === 'pre-flop'}
                 dealDelay={position * 2 * 150 + 150}
                 animateFlip={player.isHuman && phase === 'pre-flop'}
-                className="transform scale-100 xs:scale-95 md:scale-90"
+                className=""
                 colorblindMode={colorblindMode}
               />
             </>

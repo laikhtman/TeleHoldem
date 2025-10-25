@@ -60,6 +60,7 @@ export function PlayingCard({
 }: PlayingCardProps) {
   const [isFlipped, setIsFlipped] = useState(!animateFlip);
   const [isDealt, setIsDealt] = useState(!animateDeal);
+  const [isTouched, setIsTouched] = useState(false);
   const { playSound } = useSound();
 
   useEffect(() => {
@@ -85,7 +86,7 @@ export function PlayingCard({
   if (!card) {
     return (
       <div 
-        className={`w-[70px] h-[100px] rounded-md border-2 border-dashed border-border/40 bg-background/20 ${className}`}
+        className={`w-[85px] h-[120px] xs:w-[90px] xs:h-[126px] sm:w-[70px] sm:h-[100px] rounded-lg border-2 border-dashed border-border/40 bg-background/20 ${className}`}
         data-testid="card-placeholder"
       />
     );
@@ -93,16 +94,16 @@ export function PlayingCard({
 
   // Colorblind-friendly suit indicators (small geometric shapes)
   const getSuitIndicator = () => {
-    const baseClass = "absolute top-1 right-1 w-2.5 h-2.5 z-10";
+    const baseClass = "absolute top-1.5 right-1.5 w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-2.5 sm:h-2.5 z-10";
     switch (card.suit) {
       case 'S': // Spades - Circle (filled)
-        return <div className={`${baseClass} rounded-full bg-poker-cardBlack`} aria-label="Spades indicator" />;
+        return <div className={`${baseClass} rounded-full bg-poker-cardBlack shadow-sm`} aria-label="Spades indicator" />;
       case 'H': // Hearts - Square (filled) 
-        return <div className={`${baseClass} bg-poker-cardRed`} aria-label="Hearts indicator" />;
+        return <div className={`${baseClass} bg-poker-cardRed shadow-sm`} aria-label="Hearts indicator" />;
       case 'D': // Diamonds - Diamond shape (rotated square)
-        return <div className={`${baseClass} bg-poker-cardRed transform rotate-45`} aria-label="Diamonds indicator" />;
+        return <div className={`${baseClass} bg-poker-cardRed transform rotate-45 shadow-sm`} aria-label="Diamonds indicator" />;
       case 'C': // Clubs - Circle (outline)
-        return <div className={`${baseClass} rounded-full border-2 border-poker-cardBlack bg-white`} aria-label="Clubs indicator" />;
+        return <div className={`${baseClass} rounded-full border-2 border-poker-cardBlack bg-white shadow-sm`} aria-label="Clubs indicator" />;
       default:
         return null;
     }
@@ -124,9 +125,21 @@ export function PlayingCard({
 
   const cardSvgId = card ? getCardSvgId(card) : '';
 
+  // Handle touch interactions for mobile
+  const handleTouchStart = () => {
+    if (!faceDown && card) {
+      setIsTouched(true);
+      playSound('button-click', { volume: 0.08 });
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setIsTouched(false);
+  };
+
   return (
     <motion.div
-      className={`relative w-[70px] h-[100px] ${className}`}
+      className={`relative w-[85px] h-[120px] xs:w-[90px] xs:h-[126px] sm:w-[70px] sm:h-[100px] ${className}`}
       initial={getInitialState()}
       animate={getAnimateState()}
       transition={{ 
@@ -139,6 +152,13 @@ export function PlayingCard({
         scale: 1.05,
         transition: { duration: 0.2, ease: 'easeOut' }
       } : undefined}
+      whileTap={!faceDown && card ? { 
+        scale: 1.08,
+        y: -10,
+        transition: { duration: 0.1 }
+      } : undefined}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
       style={{ transformStyle: 'preserve-3d' }}
     >
       {/* Card Back */}
@@ -147,7 +167,7 @@ export function PlayingCard({
         style={{ backfaceVisibility: 'hidden' }}
       >
         <div 
-          className="w-full h-full rounded-md overflow-hidden border border-gray-400 shadow-md"
+          className="w-full h-full rounded-lg overflow-hidden border-2 border-gray-500 shadow-lg"
           data-testid="card-back"
         >
           <svg
@@ -166,7 +186,7 @@ export function PlayingCard({
         style={{ backfaceVisibility: 'hidden', rotateY: 180 }}
       >
         <div 
-          className={`w-full h-full rounded-md overflow-hidden border border-gray-400 shadow-md relative`}
+          className={`w-full h-full rounded-lg overflow-hidden border-2 border-gray-500 shadow-lg relative ${isTouched ? 'ring-2 ring-poker-chipGold ring-opacity-50' : ''}`}
           data-testid={`card-${card.id}`}
         >
           {/* Colorblind-friendly suit indicator badge (only in colorblind mode) */}
