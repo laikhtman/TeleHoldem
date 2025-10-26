@@ -1,7 +1,8 @@
 import { Card } from '@shared/schema';
 import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSound } from '@/hooks/useSound';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 import svgCardsPath from '@assets/svg-cards.svg';
 
 interface PlayingCardProps {
@@ -63,26 +64,62 @@ export function PlayingCard({
   const [isTouched, setIsTouched] = useState(false);
   const [cardDimensions, setCardDimensions] = useState({ width: '90px', height: '129px' });
   const { playSound } = useSound();
+  const prefersReducedMotion = useReducedMotion();
+  const cardRef = useRef<HTMLDivElement>(null);
+  const animationStateRef = useRef({ willChange: false });
+
+  // Handle will-change for performance
+  useEffect(() => {
+    if (animateDeal && !prefersReducedMotion && cardRef.current) {
+      // Set will-change before animation
+      cardRef.current.style.willChange = 'transform, opacity';
+      animationStateRef.current.willChange = true;
+      
+      // Remove will-change after animation completes
+      const timer = setTimeout(() => {
+        if (cardRef.current && animationStateRef.current.willChange) {
+          cardRef.current.style.willChange = 'auto';
+          animationStateRef.current.willChange = false;
+        }
+      }, 1000 + dealDelay); // Animation duration + delay
+      
+      return () => {
+        clearTimeout(timer);
+        if (cardRef.current && animationStateRef.current.willChange) {
+          cardRef.current.style.willChange = 'auto';
+          animationStateRef.current.willChange = false;
+        }
+      };
+    }
+  }, [animateDeal, dealDelay, prefersReducedMotion]);
 
   useEffect(() => {
     if (animateFlip) {
+      // Instant flip if reduced motion, else delayed
+      const delay = prefersReducedMotion ? 0 : 100;
       const timer = setTimeout(() => {
         setIsFlipped(true);
-        playSound('card-flip', { volume: 0.12 });
-      }, 100);
+        if (!prefersReducedMotion) {
+          playSound('card-flip', { volume: 0.12 });
+        }
+      }, delay);
       return () => clearTimeout(timer);
     }
-  }, [animateFlip, playSound]);
+  }, [animateFlip, playSound, prefersReducedMotion]);
 
   useEffect(() => {
     if (animateDeal) {
+      // Instant deal if reduced motion, else delayed
+      const delay = prefersReducedMotion ? 0 : dealDelay;
       const timer = setTimeout(() => {
         setIsDealt(true);
-        playSound('card-deal', { volume: 0.1 });
-      }, dealDelay);
+        if (!prefersReducedMotion) {
+          playSound('card-deal', { volume: 0.1 });
+        }
+      }, delay);
       return () => clearTimeout(timer);
     }
-  }, [animateDeal, dealDelay, playSound]);
+  }, [animateDeal, dealDelay, playSound, prefersReducedMotion]);
 
   useEffect(() => {
     const updateCardSize = () => {
@@ -138,17 +175,28 @@ export function PlayingCard({
   };
 
   const getInitialState = () => {
-    if (animateDeal) {
-      return { opacity: 0, scale: 0.3, y: -300, rotateY: 0 };
+    if (prefersReducedMotion) {
+      // No animation for reduced motion
+      return { opacity: 1, transform: 'translateY(0) scale(1) rotateY(0deg)' };
     }
-    return { opacity: 1, scale: 1, y: 0, rotateY: isFlipped ? 180 : 0 };
+    
+    if (animateDeal) {
+      // Use transform instead of individual properties for better performance
+      return { opacity: 0, transform: 'translateY(-300px) scale(0.3) rotateY(0deg)' };
+    }
+    return { opacity: 1, transform: `translateY(0) scale(1) rotateY(${isFlipped ? 180 : 0}deg)` };
   };
 
   const getAnimateState = () => {
+    if (prefersReducedMotion) {
+      // No animation for reduced motion
+      return { opacity: 1, transform: `translateY(0) scale(1) rotateY(${isFlipped ? 180 : 0}deg)` };
+    }
+    
     if (animateDeal && !isDealt) {
       return getInitialState();
     }
-    return { opacity: 1, scale: 1, y: 0, rotateY: isFlipped ? 180 : 0 };
+    return { opacity: 1, transform: `translateY(0) scale(1) rotateY(${isFlipped ? 180 : 0}deg)` };
   };
 
   const cardSvgId = card ? getCardSvgId(card) : '';
@@ -163,7 +211,7 @@ export function PlayingCard({
 
   // Handle touch interactions for mobile
   const handleTouchStart = () => {
-    if (!faceDown && card) {
+    if (!faceDown && card && !prefersReducedMotion) {
       setIsTouched(true);
       playSound('button-click', { volume: 0.08 });
     }
@@ -173,9 +221,29 @@ export function PlayingCard({
     setIsTouched(false);
   };
 
+  // Animation config based on reduced motion preference
+  const transitionConfig = prefersReducedMotion 
+    ? { duration: 0.01 } // Almost instant
+    : { 
+        duration: animateDeal ? 0.8 : 0.4, 
+        ease: animateDeal ? [0.4, 0, 0.2, 1] : "easeInOut",
+        delay: animateDeal ? dealDelay / 1000 : 0
+      };
+
+  // Hover/tap animations - disabled for reduced motion
+  const hoverAnimation = !faceDown && !prefersReducedMotion ? { 
+    transform: 'translateY(-8px) scale(1.05) rotateY(' + (isFlipped ? 180 : 0) + 'deg)',
+    transition: { duration: 0.2, ease: 'easeOut' }
+  } : undefined;
+
+  const tapAnimation = !faceDown && card && !prefersReducedMotion ? { 
+    transform: 'translateY(-10px) scale(1.08) rotateY(' + (isFlipped ? 180 : 0) + 'deg)',
+    transition: { duration: 0.1 }
+  } : undefined;
 
   return (
     <motion.div
+      ref={cardRef}
       className={`relative ${className}`}
       style={{ 
         width: cardDimensions.width, 
@@ -183,34 +251,27 @@ export function PlayingCard({
         minWidth: cardDimensions.width,
         minHeight: cardDimensions.height,
         flexShrink: 0,
-        transformStyle: 'preserve-3d'
+        transformStyle: 'preserve-3d',
+        // Hardware acceleration hint
+        transform: 'translateZ(0)'
       }}
       role="img"
       aria-label={getCardAriaLabel()}
       initial={getInitialState()}
       animate={getAnimateState()}
-      transition={{ 
-        duration: animateDeal ? 0.8 : 0.4, 
-        ease: animateDeal ? [0.4, 0, 0.2, 1] : "easeInOut",
-        delay: animateDeal ? dealDelay / 1000 : 0
-      }}
-      whileHover={!faceDown ? { 
-        y: -8, 
-        scale: 1.05,
-        transition: { duration: 0.2, ease: 'easeOut' }
-      } : undefined}
-      whileTap={!faceDown && card ? { 
-        scale: 1.08,
-        y: -10,
-        transition: { duration: 0.1 }
-      } : undefined}
+      transition={transitionConfig}
+      whileHover={hoverAnimation}
+      whileTap={tapAnimation}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
       {/* Card Back */}
       <motion.div 
         className="absolute w-full h-full"
-        style={{ backfaceVisibility: 'hidden' }}
+        style={{ 
+          backfaceVisibility: 'hidden',
+          transform: 'translateZ(0)' // Hardware acceleration
+        }}
       >
         <div 
           className="w-full h-full rounded-lg overflow-hidden border-2 border-gray-500 shadow-lg"
@@ -229,7 +290,10 @@ export function PlayingCard({
       {/* Card Front */}
       <motion.div 
         className="absolute w-full h-full"
-        style={{ backfaceVisibility: 'hidden', rotateY: 180 }}
+        style={{ 
+          backfaceVisibility: 'hidden', 
+          transform: 'rotateY(180deg) translateZ(0)' // Hardware acceleration
+        }}
       >
         <div 
           className={`w-full h-full rounded-lg overflow-hidden border-2 border-gray-500 shadow-lg relative ${isTouched ? 'ring-2 ring-poker-chipGold ring-opacity-50' : ''}`}

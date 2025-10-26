@@ -149,6 +149,13 @@ body {
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
   --safe-area-left: env(safe-area-inset-left, 0px);
 
+  /* Animation Performance Settings */
+  --animation-duration-fast: 200ms;
+  --animation-duration-normal: 300ms;
+  --animation-duration-slow: 500ms;
+  --animation-stagger-delay: 100ms;
+  --max-concurrent-animations: 5;
+
   /* Automatically computed borders - intensity can be controlled by the user by the --opaque-button-border-intensity setting */
 
   /* Fallback for older browsers */
@@ -451,53 +458,110 @@ body {
     pointer-events: none;
   }
 
-  /* Poker Card Animations */
+  /* Poker Card Animations - Transform-only for performance */
   @keyframes dealCard {
     0% {
-      transform: translate(var(--deal-from-x, 0), var(--deal-from-y, -300px)) scale(0.3);
+      transform: translate3d(var(--deal-from-x, 0), var(--deal-from-y, -300px), 0) scale(0.3);
       opacity: 0;
     }
     50% {
       opacity: 1;
     }
     100% {
-      transform: translate(0, 0) scale(1);
+      transform: translate3d(0, 0, 0) scale(1);
       opacity: 1;
     }
   }
 
   @keyframes flopReveal {
     0% {
-      transform: translateY(-50px);
+      transform: translate3d(0, -50px, 0);
       opacity: 0;
     }
     100% {
-      transform: translateY(0);
+      transform: translate3d(0, 0, 0);
       opacity: 1;
     }
   }
 
   @keyframes turnRiverReveal {
     0% {
-      transform: translateX(80px) scale(0.95);
+      transform: translate3d(80px, 0, 0) scale(0.95);
       opacity: 0;
     }
     100% {
-      transform: translateX(0) scale(1);
+      transform: translate3d(0, 0, 0) scale(1);
       opacity: 1;
+    }
+  }
+
+  /* Performance-optimized badge animation */
+  @keyframes badgeSlideIn {
+    0% {
+      transform: translate3d(-50%, 10px, 0) scale(0.8);
+      opacity: 0;
+    }
+    100% {
+      transform: translate3d(-50%, 0, 0) scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes badgeSlideOut {
+    0% {
+      transform: translate3d(-50%, 0, 0) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: translate3d(-50%, -10px, 0) scale(0.8);
+      opacity: 0;
+    }
+  }
+
+  /* Hardware-accelerated chip animation */
+  @keyframes chipFloat {
+    0%, 100% {
+      transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+    }
+    25% {
+      transform: translate3d(0, -5px, 0) rotate(8deg) scale(1.05);
+    }
+    50% {
+      transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+    }
+    75% {
+      transform: translate3d(0, -5px, 0) rotate(-8deg) scale(1.05);
     }
   }
 
   .card-deal-animation {
     animation: dealCard 0.6s ease-out forwards;
+    will-change: transform, opacity;
   }
 
   .card-flop-animation {
     animation: flopReveal 0.4s ease-out forwards;
+    will-change: transform, opacity;
   }
 
   .card-turn-river-animation {
     animation: turnRiverReveal 0.3s ease-out forwards;
+    will-change: transform, opacity;
+  }
+
+  /* Performance utilities */
+  .gpu-accelerated {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+
+  .will-animate {
+    will-change: transform;
+  }
+
+  .animation-complete {
+    will-change: auto;
   }
 
   /* .no-default-hover-elevate/no-default-active-elevate is an escape hatch so consumers of
@@ -590,18 +654,32 @@ body {
     transform: scale(0.95);
   }
 
-  /* Enhanced pulsing glow for current player */
+  /* Enhanced pulsing glow for current player - Transform-only for performance */
   @keyframes pulse-glow {
     0%, 100% {
+      transform: translate3d(0, 0, 0) scale(1);
       box-shadow: 0 0 15px rgba(255, 215, 0, 0.5), 0 0 30px rgba(255, 215, 0, 0.3), 0 0 45px rgba(255, 215, 0, 0.1);
     }
     50% {
+      transform: translate3d(0, 0, 0) scale(1.02);
       box-shadow: 0 0 25px rgba(255, 215, 0, 0.8), 0 0 45px rgba(255, 215, 0, 0.5), 0 0 60px rgba(255, 215, 0, 0.3);
     }
   }
 
   .animate-pulse-glow {
     animation: pulse-glow 2s ease-in-out infinite;
+    transform: translateZ(0); /* Hardware acceleration */
+    will-change: transform;
+  }
+
+  /* Reduced motion variant - no animation */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-pulse-glow {
+      animation: none !important;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.6) !important;
+      border-width: 3px !important;
+      border-color: hsl(var(--poker-chipGold)) !important;
+    }
   }
 
   /* Chip animations */
