@@ -3,15 +3,22 @@ import {
   telegramUsers, 
   sessions,
   appSettings,
+  pokerTables,
+  tablePlayers,
   type TelegramUser, 
   type InsertTelegramUser,
   type Session,
   type InsertSession,
   type AppSetting,
-  type InsertAppSetting
+  type InsertAppSetting,
+  type PokerTable,
+  type InsertPokerTable,
+  type TablePlayer,
+  type InsertTablePlayer,
+  type GameState
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, lt, gt } from "drizzle-orm";
+import { eq, and, lt, gt, isNull, desc, sql } from "drizzle-orm";
 
 export interface IStorage {
   // Telegram Users
@@ -32,6 +39,22 @@ export interface IStorage {
   getAllSettings(): Promise<AppSetting[]>;
   upsertSetting(setting: InsertAppSetting): Promise<AppSetting>;
   deleteSetting(key: string): Promise<void>;
+  
+  // Poker Tables
+  createPokerTable(table: InsertPokerTable): Promise<PokerTable>;
+  getPokerTable(id: number): Promise<PokerTable | undefined>;
+  getActivePokerTables(): Promise<PokerTable[]>;
+  updatePokerTable(id: number, updates: Partial<PokerTable>): Promise<PokerTable | undefined>;
+  updatePokerTableGameState(id: number, gameState: GameState): Promise<PokerTable | undefined>;
+  deletePokerTable(id: number): Promise<void>;
+  
+  // Table Players
+  addPlayerToTable(player: InsertTablePlayer): Promise<TablePlayer>;
+  removePlayerFromTable(tableId: number, playerId: number): Promise<void>;
+  getTablePlayers(tableId: number): Promise<TablePlayer[]>;
+  getPlayerAtTable(tableId: number, playerId: number): Promise<TablePlayer | undefined>;
+  updateTablePlayer(id: number, updates: Partial<TablePlayer>): Promise<TablePlayer | undefined>;
+  getPlayerActiveTables(playerId: number): Promise<PokerTable[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -176,6 +199,157 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(appSettings)
       .where(eq(appSettings.key, key));
+  }
+
+  // Poker Tables
+  async createPokerTable(table: InsertPokerTable): Promise<PokerTable> {
+    const [created] = await db
+      .insert(pokerTables)
+      .values([table])
+      .returning();
+    return created;
+  }
+
+  async getPokerTable(id: number): Promise<PokerTable | undefined> {
+    const [table] = await db
+      .select()
+      .from(pokerTables)
+      .where(eq(pokerTables.id, id));
+    return table || undefined;
+  }
+
+  async getActivePokerTables(): Promise<PokerTable[]> {
+    return await db
+      .select()
+      .from(pokerTables)
+      .where(eq(pokerTables.isActive, true))
+      .orderBy(desc(pokerTables.createdAt));
+  }
+
+  async updatePokerTable(id: number, updates: Partial<PokerTable>): Promise<PokerTable | undefined> {
+    const [updated] = await db
+      .update(pokerTables)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(pokerTables.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async updatePokerTableGameState(id: number, gameState: GameState): Promise<PokerTable | undefined> {
+    const [updated] = await db
+      .update(pokerTables)
+      .set({
+        gameState,
+        updatedAt: new Date(),
+      })
+      .where(eq(pokerTables.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deletePokerTable(id: number): Promise<void> {
+    await db
+      .delete(pokerTables)
+      .where(eq(pokerTables.id, id));
+  }
+
+  // Table Players
+  async addPlayerToTable(player: InsertTablePlayer): Promise<TablePlayer> {
+    const [created] = await db
+      .insert(tablePlayers)
+      .values([player])
+      .returning();
+    
+    // Update player count in the poker table
+    await db
+      .update(pokerTables)
+      .set({
+        currentPlayers: sql`${pokerTables.currentPlayers} + 1`,
+        updatedAt: new Date(),
+      })
+      .where(eq(pokerTables.id, player.tableId));
+    
+    return created;
+  }
+
+  async removePlayerFromTable(tableId: number, playerId: number): Promise<void> {
+    // Mark player as inactive and set left time
+    await db
+      .update(tablePlayers)
+      .set({
+        isActive: false,
+        leftAt: new Date(),
+      })
+      .where(
+        and(
+          eq(tablePlayers.tableId, tableId),
+          eq(tablePlayers.playerId, playerId),
+          eq(tablePlayers.isActive, true)
+        )
+      );
+    
+    // Update player count in the poker table
+    await db
+      .update(pokerTables)
+      .set({
+        currentPlayers: sql`GREATEST(${pokerTables.currentPlayers} - 1, 0)`,
+        updatedAt: new Date(),
+      })
+      .where(eq(pokerTables.id, tableId));
+  }
+
+  async getTablePlayers(tableId: number): Promise<TablePlayer[]> {
+    return await db
+      .select()
+      .from(tablePlayers)
+      .where(
+        and(
+          eq(tablePlayers.tableId, tableId),
+          eq(tablePlayers.isActive, true)
+        )
+      );
+  }
+
+  async getPlayerAtTable(tableId: number, playerId: number): Promise<TablePlayer | undefined> {
+    const [player] = await db
+      .select()
+      .from(tablePlayers)
+      .where(
+        and(
+          eq(tablePlayers.tableId, tableId),
+          eq(tablePlayers.playerId, playerId),
+          eq(tablePlayers.isActive, true)
+        )
+      );
+    return player || undefined;
+  }
+
+  async updateTablePlayer(id: number, updates: Partial<TablePlayer>): Promise<TablePlayer | undefined> {
+    const [updated] = await db
+      .update(tablePlayers)
+      .set(updates)
+      .where(eq(tablePlayers.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async getPlayerActiveTables(playerId: number): Promise<PokerTable[]> {
+    const result = await db
+      .select({ table: pokerTables })
+      .from(tablePlayers)
+      .innerJoin(pokerTables, eq(tablePlayers.tableId, pokerTables.id))
+      .where(
+        and(
+          eq(tablePlayers.playerId, playerId),
+          eq(tablePlayers.isActive, true),
+          eq(pokerTables.isActive, true)
+        )
+      );
+    
+    return result.map(r => r.table);
   }
 }
 
