@@ -85,6 +85,10 @@ export function HandStrengthIndicator({ hand, communityCards }: HandStrengthIndi
         exit={{ opacity: 0, y: -20 }}
         transition={{ duration: 0.3 }}
         className="flex flex-col gap-3"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        aria-label={`Hand strength: ${currentHand.description}. Rank ${rankValue} out of 10${totalOuts > 0 ? ` with ${totalOuts} outs` : ''}`}
         data-testid="hand-strength-indicator"
       >
         {/* Main Hand Strength */}

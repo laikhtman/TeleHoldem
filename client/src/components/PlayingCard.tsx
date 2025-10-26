@@ -152,6 +152,14 @@ export function PlayingCard({
   };
 
   const cardSvgId = card ? getCardSvgId(card) : '';
+  
+  const getCardAriaLabel = () => {
+    if (!card) return 'Empty card slot';
+    if (faceDown) return 'Face down card';
+    const rank = card.rank === 'A' ? 'Ace' : card.rank === 'K' ? 'King' : card.rank === 'Q' ? 'Queen' : card.rank === 'J' ? 'Jack' : card.rank;
+    const suit = card.suit === 'S' ? 'Spades' : card.suit === 'H' ? 'Hearts' : card.suit === 'D' ? 'Diamonds' : card.suit === 'C' ? 'Clubs' : card.suit;
+    return `${rank} of ${suit}`;
+  };
 
   // Handle touch interactions for mobile
   const handleTouchStart = () => {
@@ -177,6 +185,8 @@ export function PlayingCard({
         flexShrink: 0,
         transformStyle: 'preserve-3d'
       }}
+      role="img"
+      aria-label={getCardAriaLabel()}
       initial={getInitialState()}
       animate={getAnimateState()}
       transition={{ 

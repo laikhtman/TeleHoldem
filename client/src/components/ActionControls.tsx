@@ -244,7 +244,7 @@ export function ActionControls({
   }
 
   return (
-    <div className="flex flex-col gap-3 xs:gap-4 relative" ref={swipeRef}>
+    <div className="flex flex-col gap-3 xs:gap-4 relative" ref={swipeRef} role="group" aria-label="Action controls">
       {/* Swipe visual feedback indicators for mobile */}
       <AnimatePresence>
         {(isSwipingLeft || isSwipingRight) && (

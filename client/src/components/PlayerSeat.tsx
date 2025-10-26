@@ -258,7 +258,7 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
         {/* Player info */}
         <div className="text-center mb-2 xs:mb-2.5 sm:mb-1.5">
           <div className="flex items-center justify-between gap-2 xs:gap-2.5 mb-1 xs:mb-1.5">
-            <div className="font-bold text-white tracking-wide" style={{ fontSize: textSize.name }}>
+            <div className="font-bold text-white tracking-wide max-w-[120px] xs:max-w-[140px] truncate" style={{ fontSize: textSize.name }}>
               {player.name}
             </div>
             {isDealer && (
