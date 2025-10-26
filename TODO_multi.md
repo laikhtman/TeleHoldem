@@ -30,6 +30,19 @@ This document outlines detailed tasks for evolving the functional Texas Hold'em 
    - [ ] No visual interference with poker table on mobile
    - [ ] Panel appears correctly on tablet landscape
 
+**Implementation notes (repo code)**
+- poker-game layout: `client/src/pages/poker-game.tsx:922` wraps the Hand Strength panel with `div` class `hidden md:block ...`; this already hides on `< md`. Keep wrapper as `hidden md:block` and remove any conditional that could re-show it on mobile.
+- Toggle button: `client/src/pages/poker-game.tsx:929` uses `Button` with `className` ``hidden md:block lg:hidden fixed ... h-12 w-12``. This meets the "tablet-only" intent. Do not render any toggle on `< md`.
+- Collapse behavior: Panel container at `client/src/pages/poker-game.tsx:944` applies `${isHandStrengthCollapsed ? 'md:hidden lg:block' : ''}` to hide the panel on md when collapsed but show on lg. Keep this conditional; no mobile rendering path exists due to the parent `hidden md:block`.
+- HandStrengthIndicator source: `client/src/components/HandStrengthIndicator.tsx` has no mobile-only UI; no changes needed beyond container visibility.
+- Validation quick check: ensure `data-testid="button-toggle-hand-strength"` is not present on small screens via responsive classes; verify with responsive devtools.
+
+Progress
+- [x] Panel wrapper enforces `hidden md:block` (no mobile render).
+- [x] Toggle button now shows on md and larger (changed class to `hidden md:block`; previously hidden on lg).
+- [x] Collapse now hides panel on md and lg for consistent behavior when toggle is visible (changed `md:hidden lg:block` to `hidden`).
+- [ ] Cross-device QA pending (tablet landscape/portrait, iPhone sizes).
+
 ### Task 1.2: Refine Action Controls Container
 **Problem**: Action controls background and positioning needs polish
 **Priority**: HIGH
@@ -56,6 +69,20 @@ This document outlines detailed tasks for evolving the functional Texas Hold'em 
    - [ ] No visual overlap with table elements
    - [ ] All buttons ≥ 48px height for touch interaction
    - [ ] Consistent spacing across mobile orientations
+
+**Implementation notes (repo code)**
+- Container block: `client/src/pages/poker-game.tsx:1068` uses id `action-controls` with classes `bg-card/80 backdrop-blur-lg ... pb-[calc(0.75rem+var(--safe-area-bottom))]`. This already reflects the stronger blur/opacity. If further contrast is needed, tune to `bg-card/85 backdrop-blur-xl` and verify text contrast.
+- Safe area padding: The same container sets bottom padding with `var(--safe-area-bottom)`; keep this and ensure it persists on all breakpoints.
+- Button min heights: In `client/src/components/ActionControls.tsx`, quick-bet buttons set `className="min-h-[56px] xs:min-h-[60px] sm:min-h-[52px] ..."`; primary action buttons (Fold/Check/Call/Bet/Raise) are also large. Confirm all action `Button` usages include `min-h-[48px]` or higher.
+- Swipe hint spacing: `client/src/pages/poker-game.tsx:1151` renders the swipe hint at `bottom-[calc(5rem+var(--safe-area-bottom))]`; confirm it does not overlap the controls.
+- Test id for container: `action-controls` can be targeted in E2E to assert backdrop/opacity via computed styles.
+
+Progress
+- [x] Increased contrast/blur responsively: `bg-card/90 sm:/85 md:/80` and `backdrop-blur-lg sm:backdrop-blur-xl` to balance readability vs. depth across breakpoints.
+- [x] Increased mobile padding for comfort: `p-4 xs:p-5 sm:p-6` and larger safe-area bottom padding on xs/sm.
+- [x] Safe-area-aware padding retained (`pb-[calc(...+var(--safe-area-bottom))]` across breakpoints).
+- [x] Buttons already meet ≥48px min-height in code (quick bet controls 56–60px; start button 48px).
+- [ ] On-device QA for overlap and thumb reach pending.
 
 ### Task 1.3: Optimize Player Seat Scaling & Layout
 **Problem**: Player seats appear cramped with small cards on mobile
@@ -85,6 +112,20 @@ This document outlines detailed tasks for evolving the functional Texas Hold'em 
    - [ ] No overlap between adjacent player seats
    - [ ] Dealer button (D) clearly visible
 
+**Implementation notes (repo code)**
+- Seat polar layout: `client/src/components/PlayerSeat.tsx:80` `getPosition()` computes an ellipse using `radiusX`/`radiusY`. For small screens, reduce `bufferPercentage` from `0.12` to ~`0.08` and consider deriving `radiusX/Y` from `window.innerWidth` breakpoints to spread seats further from the center on mobile.
+- Card sizing: Actual card sizes come from `client/src/components/PlayingCard.tsx:54` via `cardDimensions` per breakpoint. To increase visual weight on `< 480px`, bump the default from `90x129` to `96x138`, or set the `xs` step to `105x150`.
+- Text sizes: `PlayerSeat.tsx:140` sets text sizes through state based on `window.innerWidth` thresholds. Increase mobile (`<480`) from `16px` to `17–18px` and xs from `18px` to `19px` for readability.
+- Dealer badge sizing: `PlayerSeat.tsx:223` uses responsive sizes for the "D" badge; keep `xs:w-8 xs:h-8` and ensure contrast over seat backgrounds.
+- Prevent overlap: Inspect `seatClasses` and add `md:max-w-[...]` caps if labels overflow; verify with 6 players in portrait.
+
+Progress
+- [x] Increased mobile card size for readability (`PlayingCard.tsx` mobile 90x129 -> 96x138; xs 100x143 -> 105x150).
+- [x] Increased on-seat typography for mobile/xs (`PlayerSeat.tsx` name/chips: mobile 17px, xs 19px).
+- [x] Reduced seat crowding on small screens by expanding seating ellipse (`PlayerSeat.tsx` getPosition: bufferPercentage 0.12 -> 0.08 on <480px; smaller deductions for radiusX/Y).
+- [ ] Visual overlap pass on real devices.
+- [ ] Adjust name wrapping/truncation if any overflow appears (post-QA).
+
 ### Task 1.4: Perfect Table Aspect Ratio & Scaling
 **Problem**: Table proportions need mobile-specific optimization
 **Priority**: MEDIUM
@@ -111,6 +152,19 @@ This document outlines detailed tasks for evolving the functional Texas Hold'em 
    - [ ] Oval shape maintains proper proportions
    - [ ] No clipping or viewport overflow
    - [ ] All 6 player positions clearly visible
+
+**Implementation notes (repo code)**
+- Outer wood rim: `client/src/pages/poker-game.tsx:966` div with `wood-grain` sets `aspectRatio: '3 / 2'` and rounded radii per breakpoint (`rounded-[100px] ... lg:rounded-[220px]`). Tune aspect ratio to `'1.7 / 1'` for phones if seats clip, via conditional style when `window.innerWidth < 480`.
+- Felt surface: `client/src/pages/poker-game.tsx:976` sets inner `rounded-[93px] xs:[113px] sm:[152px] md:[181px] lg:[210px]`. Increase radii slightly on small breakpoints to preserve the ellipse when container width grows.
+- Max heights: Container uses `max-h-[min(75vh,800px)]`. On very small heights, consider `max-h-[min(68vh,720px)]` at `sm:` to preserve room for controls.
+- Theme color: Felt color comes from `tableThemeColors[settings.tableTheme]`; ensure contrast with chips and text in lighter themes.
+
+Progress
+- [x] Added responsive aspect ratio state: `'1.7 / 1'` (<480px), `'1.8 / 1'` (>=480px and <768px), `'3 / 2'` (>=768px). File: `client/src/pages/poker-game.tsx` (state `tableAspect` + resize handler).
+- [x] Applied responsive max-h caps to preserve room for controls: base `68vh`, xs `70vh`, sm `72vh`, md `75vh` with pixel caps.
+- [x] Constrained table width slightly on small screens: `max-w-[92%]/[94%]/[96%]` up to md, then full width.
+- [x] Slightly increased inner felt/outer rim radii on xs/sm to maintain oval proportions at new widths.
+- [ ] Visual audit across iPhone SE/14 Pro, small Android, iPad landscape.
 
 ---
 
@@ -144,6 +198,13 @@ This document outlines detailed tasks for evolving the functional Texas Hold'em 
    - [ ] Consistent margins on devices with/without notches
    - [ ] Safe areas respected in both orientations
 
+**Implementation notes (repo code)**
+- CSS variables are defined in `client/src/index.css:117-120` as `--safe-area-* = env(safe-area-inset-*, 0px)`. No runtime JS is needed.
+- Header controls: `client/src/pages/poker-game.tsx:905` uses `top-[calc(1rem+var(--safe-area-top))]` and right padding; keep this pattern for all fixed elements.
+- Toggle (left edge): `client/src/pages/poker-game.tsx:935` positions the hand-strength toggle with `left-[calc(0.5rem+var(--safe-area-left))]` and `top-[calc(5rem+var(--safe-area-top))]`.
+- Swipe hint: `client/src/pages/poker-game.tsx:1153` uses `bottom-[calc(5rem+var(--safe-area-bottom))]`.
+- Bottom sheet: `client/src/components/MobileBottomSheet.tsx:60` FAB and sheet container both include safe-area offsets; verify padding via devtools on notch and non-notch iPhones.
+
 ### Task 2.2: Touch Target Optimization
 **Problem**: Ensure all interactive elements are touch-friendly
 **Priority**: MEDIUM
@@ -171,6 +232,12 @@ This document outlines detailed tasks for evolving the functional Texas Hold'em 
    - [ ] Slider responds smoothly to touch
    - [ ] Toggle buttons respond consistently
 
+**Implementation notes (repo code)**
+- Global buttons: The header `Settings` button uses `className="min-h-11 min-w-11"` at `client/src/pages/poker-game.tsx:910` (~44px). `ThemeToggle` buttons enforce `min-[44px]` at `client/src/components/ThemeToggle.tsx:37` and `:57`.
+- Action controls: Quick bet buttons in `client/src/components/ActionControls.tsx` specify min heights `56–60px` across mobile breakpoints. Ensure primary action row buttons also meet `>=48px` and maintain `gap-3` or more between siblings.
+- Sliders and draggables: `Slider` uses larger track height via `className` overrides; draggable chips in ActionControls expose four values; confirm there’s at least 8px spacing between draggables.
+- Toggle hand-strength button: `poker-game.tsx:935` uses `h-12 w-12` for ample target; remains hidden on mobile.
+
 ### Task 2.3: Typography & Contrast Mobile Optimization
 **Problem**: Ensure text readability on mobile screens
 **Priority**: MEDIUM
@@ -197,6 +264,12 @@ This document outlines detailed tasks for evolving the functional Texas Hold'em 
    - [ ] High contrast in all lighting conditions
    - [ ] No critical information truncated
    - [ ] Consistent rendering across browsers
+
+**Implementation notes (repo code)**
+- Player seat typography: `client/src/components/PlayerSeat.tsx` derives sizes from `window.innerWidth` and inline styles; raise baseline to 17–18px on `<480` and 19px on `>=480` for `name/chips`.
+- Pot/hand text: `client/src/components/PotDisplay.tsx` and `client/src/components/HandStrengthIndicator.tsx` use `Badge` and small text; verify contrast against `bg-card` and adjust tokens in `client/src/index.css` (`--muted-foreground`, `--card-foreground`) if needed.
+- Contrast tokens: Tailwind CSS variables in `client/src/index.css` define `--accent`, `--muted`, etc. For dark mode, ensure `--muted-foreground` remains >= 4.5:1 against backgrounds.
+- Text scaling: Test iOS "Larger Text"—ensure containers avoid clipping by allowing wrap (`break-words`) where necessary in action labels.
 
 ---
 
@@ -229,6 +302,12 @@ This document outlines detailed tasks for evolving the functional Texas Hold'em 
    - [ ] Clear turn indication provided
    - [ ] Action buttons properly styled and accessible
 
+**Implementation notes (repo code)**
+- Visibility logic exists: `client/src/pages/poker-game.tsx:1069-1100` renders the Start button only for `phase === 'waiting'`; otherwise renders `<ActionControls />`. This already satisfies replacement during a hand.
+- Turn gating: `<ActionControls disabled={gameState.currentPlayerIndex !== 0 || isProcessing || settings.isPaused} ... />` ensures buttons only enable on the human’s turn.
+- Additional cue: The pot odds banner (`<PotOddsDisplay />`) shows when a call is required; retain it above controls for guidance during the player’s turn.
+- Keyboard shortcuts: `client/src/components/ActionControls.tsx` defines `f/c/r/a` keys; add explicit aria-describedby on the controls container if needed.
+
 ### Task 3.2: Better Turn Management
 **Problem**: Unclear whose turn it is during gameplay
 **Priority**: MEDIUM
@@ -255,6 +334,12 @@ This document outlines detailed tasks for evolving the functional Texas Hold'em 
    - [ ] Smooth transitions between turns
    - [ ] Turn timer visible and functional
    - [ ] No ambiguity about whose turn it is
+
+**Implementation notes (repo code)**
+- Current player highlight: `client/src/components/PlayerSeat.tsx:114` seatClasses add `animate-pulse-glow` and a gold border when `isCurrentPlayer`.
+- Bot timer: `PlayerSeat.tsx:196` shows `<TurnTimer duration={800} />` for bot turns. Consider also showing a subtle timer ring for the human player on their turn to match.
+- State source of truth: Turns are driven by `client/src/lib/gameEngine.ts` and `poker-game.tsx` handlers (fold/check/call/bet/raise). Validate `gameEngine.getNextPlayerIndex` progression in all phases and that `processBotActions` exits once `currentPlayerIndex === 0`.
+- Announcements: `addActionHistory` in `poker-game.tsx` controls history; ensure a "Your turn" toast/aria-live fires when index changes to 0.
 
 ---
 
@@ -287,6 +372,12 @@ This document outlines detailed tasks for evolving the functional Texas Hold'em 
    - [ ] Staggered flop card reveals
    - [ ] Good performance on mobile devices
 
+**Implementation notes (repo code)**
+- Dealing/flip: `client/src/components/PlayingCard.tsx` already uses framer-motion for deal and flip. Tweak `duration` (deal: 0.8s, flip: 0.4s) and `ease` to achieve smoother arcs; confirm `dealDelay` staggering set from seat position in `PlayerSeat.tsx:260`.
+- Community cards: `client/src/components/CommunityCards.tsx` animates with skeleton placeholders between phases; tune `transition` timings (`0.3–0.4s`) and glow effect duration (`1.8s`) for polish.
+- GPU: All movements are transforms; avoid animating `width/height/top/left` on frequently updated nodes.
+- Testing: Use React Profiler/Performance tab with CPU throttling; ensure no dropped frames on mid-range phones.
+
 ### Task 4.2: Chip Movement & Betting Animations
 **Problem**: Chip animations need realistic physics and timing
 **Priority**: MEDIUM
@@ -313,6 +404,12 @@ This document outlines detailed tasks for evolving the functional Texas Hold'em 
    - [ ] Smooth betting slider animations
    - [ ] Chip stack animations for winners
    - [ ] Good performance across devices
+
+**Implementation notes (repo code)**
+- Flying chips: `client/src/components/Chip.tsx` exposes `FlyingChip` with cubic bezier path and sounds. Emitted from `poker-game.tsx` when bets occur; adjust arc peak (`-150`) and `duration` (`0.8s`) as needed and vary `delay` for multi-chip stacks.
+- Pot stack: `ChipStack` displays up to 5 chips with stagger; increase count cap or add aggregation badge as already implemented.
+- Draggable chips: `ActionControls.tsx` mobile quick betting provides chips; ensure drop target mapping to pot triggers `handleQuickBet` and plays consistent feedback.
+- Sound sync: Verify `chip-place` and `chip-stack` sounds align with motion completion via `onAnimationComplete`.
 
 ---
 
@@ -350,6 +447,12 @@ This document outlines detailed tasks for evolving the functional Texas Hold'em 
    - [ ] Appropriate difficulty scaling
    - [ ] Visual personality distinctions
 
+**Implementation notes (repo code)**
+- AI entry points: Bot decisions are produced in `client/src/lib/botAI.ts` and consumed by `poker-game.tsx:401+` in `processBotActions`. Introduce a `BotPersonality` type and per-bot config (tight/loose, aggression, bluff frequency) inside `botAI`.
+- State plumbing: Extend `Player` in `shared/schema.ts` to include an optional `personality` field for bots, or maintain a side map keyed by `player.id` inside `botAI`.
+- Contextual inputs: `botAI` currently gets state and index; incorporate position (dealerIndex, currentPlayerIndex), stack depth (chips/big blind), and table image of the human.
+- Variance: Add small randomness bands to avoid determinism; gate extremes by difficulty setting from `SettingsPanel` if desired.
+
 ### Task 5.2: Advanced Game Mechanics
 **Problem**: Missing tournament features and advanced gameplay
 **Priority**: LOW
@@ -375,6 +478,11 @@ This document outlines detailed tasks for evolving the functional Texas Hold'em 
    - [ ] Tournament progression working
    - [ ] Multi-table functionality stable
    - [ ] Statistics accurate and useful
+
+**Implementation notes (repo code)**
+- Tournament scaffolding: Add a `mode` to `GameState` (`'cash' | 'tournament'`), blinds schedule, and eliminate players at 0 chips between hands in `startNewHand`.
+- Multi-table: The app is single-table; abstract `PokerTable` routes on server (`server/routes.ts`) and add client-side table selection page in `client/src/pages/lobby.tsx` to simulate multiple tables.
+- History/replay: Action history is collected in `poker-game.tsx:addActionHistory`. Persist recent hands in localStorage or backend via `apiRequest` and add a simple replay using the same components with a frozen state timeline.
 
 ---
 
@@ -412,6 +520,12 @@ This document outlines detailed tasks for evolving the functional Texas Hold'em 
    - [ ] Better type safety
    - [ ] Improved performance metrics
 
+**Implementation notes (repo code)**
+- Custom hook: Extract game orchestration from `client/src/pages/poker-game.tsx` (state, effects, handlers, persistence) into `usePokerGame()` under `client/src/hooks/`. Return `{gameState, actions, settings, uiFlags}`.
+- Context: Provide `PokerGameProvider` with the hook value to avoid prop drilling across `ActionControls`, `PlayerSeat`, `SessionStats`, etc.
+- Types: Strengthen `GameState` and `Player` in `shared/schema.ts` with stricter fields and avoid `any` casts; narrow mutation payloads in `client/src/lib/queryClient.ts` usages.
+- Performance: Memoize heavy derives (e.g., pot sums) and wrap child components with `memo` where props are stable; ensure framer-motion animations don’t cause unnecessary re-renders.
+
 ### Task 6.2: Testing & Quality Assurance
 **Problem**: Need comprehensive testing strategy
 **Priority**: LOW
@@ -443,6 +557,12 @@ This document outlines detailed tasks for evolving the functional Texas Hold'em 
    - [ ] Reliable CI/CD pipeline
    - [ ] Performance benchmarks met
    - [ ] Accessibility standards compliant
+
+**Implementation notes (repo code)**
+- Unit tests: Cover `gameEngine` pot logic (side pots, ties), `handEvaluator` rankings, and `botAI` decisions. Place under `client/src/lib/__tests__/` using Vitest/Jest.
+- Component tests: Test `ActionControls` interactions (buttons, slider, draggables) and `PlayerSeat` turn/badge rendering with React Testing Library.
+- E2E smoke: Use Playwright to run through a hand on `client/index.html` with a mocked backend; assert `data-testid` markers like `button-start-hand`, `player-seat-*`, `button-quick-all-in`.
+- A11y: Add axe-core checks to pages; ensure `aria-label`/`aria-live` are respected on toasts and status badges.
 
 ---
 

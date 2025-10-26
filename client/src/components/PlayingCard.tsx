@@ -94,9 +94,9 @@ export function PlayingCard({
       } else if (vw >= 640) {
         setCardDimensions({ width: '85px', height: '121px' });   // sm
       } else if (vw >= 480) {
-        setCardDimensions({ width: '100px', height: '143px' });  // xs
+        setCardDimensions({ width: '105px', height: '150px' });  // xs (slightly larger for readability)
       } else {
-        setCardDimensions({ width: '90px', height: '129px' });   // mobile
+        setCardDimensions({ width: '96px', height: '138px' });   // mobile (slightly larger for readability)
       }
     };
 

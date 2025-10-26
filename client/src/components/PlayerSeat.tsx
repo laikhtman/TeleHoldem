@@ -94,9 +94,9 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
     const updateTextSize = () => {
       const vw = window.innerWidth;
       if (vw >= 480) {
-        setTextSize({ name: '18px', chips: '18px' });  // xs and above
+        setTextSize({ name: '19px', chips: '19px' });  // xs and above
       } else {
-        setTextSize({ name: '16px', chips: '16px' });  // mobile
+        setTextSize({ name: '17px', chips: '17px' });  // mobile
       }
     };
 
@@ -109,12 +109,19 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
     const baseWidth = 100;
     const baseHeight = 66.67;
     
-    const bufferPercentage = 0.12;
+    // Slightly expand seating radius on small screens to reduce crowding
+    let vw = 1024;
+    if (typeof window !== 'undefined') {
+      vw = window.innerWidth;
+    }
+    const isSmall = vw < 480;
+
+    const bufferPercentage = isSmall ? 0.08 : 0.12;
     const maxRadiusX = (baseWidth / 2) * (1 - bufferPercentage);
     const maxRadiusY = (baseHeight / 2) * (1 - bufferPercentage);
     
-    const radiusX = maxRadiusX - 8;
-    const radiusY = maxRadiusY - 6;
+    const radiusX = maxRadiusX - (isSmall ? 5 : 8);
+    const radiusY = maxRadiusY - (isSmall ? 4 : 6);
     
     const angle = (position / totalPlayers) * 2 * Math.PI - Math.PI / 2;
     

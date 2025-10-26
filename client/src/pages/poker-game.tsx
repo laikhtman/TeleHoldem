@@ -84,6 +84,7 @@ export default function PokerGame() {
   const [isHistoryCollapsed, setIsHistoryCollapsed] = useState(false);
   const [isHandStrengthCollapsed, setIsHandStrengthCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [tableAspect, setTableAspect] = useState<string>('3 / 2');
   const potPosition = useRef<{ x: number; y: number }>({ x: 400, y: 150 });
   const { toast } = useToast();
   const { playSound } = useSound();
@@ -157,6 +158,28 @@ export default function PokerGame() {
       console.error('Failed to save settings to localStorage:', error);
     }
   }, [settings]);
+
+  // Responsively tune table aspect ratio for better mobile fit
+  useEffect(() => {
+    const computeAspect = () => {
+      const vw = typeof window !== 'undefined' ? window.innerWidth : 1024;
+      if (vw < 480) {
+        // Phone portrait: slightly wider table to save vertical space
+        return '1.7 / 1';
+      } else if (vw < 768) {
+        // Small tablets/large phones
+        return '1.8 / 1';
+      } else {
+        // Tablets/desktop
+        return '3 / 2';
+      }
+    };
+
+    const apply = () => setTableAspect(computeAspect());
+    apply();
+    window.addEventListener('resize', apply);
+    return () => window.removeEventListener('resize', apply);
+  }, [isLandscape]);
 
   const handleSettingsChange = (newSettings: Partial<GameSettings>) => {
     setSettings(prev => ({ ...prev, ...newSettings }));
@@ -932,7 +955,7 @@ export default function PokerGame() {
           <Button
             variant="outline"
             size="lg"
-            className={`hidden md:block lg:hidden fixed left-[calc(0.5rem+var(--safe-area-left))] top-[calc(5rem+var(--safe-area-top))] z-50 h-12 w-12 rounded-full shadow-lg bg-card/95 backdrop-blur-sm border-2`}
+            className={`hidden md:block fixed left-[calc(0.5rem+var(--safe-area-left))] top-[calc(5rem+var(--safe-area-top))] z-[140] h-12 w-12 rounded-full shadow-lg bg-card/95 backdrop-blur-sm border-2`}
             onClick={() => setIsHandStrengthCollapsed(!isHandStrengthCollapsed)}
             data-testid="button-toggle-hand-strength"
             aria-label={isHandStrengthCollapsed ? "Show Hand Strength panel" : "Hide Hand Strength panel"}
@@ -941,7 +964,7 @@ export default function PokerGame() {
           </Button>
 
           {/* Panel Content */}
-          <div className={`bg-card/70 backdrop-blur-sm border border-card-border rounded-lg p-3 shadow-sm ${isHandStrengthCollapsed ? 'md:hidden lg:block' : ''}`}>
+          <div className={`bg-card/70 backdrop-blur-sm border border-card-border rounded-lg p-3 shadow-sm ${isHandStrengthCollapsed ? 'hidden' : ''}`}>
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-semibold flex items-center gap-1.5 text-muted-foreground">
                 <TrendingUp className="w-3.5 h-3.5 text-poker-chipGold" />
@@ -961,14 +984,14 @@ export default function PokerGame() {
         <div className="flex flex-col gap-4 items-center flex-1 order-1 lg:order-2 w-full max-w-5xl mx-auto px-[calc(0.5rem+var(--safe-area-left))] xs:px-[calc(0.75rem+var(--safe-area-left))] sm:px-[calc(1rem+var(--safe-area-left))] md:px-0 pb-[calc(0.5rem+var(--safe-area-bottom))]">
           {/* Poker Table with Wood Border */}
           <div 
-            className="rounded-[100px] xs:rounded-[120px] sm:rounded-[160px] md:rounded-[190px] lg:rounded-[220px] wood-grain p-[7px] xs:p-[8px] sm:p-[10px] md:p-[11px] lg:p-[12px] table-edge-glow w-full max-w-full md:min-h-[60vh] lg:min-h-[70vh] max-h-[min(75vh,800px)] mx-auto"
+            className="rounded-[100px] xs:rounded-[120px] sm:rounded-[165px] md:rounded-[190px] lg:rounded-[220px] wood-grain p-[7px] xs:p-[8px] sm:p-[10px] md:p-[11px] lg:p-[12px] table-edge-glow w-full max-w-[92%] xs:max-w-[94%] sm:max-w-[96%] md:max-w-full md:min-h-[60vh] lg:min-h-[70vh] max-h-[min(68vh,720px)] xs:max-h-[min(70vh,760px)] sm:max-h-[min(72vh,780px)] md:max-h-[min(75vh,800px)] mx-auto"
             style={{ 
-              aspectRatio: '3 / 2',
+              aspectRatio: tableAspect,
             }}
           >
             {/* Poker Table Felt Surface */}
             <div 
-              className="relative felt-texture vignette table-depth rounded-[93px] xs:rounded-[113px] sm:rounded-[152px] md:rounded-[181px] lg:rounded-[210px] overflow-visible w-full h-full"
+              className="relative felt-texture vignette table-depth rounded-[95px] xs:rounded-[118px] sm:rounded-[158px] md:rounded-[181px] lg:rounded-[210px] overflow-visible w-full h-full"
               style={{ 
                 zIndex: 0,
                 backgroundColor: tableThemeColors[settings.tableTheme]
@@ -1067,7 +1090,7 @@ export default function PokerGame() {
           </div>
 
           {/* Controls */}
-          <div id="action-controls" className="w-full max-w-3xl md:max-w-none bg-card/80 backdrop-blur-lg rounded-lg border border-card-border shadow-lg p-3 xs:p-4 sm:p-5 md:p-4 pb-[calc(0.75rem+var(--safe-area-bottom))] sm:pb-[calc(1rem+var(--safe-area-bottom))]" style={{ zIndex: 5 }}>
+          <div id="action-controls" className="w-full max-w-3xl md:max-w-none bg-card/90 sm:bg-card/85 md:bg-card/80 backdrop-blur-lg sm:backdrop-blur-xl rounded-lg border border-card-border shadow-lg p-4 xs:p-5 sm:p-6 md:p-4 pb-[calc(1rem+var(--safe-area-bottom))] sm:pb-[calc(1.25rem+var(--safe-area-bottom))] md:pb-[calc(1rem+var(--safe-area-bottom))]" style={{ zIndex: 5 }}>
             {gameState.phase === 'waiting' ? (
               <Button 
                 onClick={startNewHand}
