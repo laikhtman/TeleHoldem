@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { Link, useLocation } from 'wouter';
@@ -10,9 +10,71 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { NumberInput } from '@/components/ui/number-input';
 import { Slider } from '@/components/ui/slider';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { Users, Trophy, DollarSign, Plus, Spade, Heart, Diamond, Club, LogOut } from 'lucide-react';
+import { 
+  Users, 
+  Trophy, 
+  DollarSign, 
+  Plus, 
+  Spade, 
+  Heart, 
+  Diamond, 
+  Club, 
+  LogOut, 
+  RefreshCw,
+  Search,
+  Filter,
+  Coins,
+  Clock,
+  UserPlus,
+  Loader2
+} from 'lucide-react';
 import type { PokerTable } from '@shared/schema';
+
+// Helper function to get relative time
+function getRelativeTime(date: Date): string {
+  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+  
+  if (seconds < 5) return 'just now';
+  if (seconds < 60) return `${seconds} seconds ago`;
+  if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes ago`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+  return `${Math.floor(seconds / 86400)} days ago`;
+}
+
+// Skeleton card component for loading state
+function TableCardSkeleton() {
+  return (
+    <Card className="bg-card backdrop-blur-lg border border-border overflow-hidden">
+      <CardHeader className="pb-3">
+        <div className="flex justify-between items-start gap-2">
+          <Skeleton className="h-6 w-32 bg-muted/20" />
+          <Skeleton className="h-5 w-20 rounded-full bg-muted/20" />
+        </div>
+      </CardHeader>
+      <CardContent className="pb-3">
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-4 w-4 rounded bg-muted/20" />
+            <Skeleton className="h-4 w-24 bg-muted/20" />
+          </div>
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-4 w-4 rounded bg-muted/20" />
+            <Skeleton className="h-4 w-20 bg-muted/20" />
+          </div>
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-4 w-4 rounded bg-muted/20" />
+            <Skeleton className="h-4 w-28 bg-muted/20" />
+          </div>
+        </div>
+      </CardContent>
+      <CardFooter className="pt-3">
+        <Skeleton className="h-10 w-full bg-muted/20" />
+      </CardFooter>
+    </Card>
+  );
+}
 
 export default function Lobby() {
   const [location, setLocation] = useLocation();
@@ -20,6 +82,12 @@ export default function Lobby() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedTable, setSelectedTable] = useState<number | null>(null);
   const [joinBuyIn, setJoinBuyIn] = useState(500);
+  const [lastUpdated, setLastUpdated] = useState(new Date());
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'waiting' | 'in_progress'>('all');
+  const [filterBlinds, setFilterBlinds] = useState<'all' | 'low' | 'medium' | 'high'>('all');
+  const [filterAvailable, setFilterAvailable] = useState(false);
   
   // Form state for Create Table modal
   const [tableName, setTableName] = useState('High Stakes');
@@ -33,11 +101,76 @@ export default function Lobby() {
   const dialogRef = useRef<HTMLDivElement>(null);
   const firstInputRef = useRef<HTMLInputElement>(null);
 
+  // Update last updated timestamp
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Force re-render to update relative time
+      setLastUpdated(new Date());
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
   // Fetch active tables
-  const { data: tablesData, isLoading } = useQuery({
+  const { data: tablesData, isLoading, refetch } = useQuery<{ tables: any[] }>({
     queryKey: ['/api/tables'],
     refetchInterval: 5000, // Refresh every 5 seconds
   });
+
+  // Update refresh state when data changes
+  useEffect(() => {
+    if (tablesData) {
+      setLastUpdated(new Date());
+      setIsRefreshing(false);
+    }
+  }, [tablesData]);
+
+  // Manual refresh handler
+  const handleManualRefresh = async () => {
+    setIsRefreshing(true);
+    await refetch();
+    setTimeout(() => setIsRefreshing(false), 500);
+  };
+
+  // Filter tables based on search and filters
+  const filteredTables = useMemo(() => {
+    let tables = tablesData?.tables || [];
+    
+    // Search filter
+    if (searchTerm) {
+      tables = tables.filter((table: PokerTable) => 
+        table.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    // Status filter
+    if (filterStatus !== 'all') {
+      tables = tables.filter((table: PokerTable) => {
+        const status = table.currentPlayers === 0 ? 'waiting' : 'in_progress';
+        return status === filterStatus;
+      });
+    }
+    
+    // Blinds filter
+    if (filterBlinds !== 'all') {
+      tables = tables.filter((table: PokerTable) => {
+        const bigBlind = table.bigBlind;
+        if (filterBlinds === 'low') return bigBlind <= 20;
+        if (filterBlinds === 'medium') return bigBlind > 20 && bigBlind <= 50;
+        if (filterBlinds === 'high') return bigBlind > 50;
+        return true;
+      });
+    }
+    
+    // Available seats filter
+    if (filterAvailable) {
+      tables = tables.filter((table: PokerTable) => 
+        table.currentPlayers < table.maxPlayers
+      );
+    }
+    
+    return tables;
+  }, [tablesData?.tables, searchTerm, filterStatus, filterBlinds, filterAvailable]);
 
   // Create table mutation
   const createTableMutation = useMutation({
@@ -229,23 +362,39 @@ export default function Lobby() {
     }
   };
 
-  const tables = tablesData?.tables || [];
+  // Get table status with color
+  const getTableStatus = (table: PokerTable) => {
+    if (table.currentPlayers === 0) {
+      return { text: 'Waiting', variant: 'secondary' as const, color: 'text-yellow-500' };
+    }
+    if (table.currentPlayers >= table.maxPlayers) {
+      return { text: 'Full', variant: 'destructive' as const, color: 'text-red-500' };
+    }
+    return { text: 'In Progress', variant: 'default' as const, color: 'text-green-500' };
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-poker-felt to-poker-feltDark p-4 sm:p-6 md:p-8">
-      <div className="mx-auto max-w-7xl">
+    <div className="min-h-screen bg-background p-4 sm:p-6 md:p-8">
+      {/* Subtle pattern background overlay */}
+      <div className="fixed inset-0 pointer-events-none opacity-[0.015]" 
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }}
+      />
+      
+      <div className="mx-auto max-w-7xl relative">
         {/* Header */}
         <div className="mb-8 text-center">
           <div className="mb-4 flex justify-center">
-            <div className="flex items-center gap-2 text-white">
-              <Spade className="h-8 w-8 fill-current" />
-              <Heart className="h-8 w-8 fill-current text-red-500" />
-              <Diamond className="h-8 w-8 fill-current text-red-500" />
-              <Club className="h-8 w-8 fill-current" />
+            <div className="flex items-center gap-2 opacity-60">
+              <Spade className="h-6 w-6 fill-current text-foreground" />
+              <Heart className="h-6 w-6 fill-current text-red-500" />
+              <Diamond className="h-6 w-6 fill-current text-red-500" />
+              <Club className="h-6 w-6 fill-current text-foreground" />
             </div>
           </div>
-          <h1 className="text-4xl font-bold text-white mb-2">Texas Hold'em Lobby</h1>
-          <p className="text-poker-muted text-lg">Choose a table to join or create your own</p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">Texas Hold'em Lobby</h1>
+          <p className="text-muted-foreground">Choose a table to join or create your own</p>
         </div>
 
         {/* Quick Play Button - For Demo */}
@@ -253,7 +402,7 @@ export default function Lobby() {
           <Link href="/demo">
             <Button
               size="lg"
-              className="bg-poker-primary hover:bg-poker-primary/80 text-white font-bold px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all"
+              className="font-semibold px-6 py-5 text-base shadow-sm"
               data-testid="button-quick-play"
             >
               <Trophy className="mr-2 h-5 w-5" />
@@ -262,16 +411,134 @@ export default function Lobby() {
           </Link>
         </div>
 
+        {/* Search and Filter Section */}
+        <div className="mb-6 space-y-4">
+          {/* Search Bar and Refresh Button */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search tables..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+                data-testid="input-search-tables"
+              />
+            </div>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Clock className="h-4 w-4" />
+              <span data-testid="text-last-updated">Updated {getRelativeTime(lastUpdated)}</span>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleManualRefresh}
+                disabled={isRefreshing}
+                className="ml-2"
+                data-testid="button-refresh"
+                aria-label="Refresh tables"
+              >
+                <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              </Button>
+            </div>
+          </div>
+
+          {/* Filter Chips */}
+          <div className="flex flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Filters:</span>
+            </div>
+            
+            {/* Status Filter */}
+            <div className="flex gap-1">
+              <Button
+                variant={filterStatus === 'all' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilterStatus('all')}
+                data-testid="filter-status-all"
+              >
+                All
+              </Button>
+              <Button
+                variant={filterStatus === 'waiting' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilterStatus('waiting')}
+                data-testid="filter-status-waiting"
+              >
+                Waiting
+              </Button>
+              <Button
+                variant={filterStatus === 'in_progress' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilterStatus('in_progress')}
+                data-testid="filter-status-progress"
+              >
+                In Progress
+              </Button>
+            </div>
+
+            {/* Blinds Filter */}
+            <div className="flex gap-1">
+              <Button
+                variant={filterBlinds === 'all' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilterBlinds('all')}
+                data-testid="filter-blinds-all"
+              >
+                All Blinds
+              </Button>
+              <Button
+                variant={filterBlinds === 'low' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilterBlinds('low')}
+                data-testid="filter-blinds-low"
+              >
+                Low ($1-$20)
+              </Button>
+              <Button
+                variant={filterBlinds === 'medium' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilterBlinds('medium')}
+                data-testid="filter-blinds-medium"
+              >
+                Medium ($21-$50)
+              </Button>
+              <Button
+                variant={filterBlinds === 'high' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilterBlinds('high')}
+                data-testid="filter-blinds-high"
+              >
+                High ($51+)
+              </Button>
+            </div>
+
+            {/* Available Seats Filter */}
+            <Button
+              variant={filterAvailable ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setFilterAvailable(!filterAvailable)}
+              data-testid="filter-available"
+            >
+              <UserPlus className="h-4 w-4 mr-1" />
+              Available Seats
+            </Button>
+          </div>
+        </div>
+
         {/* Tables Grid */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {/* Create New Table Card */}
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+          {/* Create New Table Card - Compact Design */}
           <Dialog open={isCreateDialogOpen} onOpenChange={handleDialogOpenChange}>
             <DialogTrigger asChild>
-              <Card className="bg-card/80 backdrop-blur-lg border-2 border-dashed border-poker-primary/50 hover:border-poker-primary transition-all cursor-pointer hover:shadow-lg" data-testid="button-create-table">
-                <CardContent className="flex flex-col items-center justify-center h-64">
-                  <Plus className="h-12 w-12 text-poker-primary mb-4" />
-                  <h3 className="text-xl font-bold mb-2">Create New Table</h3>
-                  <p className="text-muted-foreground text-center">Set your own stakes and rules</p>
+              <Card className="bg-card/50 backdrop-blur-sm border-2 border-dashed border-muted hover:border-primary/50 transition-all cursor-pointer hover:bg-card/70 h-full min-h-[220px] flex items-center justify-center" data-testid="button-create-table">
+                <CardContent className="flex flex-col items-center justify-center p-6">
+                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                    <Plus className="h-6 w-6 text-primary" />
+                  </div>
+                  <h3 className="text-lg font-semibold">Create Table</h3>
+                  <p className="text-sm text-muted-foreground text-center mt-1">Set your own stakes</p>
                 </CardContent>
               </Card>
             </DialogTrigger>
@@ -362,11 +629,11 @@ export default function Lobby() {
                           setErrors(prev => ({ ...prev, bigBlind: '' }));
                         }
                       }}
-                      min={2}
+                      min={1}
                       max={2000}
                       step={1}
                       prefix="$"
-                      helperText="Typical: $10-$50 (usually 2x small blind)"
+                      helperText="Usually 2x the small blind"
                       errorMessage={errors.bigBlind}
                       data-testid="input-big-blind"
                     />
@@ -387,11 +654,11 @@ export default function Lobby() {
                           setErrors(prev => ({ ...prev, minBuyIn: '' }));
                         }
                       }}
-                      min={20}
-                      max={50000}
+                      min={1}
+                      max={10000}
                       step={10}
                       prefix="$"
-                      helperText="Typical: 20-40x big blind"
+                      helperText="Recommended: 20-50x big blind"
                       errorMessage={errors.minBuyIn}
                       data-testid="input-min-buyin"
                     />
@@ -408,147 +675,173 @@ export default function Lobby() {
                       value={maxBuyIn}
                       onChange={(value) => {
                         setMaxBuyIn(value);
-                        if (errors.minBuyIn || errors.maxBuyIn) {
-                          setErrors(prev => ({ ...prev, minBuyIn: '', maxBuyIn: '' }));
+                        if (errors.maxBuyIn) {
+                          setErrors(prev => ({ ...prev, maxBuyIn: '' }));
                         }
                       }}
-                      min={100}
-                      max={100000}
+                      min={1}
+                      max={50000}
                       step={10}
                       prefix="$"
-                      helperText="Typical: 100-200x big blind"
+                      helperText="Recommended: 100-200x big blind"
                       errorMessage={errors.maxBuyIn}
                       data-testid="input-max-buyin"
                     />
                   </div>
                 </div>
-                <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-                  <Button 
+                <DialogFooter className="gap-2">
+                  <Button
                     type="button"
                     variant="outline"
                     onClick={() => handleDialogOpenChange(false)}
-                    data-testid="button-cancel-create"
-                    className="w-full sm:w-auto"
+                    data-testid="button-cancel"
                   >
                     Cancel
                   </Button>
                   <Button 
                     type="submit" 
                     disabled={createTableMutation.isPending}
-                    data-testid="button-confirm-create"
-                    className="w-full sm:w-auto"
+                    data-testid="button-create-submit"
                   >
-                    {createTableMutation.isPending ? 'Creating...' : 'Create Table'}
+                    {createTableMutation.isPending && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    Create Table
                   </Button>
                 </DialogFooter>
               </form>
             </DialogContent>
           </Dialog>
 
-          {/* Active Tables */}
+          {/* Show skeleton loaders when loading */}
           {isLoading ? (
-            <div className="col-span-full text-center text-white">
-              <p>Loading tables...</p>
-            </div>
-          ) : tables.length === 0 ? (
-            <div className="col-span-full text-center text-poker-muted">
-              <p className="text-lg">No active tables yet. Create one to get started!</p>
-            </div>
+            <>
+              <TableCardSkeleton />
+              <TableCardSkeleton />
+              <TableCardSkeleton />
+              <TableCardSkeleton />
+            </>
+          ) : filteredTables.length === 0 ? (
+            <Card className="col-span-full bg-card/50 backdrop-blur-sm border-border">
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <Search className="h-12 w-12 text-muted-foreground mb-4 opacity-50" />
+                <h3 className="text-lg font-semibold mb-2">No tables found</h3>
+                <p className="text-muted-foreground text-center max-w-md">
+                  {searchTerm || filterStatus !== 'all' || filterBlinds !== 'all' || filterAvailable
+                    ? "No tables match your filters. Try adjusting your search criteria."
+                    : "No active tables yet. Create one to get started!"}
+                </p>
+              </CardContent>
+            </Card>
           ) : (
-            tables.map((table: PokerTable) => (
-              <Card key={table.id} className="bg-card/80 backdrop-blur-lg hover:shadow-lg transition-all" data-testid={`card-table-${table.id}`}>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <span>{table.name}</span>
-                    {table.currentPlayers === table.maxPlayers && (
-                      <Badge variant="destructive">Full</Badge>
-                    )}
-                  </CardTitle>
-                  <CardDescription>
-                    Blinds: ${table.smallBlind}/${table.bigBlind}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Users className="h-4 w-4" />
-                      <span>{table.currentPlayers}/{table.maxPlayers} players</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-2">
-                      <DollarSign className="h-4 w-4 text-poker-chipGold" />
-                      <span>Buy-in: ${table.minBuyIn} - ${table.maxBuyIn}</span>
-                    </div>
-                  </div>
-                  {table.gameState && (
-                    <Badge variant="secondary" className="w-full justify-center">
-                      {table.gameState.phase === 'waiting' ? 'Waiting for players' : `In progress: ${table.gameState.phase}`}
-                    </Badge>
-                  )}
-                </CardContent>
-                <CardFooter>
-                  <Dialog open={selectedTable === table.id} onOpenChange={(open) => !open && setSelectedTable(null)}>
-                    <DialogTrigger asChild>
-                      <Button
-                        className="w-full"
-                        variant={table.currentPlayers === table.maxPlayers ? 'secondary' : 'default'}
-                        disabled={table.currentPlayers === table.maxPlayers}
-                        onClick={() => handleJoinTable(table.id, table.minBuyIn, table.maxBuyIn)}
-                        data-testid={`button-join-table-${table.id}`}
+            /* Active Table Cards */
+            filteredTables.map((table: PokerTable) => {
+              const status = getTableStatus(table);
+              const isFull = table.currentPlayers >= table.maxPlayers;
+              
+              return (
+                <Card 
+                  key={table.id} 
+                  className="bg-card backdrop-blur-lg border border-border hover:shadow-lg transition-all h-full min-h-[220px] flex flex-col"
+                  data-testid={`card-table-${table.id}`}
+                >
+                  <CardHeader className="pb-3 flex-none">
+                    <div className="flex justify-between items-start gap-2">
+                      <CardTitle className="text-lg font-semibold line-clamp-1">
+                        {table.name}
+                      </CardTitle>
+                      <Badge 
+                        variant={status.variant} 
+                        className={`${status.color} shrink-0`}
+                        data-testid={`status-table-${table.id}`}
                       >
-                        {table.currentPlayers === table.maxPlayers ? 'Table Full' : 'Join Table'}
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
-                      <DialogHeader>
-                        <DialogTitle>Join {table.name}</DialogTitle>
-                        <DialogDescription>
-                          Choose your buy-in amount to join this table.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="grid gap-4 py-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="buyIn">Buy-in Amount: ${joinBuyIn}</Label>
-                          <Slider
-                            id="buyIn"
-                            min={table.minBuyIn}
-                            max={table.maxBuyIn}
-                            step={10}
-                            value={[joinBuyIn]}
-                            onValueChange={(value) => setJoinBuyIn(value[0])}
-                            className="w-full"
-                            data-testid="slider-buyin"
-                          />
-                          <div className="flex justify-between text-sm text-muted-foreground">
-                            <span>${table.minBuyIn}</span>
-                            <span>${table.maxBuyIn}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <DialogFooter>
-                        <Button
-                          onClick={confirmJoinTable}
-                          disabled={joinTableMutation.isPending}
-                          data-testid="button-confirm-join"
-                        >
-                          {joinTableMutation.isPending ? 'Joining...' : `Join with $${joinBuyIn}`}
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                </CardFooter>
-              </Card>
-            ))
+                        {status.text}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pb-3 flex-1 space-y-3">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Coins className="h-4 w-4 text-muted-foreground shrink-0" aria-label="Blinds" />
+                      <span className="font-medium">${table.smallBlind}/${table.bigBlind}</span>
+                      <span className="text-muted-foreground">blinds</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Users className="h-4 w-4 text-muted-foreground shrink-0" aria-label="Players" />
+                      <span className="font-medium">{table.currentPlayers}/{table.maxPlayers}</span>
+                      <span className="text-muted-foreground">players</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <DollarSign className="h-4 w-4 text-muted-foreground shrink-0" aria-label="Buy-in" />
+                      <span className="font-medium">${table.minBuyIn}-${table.maxBuyIn}</span>
+                      <span className="text-muted-foreground">buy-in</span>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="pt-3 flex-none">
+                    <Button
+                      className="w-full font-medium"
+                      variant={isFull ? "secondary" : "default"}
+                      disabled={isFull}
+                      onClick={() => handleJoinTable(table.id, table.minBuyIn, table.maxBuyIn)}
+                      data-testid={`button-join-${table.id}`}
+                    >
+                      {isFull ? "Table Full" : "Join Table"}
+                    </Button>
+                  </CardFooter>
+                </Card>
+              );
+            })
           )}
         </div>
 
-        {/* Footer Info */}
-        <div className="mt-12 text-center text-poker-muted">
-          <p className="text-sm">
-            Tip: Tables refresh automatically every 5 seconds
-          </p>
-        </div>
+        {/* Join Table Dialog */}
+        <Dialog open={selectedTable !== null} onOpenChange={(open) => !open && setSelectedTable(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Choose Your Buy-in</DialogTitle>
+              <DialogDescription>
+                Select the amount of chips you want to bring to the table.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="buyInSlider">Buy-in Amount: ${joinBuyIn}</Label>
+                <Slider
+                  id="buyInSlider"
+                  min={200}
+                  max={1000}
+                  step={50}
+                  value={[joinBuyIn]}
+                  onValueChange={(value) => setJoinBuyIn(value[0])}
+                  className="w-full"
+                  data-testid="slider-buyin"
+                />
+                <div className="flex justify-between text-sm text-muted-foreground">
+                  <span>$200</span>
+                  <span>$1000</span>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button 
+                variant="outline" 
+                onClick={() => setSelectedTable(null)}
+                data-testid="button-join-cancel"
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={confirmJoinTable}
+                disabled={joinTableMutation.isPending}
+                data-testid="button-join-confirm"
+              >
+                {joinTableMutation.isPending && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                Join with ${joinBuyIn}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
