@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { Link, useLocation } from 'wouter';
@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { NumberInput } from '@/components/ui/number-input';
 import { Slider } from '@/components/ui/slider';
 import { useToast } from '@/hooks/use-toast';
 import { Users, Trophy, DollarSign, Plus, Spade, Heart, Diamond, Club, LogOut } from 'lucide-react';
@@ -19,6 +20,18 @@ export default function Lobby() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedTable, setSelectedTable] = useState<number | null>(null);
   const [joinBuyIn, setJoinBuyIn] = useState(500);
+  
+  // Form state for Create Table modal
+  const [tableName, setTableName] = useState('High Stakes');
+  const [smallBlind, setSmallBlind] = useState(10);
+  const [bigBlind, setBigBlind] = useState(20);
+  const [minBuyIn, setMinBuyIn] = useState(200);
+  const [maxBuyIn, setMaxBuyIn] = useState(1000);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  
+  // Refs for focus management
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const firstInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch active tables
   const { data: tablesData, isLoading } = useQuery({
@@ -83,18 +96,127 @@ export default function Lobby() {
     },
   });
 
+  // Validation function for the form
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+    
+    if (!tableName.trim()) {
+      newErrors.tableName = 'Table name is required';
+    }
+    
+    if (bigBlind < smallBlind) {
+      newErrors.bigBlind = 'Big blind must be greater than or equal to small blind';
+    }
+    
+    if (minBuyIn > maxBuyIn) {
+      newErrors.minBuyIn = 'Minimum buy-in must be less than or equal to maximum buy-in';
+    }
+    
+    if (minBuyIn < bigBlind * 10) {
+      newErrors.minBuyIn = `Minimum buy-in should be at least ${bigBlind * 10} (10x big blind)`;
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+  
   const handleCreateTable = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
+    
+    if (!validateForm()) {
+      return;
+    }
+    
     createTableMutation.mutate({
-      name: formData.get('name') as string,
-      smallBlind: parseInt(formData.get('smallBlind') as string),
-      bigBlind: parseInt(formData.get('bigBlind') as string),
-      minBuyIn: parseInt(formData.get('minBuyIn') as string),
-      maxBuyIn: parseInt(formData.get('maxBuyIn') as string),
+      name: tableName,
+      smallBlind: smallBlind,
+      bigBlind: bigBlind,
+      minBuyIn: minBuyIn,
+      maxBuyIn: maxBuyIn,
       maxPlayers: 6,
     });
   };
+  
+  const resetForm = () => {
+    setTableName('High Stakes');
+    setSmallBlind(10);
+    setBigBlind(20);
+    setMinBuyIn(200);
+    setMaxBuyIn(1000);
+    setErrors({});
+  };
+  
+  const handleDialogOpenChange = (open: boolean) => {
+    setIsCreateDialogOpen(open);
+    if (!open) {
+      resetForm();
+    } else {
+      // Set focus to first input when dialog opens
+      setTimeout(() => {
+        firstInputRef.current?.focus();
+      }, 100);
+    }
+  };
+  
+  // Add keyboard event handling for better accessibility
+  useEffect(() => {
+    if (isCreateDialogOpen) {
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          handleDialogOpenChange(false);
+        }
+      };
+      
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [isCreateDialogOpen]);
+  
+  // Real-time validation for related fields
+  useEffect(() => {
+    // Skip validation on initial render or when dialog is closed
+    if (!isCreateDialogOpen) return;
+    
+    const newErrors: Record<string, string> = {};
+    
+    // Validate small blind vs big blind
+    if (bigBlind < smallBlind) {
+      newErrors.smallBlind = 'Small blind must be less than or equal to big blind';
+    }
+    
+    // Validate min vs max buy-in
+    if (minBuyIn > maxBuyIn) {
+      newErrors.maxBuyIn = 'Maximum buy-in must be greater than or equal to minimum buy-in';
+    }
+    
+    // Validate min buy-in vs big blind
+    if (minBuyIn < bigBlind * 10) {
+      newErrors.minBuyIn = `Minimum buy-in should be at least ${bigBlind * 10} (10x big blind)`;
+    }
+    
+    // Update errors, preserving unrelated errors and clearing fixed ones
+    setErrors(prev => {
+      const updated = { ...prev };
+      
+      // Clear errors for fields that are now valid
+      if (bigBlind >= smallBlind) {
+        delete updated.smallBlind;
+        delete updated.bigBlind;
+      }
+      if (minBuyIn <= maxBuyIn) {
+        delete updated.maxBuyIn;
+      }
+      if (minBuyIn >= bigBlind * 10) {
+        // Only clear minBuyIn error if it was specifically about the 10x rule
+        if (prev.minBuyIn?.includes('10x big blind')) {
+          delete updated.minBuyIn;
+        }
+      }
+      
+      // Add new errors
+      return { ...updated, ...newErrors };
+    });
+  }, [smallBlind, bigBlind, minBuyIn, maxBuyIn, isCreateDialogOpen]);
 
   const handleJoinTable = (tableId: number, minBuyIn: number, maxBuyIn: number) => {
     setSelectedTable(tableId);
@@ -143,7 +265,7 @@ export default function Lobby() {
         {/* Tables Grid */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {/* Create New Table Card */}
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <Dialog open={isCreateDialogOpen} onOpenChange={handleDialogOpenChange}>
             <DialogTrigger asChild>
               <Card className="bg-card/80 backdrop-blur-lg border-2 border-dashed border-poker-primary/50 hover:border-poker-primary transition-all cursor-pointer hover:shadow-lg" data-testid="button-create-table">
                 <CardContent className="flex flex-col items-center justify-center h-64">
@@ -153,91 +275,169 @@ export default function Lobby() {
                 </CardContent>
               </Card>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <form onSubmit={handleCreateTable}>
+            <DialogContent 
+              ref={dialogRef}
+              className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto"
+              aria-labelledby="create-table-title"
+              aria-describedby="create-table-description"
+              onOpenAutoFocus={(e) => {
+                e.preventDefault();
+                firstInputRef.current?.focus();
+              }}
+            >
+              <form onSubmit={handleCreateTable} noValidate>
                 <DialogHeader>
-                  <DialogTitle>Create New Table</DialogTitle>
-                  <DialogDescription>
+                  <DialogTitle id="create-table-title">Create New Table</DialogTitle>
+                  <DialogDescription id="create-table-description">
                     Configure your poker table settings. Other players can join once it's created.
                   </DialogDescription>
                 </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="name" className="text-right">
+                <div className="grid gap-6 py-6">
+                  {/* Table Name Field */}
+                  <div className="space-y-2">
+                    <Label htmlFor="tableName">
                       Table Name
                     </Label>
                     <Input
-                      id="name"
-                      name="name"
-                      defaultValue="High Stakes"
-                      className="col-span-3"
-                      required
+                      ref={firstInputRef}
+                      id="tableName"
+                      name="tableName"
+                      value={tableName}
+                      onChange={(e) => {
+                        setTableName(e.target.value);
+                        if (errors.tableName) {
+                          setErrors(prev => ({ ...prev, tableName: '' }));
+                        }
+                      }}
+                      className="h-12"
+                      placeholder="e.g., Friday Night Game"
+                      aria-invalid={!!errors.tableName}
+                      aria-describedby={errors.tableName ? 'tableName-error' : undefined}
                       data-testid="input-table-name"
                     />
+                    {errors.tableName && (
+                      <p id="tableName-error" className="text-sm text-destructive" role="alert">
+                        {errors.tableName}
+                      </p>
+                    )}
                   </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="smallBlind" className="text-right">
+
+                  {/* Small Blind Field */}
+                  <div className="space-y-2">
+                    <Label htmlFor="smallBlind">
                       Small Blind
                     </Label>
-                    <Input
+                    <NumberInput
                       id="smallBlind"
                       name="smallBlind"
-                      type="number"
-                      defaultValue="10"
-                      className="col-span-3"
-                      required
-                      min="1"
+                      value={smallBlind}
+                      onChange={(value) => {
+                        setSmallBlind(value);
+                        if (errors.bigBlind) {
+                          setErrors(prev => ({ ...prev, bigBlind: '' }));
+                        }
+                      }}
+                      min={1}
+                      max={1000}
+                      step={1}
+                      prefix="$"
+                      helperText="Typical: $5-$25 for casual games"
+                      errorMessage={errors.smallBlind}
                       data-testid="input-small-blind"
                     />
                   </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="bigBlind" className="text-right">
+
+                  {/* Big Blind Field */}
+                  <div className="space-y-2">
+                    <Label htmlFor="bigBlind">
                       Big Blind
                     </Label>
-                    <Input
+                    <NumberInput
                       id="bigBlind"
                       name="bigBlind"
-                      type="number"
-                      defaultValue="20"
-                      className="col-span-3"
-                      required
-                      min="2"
+                      value={bigBlind}
+                      onChange={(value) => {
+                        setBigBlind(value);
+                        if (errors.bigBlind) {
+                          setErrors(prev => ({ ...prev, bigBlind: '' }));
+                        }
+                      }}
+                      min={2}
+                      max={2000}
+                      step={1}
+                      prefix="$"
+                      helperText="Typical: $10-$50 (usually 2x small blind)"
+                      errorMessage={errors.bigBlind}
                       data-testid="input-big-blind"
                     />
                   </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="minBuyIn" className="text-right">
-                      Min Buy-in
+
+                  {/* Min Buy-in Field */}
+                  <div className="space-y-2">
+                    <Label htmlFor="minBuyIn">
+                      Minimum Buy-in
                     </Label>
-                    <Input
+                    <NumberInput
                       id="minBuyIn"
                       name="minBuyIn"
-                      type="number"
-                      defaultValue="200"
-                      className="col-span-3"
-                      required
-                      min="20"
+                      value={minBuyIn}
+                      onChange={(value) => {
+                        setMinBuyIn(value);
+                        if (errors.minBuyIn) {
+                          setErrors(prev => ({ ...prev, minBuyIn: '' }));
+                        }
+                      }}
+                      min={20}
+                      max={50000}
+                      step={10}
+                      prefix="$"
+                      helperText="Typical: 20-40x big blind"
+                      errorMessage={errors.minBuyIn}
                       data-testid="input-min-buyin"
                     />
                   </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="maxBuyIn" className="text-right">
-                      Max Buy-in
+
+                  {/* Max Buy-in Field */}
+                  <div className="space-y-2">
+                    <Label htmlFor="maxBuyIn">
+                      Maximum Buy-in
                     </Label>
-                    <Input
+                    <NumberInput
                       id="maxBuyIn"
                       name="maxBuyIn"
-                      type="number"
-                      defaultValue="1000"
-                      className="col-span-3"
-                      required
-                      min="100"
+                      value={maxBuyIn}
+                      onChange={(value) => {
+                        setMaxBuyIn(value);
+                        if (errors.minBuyIn || errors.maxBuyIn) {
+                          setErrors(prev => ({ ...prev, minBuyIn: '', maxBuyIn: '' }));
+                        }
+                      }}
+                      min={100}
+                      max={100000}
+                      step={10}
+                      prefix="$"
+                      helperText="Typical: 100-200x big blind"
+                      errorMessage={errors.maxBuyIn}
                       data-testid="input-max-buyin"
                     />
                   </div>
                 </div>
-                <DialogFooter>
-                  <Button type="submit" disabled={createTableMutation.isPending} data-testid="button-confirm-create">
+                <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                  <Button 
+                    type="button"
+                    variant="outline"
+                    onClick={() => handleDialogOpenChange(false)}
+                    data-testid="button-cancel-create"
+                    className="w-full sm:w-auto"
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    disabled={createTableMutation.isPending}
+                    data-testid="button-confirm-create"
+                    className="w-full sm:w-auto"
+                  >
                     {createTableMutation.isPending ? 'Creating...' : 'Create Table'}
                   </Button>
                 </DialogFooter>
