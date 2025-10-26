@@ -7,12 +7,16 @@ import { TelegramAuthGate } from "@/components/TelegramAuthGate";
 import PokerGame from "@/pages/poker-game";
 import SettingsPage from "@/pages/SettingsPage";
 import LandingPage from "@/pages/LandingPage";
+import Lobby from "@/pages/lobby";
 
 function Router() {
   return (
     <Switch>
       <Route path="/settings">
         <SettingsPage />
+      </Route>
+      <Route path="/lobby">
+        <Lobby />
       </Route>
       <Route path="/demo">
         <PokerGame />

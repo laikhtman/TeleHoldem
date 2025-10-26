@@ -65,16 +65,29 @@ export default function LandingPage() {
                   <span>Progress not saved</span>
                 </li>
               </ul>
-              <Link href="/demo">
-                <Button 
-                  className="w-full min-h-[48px]" 
-                  size="lg"
-                  data-testid="button-play-demo"
-                >
-                  Play Demo
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
+              <div className="space-y-2">
+                <Link href="/lobby">
+                  <Button 
+                    className="w-full min-h-[48px]" 
+                    size="lg"
+                    data-testid="button-lobby"
+                  >
+                    Enter Lobby
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+                <Link href="/demo">
+                  <Button 
+                    className="w-full min-h-[48px]" 
+                    size="lg"
+                    variant="outline"
+                    data-testid="button-play-demo"
+                  >
+                    Quick Play (Single Table)
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+              </div>
             </CardContent>
           </Card>
           
