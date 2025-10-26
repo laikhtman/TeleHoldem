@@ -119,6 +119,7 @@ export default function PokerGame() {
     }
     return {
       soundEnabled: true,
+      soundVolume: 0.5,
       animationSpeed: 1,
       tableTheme: 'classic',
       colorblindMode: false,
@@ -203,18 +204,124 @@ export default function PokerGame() {
     setSettings(prev => ({ ...prev, isPaused: !prev.isPaused }));
   };
 
+  // Double-tap gesture detection for check/call
+  const lastTapTime = useRef(0);
+  const doubleTapTimeout = useRef<NodeJS.Timeout | null>(null);
+  
+  useEffect(() => {
+    const handleDoubleTap = (e: TouchEvent | MouseEvent) => {
+      // Don't trigger if clicking on buttons or interactive elements
+      const target = e.target as HTMLElement;
+      if (target.closest('button') || target.closest('[role="button"]') || 
+          target.closest('input') || target.closest('textarea') ||
+          target.closest('.action-controls')) {
+        return;
+      }
+      
+      // Check if it's player's turn and game is ready
+      if (!gameState || gameState.currentPlayerIndex !== 0 || isProcessing || settings.isPaused) {
+        return;
+      }
+      
+      const currentTime = Date.now();
+      const tapTimeDiff = currentTime - lastTapTime.current;
+      
+      if (tapTimeDiff < 300 && tapTimeDiff > 0) {
+        // Double tap detected!
+        e.preventDefault();
+        
+        // Clear any pending timeout
+        if (doubleTapTimeout.current) {
+          clearTimeout(doubleTapTimeout.current);
+          doubleTapTimeout.current = null;
+        }
+        
+        // Trigger haptic feedback for double tap
+        triggerHaptic('medium');
+        
+        // Determine if we should check or call
+        const canCheck = gameState.currentBet === 0 || gameState.currentBet === gameState.players[0].bet;
+        
+        if (canCheck) {
+          playSound('check', { volume: settings.soundVolume * 0.3 });
+          handleCheck();
+          toast({
+            title: "Double Tap",
+            description: "Checked",
+            duration: 1500
+          });
+        } else {
+          playSound('button-click', { volume: settings.soundVolume * 0.3 });
+          handleCall();
+          const amountToCall = gameState.currentBet - gameState.players[0].bet;
+          toast({
+            title: "Double Tap",
+            description: `Called $${amountToCall}`,
+            duration: 1500
+          });
+        }
+        
+        lastTapTime.current = 0;
+      } else {
+        lastTapTime.current = currentTime;
+        
+        // Set timeout to reset if no second tap
+        if (doubleTapTimeout.current) {
+          clearTimeout(doubleTapTimeout.current);
+        }
+        doubleTapTimeout.current = setTimeout(() => {
+          lastTapTime.current = 0;
+        }, 300);
+      }
+    };
+    
+    // Add event listeners for both touch and mouse events
+    document.addEventListener('touchend', handleDoubleTap);
+    document.addEventListener('click', handleDoubleTap);
+    
+    return () => {
+      document.removeEventListener('touchend', handleDoubleTap);
+      document.removeEventListener('click', handleDoubleTap);
+      if (doubleTapTimeout.current) {
+        clearTimeout(doubleTapTimeout.current);
+      }
+    };
+  }, [gameState, isProcessing, settings.isPaused, settings.soundVolume, triggerHaptic, playSound, toast]);
+
+  // Global swipe gestures using the existing useSwipe hook
   useSwipe({
     onSwipeLeft: () => {
       if (!gameState || gameState.currentPlayerIndex !== 0 || isProcessing || settings.isPaused) return;
+      triggerHaptic('light');
+      playSound('fold', { volume: settings.soundVolume * 0.3 });
       handleFold();
+      toast({
+        title: "Swipe Left",
+        description: "Folded",
+        duration: 1500
+      });
     },
     onSwipeRight: () => {
       if (!gameState || gameState.currentPlayerIndex !== 0 || isProcessing || settings.isPaused) return;
       const canCheck = gameState.currentBet === 0 || gameState.currentBet === gameState.players[0].bet;
+      triggerHaptic('medium');
       if (canCheck) {
+        playSound('check', { volume: settings.soundVolume * 0.3 });
         handleCheck();
+        toast({
+          title: "Swipe Right",
+          description: "Checked",
+          duration: 1500
+        });
       } else {
+        playSound('button-click', { volume: settings.soundVolume * 0.3 });
         handleCall();
+        const amountToCall = gameState.currentBet - gameState.players[0].bet;
+        toast({
+          title: "Swipe Right",
+          description: `Called $${amountToCall}`,
+          duration: 1500
+        });
       }
     },
   }, { minSwipeDistance: 80 });
@@ -396,7 +503,11 @@ export default function PokerGame() {
   const startNewHand = () => {
     if (!gameState) return;
     
-    playSound('card-shuffle', { volume: 0.2 });
+    // Sound and haptic for shuffling
+    if (settings.soundEnabled) {
+      playSound('card-shuffle', { volume: settings.soundVolume * 0.3 });
+    }
+    triggerHaptic('light');
     
     setWinningPlayerIds([]);
     setWinAmounts({});
@@ -413,6 +524,16 @@ export default function PokerGame() {
       'New hand started. Cards dealt to all players.'
     );
     
+    // Play card dealing sounds with delays
+    if (settings.soundEnabled) {
+      // Deal hole cards to each player (2 cards each)
+      for (let i = 0; i < NUM_PLAYERS * 2; i++) {
+        setTimeout(() => {
+          playSound('card-deal', { volume: settings.soundVolume * 0.2 });
+        }, i * 150); // Stagger card dealing sounds
+      }
+    }
+    
     // Post blinds (small blind $10, big blind $20)
     const smallBlindIndex = (newState.dealerIndex + 1) % NUM_PLAYERS;
     const bigBlindIndex = (newState.dealerIndex + 2) % NUM_PLAYERS;
@@ -422,6 +543,13 @@ export default function PokerGame() {
     if (!newState.players || newState.players.length === 0) {
       console.error('Failed to initialize players in new hand');
       return;
+    }
+    
+    // Sound for blinds posting
+    if (settings.soundEnabled) {
+      setTimeout(() => {
+        playSound('chip-place', { volume: settings.soundVolume * 0.15 });
+      }, NUM_PLAYERS * 2 * 150 + 200);
     }
     
     // Add blinds history
@@ -689,13 +817,27 @@ export default function PokerGame() {
       });
       setWinAmounts(newWinAmounts);
       
-      // Trigger haptic feedback for winning
-      if (winners.some(w => w.id === 'player-0')) {
+      // Trigger haptic feedback and sound for winning
+      const humanWon = winners.some(w => w.id === 'player-0');
+      if (humanWon) {
         triggerHaptic('success');
+        // Play victory sound based on pot size
+        if (settings.soundEnabled) {
+          if (totalPot > 500) {
+            playSound('victory-big', { volume: settings.soundVolume * 0.5 });
+          } else {
+            playSound('victory-small', { volume: settings.soundVolume * 0.4 });
+          }
+        }
+      } else {
+        // Smaller sound for when human loses
+        if (settings.soundEnabled) {
+          playSound('chip-collect', { volume: settings.soundVolume * 0.25 });
+        }
       }
       
       toast({
-        variant: "success" as any,
+        variant: humanWon ? "success" : "info" as any,
         title: "Hand Complete!",
         description: `${winnerNames} wins the pot - ${winningHand}`,
         duration: 5000,
@@ -810,6 +952,14 @@ export default function PokerGame() {
   const handleFold = () => {
     if (!gameState || isProcessing || settings.isPaused) return;
     setIsProcessing(true);
+    
+    // Haptic feedback for fold
+    triggerHaptic('light');
+    // Sound effect for fold with volume control
+    if (settings.soundEnabled) {
+      playSound('fold', { volume: settings.soundVolume * 0.3 });
+    }
+    
     let newState = gameEngine.playerFold(gameState, 0);
     newState = addActionHistory(
       newState,
@@ -824,6 +974,14 @@ export default function PokerGame() {
   const handleCheck = () => {
     if (!gameState || isProcessing || settings.isPaused) return;
     setIsProcessing(true);
+    
+    // Haptic feedback for check
+    triggerHaptic('light');
+    // Sound effect for check with volume control
+    if (settings.soundEnabled) {
+      playSound('check', { volume: settings.soundVolume * 0.25 });
+    }
+    
     let newState = gameEngine.playerCheck(gameState, 0);
     newState = addActionHistory(
       newState,
@@ -839,6 +997,14 @@ export default function PokerGame() {
     if (!gameState || isProcessing || settings.isPaused) return;
     setIsProcessing(true);
     const amountToCall = gameState.currentBet - gameState.players[0].bet;
+    
+    // Haptic feedback for call (medium for money action)
+    triggerHaptic('medium');
+    // Sound effect for chips being placed
+    if (settings.soundEnabled) {
+      playSound('chip-place', { volume: settings.soundVolume * 0.3 });
+    }
+    
     let newState = gameEngine.playerBet(gameState, 0, amountToCall);
     newState = addActionHistory(
       newState,
@@ -854,11 +1020,38 @@ export default function PokerGame() {
   const handleBet = (amount: number) => {
     if (!gameState || isProcessing || settings.isPaused) return;
     setIsProcessing(true);
+    
+    // Haptic feedback based on bet size
+    const humanPlayer = gameState.players[0];
+    const isAllIn = amount >= humanPlayer.chips;
+    const isLargeBet = amount > humanPlayer.chips * 0.5;
+    
+    if (isAllIn) {
+      triggerHaptic('heavy');
+      if (settings.soundEnabled) {
+        playSound('raise', { volume: settings.soundVolume * 0.4 });
+        // Additional dramatic sound for all-in
+        setTimeout(() => {
+          playSound('chip-stack', { volume: settings.soundVolume * 0.4 });
+        }, 200);
+      }
+    } else if (isLargeBet) {
+      triggerHaptic('medium');
+      if (settings.soundEnabled) {
+        playSound('chip-place', { volume: settings.soundVolume * 0.35 });
+      }
+    } else {
+      triggerHaptic('light');
+      if (settings.soundEnabled) {
+        playSound('chip-place', { volume: settings.soundVolume * 0.25 });
+      }
+    }
+    
     let newState = gameEngine.playerBet(gameState, 0, amount);
     newState = addActionHistory(
       newState,
       'player-action',
-      `bet $${amount}`,
+      isAllIn ? `went all-in $${amount}` : `bet $${amount}`,
       gameState.players[0].name,
       'bet',
       amount
@@ -870,11 +1063,38 @@ export default function PokerGame() {
     if (!gameState || isProcessing || settings.isPaused) return;
     setIsProcessing(true);
     const currentPlayerBet = gameState.players[0].bet;
+    
+    // Haptic feedback for raise (always medium to heavy)
+    const humanPlayer = gameState.players[0];
+    const isAllIn = amount >= humanPlayer.chips;
+    const isLargeRaise = amount > humanPlayer.chips * 0.5;
+    
+    if (isAllIn) {
+      triggerHaptic('heavy');
+      if (settings.soundEnabled) {
+        playSound('raise', { volume: settings.soundVolume * 0.45 });
+        // Additional dramatic sound for all-in
+        setTimeout(() => {
+          playSound('chip-stack', { volume: settings.soundVolume * 0.4 });
+        }, 200);
+      }
+    } else if (isLargeRaise) {
+      triggerHaptic('medium');
+      if (settings.soundEnabled) {
+        playSound('raise', { volume: settings.soundVolume * 0.35 });
+      }
+    } else {
+      triggerHaptic('medium');
+      if (settings.soundEnabled) {
+        playSound('chip-place', { volume: settings.soundVolume * 0.3 });
+      }
+    }
+    
     let newState = gameEngine.playerBet(gameState, 0, amount);
     newState = addActionHistory(
       newState,
       'player-action',
-      `raised to $${currentPlayerBet + amount}`,
+      isAllIn ? `went all-in raising to $${currentPlayerBet + amount}` : `raised to $${currentPlayerBet + amount}`,
       gameState.players[0].name,
       'raise',
       amount
@@ -1093,6 +1313,9 @@ export default function PokerGame() {
                   winAmount={winAmounts[player.id] || 0}
                   isProcessing={isProcessing}
                   colorblindMode={settings.colorblindMode}
+                  onFold={index === 0 ? handleFold : undefined}
+                  soundEnabled={settings.soundEnabled}
+                  soundVolume={settings.soundVolume}
                 />
               ))}
 

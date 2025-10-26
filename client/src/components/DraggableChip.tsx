@@ -6,12 +6,14 @@ import { useHaptic } from '@/hooks/useHaptic';
 
 interface DraggableChipProps {
   value: number;
-  onDrop?: (value: number) => void;
+  onDrop?: (value: number, isAllIn?: boolean) => void;
   disabled?: boolean;
   className?: string;
+  soundVolume?: number;
+  maxChips?: number;
 }
 
-export function DraggableChip({ value, onDrop, disabled = false, className = '' }: DraggableChipProps) {
+export function DraggableChip({ value, onDrop, disabled = false, className = '', soundVolume = 0.5, maxChips = 1000 }: DraggableChipProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [hasBeenDragged, setHasBeenDragged] = useState(false);
   const { playSound } = useSound();
@@ -37,7 +39,7 @@ export function DraggableChip({ value, onDrop, disabled = false, className = '' 
     setIsDragging(true);
     setHasBeenDragged(true);
     triggerHaptic('light');
-    playSound('button-click', { volume: 0.2 });
+    playSound('chip-pickup', { volume: soundVolume * 0.3 });
   };
 
   const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
@@ -68,13 +70,31 @@ export function DraggableChip({ value, onDrop, disabled = false, className = '' 
       );
       
       if (distanceToCenter < originalDistanceToCenter) {
-        onDrop(value);
-        triggerHaptic('medium');
-        playSound('chip-place', { volume: 0.3 });
+        // Determine if this is an all-in based on drag distance and value
+        const isAllIn = value === maxChips || dragDistance > 200;
+        
+        onDrop(value, isAllIn);
+        
+        // Different haptic/sound for all-in
+        if (isAllIn) {
+          triggerHaptic('heavy');
+          playSound('raise', { volume: soundVolume * 0.45 });
+          setTimeout(() => {
+            playSound('chip-stack', { volume: soundVolume * 0.4 });
+          }, 200);
+        } else {
+          triggerHaptic('medium');
+          playSound('chip-place', { volume: soundVolume * 0.35 });
+        }
       } else {
         // Snap back
-        playSound('button-click', { volume: 0.1 });
+        triggerHaptic('light');
+        playSound('button-click', { volume: soundVolume * 0.15 });
       }
+    } else if (dragDistance <= 100) {
+      // Not dragged far enough
+      triggerHaptic('light');
+      playSound('button-click', { volume: soundVolume * 0.1 });
     }
   };
 

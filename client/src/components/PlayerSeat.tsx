@@ -7,6 +7,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FlyingChip } from './Chip';
 import { useAnimatedCounter } from '@/hooks/useAnimatedCounter';
 import { TurnTimer } from './TurnTimer';
+import { useSwipeGesture } from '@/hooks/useSwipeGesture';
+import { useHaptic } from '@/hooks/useHaptic';
+import { useSound } from '@/hooks/useSound';
+import { useToast } from '@/hooks/use-toast';
 
 type ActionBadgeType = 'fold' | 'check' | 'call' | 'bet' | 'raise';
 
@@ -28,9 +32,12 @@ interface PlayerSeatProps {
   onChipAnimationTrigger?: (position: { x: number; y: number }) => void;
   isProcessing: boolean;
   colorblindMode?: boolean;
+  onFold?: () => void;
+  soundEnabled?: boolean;
+  soundVolume?: number;
 }
 
-export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, isDealer, isWinner, phase, lastAction, winAmount = 0, onChipAnimationTrigger, isProcessing, colorblindMode = false }: PlayerSeatProps) {
+export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, isDealer, isWinner, phase, lastAction, winAmount = 0, onChipAnimationTrigger, isProcessing, colorblindMode = false, onFold, soundEnabled = true, soundVolume = 0.5 }: PlayerSeatProps) {
   const [flyingChips, setFlyingChips] = useState<Array<{ id: number; startX: number; startY: number }>>([]);
   const [actionBadge, setActionBadge] = useState<ActionBadge | null>(null);
   const [showWinAmount, setShowWinAmount] = useState(false);
@@ -38,7 +45,11 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
   const [textSize, setTextSize] = useState({ name: '16px', chips: '16px' });
   const prevBet = useRef(player.bet);
   const seatRef = useRef<HTMLDivElement>(null);
+  const cardsRef = useRef<HTMLDivElement>(null);
   const animatedChipCount = useAnimatedCounter(player.chips);
+  const { triggerHaptic } = useHaptic();
+  const { playSound } = useSound();
+  const { toast } = useToast();
   
   // Slight downscale seats on very small screens to reduce overlap
   const getSeatScale = () => {
@@ -182,6 +193,32 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
     if (isDealer) parts.push('dealer');
     return parts.join(', ');
   };
+  
+  // Swipe up gesture for folding on player's hole cards (only for human player)
+  useSwipeGesture(cardsRef, {
+    onSwipeUp: () => {
+      // Only allow swipe fold for human player when it's their turn
+      if (player.isHuman && isCurrentPlayer && onFold && !isProcessing && !player.folded) {
+        // Haptic and sound feedback for swipe fold
+        triggerHaptic('light');
+        if (soundEnabled) {
+          playSound('fold', { volume: soundVolume * 0.3 });
+        }
+        
+        // Call the fold handler
+        onFold();
+        
+        // Show toast notification
+        toast({
+          title: "Swipe Up",
+          description: "Folded",
+          duration: 1500
+        });
+      }
+    },
+    threshold: 50, // Lower threshold for easier activation
+    enabled: player.isHuman && isCurrentPlayer && !isProcessing && !player.folded
+  });
 
   return (
     <div
@@ -289,7 +326,12 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
         </div>
 
         {/* Player cards */}
-        <div className="flex gap-1 xs:gap-1.5 justify-center flex-shrink-0" data-testid={`player-cards-${player.id}`}>
+        <div 
+          ref={cardsRef}
+          className="flex gap-1 xs:gap-1.5 justify-center flex-shrink-0" 
+          data-testid={`player-cards-${player.id}`}
+          style={player.isHuman && isCurrentPlayer && !player.folded ? { cursor: 'grab' } : {}}
+        >
           {player.hand.length > 0 && (
             <>
               <PlayingCard 

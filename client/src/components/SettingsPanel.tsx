@@ -10,6 +10,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 export interface GameSettings {
   soundEnabled: boolean;
+  soundVolume: number; // 0 to 1
   animationSpeed: number; // 0.5 = slow, 1 = normal, 1.5 = fast
   tableTheme: 'classic' | 'blue' | 'red' | 'purple';
   colorblindMode: boolean;
@@ -144,6 +145,39 @@ export function SettingsPanel({ settings, onSettingsChange, onPauseToggle, disab
               {settings.soundEnabled ? 'Sound effects enabled' : 'Sound effects muted'}
             </p>
           </div>
+
+          {/* Volume Slider */}
+          {settings.soundEnabled && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Volume2 className="h-5 w-5 text-muted-foreground" />
+                <Label htmlFor="volume-slider" className="text-base font-medium">
+                  Volume
+                </Label>
+              </div>
+              <div className="space-y-2">
+                <Slider
+                  id="volume-slider"
+                  min={0}
+                  max={1}
+                  step={0.1}
+                  value={[settings.soundVolume || 0.5]}
+                  onValueChange={(value) => onSettingsChange({ soundVolume: value[0] })}
+                  className="w-full"
+                  data-testid="slider-volume"
+                  aria-label="Sound volume"
+                  aria-valuetext={`${Math.round((settings.soundVolume || 0.5) * 100)}%`}
+                />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Mute</span>
+                  <span className="font-medium text-foreground">
+                    {Math.round((settings.soundVolume || 0.5) * 100)}%
+                  </span>
+                  <span>Max</span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Animation Speed */}
           <div className="space-y-3">
