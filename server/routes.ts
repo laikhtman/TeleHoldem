@@ -7,7 +7,8 @@ import {
   generateSessionToken,
   getSessionExpiry 
 } from "./telegram";
-import type { TelegramUser } from "@shared/schema";
+import type { TelegramUser, InsertPokerTable } from "@shared/schema";
+import { insertPokerTableSchema } from "@shared/schema";
 
 // Extend Express Request to include user
 declare global {
@@ -267,6 +268,179 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('System status error:', error);
       res.status(500).json({ error: 'Failed to get system status' });
+    }
+  });
+
+  // ====== Poker Table Routes ======
+
+  // GET /api/tables - Get all active poker tables
+  app.get('/api/tables', async (req: Request, res: Response) => {
+    try {
+      const tables = await storage.getActivePokerTables();
+      res.json({ tables });
+    } catch (error) {
+      console.error('Get tables error:', error);
+      res.status(500).json({ error: 'Failed to get tables' });
+    }
+  });
+
+  // GET /api/tables/:id - Get specific poker table
+  app.get('/api/tables/:id', async (req: Request, res: Response) => {
+    try {
+      const tableId = parseInt(req.params.id);
+      
+      if (isNaN(tableId)) {
+        return res.status(400).json({ error: 'Invalid table ID' });
+      }
+      
+      const table = await storage.getPokerTable(tableId);
+      
+      if (!table) {
+        return res.status(404).json({ error: 'Table not found' });
+      }
+      
+      const players = await storage.getTablePlayers(tableId);
+      res.json({ table, players });
+    } catch (error) {
+      console.error('Get table error:', error);
+      res.status(500).json({ error: 'Failed to get table' });
+    }
+  });
+
+  // POST /api/tables - Create new poker table
+  app.post('/api/tables', async (req: Request, res: Response) => {
+    try {
+      // For demo mode, allow table creation without auth
+      const isDemo = !req.cookies['telegram_session'];
+      
+      const tableData = insertPokerTableSchema.parse({
+        name: req.body.name,
+        smallBlind: req.body.smallBlind,
+        bigBlind: req.body.bigBlind,
+        minBuyIn: req.body.minBuyIn,
+        maxBuyIn: req.body.maxBuyIn,
+        maxPlayers: req.body.maxPlayers || 6,
+        isActive: true,
+        createdBy: !isDemo && req.user ? req.user.id : null,
+      });
+      
+      const table = await storage.createPokerTable(tableData);
+      res.json({ table });
+    } catch (error) {
+      console.error('Create table error:', error);
+      res.status(500).json({ error: 'Failed to create table' });
+    }
+  });
+
+  // POST /api/tables/:id/join - Join a poker table
+  app.post('/api/tables/:id/join', async (req: Request, res: Response) => {
+    try {
+      const tableId = parseInt(req.params.id);
+      const { buyInAmount, seatNumber, playerName } = req.body;
+      
+      if (isNaN(tableId)) {
+        return res.status(400).json({ error: 'Invalid table ID' });
+      }
+      
+      if (typeof buyInAmount !== 'number' || buyInAmount <= 0) {
+        return res.status(400).json({ error: 'Invalid buy-in amount' });
+      }
+      
+      if (typeof seatNumber !== 'number' || seatNumber < 0 || seatNumber > 5) {
+        return res.status(400).json({ error: 'Invalid seat number' });
+      }
+      
+      const table = await storage.getPokerTable(tableId);
+      
+      if (!table) {
+        return res.status(404).json({ error: 'Table not found' });
+      }
+      
+      if (!table.isActive) {
+        return res.status(400).json({ error: 'Table is not active' });
+      }
+      
+      if (table.currentPlayers >= table.maxPlayers) {
+        return res.status(400).json({ error: 'Table is full' });
+      }
+      
+      if (buyInAmount < table.minBuyIn || buyInAmount > table.maxBuyIn) {
+        return res.status(400).json({ error: `Buy-in must be between $${table.minBuyIn} and $${table.maxBuyIn}` });
+      }
+      
+      // For demo mode, create a pseudo player ID based on name
+      const isDemo = !req.cookies['telegram_session'];
+      let playerId: number | null = null;
+      
+      if (!isDemo && req.user) {
+        playerId = req.user.id;
+        
+        // Check if player is already at this table
+        const existingPlayer = await storage.getPlayerAtTable(tableId, playerId);
+        if (existingPlayer) {
+          return res.status(400).json({ error: 'You are already at this table' });
+        }
+      }
+      
+      // For demo mode, we'll track players by session/name rather than user ID
+      // This is simplified for the demo - in production you'd want better session tracking
+      const tablePlayer = await storage.addPlayerToTable({
+        tableId,
+        playerId: playerId || 0, // Use 0 for demo players
+        seatNumber,
+        buyInAmount,
+        currentChips: buyInAmount,
+        isActive: true,
+      });
+      
+      res.json({ 
+        success: true,
+        tablePlayer,
+        playerName: playerName || (req.user?.displayName ?? 'Demo Player')
+      });
+    } catch (error) {
+      console.error('Join table error:', error);
+      res.status(500).json({ error: 'Failed to join table' });
+    }
+  });
+
+  // POST /api/tables/:id/leave - Leave a poker table
+  app.post('/api/tables/:id/leave', async (req: Request, res: Response) => {
+    try {
+      const tableId = parseInt(req.params.id);
+      
+      if (isNaN(tableId)) {
+        return res.status(400).json({ error: 'Invalid table ID' });
+      }
+      
+      // For demo mode, we need a way to identify the player
+      const isDemo = !req.cookies['telegram_session'];
+      
+      if (!isDemo && req.user) {
+        await storage.removePlayerFromTable(tableId, req.user.id);
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Leave table error:', error);
+      res.status(500).json({ error: 'Failed to leave table' });
+    }
+  });
+
+  // GET /api/tables/:id/players - Get players at a table
+  app.get('/api/tables/:id/players', async (req: Request, res: Response) => {
+    try {
+      const tableId = parseInt(req.params.id);
+      
+      if (isNaN(tableId)) {
+        return res.status(400).json({ error: 'Invalid table ID' });
+      }
+      
+      const players = await storage.getTablePlayers(tableId);
+      res.json({ players });
+    } catch (error) {
+      console.error('Get table players error:', error);
+      res.status(500).json({ error: 'Failed to get table players' });
     }
   });
 
