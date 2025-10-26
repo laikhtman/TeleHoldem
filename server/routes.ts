@@ -386,7 +386,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // This is simplified for the demo - in production you'd want better session tracking
       const tablePlayer = await storage.addPlayerToTable({
         tableId,
-        playerId: playerId || 0, // Use 0 for demo players
+        playerId: playerId || null, // Use null for demo players (nullable field)
         seatNumber,
         buyInAmount,
         currentChips: buyInAmount,

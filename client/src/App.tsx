@@ -22,9 +22,7 @@ function Router() {
         <PokerGame />
       </Route>
       <Route path="/game">
-        <TelegramAuthGate>
-          <PokerGame />
-        </TelegramAuthGate>
+        <PokerGame />
       </Route>
       <Route path="/">
         <LandingPage />

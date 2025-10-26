@@ -182,7 +182,7 @@ export const pokerTables = pgTable('poker_tables', {
 export const tablePlayers = pgTable('table_players', {
   id: serial('id').primaryKey(),
   tableId: integer('table_id').notNull().references(() => pokerTables.id, { onDelete: 'cascade' }),
-  playerId: integer('player_id').notNull().references(() => telegramUsers.id, { onDelete: 'cascade' }),
+  playerId: integer('player_id'), // Nullable for demo/anonymous players, removed FK constraint
   seatNumber: integer('seat_number').notNull(),
   buyInAmount: integer('buy_in_amount').notNull(),
   currentChips: integer('current_chips').notNull(),
