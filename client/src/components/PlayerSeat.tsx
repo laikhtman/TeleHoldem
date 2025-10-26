@@ -39,6 +39,21 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
   const prevBet = useRef(player.bet);
   const seatRef = useRef<HTMLDivElement>(null);
   const animatedChipCount = useAnimatedCounter(player.chips);
+  
+  // Slight downscale seats on very small screens to reduce overlap
+  const getSeatScale = () => {
+    if (typeof window === 'undefined') return 1;
+    const vw = window.innerWidth;
+    if (vw < 360) return 0.82;
+    if (vw < 480) return 0.88;
+    return 1;
+  };
+  const [seatScale, setSeatScale] = useState<number>(getSeatScale());
+  useEffect(() => {
+    const onResize = () => setSeatScale(getSeatScale());
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   useEffect(() => {
     if (player.bet > prevBet.current && seatRef.current) {
@@ -115,13 +130,14 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
       vw = window.innerWidth;
     }
     const isSmall = vw < 480;
+    const isVerySmall = vw < 360;
 
-    const bufferPercentage = isSmall ? 0.08 : 0.12;
+    const bufferPercentage = isVerySmall ? 0.055 : isSmall ? 0.075 : 0.12;
     const maxRadiusX = (baseWidth / 2) * (1 - bufferPercentage);
     const maxRadiusY = (baseHeight / 2) * (1 - bufferPercentage);
     
-    const radiusX = maxRadiusX - (isSmall ? 5 : 8);
-    const radiusY = maxRadiusY - (isSmall ? 4 : 6);
+    const radiusX = maxRadiusX - (isVerySmall ? 1 : isSmall ? 3 : 8);
+    const radiusY = maxRadiusY - (isVerySmall ? 1 : isSmall ? 3 : 6);
     
     const angle = (position / totalPlayers) * 2 * Math.PI - Math.PI / 2;
     
@@ -131,12 +147,11 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
     return {
       left: `${x}%`,
       top: `${y}%`,
-      transform: 'translate(-50%, -50%)'
-    };
+    } as React.CSSProperties;
   };
 
   const seatClasses = [
-    'rounded-lg p-4 xs:p-4 sm:p-3.5 md:p-4 lg:p-4 backdrop-blur-sm transition-all duration-300 relative',
+    'rounded-lg p-3 xs:p-3.5 sm:p-3.5 md:p-4 lg:p-4 backdrop-blur-sm transition-all duration-300 relative',
     isCurrentPlayer ? 'bg-black/85 border-[3px] sm:border-2 md:border-[3px] border-poker-chipGold animate-pulse-glow shadow-2xl' : 'bg-black/75 border border-white/30',
     isWinner ? 'bg-poker-chipGold/25 border-[3px] sm:border-2 md:border-[3px] border-poker-chipGold shadow-2xl' : '',
     player.chips === 0 ? 'opacity-50 grayscale' : ''
@@ -172,7 +187,7 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
     <div
       ref={seatRef}
       className="absolute seat-shadow"
-      style={{ ...getPosition(), zIndex: 4 }}
+      style={{ ...getPosition(), zIndex: 4, transform: `translate(-50%, -50%) scale(${seatScale})` }}
       data-testid={`player-seat-${player.id}`}
       onMouseEnter={() => setShowStats(true)}
       onMouseLeave={() => setShowStats(false)}

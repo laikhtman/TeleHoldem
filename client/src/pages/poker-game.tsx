@@ -164,11 +164,11 @@ export default function PokerGame() {
     const computeAspect = () => {
       const vw = typeof window !== 'undefined' ? window.innerWidth : 1024;
       if (vw < 480) {
-        // Phone portrait: slightly wider table to save vertical space
-        return '1.7 / 1';
+        // Phone portrait: wider table to spread seats
+        return '1.9 / 1';
       } else if (vw < 768) {
         // Small tablets/large phones
-        return '1.8 / 1';
+        return '1.85 / 1';
       } else {
         // Tablets/desktop
         return '3 / 2';
@@ -984,7 +984,7 @@ export default function PokerGame() {
         <div className="flex flex-col gap-4 items-center flex-1 order-1 lg:order-2 w-full max-w-5xl mx-auto px-[calc(0.5rem+var(--safe-area-left))] xs:px-[calc(0.75rem+var(--safe-area-left))] sm:px-[calc(1rem+var(--safe-area-left))] md:px-0 pb-[calc(0.5rem+var(--safe-area-bottom))]">
           {/* Poker Table with Wood Border */}
           <div 
-            className="rounded-[100px] xs:rounded-[120px] sm:rounded-[165px] md:rounded-[190px] lg:rounded-[220px] wood-grain p-[7px] xs:p-[8px] sm:p-[10px] md:p-[11px] lg:p-[12px] table-edge-glow w-full max-w-[92%] xs:max-w-[94%] sm:max-w-[96%] md:max-w-full md:min-h-[60vh] lg:min-h-[70vh] max-h-[min(68vh,720px)] xs:max-h-[min(70vh,760px)] sm:max-h-[min(72vh,780px)] md:max-h-[min(75vh,800px)] mx-auto"
+            className="rounded-[100px] xs:rounded-[120px] sm:rounded-[165px] md:rounded-[190px] lg:rounded-[220px] wood-grain p-[7px] xs:p-[8px] sm:p-[10px] md:p-[11px] lg:p-[12px] table-edge-glow w-full max-w-[96%] xs:max-w-[97%] sm:max-w-[98%] md:max-w-full md:min-h-[60vh] lg:min-h-[70vh] max-h-[min(68vh,720px)] xs:max-h-[min(70vh,760px)] sm:max-h-[min(72vh,780px)] md:max-h-[min(75vh,800px)] mx-auto"
             style={{ 
               aspectRatio: tableAspect,
             }}

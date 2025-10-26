@@ -123,6 +123,7 @@ Progress
 - [x] Increased mobile card size for readability (`PlayingCard.tsx` mobile 90x129 -> 96x138; xs 100x143 -> 105x150).
 - [x] Increased on-seat typography for mobile/xs (`PlayerSeat.tsx` name/chips: mobile 17px, xs 19px).
 - [x] Reduced seat crowding on small screens by expanding seating ellipse (`PlayerSeat.tsx` getPosition: bufferPercentage 0.12 -> 0.08 on <480px; smaller deductions for radiusX/Y).
+- [x] Added responsive seat scale on very small screens to avoid overlap (`PlayerSeat.tsx` scale 0.85 <380px, 0.9 <480px).
 - [ ] Visual overlap pass on real devices.
 - [ ] Adjust name wrapping/truncation if any overflow appears (post-QA).
 
