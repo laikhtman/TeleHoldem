@@ -443,6 +443,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: 'Failed to get table players' });
     }
   });
+  
+  // PATCH /api/tables/:id/gamestate - Update game state for a table
+  app.patch('/api/tables/:id/gamestate', async (req: Request, res: Response) => {
+    try {
+      const tableId = parseInt(req.params.id);
+      const { gameState } = req.body;
+      
+      if (isNaN(tableId)) {
+        return res.status(400).json({ error: 'Invalid table ID' });
+      }
+      
+      if (!gameState) {
+        return res.status(400).json({ error: 'Game state is required' });
+      }
+      
+      const updatedTable = await storage.updatePokerTableGameState(tableId, gameState);
+      
+      if (!updatedTable) {
+        return res.status(404).json({ error: 'Table not found' });
+      }
+      
+      res.json({ success: true, table: updatedTable });
+    } catch (error) {
+      console.error('Update table game state error:', error);
+      res.status(500).json({ error: 'Failed to update game state' });
+    }
+  });
 
   // Cleanup expired sessions periodically
   setInterval(() => {

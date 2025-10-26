@@ -92,6 +92,20 @@ export default function PokerGame() {
   const { user, isAuthenticated, isStandalone } = useTelegramAuth();
   const { isLandscape } = useOrientation();
   const { isOnline, isReconnecting, checkConnection } = useNetworkStatus();
+  
+  // Get tableId from URL query params
+  const searchParams = new URLSearchParams(window.location.search);
+  const tableId = searchParams.get('tableId');
+  
+  // Query to fetch table data if tableId exists
+  const { data: tableData, isLoading: isLoadingTable } = useQuery<{
+    table: PokerTable;
+    players: any[];
+  }>({
+    queryKey: [`/api/tables/${tableId}`],
+    enabled: !!tableId,
+    refetchInterval: tableId ? 5000 : false, // Refresh every 5 seconds to get latest state
+  });
 
   // Settings state with localStorage persistence
   const [settings, setSettings] = useState<GameSettings>(() => {
@@ -245,12 +259,43 @@ export default function PokerGame() {
   };
 
   useEffect(() => {
-    // Load game from local storage on component mount
-    try {
-      const savedGame = localStorage.getItem('pokerGameState');
-      if (savedGame) {
-        setGameState(JSON.parse(savedGame));
+    // If we have a tableId, load from table data
+    if (tableId && tableData?.table) {
+      const table = tableData.table as PokerTable;
+      
+      // If table has a saved game state, use it
+      if (table.gameState) {
+        setGameState(table.gameState);
       } else {
+        // Initialize a new game for this table
+        const initialState = gameEngine.createInitialGameState(table.maxPlayers || NUM_PLAYERS);
+        
+        // Set up players based on table players
+        if (tableData.players && tableData.players.length > 0) {
+          // TODO: Set up players from table data
+        }
+        
+        setGameState(initialState);
+      }
+    } else {
+      // No tableId - use local storage (demo mode)
+      try {
+        const savedGame = localStorage.getItem('pokerGameState');
+        if (savedGame) {
+          setGameState(JSON.parse(savedGame));
+        } else {
+          const initialState = gameEngine.createInitialGameState(NUM_PLAYERS);
+          
+          // If authenticated with Telegram, use user's displayName and bankroll
+          if (isAuthenticated && user) {
+            initialState.players[0].name = user.displayName;
+            initialState.players[0].chips = user.bankroll;
+          }
+          
+          setGameState(initialState);
+        }
+      } catch (error) {
+        console.error("Failed to load game state from local storage:", error);
         const initialState = gameEngine.createInitialGameState(NUM_PLAYERS);
         
         // If authenticated with Telegram, use user's displayName and bankroll
@@ -261,57 +306,64 @@ export default function PokerGame() {
         
         setGameState(initialState);
       }
-    } catch (error) {
-      console.error("Failed to load game state from local storage:", error);
-      const initialState = gameEngine.createInitialGameState(NUM_PLAYERS);
-      
-      // If authenticated with Telegram, use user's displayName and bankroll
-      if (isAuthenticated && user) {
-        initialState.players[0].name = user.displayName;
-        initialState.players[0].chips = user.bankroll;
-      }
-      
-      setGameState(initialState);
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, tableId, tableData]);
+
+  // Mutation to save game state to table
+  const saveTableGameStateMutation = useMutation({
+    mutationFn: async (gameState: GameState) => {
+      if (!tableId) throw new Error('No tableId');
+      const res = await apiRequest('PATCH', `/api/tables/${tableId}/gamestate`, { gameState });
+      return res.json();
+    },
+    onError: (error) => {
+      console.error('Failed to save table game state:', error);
+    }
+  });
 
   useEffect(() => {
-    // Save game to local storage whenever it changes
+    // Save game state
     if (gameState) {
-      try {
-        localStorage.setItem('pokerGameState', JSON.stringify(gameState));
-        
-        // Also save a recovery timestamp for session recovery
-        localStorage.setItem('pokerGameRecoveryTime', Date.now().toString());
-      } catch (error) {
-        console.error("Failed to save game state to local storage:", error);
-        
-        // Show user-friendly error message
-        toast({
-          variant: 'destructive',
-          title: 'Storage Error',
-          description: 'Unable to save game progress. Your browser storage might be full.',
-          duration: 4000,
-        });
-        
-        // Try to clear old data if storage is full
+      if (tableId) {
+        // Save to table in database
+        saveTableGameStateMutation.mutate(gameState);
+      } else {
+        // Save to local storage for demo mode
         try {
-          const recoveryTime = localStorage.getItem('pokerGameRecoveryTime');
-          if (recoveryTime && Date.now() - parseInt(recoveryTime) > 7 * 24 * 60 * 60 * 1000) {
-            // Clear old game state if older than 7 days
-            localStorage.removeItem('pokerGameState');
-            localStorage.removeItem('pokerGameRecoveryTime');
-            
-            // Try saving again
-            localStorage.setItem('pokerGameState', JSON.stringify(gameState));
-            localStorage.setItem('pokerGameRecoveryTime', Date.now().toString());
+          localStorage.setItem('pokerGameState', JSON.stringify(gameState));
+          
+          // Also save a recovery timestamp for session recovery
+          localStorage.setItem('pokerGameRecoveryTime', Date.now().toString());
+        } catch (error) {
+          console.error("Failed to save game state to local storage:", error);
+          
+          // Show user-friendly error message
+          toast({
+            variant: 'destructive',
+            title: 'Storage Error',
+            description: 'Unable to save game progress. Your browser storage might be full.',
+            duration: 4000,
+          });
+          
+          // Try to clear old data if storage is full
+          try {
+            const recoveryTime = localStorage.getItem('pokerGameRecoveryTime');
+            if (recoveryTime && Date.now() - parseInt(recoveryTime) > 7 * 24 * 60 * 60 * 1000) {
+              // Clear old game state if older than 7 days
+              localStorage.removeItem('pokerGameState');
+              localStorage.removeItem('pokerGameRecoveryTime');
+              
+              // Try saving again
+              localStorage.setItem('pokerGameState', JSON.stringify(gameState));
+              localStorage.setItem('pokerGameRecoveryTime', Date.now().toString());
+            }
+          } catch (retryError) {
+            console.error("Failed to clear and retry save:", retryError);
           }
-        } catch (retryError) {
-          console.error("Failed to clear and retry save:", retryError);
         }
       }
     }
-  }, [gameState, toast]);
+  }, [gameState, toast, tableId, saveTableGameStateMutation]);
 
   // Save stats and bankroll to backend when hand ends (for authenticated users)
   useEffect(() => {
@@ -926,6 +978,20 @@ export default function PokerGame() {
       
       {/* Header Controls - Fixed Top Right with safe-area padding */}
       <div className="fixed top-[calc(1rem+var(--safe-area-top))] right-[calc(1rem+var(--safe-area-right))] z-50 flex gap-2">
+        {tableId && (
+          <Link href="/lobby">
+            <Button 
+              variant="outline" 
+              size="default"
+              aria-label="Back to Lobby"
+              data-testid="button-back-to-lobby"
+              className="min-h-11"
+            >
+              <ChevronLeft className="w-4 h-4 mr-1" />
+              Back to Lobby
+            </Button>
+          </Link>
+        )}
         <Link href="/settings">
           <Button 
             variant="outline" 
