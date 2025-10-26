@@ -161,6 +161,36 @@ export const appSettings = pgTable('app_settings', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
+// Poker Tables Table
+export const pokerTables = pgTable('poker_tables', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 255 }).notNull(),
+  smallBlind: integer('small_blind').notNull().default(10),
+  bigBlind: integer('big_blind').notNull().default(20),
+  minBuyIn: integer('min_buy_in').notNull().default(200),
+  maxBuyIn: integer('max_buy_in').notNull().default(1000),
+  maxPlayers: integer('max_players').notNull().default(6),
+  currentPlayers: integer('current_players').notNull().default(0),
+  isActive: boolean('is_active').notNull().default(true),
+  gameState: json('game_state').$type<GameState>(),
+  createdBy: integer('created_by').references(() => telegramUsers.id),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+// Table Players Join Table
+export const tablePlayers = pgTable('table_players', {
+  id: serial('id').primaryKey(),
+  tableId: integer('table_id').notNull().references(() => pokerTables.id, { onDelete: 'cascade' }),
+  playerId: integer('player_id').notNull().references(() => telegramUsers.id, { onDelete: 'cascade' }),
+  seatNumber: integer('seat_number').notNull(),
+  buyInAmount: integer('buy_in_amount').notNull(),
+  currentChips: integer('current_chips').notNull(),
+  isActive: boolean('is_active').notNull().default(true),
+  joinedAt: timestamp('joined_at').notNull().defaultNow(),
+  leftAt: timestamp('left_at'),
+});
+
 // Zod Schemas and Types
 export const insertTelegramUserSchema = createInsertSchema(telegramUsers).omit({
   id: true,
@@ -191,3 +221,27 @@ export const selectAppSettingSchema = createSelectSchema(appSettings);
 
 export type AppSetting = typeof appSettings.$inferSelect;
 export type InsertAppSetting = z.infer<typeof insertAppSettingSchema>;
+
+// Poker Tables Schemas and Types
+export const insertPokerTableSchema = createInsertSchema(pokerTables).omit({
+  id: true,
+  currentPlayers: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const selectPokerTableSchema = createSelectSchema(pokerTables);
+
+export type PokerTable = typeof pokerTables.$inferSelect;
+export type InsertPokerTable = z.infer<typeof insertPokerTableSchema>;
+
+// Table Players Schemas and Types
+export const insertTablePlayerSchema = createInsertSchema(tablePlayers).omit({
+  id: true,
+  joinedAt: true,
+});
+
+export const selectTablePlayerSchema = createSelectSchema(tablePlayers);
+
+export type TablePlayer = typeof tablePlayers.$inferSelect;
+export type InsertTablePlayer = z.infer<typeof insertTablePlayerSchema>;
