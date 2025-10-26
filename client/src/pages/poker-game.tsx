@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import { Link } from 'wouter';
-import { GameState, GamePhase, Card, ActionHistoryEntry, PlayerAction, ACHIEVEMENT_LIST } from '@shared/schema';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { Link, useLocation } from 'wouter';
+import { GameState, GamePhase, Card, ActionHistoryEntry, PlayerAction, ACHIEVEMENT_LIST, PokerTable } from '@shared/schema';
 import { gameEngine } from '@/lib/gameEngine';
 import { botAI } from '@/lib/botAI';
 import { PlayerSeat } from '@/components/PlayerSeat';
