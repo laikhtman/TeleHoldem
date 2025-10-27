@@ -81,7 +81,9 @@ export default function Lobby() {
   const { toast } = useToast();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedTable, setSelectedTable] = useState<number | null>(null);
+  const [selectedTableLimits, setSelectedTableLimits] = useState<{ min: number; max: number } | null>(null);
   const [joinBuyIn, setJoinBuyIn] = useState(500);
+  const [joinBuyInInput, setJoinBuyInInput] = useState('500');
   const [lastUpdated, setLastUpdated] = useState(new Date());
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -100,6 +102,9 @@ export default function Lobby() {
   // Refs for focus management
   const dialogRef = useRef<HTMLDivElement>(null);
   const firstInputRef = useRef<HTMLInputElement>(null);
+  const joinDialogRef = useRef<HTMLDivElement>(null);
+  const joinSliderRef = useRef<HTMLDivElement>(null);
+  const joinInputRef = useRef<HTMLInputElement>(null);
 
   // Update last updated timestamp
   useEffect(() => {
@@ -353,7 +358,13 @@ export default function Lobby() {
 
   const handleJoinTable = (tableId: number, minBuyIn: number, maxBuyIn: number) => {
     setSelectedTable(tableId);
-    setJoinBuyIn(Math.min(maxBuyIn, Math.max(minBuyIn, 500)));
+    setSelectedTableLimits({ min: minBuyIn, max: maxBuyIn });
+    // Set initial buy-in to middle value, or 500 if it's within range
+    const defaultBuyIn = Math.min(maxBuyIn, Math.max(minBuyIn, 
+      500 >= minBuyIn && 500 <= maxBuyIn ? 500 : Math.floor((minBuyIn + maxBuyIn) / 2)
+    ));
+    setJoinBuyIn(defaultBuyIn);
+    setJoinBuyInInput(defaultBuyIn.toString());
   };
 
   const confirmJoinTable = () => {
@@ -793,51 +804,191 @@ export default function Lobby() {
           )}
         </div>
 
-        {/* Join Table Dialog */}
-        <Dialog open={selectedTable !== null} onOpenChange={(open) => !open && setSelectedTable(null)}>
-          <DialogContent>
+        {/* Join Table Dialog - Comprehensive Improvements */}
+        <Dialog 
+          open={selectedTable !== null} 
+          onOpenChange={(open) => {
+            if (!open) {
+              setSelectedTable(null);
+              setSelectedTableLimits(null);
+            }
+          }}
+        >
+          <DialogContent 
+            ref={joinDialogRef}
+            className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto"
+            aria-labelledby="join-table-title"
+            aria-describedby="join-table-description"
+            onOpenAutoFocus={(e) => {
+              e.preventDefault();
+              // Focus on the input for precise entry
+              setTimeout(() => {
+                joinInputRef.current?.focus();
+                joinInputRef.current?.select();
+              }, 100);
+            }}
+            onKeyDown={(e) => {
+              // Handle Escape key
+              if (e.key === 'Escape') {
+                setSelectedTable(null);
+                setSelectedTableLimits(null);
+              }
+            }}
+          >
             <DialogHeader>
-              <DialogTitle>Choose Your Buy-in</DialogTitle>
-              <DialogDescription>
+              <DialogTitle id="join-table-title">Choose Your Buy-in</DialogTitle>
+              <DialogDescription id="join-table-description">
                 Select the amount of chips you want to bring to the table.
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="buyInSlider">Buy-in Amount: ${joinBuyIn}</Label>
-                <Slider
-                  id="buyInSlider"
-                  min={200}
-                  max={1000}
-                  step={50}
-                  value={[joinBuyIn]}
-                  onValueChange={(value) => setJoinBuyIn(value[0])}
-                  className="w-full"
-                  data-testid="slider-buyin"
-                />
-                <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>$200</span>
-                  <span>$1000</span>
+            
+            {selectedTableLimits && (
+              <div className="space-y-6 py-6">
+                {/* Contextual Information */}
+                <div className="bg-muted/30 rounded-lg p-4 space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Table Limits</span>
+                    <span className="text-base font-semibold">
+                      ${selectedTableLimits.min} - ${selectedTableLimits.max}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Recommended Buy-in</span>
+                    <span className="text-sm">
+                      ${Math.floor((selectedTableLimits.min + selectedTableLimits.max) / 2)} (50% of max)
+                    </span>
+                  </div>
+                </div>
+
+                {/* Buy-in Selection */}
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="buyInAmount" className="text-base font-medium">
+                      Buy-in Amount
+                    </Label>
+                    
+                    {/* Numeric Input with Currency Prefix */}
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg font-semibold pointer-events-none">
+                        $
+                      </span>
+                      <Input
+                        ref={joinInputRef}
+                        id="buyInAmount"
+                        type="number"
+                        value={joinBuyInInput}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setJoinBuyInInput(value);
+                          
+                          // Only update slider if valid number
+                          const numValue = parseInt(value);
+                          if (!isNaN(numValue)) {
+                            const clampedValue = Math.min(
+                              selectedTableLimits.max, 
+                              Math.max(selectedTableLimits.min, numValue)
+                            );
+                            setJoinBuyIn(clampedValue);
+                          }
+                        }}
+                        onBlur={() => {
+                          // Ensure valid value on blur
+                          const numValue = parseInt(joinBuyInInput) || selectedTableLimits.min;
+                          const clampedValue = Math.min(
+                            selectedTableLimits.max, 
+                            Math.max(selectedTableLimits.min, numValue)
+                          );
+                          setJoinBuyIn(clampedValue);
+                          setJoinBuyInInput(clampedValue.toString());
+                        }}
+                        min={selectedTableLimits.min}
+                        max={selectedTableLimits.max}
+                        step={10}
+                        className="h-12 pl-8 pr-3 text-lg font-medium"
+                        placeholder={`${selectedTableLimits.min}`}
+                        aria-label="Buy-in amount"
+                        aria-describedby="buyin-helper"
+                        data-testid="input-buyin-amount"
+                      />
+                    </div>
+                    <p id="buyin-helper" className="text-sm text-muted-foreground">
+                      Enter an amount between ${selectedTableLimits.min} and ${selectedTableLimits.max}
+                    </p>
+                  </div>
+
+                  {/* Slider with Tick Marks */}
+                  <div className="space-y-2">
+                    <Label htmlFor="buyInSlider" className="text-sm text-muted-foreground">
+                      Or use the slider to select
+                    </Label>
+                    <div ref={joinSliderRef}>
+                      <Slider
+                        id="buyInSlider"
+                        min={selectedTableLimits.min}
+                        max={selectedTableLimits.max}
+                        step={10}
+                        value={[joinBuyIn]}
+                        onValueChange={(value) => {
+                          setJoinBuyIn(value[0]);
+                          setJoinBuyInInput(value[0].toString());
+                        }}
+                        showTickMarks={true}
+                        tickInterval={
+                          // Calculate appropriate tick interval
+                          selectedTableLimits.max - selectedTableLimits.min <= 200 ? 50 :
+                          selectedTableLimits.max - selectedTableLimits.min <= 500 ? 100 :
+                          selectedTableLimits.max - selectedTableLimits.min <= 1000 ? 200 :
+                          500
+                        }
+                        className="w-full"
+                        aria-label="Buy-in amount slider"
+                        aria-valuemin={selectedTableLimits.min}
+                        aria-valuemax={selectedTableLimits.max}
+                        aria-valuenow={joinBuyIn}
+                        data-testid="slider-buyin"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Current Selection Display */}
+                  <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">You will start with:</span>
+                      <span className="text-2xl font-bold text-primary">
+                        ${joinBuyIn.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-            <DialogFooter>
+            )}
+            
+            <DialogFooter className="flex-col sm:flex-row gap-2">
               <Button 
                 variant="outline" 
-                onClick={() => setSelectedTable(null)}
+                onClick={() => {
+                  setSelectedTable(null);
+                  setSelectedTableLimits(null);
+                }}
+                className="w-full sm:w-auto"
                 data-testid="button-join-cancel"
               >
                 Cancel
               </Button>
               <Button 
                 onClick={confirmJoinTable}
-                disabled={joinTableMutation.isPending}
+                disabled={joinTableMutation.isPending || !selectedTableLimits}
+                className="w-full sm:w-auto font-semibold"
                 data-testid="button-join-confirm"
               >
-                {joinTableMutation.isPending && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {joinTableMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Joining...
+                  </>
+                ) : (
+                  `Join with $${joinBuyIn.toLocaleString()}`
                 )}
-                Join with ${joinBuyIn}
               </Button>
             </DialogFooter>
           </DialogContent>

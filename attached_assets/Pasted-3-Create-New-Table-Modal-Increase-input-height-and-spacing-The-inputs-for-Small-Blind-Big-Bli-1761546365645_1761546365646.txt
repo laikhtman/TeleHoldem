@@ -1,0 +1,72 @@
+3 Create New Table Modal
+
+Increase input height and spacing – The inputs for “Small Blind”, “Big Blind”, etc., are narrow and do not meet the 44 px mobile tap target
+teleholdem.replit.app
+. Increase their vertical padding and margin.
+
+Use numeric input controls – Change numeric fields (small blind, big blind, min buy‑in, max buy‑in) to use <input type="number"> with appropriate min, max and step attributes. Provide plus/minus buttons or a stepper for easier adjustments on touch devices
+teleholdem.replit.app
+.
+
+Currency and units – Prefix or suffix buy‑in and blind fields with the “$” symbol and ensure consistent alignment. Provide hints for typical ranges or defaults.
+
+Field validations & error messages – Validate that min buy‑in ≤ max buy‑in and big blind ≥ small blind. Show inline error messages near the relevant field instead of generic alerts.
+
+Add Cancel button – There is only an “X” icon to close the modal
+teleholdem.replit.app
+. Provide a clearly labeled “Cancel” button next to “Create Table” to improve discoverability and meet accessibility guidelines.
+
+Accessibility improvements – Add labels tied to each input via for and id, ensure the modal traps focus while open, and describe its purpose via aria-labelledby.
+
+4 Join Table Modal
+
+Slider usability – The slider to choose buy‑in amount has no tick marks, making it difficult to select precise values
+teleholdem.replit.app
+. Add discrete tick marks (e.g., increments of $100) and allow users to tap the track to jump to a value.
+
+Numeric input alternative – Provide an input box next to the slider for users who prefer typing an exact amount. Ensure the slider and input stay synchronized
+teleholdem.replit.app
+.
+
+Handle size & contrast – Increase the slider handle size to at least 44 px for better touch accuracy and ensure there is sufficient contrast between the handle and the track
+teleholdem.replit.app
+.
+
+Contextual information – Clearly state the minimum and maximum buy‑in values above the slider (e.g., “Min: $200 – Max: $1 000”) and update the button text (“Join with $500”) dynamically as the value changes. Use a readable font size
+teleholdem.replit.app
+.
+
+Modal actions – Add a secondary “Cancel” or “Go back” button and ensure focus management (focus on the join button by default, pressing Escape closes the modal). Provide accessible aria-labels for close icon.
+
+5 Game Table / Demo Page
+5.1 Table & Seat Layout
+
+Move the user’s seat to the bottom – In most poker UIs, the player controls their hand at the bottom of the screen for ergonomic reasons. The current design places the player at the top center
+teleholdem.replit.app
+, making actions and gestures awkward. Reposition the user seat to the bottom center and distribute opponents around the table using an elliptical algorithm.
+
+Responsive seat positioning – Use percentages based on container dimensions to place seats symmetrically. Ensure seats never overlap community cards or pot display on small screens. Adjust radii for ellipse on narrow widths so seats don’t crowd together.
+
+Seat component design – Increase the size of player avatars/cards and chip stacks for readability. Standardize the seat background and border; show dealer button and current turn indicator clearly (e.g., using a glowing ring or pulse). Ensure folded or all‑in players’ seats are dimmed or grayed out
+teleholdem.replit.app
+.
+
+Card graphics – Some cards appear pixelated. Use high‑quality vector or SVG assets for card faces and consistent back designs. Provide color-coded suits (hearts/diamonds red, clubs/spades black) and ensure cards remain legible on all backgrounds.
+
+Pot display – Position the pot amount clearly above or between community cards. Use a subtle background pill or outline to separate it from the felt. Animate chips moving to the pot when bets are made.
+
+5.2 Panels & Overlays
+
+Hand Strength panel – On desktop, show this panel as a persistent left sidebar. On mobile, hide it behind a toggle or move it to a bottom sheet. The current panel is cramped and overlays part of the table
+teleholdem.replit.app
+; restructure it with collapsible content and improved typography.
+
+Action History / Stats right panel – The combined Action History and Session Stats panel is extremely long, forcing the user to scroll within a small area
+teleholdem.replit.app
+. Split these sections into separate collapsible panels or provide tabs. On mobile, hide the panel by default and make it accessible via a floating action button or bottom sheet.
+
+Decision Helper – The pot odds and advice appear in a large card above the action bar. Collapse this information by default and let users expand it via a small info icon. Many players will not need constant EV advice. Also, revise the EV call indicator color; the current red “–EV Call” may confuse novices.
+
+Toasts & notifications – Action toasts currently appear near the bottom and sometimes overlap controls. Move them to the top center or right side and ensure they have consistent styling, fade away after a short delay, and announce important actions via aria-live.
+
+Floating menu – Provide a floating action button (FAB) on mobile for secondary actions (e.g., show hand strength, view history, settings). The current implementation lacks quick access to side panels when they are hidden.
