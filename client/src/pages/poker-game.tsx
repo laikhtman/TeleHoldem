@@ -1317,6 +1317,7 @@ export default function PokerGame() {
       
       {/* Header Controls - Fixed Top Right with safe-area padding */}
       <div className="fixed top-[calc(1rem+var(--safe-area-top))] right-[calc(1rem+var(--safe-area-right))] z-50 flex gap-2">
+        <ThemeToggle />
         {tableId && (
           <Link href="/lobby">
             <Button 

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spade, Heart, Diamond, Club, ArrowRight, Zap, MessageCircle, CheckCircle, AlertCircle } from "lucide-react";
 import { useTelegramWebApp } from "@/hooks/useTelegramWebApp";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function LandingPage() {
   const { isInTelegram, initData } = useTelegramWebApp();
@@ -20,6 +21,11 @@ export default function LandingPage() {
   // Landing page for non-Telegram users
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      {/* Header with theme toggle */}
+      <div className="absolute top-4 right-4 z-10" style={{ paddingTop: `var(--safe-area-top)` }}>
+        <ThemeToggle />
+      </div>
+      
       {/* Main content with safe area padding */}
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-8" style={{ paddingTop: `calc(2rem + var(--safe-area-top))`, paddingBottom: `calc(2rem + var(--safe-area-bottom))` }}>
         <div className="w-full max-w-5xl">

@@ -529,6 +529,18 @@ body {
       font-size: 16px;
     }
     
+    /* Smooth theme transitions */
+    html.theme-transition,
+    html.theme-transition *,
+    html.theme-transition *:before,
+    html.theme-transition *:after {
+      transition: background-color 300ms ease, 
+                  color 300ms ease, 
+                  border-color 300ms ease,
+                  box-shadow 300ms ease !important;
+      transition-delay: 0 !important;
+    }
+    
     body {
       font-size: var(--font-size-sm);
       line-height: var(--line-height-normal);
