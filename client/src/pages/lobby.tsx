@@ -13,6 +13,10 @@ import { Slider } from '@/components/ui/slider';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+import { ErrorState } from '@/components/ErrorState';
+import { LoadingState, TableSkeleton } from '@/components/LoadingState';
+import { logError } from '@/lib/errorHandler';
 import { 
   Users, 
   Trophy, 
@@ -80,6 +84,7 @@ function TableCardSkeleton() {
 export default function Lobby() {
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
+  const { isOnline, isReconnecting, queueAction } = useOnlineStatus();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedTable, setSelectedTable] = useState<number | null>(null);
   const [selectedTableLimits, setSelectedTableLimits] = useState<{ min: number; max: number } | null>(null);
@@ -118,9 +123,16 @@ export default function Lobby() {
   }, []);
 
   // Fetch active tables
-  const { data: tablesData, isLoading, refetch } = useQuery<{ tables: any[] }>({
+  const { data: tablesData, isLoading, error: fetchError, refetch } = useQuery<{ tables: any[] }>({
     queryKey: ['/api/tables'],
-    refetchInterval: 5000, // Refresh every 5 seconds
+    refetchInterval: isOnline ? 5000 : false, // Only refresh when online
+    enabled: isOnline, // Only fetch when online
+    retry: (failureCount, error) => {
+      // Log error for debugging
+      logError(error, { context: 'fetch_tables' });
+      // Retry up to 3 times for network errors
+      return failureCount < 3;
+    },
   });
 
   // Update refresh state when data changes
@@ -188,6 +200,9 @@ export default function Lobby() {
       maxBuyIn: number;
       maxPlayers: number;
     }) => {
+      if (!isOnline) {
+        throw new Error('Cannot create table while offline');
+      }
       const res = await apiRequest('POST', '/api/tables', data);
       return res.json();
     },
@@ -197,13 +212,34 @@ export default function Lobby() {
       toast({
         title: 'Table created',
         description: 'Your table has been created successfully.',
+        variant: 'success' as any,
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      logError(error, { context: 'create_table' });
+      
+      let errorMessage = 'Failed to create table. Please try again.';
+      if (!isOnline) {
+        errorMessage = 'You are offline. Please check your connection.';
+      } else if (error?.status === 400) {
+        errorMessage = 'Invalid table settings. Please check your inputs.';
+      } else if (error?.status === 403) {
+        errorMessage = 'You do not have permission to create tables.';
+      }
+      
       toast({
-        title: 'Error',
-        description: 'Failed to create table. Please try again.',
+        title: 'Failed to Create Table',
+        description: errorMessage,
         variant: 'destructive',
+        action: !isOnline ? undefined : (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => createTableMutation.mutate(createTableMutation.variables!)}
+          >
+            Retry
+          </Button>
+        ),
       });
     },
   });
@@ -211,6 +247,9 @@ export default function Lobby() {
   // Join table mutation
   const joinTableMutation = useMutation({
     mutationFn: async ({ tableId, buyIn }: { tableId: number; buyIn: number }) => {
+      if (!isOnline) {
+        throw new Error('Cannot join table while offline');
+      }
       const res = await apiRequest('POST', `/api/tables/${tableId}/join`, {
         buyInAmount: buyIn,
         seatNumber: Math.floor(Math.random() * 6), // Random seat for now
@@ -222,15 +261,44 @@ export default function Lobby() {
       toast({
         title: 'Joined table',
         description: 'You have successfully joined the table.',
+        variant: 'success' as any,
       });
       // Navigate to the game with the table ID
       setLocation(`/game?tableId=${variables.tableId}`);
     },
-    onError: (error: any) => {
+    onError: (error: any, variables) => {
+      logError(error, { context: 'join_table', tableId: variables.tableId });
+      
+      let errorMessage = 'Failed to join table. Please try again.';
+      if (!isOnline) {
+        errorMessage = 'You are offline. Please check your connection.';
+      } else if (error?.message?.includes('full')) {
+        errorMessage = 'Table is full. Please try another table.';
+      } else if (error?.message?.includes('insufficient')) {
+        errorMessage = 'Insufficient funds. You need more chips to join this table.';
+      } else if (error?.message?.includes('already')) {
+        errorMessage = 'You are already seated at this table.';
+      } else if (error?.status === 404) {
+        errorMessage = 'Table not found. It may have been removed.';
+      }
+      
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to join table. Please try again.',
+        title: 'Cannot Join Table',
+        description: errorMessage,
         variant: 'destructive',
+        action: !isOnline ? undefined : (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              if (variables) {
+                joinTableMutation.mutate(variables);
+              }
+            }}
+          >
+            Retry
+          </Button>
+        ),
       });
     },
   });
@@ -730,13 +798,28 @@ export default function Lobby() {
             </DialogContent>
           </Dialog>
 
-          {/* Show skeleton loaders when loading */}
-          {isLoading ? (
+          {/* Show error state if there's an error */}
+          {fetchError && !isReconnecting ? (
+            <div className="col-span-full">
+              <ErrorState
+                type={!isOnline ? 'network' : 'server'}
+                title={!isOnline ? 'You are offline' : 'Failed to load tables'}
+                message={
+                  !isOnline 
+                    ? 'Connect to the internet to see available tables.'
+                    : 'We could not load the tables. Please try again.'
+                }
+                onRetry={() => refetch()}
+                className="mx-auto"
+              />
+            </div>
+          ) : isLoading || isReconnecting ? (
+            /* Show skeleton loaders when loading */
             <>
-              <TableCardSkeleton />
-              <TableCardSkeleton />
-              <TableCardSkeleton />
-              <TableCardSkeleton />
+              <TableSkeleton />
+              <TableSkeleton />
+              <TableSkeleton />
+              <TableSkeleton />
             </>
           ) : filteredTables.length === 0 ? (
             <Card className="col-span-full bg-card/50 backdrop-blur-sm border-border">

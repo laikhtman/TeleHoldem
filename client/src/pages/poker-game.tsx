@@ -4,6 +4,10 @@ import { Link, useLocation } from 'wouter';
 import { GameState, GamePhase, Card, ActionHistoryEntry, PlayerAction, ACHIEVEMENT_LIST, PokerTable } from '@shared/schema';
 import { gameEngine } from '@/lib/gameEngine';
 import { botAI } from '@/lib/botAI';
+import { ErrorState } from '@/components/ErrorState';
+import { LoadingState, FullPageLoader } from '@/components/LoadingState';
+import { logError, ErrorCategory } from '@/lib/errorHandler';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { PlayerSeat } from '@/components/PlayerSeat';
 import { CommunityCards } from '@/components/CommunityCards';
 import { PotDisplay } from '@/components/PotDisplay';
@@ -98,8 +102,11 @@ export default function PokerGame() {
   const { triggerHaptic } = useHaptic();
   const { user, isAuthenticated, isStandalone } = useTelegramAuth();
   const { isLandscape } = useOrientation();
-  const { isOnline, isReconnecting, checkConnection } = useNetworkStatus();
+  const { isOnline: networkOnline, isReconnecting: networkReconnecting, checkConnection } = useNetworkStatus();
+  const { isOnline, isReconnecting, queueAction } = useOnlineStatus();
   const [, navigate] = useLocation();
+  const [connectionError, setConnectionError] = useState(false);
+  const [gameError, setGameError] = useState<{ message: string; canRetry: boolean } | null>(null);
   
   // Onboarding and tips hooks
   const { 
@@ -164,14 +171,38 @@ export default function PokerGame() {
       }
       await apiRequest('PATCH', '/api/users/me/stats', { stats });
     },
-    onError: (error) => {
-      console.error('Failed to save stats:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Failed to save stats',
-        description: 'Your stats will be saved when connection is restored',
-        duration: 3000,
-      });
+    onError: (error: any) => {
+      logError(error, { context: 'save_stats' }, { category: ErrorCategory.SERVER });
+      
+      if (!isOnline) {
+        // Queue the action for when online
+        queueAction(
+          () => saveStatsMutation.mutateAsync(saveStatsMutation.variables!),
+          'Save game statistics'
+        );
+        toast({
+          title: 'Stats queued',
+          description: 'Your stats will be saved when connection is restored',
+          variant: 'default' as any,
+          duration: 3000,
+        });
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Failed to save stats',
+          description: 'Your stats could not be saved. They will be retried automatically.',
+          duration: 3000,
+          action: (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => saveStatsMutation.mutate(saveStatsMutation.variables!)}
+            >
+              Retry Now
+            </Button>
+          ),
+        });
+      }
     },
   });
 
@@ -183,14 +214,38 @@ export default function PokerGame() {
       }
       await apiRequest('PATCH', '/api/users/me/bankroll', { bankroll });
     },
-    onError: (error) => {
-      console.error('Failed to save bankroll:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Failed to save bankroll',
-        description: 'Your bankroll will be saved when connection is restored',
-        duration: 3000,
-      });
+    onError: (error: any) => {
+      logError(error, { context: 'save_bankroll', critical: true }, { category: ErrorCategory.SERVER });
+      
+      if (!isOnline) {
+        // Queue the critical action for when online
+        queueAction(
+          () => saveBankrollMutation.mutateAsync(saveBankrollMutation.variables!),
+          'Save bankroll (critical)'
+        );
+        toast({
+          title: 'Bankroll queued',
+          description: 'Your bankroll will be saved when connection is restored',
+          variant: 'default' as any,
+          duration: 3000,
+        });
+      } else {
+        toast({
+          variant: 'destructive',
+          title: '⚠️ Critical: Failed to save bankroll',
+          description: 'Your bankroll could not be saved. Please retry to avoid losing your winnings.',
+          duration: Infinity,
+          action: (
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => saveBankrollMutation.mutate(saveBankrollMutation.variables!)}
+            >
+              Retry Now
+            </Button>
+          ),
+        });
+      }
     },
   });
 

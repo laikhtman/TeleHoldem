@@ -1,9 +1,28 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { logError, ErrorCategory } from "@/lib/errorHandler";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
+    const error = new Error(`${res.status}: ${text}`);
+    (error as any).status = res.status;
+    
+    // Log error to error handler
+    const category = res.status === 401 ? ErrorCategory.AUTH :
+                     res.status >= 500 ? ErrorCategory.SERVER :
+                     res.status === 404 ? ErrorCategory.CLIENT :
+                     ErrorCategory.NETWORK;
+    
+    logError(error, { 
+      url: res.url, 
+      status: res.status,
+      statusText: res.statusText 
+    }, {
+      showToast: false, // We'll handle toasts at the component level
+      category
+    });
+    
+    throw error;
   }
 }
 
@@ -47,11 +66,34 @@ export const queryClient = new QueryClient({
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
-      staleTime: Infinity,
-      retry: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes instead of infinity
+      gcTime: 10 * 60 * 1000, // 10 minutes garbage collection
+      retry: (failureCount, error: any) => {
+        // Don't retry on 4xx errors except 408 (timeout) and 429 (rate limit)
+        if (error?.status && error.status >= 400 && error.status < 500) {
+          return error.status === 408 || error.status === 429 ? failureCount < 2 : false;
+        }
+        // Retry network and server errors up to 3 times
+        return failureCount < 3;
+      },
+      retryDelay: (attemptIndex) => {
+        // Exponential backoff: 1s, 2s, 4s
+        return Math.min(1000 * Math.pow(2, attemptIndex), 4000);
+      },
+      networkMode: 'online', // Only fetch when online
     },
     mutations: {
-      retry: false,
+      retry: (failureCount, error: any) => {
+        // Only retry network errors for mutations (not validation errors)
+        if (error?.status && error.status >= 400 && error.status < 500) {
+          return false;
+        }
+        return failureCount < 2;
+      },
+      retryDelay: (attemptIndex) => {
+        return Math.min(1000 * Math.pow(2, attemptIndex), 3000);
+      },
+      networkMode: 'online',
     },
   },
 });
