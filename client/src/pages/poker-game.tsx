@@ -24,7 +24,7 @@ import { HandStrengthPanel } from '@/components/HandStrengthPanel';
 import { PotOddsDisplay } from '@/components/PotOddsDisplay';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FlyingChip } from '@/components/Chip';
-import { Trash2, ChevronRight, ChevronLeft, TrendingUp, Settings, Menu } from 'lucide-react';
+import { Trash2, ChevronRight, ChevronLeft, TrendingUp, Settings, Menu, HelpCircle } from 'lucide-react';
 import { PokerLoader, PokerSpinner } from '@/components/PokerLoader';
 import { useSound } from '@/hooks/useSound';
 import { useHaptic } from '@/hooks/useHaptic';
@@ -35,6 +35,10 @@ import { useTelegramAuth } from '@/hooks/useTelegramAuth';
 import { apiRequest } from '@/lib/queryClient';
 import { useOrientation } from '@/hooks/useOrientation';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+import { OnboardingFlow } from '@/components/OnboardingFlow';
+import { GameTip } from '@/components/GameTip';
+import { useOnboarding } from '@/hooks/useOnboarding';
+import { useGameTips } from '@/hooks/useGameTips';
 
 const NUM_PLAYERS = 6;
 const MAX_HISTORY_ENTRIES = 30;
@@ -95,6 +99,19 @@ export default function PokerGame() {
   const { user, isAuthenticated, isStandalone } = useTelegramAuth();
   const { isLandscape } = useOrientation();
   const { isOnline, isReconnecting, checkConnection } = useNetworkStatus();
+  const [, navigate] = useLocation();
+  
+  // Onboarding and tips hooks
+  const { 
+    isOnboardingActive, 
+    hasCompletedOnboarding, 
+    startOnboarding 
+  } = useOnboarding();
+  
+  const { 
+    triggerTip, 
+    tipsEnabled 
+  } = useGameTips();
   
   // Get tableId from URL query params
   const searchParams = new URLSearchParams(window.location.search);
@@ -511,6 +528,93 @@ export default function PokerGame() {
       saveStatsMutation.mutate(stats);
     }
   }, [gameState?.phase, gameState?.sessionStats.handsPlayed, isAuthenticated, user]);
+
+  // Start onboarding for first-time users
+  useEffect(() => {
+    if (!hasCompletedOnboarding && gameState && !isOnboardingActive) {
+      // Small delay to let the game render first
+      const timer = setTimeout(() => {
+        startOnboarding();
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [hasCompletedOnboarding, gameState, isOnboardingActive, startOnboarding]);
+
+  // Trigger contextual tips based on game events
+  useEffect(() => {
+    if (!gameState || !tipsEnabled) return;
+
+    // First turn tip
+    if (gameState.currentPlayerIndex === 0 && gameState.phase === 'pre-flop') {
+      triggerTip('first_turn');
+      triggerTip('keyboard_available');
+    }
+  }, [gameState?.currentPlayerIndex, gameState?.phase, triggerTip, tipsEnabled]);
+
+  useEffect(() => {
+    if (!gameState || !tipsEnabled) return;
+
+    // Cards dealt tip
+    if (gameState.phase === 'pre-flop' && gameState.players[0].cards.length === 2) {
+      triggerTip('cards_dealt');
+    }
+  }, [gameState?.phase, gameState?.players, triggerTip, tipsEnabled]);
+
+  useEffect(() => {
+    if (!gameState || !tipsEnabled) return;
+
+    // Big pot tip
+    const totalPot = gameState.pots.reduce((sum, pot) => sum + pot.amount, 0);
+    if (totalPot > 500) {
+      triggerTip('big_pot');
+    }
+  }, [gameState?.pots, triggerTip, tipsEnabled]);
+
+  useEffect(() => {
+    if (!gameState || !tipsEnabled) return;
+
+    // First bet tip
+    if (gameState.currentBet > 0 && gameState.currentPlayerIndex === 0) {
+      triggerTip('first_bet');
+    }
+  }, [gameState?.currentBet, gameState?.currentPlayerIndex, triggerTip, tipsEnabled]);
+
+  // Mobile-specific tips
+  useEffect(() => {
+    const isMobile = window.innerWidth < 768;
+    if (isMobile && tipsEnabled) {
+      triggerTip('mobile_first_time');
+    }
+  }, [triggerTip, tipsEnabled]);
+
+  // Keyboard shortcut for help (? key)
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Don't trigger if typing in an input
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+
+      // Check for ? key (shift + /)
+      if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+        e.preventDefault();
+        navigate('/help');
+      }
+
+      // Additional shortcuts for panels
+      if (e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        setIsRightPanelCollapsed(!isRightPanelCollapsed);
+      }
+      
+      if (e.key.toLowerCase() === 'h') {
+        e.preventDefault();
+        setIsHandStrengthCollapsed(!isHandStrengthCollapsed);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [navigate, isRightPanelCollapsed, isHandStrengthCollapsed]);
 
   const startNewHand = () => {
     if (!gameState) return;
@@ -1332,6 +1436,17 @@ export default function PokerGame() {
             </Button>
           </Link>
         )}
+        <Link href="/help">
+          <Button 
+            variant="outline" 
+            size="icon"
+            aria-label="Help and Documentation"
+            data-testid="button-help"
+            className="min-h-11 min-w-11"
+          >
+            <HelpCircle className="w-5 h-5" />
+          </Button>
+        </Link>
         <Link href="/settings">
           <Button 
             variant="outline" 
@@ -1343,7 +1458,6 @@ export default function PokerGame() {
             <Settings className="w-5 h-5" />
           </Button>
         </Link>
-        <ThemeToggle />
         <SettingsPanel 
           settings={settings}
           onSettingsChange={handleSettingsChange}
@@ -1592,6 +1706,12 @@ export default function PokerGame() {
           onToggleCollapse={() => setIsRightPanelCollapsed(!isRightPanelCollapsed)}
         />
       </div>
+
+      {/* Onboarding Flow Overlay */}
+      <OnboardingFlow />
+
+      {/* Game Tips */}
+      <GameTip position="top-right" />
     </div>
   );
 }
