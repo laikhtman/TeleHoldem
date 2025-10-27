@@ -11,9 +11,13 @@
 
 /* LIGHT MODE TOKENS */
 :root {
+  /* ================== RESPONSIVE BASE FONT SIZE ================== */
+  /* Sets the root font size for proper rem scaling across devices */
+  font-size: 14px; /* Mobile base (<768px) */
+  
   /* ================== SPACING TOKENS ================== */
   /* Use these for all padding, margin, and gap values */
-  --spacing-xs: 0.25rem;   /* 4px */
+  --spacing-xs: 0.25rem;   /* 4px at base 16px */
   --spacing-sm: 0.5rem;    /* 8px */
   --spacing-md: 1rem;      /* 16px */
   --spacing-lg: 1.5rem;    /* 24px */
@@ -29,16 +33,16 @@
   --font-serif: Georgia, serif;
   --font-mono: JetBrains Mono, Menlo, monospace;
   
-  /* Font Sizes - Use for all text */
-  --font-size-xs: 0.75rem;    /* 12px */
-  --font-size-sm: 0.875rem;   /* 14px */
-  --font-size-base: 1rem;     /* 16px */
-  --font-size-lg: 1.125rem;   /* 18px */
-  --font-size-xl: 1.25rem;    /* 20px */
-  --font-size-2xl: 1.5rem;    /* 24px */
-  --font-size-3xl: 2rem;      /* 32px */
-  --font-size-4xl: 2.5rem;    /* 40px */
-  --font-size-5xl: 3rem;      /* 48px */
+  /* Font Sizes - Use rem for scalable typography */
+  --font-size-xs: 0.75rem;    /* 10.5px mobile, 11.25px tablet, 12px desktop */
+  --font-size-sm: 0.875rem;   /* 12.25px mobile, 13.125px tablet, 14px desktop */
+  --font-size-base: 1rem;     /* 14px mobile, 15px tablet, 16px desktop */
+  --font-size-lg: 1.125rem;   /* 15.75px mobile, 16.875px tablet, 18px desktop */
+  --font-size-xl: 1.25rem;    /* 17.5px mobile, 18.75px tablet, 20px desktop */
+  --font-size-2xl: 1.5rem;    /* 21px mobile, 22.5px tablet, 24px desktop */
+  --font-size-3xl: 2rem;      /* 28px mobile, 30px tablet, 32px desktop */
+  --font-size-4xl: 2.5rem;    /* 35px mobile, 37.5px tablet, 40px desktop */
+  --font-size-5xl: 3rem;      /* 42px mobile, 45px tablet, 48px desktop */
   
   /* Font Weights */
   --font-weight-thin: 100;
@@ -65,13 +69,6 @@
   --letter-spacing-wide: 0.025em;
   --letter-spacing-wider: 0.05em;
   --letter-spacing-widest: 0.1em;
-
-  /* Responsive Body Typography */
-  --font-size-body-xs: 14px;   /* <480px */
-  --font-size-body-sm: 15px;   /* 480–767px */
-  --font-size-body-md: 16px;   /* 768–1023px */
-  --font-size-body-lg: 16px;   /* ≥1024px */
-  --font-size-body: var(--font-size-body-sm);
 
   /* ================== RADIUS TOKENS ================== */
   /* Use for all border-radius values */
@@ -319,6 +316,20 @@
   --accent-border: hsl(from hsl(var(--accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
   --destructive-border: hsl(var(--destructive));
   --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+}
+
+/* ================== RESPONSIVE BASE FONT SIZES ================== */
+/* Media queries for responsive typography scaling */
+@media (min-width: 768px) {
+  :root {
+    font-size: 15px; /* Tablet base (768px - 1023px) */
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    font-size: 16px; /* Desktop base (≥1024px) */
+  }
 }
 
 /* DARK MODE TOKENS */

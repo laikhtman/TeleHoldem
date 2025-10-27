@@ -44,10 +44,10 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
   const [showWinAmount, setShowWinAmount] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [textSize, setTextSize] = useState({ 
-    name: '20px',     // Increased from 16px
-    chips: '22px',    // Increased for better visibility
-    status: '16px',   // For status text (folded, all-in, etc)
-    bet: '18px'       // For bet amounts
+    name: '1.375rem',   // Scales: 19.25px mobile, 20.625px tablet, 22px desktop
+    chips: '1.5rem',    // Scales: 21px mobile, 22.5px tablet, 24px desktop
+    status: '1.125rem', // Scales: 15.75px mobile, 16.875px tablet, 18px desktop
+    bet: '1.25rem'      // Scales: 17.5px mobile, 18.75px tablet, 20px desktop
   });
   const prevBet = useRef(player.bet);
   const seatRef = useRef<HTMLDivElement>(null);
@@ -124,29 +124,37 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
   useEffect(() => {
     const updateTextSize = () => {
       const vw = window.innerWidth;
-      if (vw >= 768) {
-        // Desktop/tablet sizes
+      if (vw >= 1024) {
+        // Desktop sizes (base 16px)
         setTextSize({ 
-          name: '22px',    // Larger for better readability
-          chips: '24px',   // Very prominent chip count
-          status: '18px',  // Clear status indicators
-          bet: '20px'      // Clear bet amounts
+          name: '1.375rem',   // 22px at 16px base
+          chips: '1.5rem',    // 24px at 16px base
+          status: '1.125rem', // 18px at 16px base
+          bet: '1.25rem'      // 20px at 16px base
+        });
+      } else if (vw >= 768) {
+        // Tablet sizes (base 15px)
+        setTextSize({ 
+          name: '1.333rem',   // ~20px at 15px base
+          chips: '1.467rem',  // ~22px at 15px base
+          status: '1.067rem', // ~16px at 15px base
+          bet: '1.2rem'       // ~18px at 15px base
         });
       } else if (vw >= 480) {
-        // Small tablets/large phones
+        // Large phones (base 14px)
         setTextSize({ 
-          name: '20px',
-          chips: '22px',
-          status: '16px',
-          bet: '18px'
+          name: '1.429rem',   // ~20px at 14px base
+          chips: '1.571rem',  // ~22px at 14px base
+          status: '1.143rem', // ~16px at 14px base
+          bet: '1.286rem'     // ~18px at 14px base
         });
       } else {
-        // Mobile phones
+        // Small phones (base 14px)
         setTextSize({ 
-          name: '18px',    // Still readable on small screens
-          chips: '20px',   // Prominent even on mobile
-          status: '15px',
-          bet: '16px'
+          name: '1.286rem',   // ~18px at 14px base
+          chips: '1.429rem',  // ~20px at 14px base
+          status: '1.071rem', // ~15px at 14px base
+          bet: '1.143rem'     // ~16px at 14px base
         });
       }
     };

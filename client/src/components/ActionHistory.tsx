@@ -211,7 +211,7 @@ export function ActionHistory({ history, currentPlayerName }: ActionHistoryProps
                             )}
                           </div>
 
-                          <div className="text-[10px] text-muted-foreground whitespace-nowrap mt-0.5">
+                          <div className="text-[0.625rem] text-muted-foreground whitespace-nowrap mt-0.5">
                             {formatTime(entry.timestamp)}
                           </div>
                         </motion.div>

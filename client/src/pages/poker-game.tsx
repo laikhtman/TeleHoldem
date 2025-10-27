@@ -1441,7 +1441,7 @@ export default function PokerGame() {
               {gameState.lastAction && (
                 <div className="absolute bottom-2 sm:bottom-4 left-1/2 transform -translate-x-1/2" style={{ zIndex: 10 }}>
                   <div className="bg-black/70 backdrop-blur-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-white/20">
-                    <div className="text-[10px] sm:text-xs text-white" data-testid="text-last-action">
+                    <div className="text-[0.625rem] sm:text-xs text-white" data-testid="text-last-action">
                       {gameState.lastAction}
                     </div>
                   </div>
