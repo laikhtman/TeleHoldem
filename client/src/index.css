@@ -1096,3 +1096,56 @@ body {
     outline-offset: 2px !important;
   }
 }
+
+/* Enhanced animations for improved player seats */
+@keyframes pulse-glow-enhanced {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    box-shadow: 
+      0 0 30px hsl(var(--poker-chip-gold) / 1),
+      0 0 60px hsl(var(--poker-chip-gold) / 0.8),
+      0 0 90px hsl(var(--poker-chip-gold) / 0.4),
+      inset 0 0 20px hsl(var(--poker-chip-gold) / 0.1);
+  }
+  50% {
+    transform: translate3d(0, 0, 0) scale(1.02);
+    box-shadow: 
+      0 0 40px hsl(var(--poker-chip-gold) / 1),
+      0 0 80px hsl(var(--poker-chip-gold) / 0.9),
+      0 0 120px hsl(var(--poker-chip-gold) / 0.6),
+      inset 0 0 30px hsl(var(--poker-chip-gold) / 0.2);
+  }
+}
+
+.animate-pulse-glow-enhanced {
+  animation: pulse-glow-enhanced 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Special shadow effects for different seat states */
+.shadow-poker-glow {
+  box-shadow: 
+    0 0 35px hsl(var(--poker-chip-gold) / 0.6),
+    0 10px 50px -10px hsl(var(--poker-chip-gold) / 0.4),
+    0 20px 60px -20px hsl(var(--poker-chip-gold) / 0.2);
+}
+
+.shadow-poker-gold {
+  box-shadow: 
+    0 0 30px hsl(var(--poker-chip-gold) / 0.5),
+    0 10px 40px -10px hsl(var(--poker-chip-gold) / 0.3),
+    0 15px 50px -15px hsl(var(--poker-chip-gold) / 0.15);
+}
+
+.shadow-red-glow {
+  box-shadow: 
+    0 0 30px rgba(239, 68, 68, 0.6),
+    0 10px 40px -10px rgba(239, 68, 68, 0.4),
+    0 15px 50px -15px rgba(239, 68, 68, 0.2);
+}
+
+/* Border styles for special states */
+.border-3 {
+  border-width: 3px;
+}

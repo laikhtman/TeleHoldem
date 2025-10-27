@@ -1,7 +1,7 @@
 import { PlayerStats } from './PlayerStats';
 import { Player, GamePhase } from '@shared/schema';
 import { PlayingCard } from './PlayingCard';
-import { Coins, Trophy, XCircle, CheckCircle, ArrowUpCircle } from 'lucide-react';
+import { Coins, Trophy, XCircle, CheckCircle, ArrowUpCircle, User, Crown } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FlyingChip } from './Chip';
@@ -11,6 +11,7 @@ import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { useHaptic } from '@/hooks/useHaptic';
 import { useSound } from '@/hooks/useSound';
 import { useToast } from '@/hooks/use-toast';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 type ActionBadgeType = 'fold' | 'check' | 'call' | 'bet' | 'raise';
 
@@ -42,7 +43,12 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
   const [actionBadge, setActionBadge] = useState<ActionBadge | null>(null);
   const [showWinAmount, setShowWinAmount] = useState(false);
   const [showStats, setShowStats] = useState(false);
-  const [textSize, setTextSize] = useState({ name: '16px', chips: '16px' });
+  const [textSize, setTextSize] = useState({ 
+    name: '20px',     // Increased from 16px
+    chips: '22px',    // Increased for better visibility
+    status: '16px',   // For status text (folded, all-in, etc)
+    bet: '18px'       // For bet amounts
+  });
   const prevBet = useRef(player.bet);
   const seatRef = useRef<HTMLDivElement>(null);
   const animatedChipCount = useAnimatedCounter(player.chips);
@@ -54,8 +60,8 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
   const getSeatScale = () => {
     if (typeof window === 'undefined') return 1;
     const vw = window.innerWidth;
-    if (vw < 360) return 0.82;
-    if (vw < 480) return 0.88;
+    if (vw < 360) return 0.85;
+    if (vw < 480) return 0.92;
     return 1;
   };
   const [seatScale, setSeatScale] = useState<number>(getSeatScale());
@@ -118,10 +124,30 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
   useEffect(() => {
     const updateTextSize = () => {
       const vw = window.innerWidth;
-      if (vw >= 480) {
-        setTextSize({ name: '19px', chips: '19px' });  // xs and above
+      if (vw >= 768) {
+        // Desktop/tablet sizes
+        setTextSize({ 
+          name: '22px',    // Larger for better readability
+          chips: '24px',   // Very prominent chip count
+          status: '18px',  // Clear status indicators
+          bet: '20px'      // Clear bet amounts
+        });
+      } else if (vw >= 480) {
+        // Small tablets/large phones
+        setTextSize({ 
+          name: '20px',
+          chips: '22px',
+          status: '16px',
+          bet: '18px'
+        });
       } else {
-        setTextSize({ name: '17px', chips: '17px' });  // mobile
+        // Mobile phones
+        setTextSize({ 
+          name: '18px',    // Still readable on small screens
+          chips: '20px',   // Prominent even on mobile
+          status: '15px',
+          bet: '16px'
+        });
       }
     };
 
@@ -174,12 +200,40 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
     } as React.CSSProperties;
   };
 
-  const seatClasses = [
-    'rounded-lg p-3 xs:p-3.5 sm:p-3.5 md:p-4 lg:p-4 backdrop-blur-sm transition-all duration-300 relative',
-    isCurrentPlayer ? 'bg-black/85 border-[3px] sm:border-2 md:border-[3px] border-poker-chipGold animate-pulse-glow shadow-2xl' : 'bg-black/75 border border-white/30',
-    isWinner ? 'bg-poker-chipGold/25 border-[3px] sm:border-2 md:border-[3px] border-poker-chipGold shadow-2xl' : '',
-    player.chips === 0 ? 'opacity-50 grayscale' : ''
-  ].join(' ');
+  // Enhanced seat styling with better visual hierarchy
+  const getSeatClasses = () => {
+    const baseClasses = 'rounded-xl p-4 xs:p-5 sm:p-5 md:p-6 lg:p-6 backdrop-blur-md transition-all duration-300 relative shadow-xl';
+    
+    if (player.chips === 0) {
+      // Eliminated players - heavily dimmed
+      return `${baseClasses} bg-black/40 border-2 border-gray-800/50 opacity-40 grayscale`;
+    }
+    
+    if (player.folded) {
+      // Folded players - dimmed but still visible
+      return `${baseClasses} bg-black/50 border-2 border-gray-600/50 opacity-60`;
+    }
+    
+    if (isCurrentPlayer) {
+      // Current player - highly prominent with animated glow
+      return `${baseClasses} bg-gradient-to-br from-black/90 to-black/80 border-4 border-poker-chipGold animate-pulse-glow-enhanced shadow-poker-glow`;
+    }
+    
+    if (isWinner) {
+      // Winner - gold theme
+      return `${baseClasses} bg-gradient-to-br from-poker-chipGold/30 to-poker-chipGold/20 border-4 border-poker-chipGold shadow-poker-gold`;
+    }
+    
+    if (player.allIn) {
+      // All-in player - special red glow effect
+      return `${baseClasses} bg-gradient-to-br from-red-900/80 to-black/80 border-3 border-red-500 shadow-red-glow`;
+    }
+    
+    // Default seat styling
+    return `${baseClasses} bg-gradient-to-br from-black/80 to-black/70 border-2 border-white/20 hover:border-white/30`;
+  };
+
+  const seatClasses = getSeatClasses();
 
   const getBadgeStyle = (type: ActionBadgeType) => {
     switch (type) {
@@ -306,43 +360,106 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
             WINNER
           </div>
         )}
-        {/* Player info */}
-        <div className="text-center mb-2 xs:mb-2.5 sm:mb-1.5">
-          <div className="flex items-center justify-between gap-2 xs:gap-2.5 mb-1 xs:mb-1.5">
-            <div className="font-bold text-white tracking-wide max-w-[120px] xs:max-w-[140px] truncate" style={{ fontSize: textSize.name }}>
-              {player.name}
-            </div>
-            {isDealer && (
-              <div className="w-7 h-7 xs:w-8 xs:h-8 sm:w-6 sm:h-6 md:w-7 md:h-7 rounded-full bg-white text-black text-sm xs:text-base sm:text-xs md:text-sm font-bold flex items-center justify-center shadow-md">
-                D
+        {/* Enhanced Player Info Section with Avatar */}
+        <div className="flex flex-col items-center mb-3">
+          {/* Avatar and Name Row */}
+          <div className="flex items-center gap-3 mb-2">
+            {/* Player Avatar - Larger and more prominent */}
+            <Avatar className="w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 border-2 border-white/20 shadow-lg">
+              <AvatarFallback 
+                className={`text-lg xs:text-xl sm:text-2xl font-bold ${
+                  player.folded ? 'bg-gray-700 text-gray-400' : 
+                  player.allIn ? 'bg-red-900 text-white' :
+                  isCurrentPlayer ? 'bg-poker-chipGold text-black' :
+                  'bg-gradient-to-br from-blue-600 to-blue-800 text-white'
+                }`}
+              >
+                {player.name.substring(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+
+            <div className="flex flex-col items-start">
+              {/* Player Name */}
+              <div className="font-bold text-white tracking-wide" style={{ fontSize: textSize.name }}>
+                {player.name}
               </div>
+              
+              {/* Chip Count - More prominent */}
+              <div className="flex items-center gap-1 text-poker-chipGold font-mono font-bold" style={{ fontSize: textSize.chips }}>
+                <Coins className="w-6 h-6 xs:w-7 xs:h-7" aria-hidden="true" />
+                <span data-testid={`player-chips-${player.id}`}>
+                  ${animatedChipCount}
+                </span>
+              </div>
+            </div>
+
+            {/* Enhanced Dealer Button */}
+            {isDealer && (
+              <motion.div 
+                className="absolute -top-2 -right-2 w-10 h-10 xs:w-12 xs:h-12 rounded-full bg-gradient-to-br from-poker-chipGold to-yellow-600 text-black font-bold flex items-center justify-center shadow-lg border-2 border-yellow-400"
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                whileHover={{ scale: 1.1 }}
+                aria-label="Dealer button"
+              >
+                <Crown className="w-5 h-5 xs:w-6 xs:h-6" />
+              </motion.div>
             )}
           </div>
-          <div className="flex items-center justify-center gap-1 xs:gap-1.5 text-poker-chipGold font-mono font-bold" style={{ fontSize: textSize.chips }}>
-            <Coins className="w-5 h-5 xs:w-6 xs:h-6 sm:w-4 sm:h-4 md:w-5 md:h-5" aria-hidden="true" />
-            <span data-testid={`player-chips-${player.id}`} aria-label={`${player.name} has ${animatedChipCount} dollars in chips`}>${animatedChipCount}</span>
+
+          {/* Status Indicators Row */}
+          <div className="flex flex-col items-center gap-1">
+            {player.bet > 0 && (
+              <motion.div 
+                className="text-poker-success font-bold" 
+                style={{ fontSize: textSize.bet }}
+                data-testid={`player-bet-${player.id}`}
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.2 }}
+              >
+                BET: ${player.bet}
+              </motion.div>
+            )}
+            
+            {player.folded && (
+              <motion.div 
+                className="px-3 py-1 bg-gray-800 text-gray-400 rounded-full font-bold" 
+                style={{ fontSize: textSize.status }}
+                data-testid={`player-folded-${player.id}`}
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+              >
+                FOLDED
+              </motion.div>
+            )}
+            
+            {player.allIn && !player.folded && (
+              <motion.div 
+                className="px-3 py-1 bg-gradient-to-r from-red-600 to-red-800 text-white rounded-full font-bold shadow-red-glow" 
+                style={{ fontSize: textSize.status }}
+                data-testid={`player-allin-${player.id}`}
+                animate={{ 
+                  scale: [1, 1.05, 1],
+                  boxShadow: [
+                    '0 0 10px rgba(239, 68, 68, 0.5)',
+                    '0 0 20px rgba(239, 68, 68, 0.8)',
+                    '0 0 10px rgba(239, 68, 68, 0.5)',
+                  ]
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                ALL IN!
+              </motion.div>
+            )}
           </div>
-          {player.bet > 0 && (
-            <div className="text-sm xs:text-base sm:text-sm md:text-sm text-poker-success mt-1 font-semibold" data-testid={`player-bet-${player.id}`}>
-              Bet: ${player.bet}
-            </div>
-          )}
-          {player.folded && (
-            <div className="text-sm xs:text-base sm:text-sm md:text-sm text-destructive mt-1 font-semibold" data-testid={`player-folded-${player.id}`} aria-label={`${player.name} has folded`}>
-              Folded
-            </div>
-          )}
-          {player.allIn && (
-            <div className="text-sm xs:text-base sm:text-sm md:text-sm text-poker-chipGold mt-1 font-bold animate-pulse" data-testid={`player-allin-${player.id}`} aria-label={`${player.name} is all-in`}>
-              ALL IN!
-            </div>
-          )}
         </div>
 
-        {/* Player cards */}
+        {/* Enhanced Player Cards Section - Larger and more prominent */}
         <div 
           ref={swipeRef}
-          className="flex gap-1 xs:gap-1.5 justify-center flex-shrink-0" 
+          className="flex gap-2 xs:gap-2.5 justify-center flex-shrink-0 mt-2" 
           data-testid={`player-cards-${player.id}`}
           style={player.isHuman && isCurrentPlayer && !player.folded ? { cursor: 'grab' } : {}}
         >
@@ -354,7 +471,7 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
                 animateDeal={phase === 'pre-flop'}
                 dealDelay={position * 2 * 150}
                 animateFlip={player.isHuman && phase === 'pre-flop'}
-                className="flex-shrink-0"
+                className="flex-shrink-0 scale-110 xs:scale-125 sm:scale-125 hover:scale-[1.3] transition-transform duration-200"
                 colorblindMode={colorblindMode}
               />
               <PlayingCard 
@@ -363,7 +480,7 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
                 animateDeal={phase === 'pre-flop'}
                 dealDelay={position * 2 * 150 + 150}
                 animateFlip={player.isHuman && phase === 'pre-flop'}
-                className="flex-shrink-0"
+                className="flex-shrink-0 scale-110 xs:scale-125 sm:scale-125 hover:scale-[1.3] transition-transform duration-200"
                 colorblindMode={colorblindMode}
               />
             </>
