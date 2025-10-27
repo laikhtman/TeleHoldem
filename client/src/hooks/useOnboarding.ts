@@ -87,18 +87,13 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
 export function useOnboarding() {
   const [isOnboardingActive, setIsOnboardingActive] = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(true); // Default to true to avoid showing on every load
-
-  // Check if user has completed onboarding
-  useEffect(() => {
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(() => {
+    // Initialize from localStorage directly to avoid race conditions
     const completed = localStorage.getItem(STORAGE_KEY);
     const version = localStorage.getItem(VERSION_KEY);
-    
-    // Show onboarding if never completed or if version changed
-    if (!completed || version !== ONBOARDING_VERSION) {
-      setHasCompletedOnboarding(false);
-    }
-  }, []);
+    // Only return true if BOTH completed is 'true' AND version matches
+    return completed === 'true' && version === ONBOARDING_VERSION;
+  });
 
   const startOnboarding = useCallback(() => {
     setIsOnboardingActive(true);

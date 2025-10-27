@@ -338,14 +338,14 @@ class ErrorHandler {
     this.errorLog = this.errorLog.filter(log => log.timestamp > oneHourAgo);
     
     // Cleanup frequency map
-    for (const [key, _] of this.errorFrequency) {
+    Array.from(this.errorFrequency.entries()).forEach(([key, _]) => {
       const lastError = this.errorLog.find(log => 
         `${log.category}_${log.message}` === key
       );
       if (!lastError) {
         this.errorFrequency.delete(key);
       }
-    }
+    });
     
     this.saveErrorLogs();
   }
@@ -357,7 +357,8 @@ class ErrorHandler {
   
   // Check if we have repeated errors
   public hasRepeatedErrors(threshold: number = 5): boolean {
-    for (const count of this.errorFrequency.values()) {
+    const values = Array.from(this.errorFrequency.values());
+    for (const count of values) {
       if (count >= threshold) return true;
     }
     return false;

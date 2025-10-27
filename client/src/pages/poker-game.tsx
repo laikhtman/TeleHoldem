@@ -610,7 +610,11 @@ export default function PokerGame() {
     if (!gameState || !tipsEnabled) return;
 
     // Cards dealt tip
-    if (gameState.phase === 'pre-flop' && gameState.players[0].cards.length === 2) {
+    if (gameState.phase === 'pre-flop' && 
+        gameState.players && 
+        gameState.players[0] && 
+        gameState.players[0].cards && 
+        gameState.players[0].cards.length === 2) {
       triggerTip('cards_dealt');
     }
   }, [gameState?.phase, gameState?.players, triggerTip, tipsEnabled]);

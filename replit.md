@@ -21,6 +21,49 @@ A comprehensive Texas Hold'em poker web application designed to provide a realis
 ## User Preferences
 I prefer iterative development with clear communication on major changes. Please ask before making significant architectural alterations or introducing new external dependencies. I value detailed explanations for complex features or decisions.
 
+## Recent Updates - Section 6 Global Enhancements (Completed)
+
+### Design Tokens System
+- **Comprehensive CSS Variables**: All colors, spacing, typography, radius, shadows, animations, and z-index values centralized in `index.css`
+- **Semantic Color Tokens**: Primary, secondary, success/warning/error states, surface colors, text colors, border colors
+- **Spacing Scale**: Consistent spacing from xs (0.25rem) to 5xl (6rem)
+- **Typography Scale**: Font sizes from xs to 5xl with weights, line heights, letter spacing
+- **Animation Tokens**: Transition durations (fastest to slowest) and easing functions including spring animations
+
+### Responsive Typography
+- **Base Font Sizes**: 14px mobile, 15px tablet, 16px desktop
+- **rem Units**: All typography uses rem for accessibility and user preference support
+- **Modular Scale**: Consistent proportional scaling across all text elements
+
+### Theme Support
+- **Dark/Light Modes**: Full theme system with smooth transitions
+- **ThemeProvider Context**: Centralized theme management with persistence
+- **System Preference Detection**: Respects OS theme preference on first load
+- **localStorage Persistence**: User's theme choice saved and restored
+- **Theme Toggle**: Sun/Moon icon toggle available on all pages
+
+### Performance Optimizations
+- **React.lazy Loading**: Heavy components (charts, achievements, sidebars) loaded on demand
+- **requestAnimationFrame**: Custom hooks for 60fps animations (counters, timers, chip movements)
+- **React.memo**: Memoized components to prevent unnecessary re-renders
+- **Performance Monitoring**: FPS counter and render time tracking utilities
+- **Adaptive Performance**: Low device detection for performance adjustments
+
+### User Onboarding & Tutorials
+- **Interactive Onboarding Flow**: 6-step tutorial for first-time users with spotlight animations
+- **Contextual Game Tips**: Smart tips triggered at key game moments
+- **Comprehensive Help Page**: Full documentation at `/help` with rules, controls, shortcuts, strategy, FAQ
+- **Keyboard Shortcut**: Press "?" to quickly access help from anywhere
+- **Mobile-Specific Guidance**: Special tips for touch users and gestures
+
+### Error Handling
+- **Global ErrorBoundary**: Catches and displays user-friendly error messages
+- **Network Status Detection**: Online/offline monitoring with automatic reconnection
+- **Specific Error States**: Custom handling for lobby, game, auth, and API errors
+- **Retry Mechanisms**: All errors include actionable retry options
+- **Loading States**: Skeleton loaders and progress indicators for better UX
+- **Error Logging**: Comprehensive error tracking with frequency monitoring
+
 ## System Architecture
 
 ### UI/UX Decisions
