@@ -1481,7 +1481,6 @@ export default function PokerGame() {
                 {/* Pot Odds and Win Probability Display */}
                 {gameState.currentPlayerIndex === 0 && 
                  !humanPlayer.folded && 
-                 gameState.phase !== 'waiting' &&
                  gameState.currentBet > humanPlayer.bet && (
                   <div className="mb-3">
                     <PotOddsDisplay

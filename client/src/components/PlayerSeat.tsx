@@ -262,7 +262,7 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
   };
   
   // Swipe up gesture for folding on player's hole cards (only for human player)
-  const swipeRef = useSwipeGesture({
+  const { ref: swipeRef, isSwipingLeft, isSwipingRight } = useSwipeGesture({
     onSwipeUp: () => {
       // Only allow swipe fold for human player when it's their turn
       if (player.isHuman && isCurrentPlayer && onFold && !isProcessing && !player.folded) {
