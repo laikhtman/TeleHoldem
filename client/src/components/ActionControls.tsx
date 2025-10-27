@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { useState, useEffect, useCallback } from 'react';
-import { AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { AlertCircle, ChevronLeft, ChevronRight, X, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useShake } from '@/hooks/useShake';
 import { useToast } from '@/hooks/use-toast';
@@ -48,10 +48,18 @@ export function ActionControls({
   playerFolded = false
 }: ActionControlsProps & { playerFolded?: boolean }) {
   const [betAmount, setBetAmount] = useState(minBet);
+  const [showGestureHints, setShowGestureHints] = useState(() => {
+    // Check localStorage for gesture hints preference
+    const stored = localStorage.getItem('poker-gesture-hints-dismissed');
+    return stored !== 'true';
+  });
   const { isShaking: isSliderShaking, triggerShake: triggerSliderShake } = useShake(400);
   const { toast } = useToast();
   const { playSound } = useSound();
   const { triggerHaptic } = useHaptic();
+  
+  const canRaise = maxBet >= minRaiseAmount && currentBet > 0;
+  const canBet = maxBet >= minBet && currentBet === 0;
 
   useEffect(() => {
     setBetAmount(currentBet > 0 ? minRaiseAmount : minBet);
@@ -243,6 +251,11 @@ export function ActionControls({
     );
   }
 
+  const dismissGestureHints = useCallback(() => {
+    setShowGestureHints(false);
+    localStorage.setItem('poker-gesture-hints-dismissed', 'true');
+  }, []);
+
   return (
     <div className="flex flex-col gap-3 xs:gap-4 relative" ref={swipeRef} role="group" aria-label="Action controls">
       {/* Swipe visual feedback indicators for mobile */}
@@ -256,7 +269,7 @@ export function ActionControls({
             transition={{ duration: 0.2 }}
           >
             <div className={`flex items-center gap-2 px-4 py-2 rounded-full ${
-              isSwipingLeft ? 'bg-destructive/80' : 'bg-accent/80'
+              isSwipingLeft ? 'bg-destructive/80' : 'bg-primary/80'
             } backdrop-blur-sm text-white text-sm font-medium`}>
               {isSwipingLeft ? (
                 <>
@@ -274,64 +287,104 @@ export function ActionControls({
         )}
       </AnimatePresence>
 
-      {/* Swipe hint for mobile users */}
-      <div className="text-xs text-muted-foreground text-center py-1 md:hidden">
-        Swipe left to fold • Swipe right to {canCheck ? 'check' : 'call'}
-      </div>
+      {/* Consolidated gesture hint for mobile users - dismissible */}
+      {showGestureHints && (
+        <motion.div 
+          className="bg-card/90 backdrop-blur-sm border border-border rounded-lg p-2 px-3 mb-2 flex items-center justify-between gap-2 md:hidden"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+        >
+          <div className="flex items-center gap-2">
+            <Info className="w-4 h-4 text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">
+              Swipe left to fold • Swipe right to {canCheck ? 'check' : 'call'} • Double-tap to check/call
+            </span>
+          </div>
+          <Button
+            onClick={dismissGestureHints}
+            variant="ghost"
+            size="sm"
+            className="h-6 w-6 p-0"
+            aria-label="Dismiss gesture hints"
+          >
+            <X className="w-3 h-3" />
+          </Button>
+        </motion.div>
+      )}
 
       <div className="flex gap-2 xs:gap-3 md:gap-2 lg:gap-4 justify-center flex-wrap">
+        {/* Fold Button - Destructive variant (red) */}
         <Button
           onClick={handleFold}
           variant="destructive"
           size="lg"
           disabled={disabled}
           data-testid="button-fold"
-          className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] min-h-[52px] xs:min-h-[56px] sm:min-h-[52px] text-base font-bold poker-button-glow"
+          className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] text-base font-bold"
           aria-label="Fold your hand. Keyboard shortcut: F key"
           aria-disabled={disabled}
         >
-          Fold <span className="text-xs ml-1 opacity-70 hidden sm:inline">(F)</span>
+          Fold <span className="text-xs ml-1 opacity-70">(F)</span>
         </Button>
         
+        {/* Check/Call Button - Primary variant */}
         {canCheck ? (
           <Button
             onClick={handleCheck}
-            variant="secondary"
+            variant="default"
             size="lg"
             disabled={disabled}
             data-testid="button-check"
-            className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] min-h-[52px] xs:min-h-[56px] sm:min-h-[52px] text-base font-bold bg-accent hover:bg-accent/90 poker-button-glow"
+            className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] text-base font-bold"
             aria-label="Check - pass your turn without betting. Keyboard shortcut: C key"
             aria-disabled={disabled}
           >
-            Check <span className="text-xs ml-1 opacity-70 hidden sm:inline">(C)</span>
+            Check <span className="text-xs ml-1 opacity-70">(C)</span>
           </Button>
         ) : (
           <Button
             onClick={handleCall}
-            variant="secondary"
+            variant="default"
             size="lg"
             disabled={disabled || amountToCall <= 0}
             data-testid="button-call"
-            className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] min-h-[52px] xs:min-h-[56px] sm:min-h-[52px] text-base font-bold bg-accent hover:bg-accent/90 poker-button-glow"
+            className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] text-base font-bold"
             aria-label={`Call ${amountToCall} dollars to match the current bet. Keyboard shortcut: C key`}
             aria-disabled={disabled || amountToCall <= 0}
           >
-            Call ${amountToCall} <span className="text-xs ml-1 opacity-70 hidden sm:inline">(C)</span>
+            Call ${amountToCall} <span className="text-xs ml-1 opacity-70">(C)</span>
           </Button>
         )}
         
+        {/* Raise Button - Secondary variant, only shown when raising is allowed */}
+        {(canRaise || canBet) && (
+          <Button
+            onClick={handleBetOrRaise}
+            variant="secondary"
+            size="lg"
+            disabled={disabled || (!canRaise && !canBet)}
+            data-testid="button-bet-raise"
+            className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[140px] text-base font-bold"
+            aria-label={currentBet === 0 ? `Bet ${betAmount} dollars. Keyboard shortcut: R key` : `Raise to ${betAmount} dollars. Keyboard shortcut: R key`}
+            aria-disabled={disabled || (!canRaise && !canBet)}
+          >
+            {currentBet === 0 ? `Bet $${betAmount}` : `Raise to $${betAmount}`} <span className="text-xs ml-1 opacity-70">(R)</span>
+          </Button>
+        )}
+        
+        {/* All-in Button - Special highlight color */}
         <Button
-          onClick={handleBetOrRaise}
-          variant="default"
+          onClick={handleAllIn}
+          variant="outline"
           size="lg"
-          disabled={disabled || maxBet < minBet}
-          data-testid="button-bet-raise"
-          className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[140px] min-h-[52px] xs:min-h-[56px] sm:min-h-[52px] text-base bg-poker-chipGold text-black hover:bg-poker-chipGold/90 font-bold poker-button-glow"
-          aria-label={currentBet === 0 ? `Bet ${betAmount} dollars. Keyboard shortcut: R key` : `Raise to ${betAmount} dollars. Keyboard shortcut: R key`}
-          aria-disabled={disabled || maxBet < minBet}
+          disabled={disabled || maxBet <= (currentBet > 0 ? minRaiseAmount : minBet)}
+          data-testid="button-all-in"
+          className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[140px] text-base font-bold bg-poker-chipGold/20 border-2 border-poker-chipGold text-poker-chipGold hover:bg-poker-chipGold/30"
+          aria-label={`Go all-in with ${maxBet} dollars. Keyboard shortcut: A key`}
+          aria-disabled={disabled || maxBet <= (currentBet > 0 ? minRaiseAmount : minBet)}
         >
-          {currentBet === 0 ? `Bet $${betAmount}` : `Raise to $${betAmount}`} <span className="text-xs ml-1 opacity-70 hidden sm:inline">(R)</span>
+          All-in ${maxBet} <span className="text-xs ml-1 opacity-70">(A)</span>
         </Button>
       </div>
 
@@ -421,80 +474,134 @@ export function ActionControls({
             </div>
           </div>
 
-          {/* Quick bet buttons optimized for thumb reach on mobile */}
-          <div className="grid grid-cols-2 xs:flex gap-3 xs:gap-4 md:gap-2 lg:gap-4 xs:justify-center xs:flex-wrap">
-            <Button
-              onClick={() => handleQuickBet(halfPot)}
-              variant="outline"
-              disabled={disabled || halfPot < (currentBet > 0 ? minRaiseAmount : minBet) || halfPot > maxBet}
-              data-testid="button-quick-half-pot"
-              className="min-h-[56px] xs:min-h-[60px] sm:min-h-[52px] text-base font-bold bg-background/60 backdrop-blur-sm border-2 hover:bg-accent/30 active:scale-95 transition-transform"
-              aria-label={`Quick bet half pot: ${halfPot} dollars`}
-            >
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-sm xs:text-base">½ POT</span>
-                <span className="text-xs xs:text-sm opacity-80">${halfPot}</span>
-              </div>
-            </Button>
-            <Button
-              onClick={() => handleQuickBet(potSize)}
-              variant="outline"
-              disabled={disabled || potSize < (currentBet > 0 ? minRaiseAmount : minBet) || potSize > maxBet}
-              data-testid="button-quick-pot"
-              className="min-h-[56px] xs:min-h-[60px] sm:min-h-[52px] text-base font-bold bg-background/60 backdrop-blur-sm border-2 hover:bg-accent/30 active:scale-95 transition-transform"
-              aria-label={`Quick bet pot size: ${potSize} dollars`}
-            >
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-sm xs:text-base">POT</span>
-                <span className="text-xs xs:text-sm opacity-80">${potSize}</span>
-              </div>
-            </Button>
-            <Button
-              onClick={() => handleQuickBet(potSize * 2)}
-              variant="outline"
-              disabled={disabled || potSize * 2 < (currentBet > 0 ? minRaiseAmount : minBet) || potSize * 2 > maxBet}
-              data-testid="button-quick-2x-pot"
-              className="min-h-[56px] xs:min-h-[60px] sm:min-h-[52px] text-base font-bold bg-background/60 backdrop-blur-sm border-2 hover:bg-accent/30 active:scale-95 transition-transform"
-              aria-label={`Quick bet double pot: ${potSize * 2} dollars`}
-            >
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-sm xs:text-base">2× POT</span>
-                <span className="text-xs xs:text-sm opacity-80">${potSize * 2}</span>
-              </div>
-            </Button>
-            <Button
-              onClick={handleAllIn}
-              variant="outline"
-              disabled={disabled || maxBet <= (currentBet > 0 ? minRaiseAmount : minBet)}
-              data-testid="button-quick-all-in"
-              className="min-h-[56px] xs:min-h-[60px] sm:min-h-[52px] text-base font-bold bg-poker-chipGold/20 backdrop-blur-sm border-2 border-poker-chipGold/60 text-poker-chipGold hover:bg-poker-chipGold/30 active:scale-95 transition-transform shadow-lg"
-              aria-label={`Go all-in with all your chips: ${maxBet} dollars. Keyboard shortcut: A key`}
-            >
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-sm xs:text-base">ALL-IN</span>
-                <span className="text-xs xs:text-sm opacity-90">${maxBet}</span>
-              </div>
-            </Button>
+          {/* Large preset bet buttons */}
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground text-center">Quick bet options:</p>
+            <div className="flex gap-2 justify-center flex-wrap">
+              <Button
+                onClick={() => handleQuickBet(halfPot)}
+                variant={betAmount === halfPot ? "default" : "outline"}
+                size="lg"
+                disabled={disabled || halfPot < (currentBet > 0 ? minRaiseAmount : minBet) || halfPot > maxBet}
+                data-testid="button-quick-half-pot"
+                className={`min-w-[100px] font-bold transition-all ${
+                  betAmount === halfPot ? 'ring-2 ring-primary ring-offset-2' : ''
+                }`}
+                aria-label={`Quick bet half pot: ${halfPot} dollars`}
+              >
+                <div className="flex flex-col items-center">
+                  <span className="text-base">½ POT</span>
+                  <span className="text-xs opacity-80">${halfPot}</span>
+                </div>
+              </Button>
+              <Button
+                onClick={() => handleQuickBet(potSize)}
+                variant={betAmount === potSize ? "default" : "outline"}
+                size="lg"
+                disabled={disabled || potSize < (currentBet > 0 ? minRaiseAmount : minBet) || potSize > maxBet}
+                data-testid="button-quick-pot"
+                className={`min-w-[100px] font-bold transition-all ${
+                  betAmount === potSize ? 'ring-2 ring-primary ring-offset-2' : ''
+                }`}
+                aria-label={`Quick bet pot size: ${potSize} dollars`}
+              >
+                <div className="flex flex-col items-center">
+                  <span className="text-base">POT</span>
+                  <span className="text-xs opacity-80">${potSize}</span>
+                </div>
+              </Button>
+              <Button
+                onClick={() => handleQuickBet(potSize * 2)}
+                variant={betAmount === potSize * 2 ? "default" : "outline"}
+                size="lg"
+                disabled={disabled || potSize * 2 < (currentBet > 0 ? minRaiseAmount : minBet) || potSize * 2 > maxBet}
+                data-testid="button-quick-2x-pot"
+                className={`min-w-[100px] font-bold transition-all ${
+                  betAmount === potSize * 2 ? 'ring-2 ring-primary ring-offset-2' : ''
+                }`}
+                aria-label={`Quick bet double pot: ${potSize * 2} dollars`}
+              >
+                <div className="flex flex-col items-center">
+                  <span className="text-base">2× POT</span>
+                  <span className="text-xs opacity-80">${potSize * 2}</span>
+                </div>
+              </Button>
+              <Button
+                onClick={() => handleQuickBet(maxBet)}
+                variant={betAmount === maxBet ? "default" : "outline"}
+                size="lg"
+                disabled={disabled || maxBet <= (currentBet > 0 ? minRaiseAmount : minBet)}
+                data-testid="button-quick-all-in-preset"
+                className={`min-w-[100px] font-bold bg-poker-chipGold/20 border-2 border-poker-chipGold text-poker-chipGold hover:bg-poker-chipGold/30 transition-all ${
+                  betAmount === maxBet ? 'ring-2 ring-poker-chipGold ring-offset-2' : ''
+                }`}
+                aria-label={`Set bet to all-in amount: ${maxBet} dollars`}
+              >
+                <div className="flex flex-col items-center">
+                  <span className="text-base">ALL-IN</span>
+                  <span className="text-xs opacity-90">${maxBet}</span>
+                </div>
+              </Button>
+            </div>
           </div>
 
-          <Slider
-            value={[betAmount]}
-            onValueChange={handleBetChange}
-            min={currentBet > 0 ? minRaiseAmount : minBet}
-            max={maxBet}
-            step={10}
-            disabled={disabled}
-            data-testid="slider-bet"
-            className="w-full [&>span:first-child]:h-2 [&>span:first-child]:md:h-3"
-            aria-label={`Bet amount slider. Range from ${currentBet > 0 ? minRaiseAmount : minBet} to ${maxBet} dollars. Current value: ${betAmount} dollars`}
-            aria-describedby="bet-amount-description"
-          />
-          <span id="bet-amount-description" className="sr-only">
-            Use the slider to adjust your bet amount. Minimum bet is {currentBet > 0 ? minRaiseAmount : minBet} dollars. Maximum bet is {maxBet} dollars.
-          </span>
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>${currentBet > 0 ? minRaiseAmount : minBet}</span>
-            <span>${maxBet}</span>
+          {/* Enhanced slider with visual improvements */}
+          <div className="space-y-2">
+            <Slider
+              value={[betAmount]}
+              onValueChange={handleBetChange}
+              min={currentBet > 0 ? minRaiseAmount : minBet}
+              max={maxBet}
+              step={10}
+              disabled={disabled}
+              showTickMarks={true}
+              tickInterval={potSize > 0 ? potSize : 100}
+              data-testid="slider-bet"
+              className="w-full"
+              aria-label={`Bet amount slider. Range from ${currentBet > 0 ? minRaiseAmount : minBet} to ${maxBet} dollars. Current value: ${betAmount} dollars`}
+              aria-describedby="bet-amount-description"
+            />
+            <span id="bet-amount-description" className="sr-only">
+              Use the slider to adjust your bet amount. Minimum bet is {currentBet > 0 ? minRaiseAmount : minBet} dollars. Maximum bet is {maxBet} dollars.
+            </span>
+            
+            {/* Enhanced slider range labels with color indicators */}
+            <div className="flex justify-between items-center">
+              <div className="flex flex-col items-start">
+                <span className="text-xs font-bold text-muted-foreground">MIN</span>
+                <span className="text-sm font-mono">${currentBet > 0 ? minRaiseAmount : minBet}</span>
+              </div>
+              
+              {potSize > 0 && (
+                <>
+                  {halfPot <= maxBet && (
+                    <div className="flex flex-col items-center">
+                      <span className="text-xs font-bold text-green-500">½ POT</span>
+                      <span className="text-sm font-mono">${halfPot}</span>
+                    </div>
+                  )}
+                  
+                  {potSize <= maxBet && (
+                    <div className="flex flex-col items-center">
+                      <span className="text-xs font-bold text-blue-500">POT</span>
+                      <span className="text-sm font-mono">${potSize}</span>
+                    </div>
+                  )}
+                  
+                  {potSize * 2 <= maxBet && (
+                    <div className="flex flex-col items-center">
+                      <span className="text-xs font-bold text-orange-500">2× POT</span>
+                      <span className="text-sm font-mono">${potSize * 2}</span>
+                    </div>
+                  )}
+                </>
+              )}
+              
+              <div className="flex flex-col items-end">
+                <span className="text-xs font-bold text-poker-chipGold">MAX</span>
+                <span className="text-sm font-mono">${maxBet}</span>
+              </div>
+            </div>
           </div>
         </div>
       )}
