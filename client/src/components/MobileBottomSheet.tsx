@@ -195,13 +195,19 @@ export function MobileBottomSheet({
                           <Calculator className="w-4 h-4" />
                           <span className="font-medium">Pot Odds</span>
                         </div>
-                        {gameState.pot > 0 && (
-                          <Badge variant="outline">${gameState.pot}</Badge>
+                        {gameState.pots.length > 0 && (
+                          <Badge variant="outline">${gameState.pots.reduce((total, pot) => total + pot.amount, 0)}</Badge>
                         )}
                       </Button>
                     </CollapsibleTrigger>
                     <CollapsibleContent className="pt-2">
-                      <PotOddsDisplay gameState={gameState} />
+                      <PotOddsDisplay 
+                        amountToCall={Math.max(0, gameState.currentBet - gameState.players[0].bet)}
+                        potSize={gameState.pots.reduce((total, pot) => total + pot.amount, 0)}
+                        playerCards={gameState.players[0].hand}
+                        communityCards={gameState.communityCards}
+                        numOpponents={gameState.players.filter(p => !p.folded && p.id !== gameState.players[0].id).length}
+                      />
                     </CollapsibleContent>
                   </Collapsible>
                   

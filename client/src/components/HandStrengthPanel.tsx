@@ -27,7 +27,7 @@ interface DecisionHelperProps {
 
 function DecisionHelper({ gameState }: DecisionHelperProps) {
   const player = gameState.players[0];
-  const potSize = gameState.pot;
+  const potSize = gameState.pots.reduce((total, pot) => total + pot.amount, 0);
   const toCall = gameState.currentBet - player.bet;
   const stackSize = player.chips;
   
@@ -77,7 +77,9 @@ function DecisionHelper({ gameState }: DecisionHelperProps) {
     
     // Phase-specific advice
     if (gameState.phase === 'pre-flop') {
-      if (gameState.currentBet > gameState.bigBlind * 3) {
+      // Assume default big blind of 20 (or check if current bet is large)
+      const estimatedBigBlind = 20;
+      if (gameState.currentBet > estimatedBigBlind * 3) {
         suggestions.push({
           type: 'warning' as const,
           text: 'Large pre-flop raise - proceed with caution'
@@ -223,15 +225,21 @@ export function HandStrengthPanel({
                   <Calculator className="w-4 h-4" />
                   <span className="font-medium">Pot Odds</span>
                 </div>
-                {gameState.pot > 0 && (
+                {gameState.pots.length > 0 && (
                   <Badge variant="outline">
-                    ${gameState.pot}
+                    ${gameState.pots.reduce((total, pot) => total + pot.amount, 0)}
                   </Badge>
                 )}
               </Button>
             </CollapsibleTrigger>
             <CollapsibleContent className="pt-2">
-              <PotOddsDisplay gameState={gameState} />
+              <PotOddsDisplay 
+                amountToCall={Math.max(0, gameState.currentBet - player.bet)}
+                potSize={gameState.pots.reduce((total, pot) => total + pot.amount, 0)}
+                playerCards={player.hand}
+                communityCards={gameState.communityCards}
+                numOpponents={gameState.players.filter(p => !p.folded && p.id !== player.id).length}
+              />
             </CollapsibleContent>
           </Collapsible>
           
@@ -260,7 +268,7 @@ export function HandStrengthPanel({
               </Button>
             </CollapsibleTrigger>
             <CollapsibleContent className="pt-2">
-              {hasCards && gameState.pot > 0 ? (
+              {hasCards && gameState.pots.reduce((total, pot) => total + pot.amount, 0) > 0 ? (
                 <DecisionHelper gameState={gameState} />
               ) : (
                 <div className="text-sm text-muted-foreground text-center py-4">
