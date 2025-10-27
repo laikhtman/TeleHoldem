@@ -19,10 +19,11 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { WinnerCelebration } from '@/components/WinnerCelebration';
 import { HandStrengthIndicator } from '@/components/HandStrengthIndicator';
+import { HandStrengthPanel } from '@/components/HandStrengthPanel';
 import { PotOddsDisplay } from '@/components/PotOddsDisplay';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FlyingChip } from '@/components/Chip';
-import { Trash2, ChevronRight, ChevronLeft, TrendingUp, Settings } from 'lucide-react';
+import { Trash2, ChevronRight, ChevronLeft, TrendingUp, Settings, Menu } from 'lucide-react';
 import { PokerLoader, PokerSpinner } from '@/components/PokerLoader';
 import { useSound } from '@/hooks/useSound';
 import { useHaptic } from '@/hooks/useHaptic';
@@ -84,6 +85,7 @@ export default function PokerGame() {
   const [isHistoryCollapsed, setIsHistoryCollapsed] = useState(false);
   const [isHandStrengthCollapsed, setIsHandStrengthCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isTabletPanelOpen, setIsTabletPanelOpen] = useState(false);
   const [tableAspect, setTableAspect] = useState<string>('3 / 2');
   const potPosition = useRef<{ x: number; y: number }>({ x: 400, y: 150 });
   const { toast } = useToast();
@@ -1237,17 +1239,47 @@ export default function PokerGame() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-2 sm:p-4 lg:p-6 relative overflow-hidden" role="main" aria-label="Poker game table">
-      {/* Skip link for keyboard users */}
-      <a 
-        href="#action-controls" 
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[200] focus:bg-poker-chipGold focus:text-black focus:px-4 focus:py-2 focus:rounded-md focus:font-bold"
-        data-testid="skip-to-controls"
-      >
-        Skip to action controls
-      </a>
+    <div className="min-h-screen bg-background flex flex-col lg:flex-row relative overflow-hidden" role="main" aria-label="Poker game table">
+      {/* Desktop Sidebar - Left Side (Hidden on Mobile/Tablet) */}
+      <div className="hidden lg:block w-[300px] h-screen border-r bg-background flex-shrink-0">
+        <HandStrengthPanel gameState={gameState} />
+      </div>
       
-      {/* Network Status Indicator */}
+      {/* Tablet Overlay Panel */}
+      {isTabletPanelOpen && (
+        <div className="hidden md:block lg:hidden">
+          <HandStrengthPanel 
+            gameState={gameState} 
+            isTablet={true}
+            onClose={() => setIsTabletPanelOpen(false)}
+          />
+        </div>
+      )}
+      
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-h-screen relative">
+        {/* Tablet Toggle Button (Hidden on Mobile and Desktop) */}
+        <Button
+          variant="outline"
+          size="icon"
+          className="hidden md:flex lg:hidden fixed left-4 top-20 z-50 h-12 w-12 rounded-full shadow-lg bg-background/95 backdrop-blur-sm"
+          onClick={() => setIsTabletPanelOpen(!isTabletPanelOpen)}
+          data-testid="button-toggle-tablet-panel"
+          aria-label={isTabletPanelOpen ? "Hide Hand Analysis panel" : "Show Hand Analysis panel"}
+        >
+          <Menu className="w-5 h-5" />
+        </Button>
+        
+        {/* Skip link for keyboard users */}
+        <a 
+          href="#action-controls" 
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[200] focus:bg-poker-chipGold focus:text-black focus:px-4 focus:py-2 focus:rounded-md focus:font-bold"
+          data-testid="skip-to-controls"
+        >
+          Skip to action controls
+        </a>
+        
+        {/* Network Status Indicator */}
       {(!isOnline || isReconnecting) && (
         <div 
           className="fixed top-[calc(var(--safe-area-top,0px)+4.5rem)] left-1/2 -translate-x-1/2 z-[140] 
@@ -1318,42 +1350,9 @@ export default function PokerGame() {
         />
       </div>
 
-      {/* Cleaner Centered Layout */}
-      <div className="w-full max-w-[2000px] flex flex-col lg:flex-row gap-4 lg:gap-6 items-start justify-center">
-        
-        {/* Hand Strength Indicator - Desktop Only (Hidden on Mobile < 768px) */}
-        <div className="hidden md:block md:sticky lg:sticky md:top-6 lg:top-6 md:self-start lg:self-start order-2 lg:order-1 w-full md:w-72 lg:w-64 xl:w-72">
-          {/* Toggle Button - Tablet Only (Hidden on Mobile Phones and Desktop) - Made larger for better tap targets */}
-          <Button
-            variant="outline"
-            size="lg"
-            className={`hidden md:block fixed left-[calc(0.5rem+var(--safe-area-left))] top-[calc(5rem+var(--safe-area-top))] z-[140] h-12 w-12 rounded-full shadow-lg bg-card/95 backdrop-blur-sm border-2`}
-            onClick={() => setIsHandStrengthCollapsed(!isHandStrengthCollapsed)}
-            data-testid="button-toggle-hand-strength"
-            aria-label={isHandStrengthCollapsed ? "Show Hand Strength panel" : "Hide Hand Strength panel"}
-          >
-            {isHandStrengthCollapsed ? <ChevronRight className="w-6 h-6" /> : <ChevronLeft className="w-6 h-6" />}
-          </Button>
-
-          {/* Panel Content */}
-          <div className={`bg-card/70 backdrop-blur-sm border border-card-border rounded-lg p-3 shadow-sm ${isHandStrengthCollapsed ? 'hidden' : ''}`}>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-semibold flex items-center gap-1.5 text-muted-foreground">
-                <TrendingUp className="w-3.5 h-3.5 text-poker-chipGold" />
-                Hand Strength
-              </h3>
-            </div>
-            {gameState && (
-              <HandStrengthIndicator
-                hand={gameState.players[0].hand}
-                communityCards={gameState.communityCards}
-              />
-            )}
-          </div>
-        </div>
-
-        {/* Main Game Area - Center - Takes Priority */}
-        <div className="flex flex-col gap-4 items-center flex-1 order-1 lg:order-2 w-full max-w-5xl mx-auto px-[calc(0.5rem+var(--safe-area-left))] xs:px-[calc(0.75rem+var(--safe-area-left))] sm:px-[calc(1rem+var(--safe-area-left))] md:px-0 pb-[calc(0.5rem+var(--safe-area-bottom))]">
+      {/* Main Game Content - Center */}
+      <div className="flex-1 flex items-center justify-center p-2 sm:p-4 lg:p-6">
+        <div className="w-full max-w-5xl flex flex-col gap-4 items-center">
           {/* Poker Table with Wood Border */}
           <div 
             className="rounded-[100px] xs:rounded-[120px] sm:rounded-[165px] md:rounded-[190px] lg:rounded-[220px] wood-grain p-[7px] xs:p-[8px] sm:p-[10px] md:p-[11px] lg:p-[12px] table-edge-glow w-full max-w-[96%] xs:max-w-[97%] sm:max-w-[98%] md:max-w-full md:min-h-[60vh] lg:min-h-[70vh] max-h-[min(68vh,720px)] xs:max-h-[min(70vh,760px)] sm:max-h-[min(72vh,780px)] md:max-h-[min(75vh,800px)] mx-auto"
@@ -1516,19 +1515,6 @@ export default function PokerGame() {
           </div>
         </div>
 
-        {/* Action History - Right Sidebar (Desktop Only) - Completely Hidden on Mobile */}
-        <div className="hidden lg:block lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-3rem)] order-3 lg:w-72 xl:w-80">
-          <div className="flex flex-col gap-3 pointer-events-auto">
-            <div className="lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto lg:pr-2 space-y-3">
-              <ActionHistory 
-                history={gameState.actionHistory} 
-                currentPlayerName={gameState.players[0].name}
-              />
-              <SessionStats stats={gameState.sessionStats} />
-              <HandDistributionChart data={gameState.sessionStats.handDistribution} />
-              <AchievementsList achievements={gameState.achievements} />
-            </div>
-          </div>
         </div>
       </div>
 

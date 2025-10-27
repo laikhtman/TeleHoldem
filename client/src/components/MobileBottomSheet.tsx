@@ -2,13 +2,20 @@ import { useRef } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { TrendingUp, History, BarChart3 } from 'lucide-react';
+import { TrendingUp, History, BarChart3, Activity } from 'lucide-react';
 import { MobileStatsCompact } from './MobileStatsCompact';
 import { SessionStats } from './SessionStats';
 import { ActionHistory } from './ActionHistory';
 import { HandDistributionChart } from './HandDistributionChart';
 import { AchievementsList } from './AchievementsList';
+import { HandStrengthIndicator } from './HandStrengthIndicator';
+import { PotOddsDisplay } from './PotOddsDisplay';
 import { GameState } from '@shared/schema';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ChevronDown, ChevronRight, Calculator, HelpCircle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import { useState } from 'react';
 
 interface MobileBottomSheetProps {
   open: boolean;
@@ -23,6 +30,9 @@ export function MobileBottomSheet({
 }: MobileBottomSheetProps) {
   const touchStartY = useRef<number>(0);
   const touchEndY = useRef<number>(0);
+  const [handStrengthOpen, setHandStrengthOpen] = useState(true);
+  const [potOddsOpen, setPotOddsOpen] = useState(true);
+  const [helperOpen, setHelperOpen] = useState(true);
 
   const handleHeaderTouchStart = (e: React.TouchEvent) => {
     touchStartY.current = e.touches[0].clientY;
@@ -97,36 +107,125 @@ export function MobileBottomSheet({
           <SheetTitle className="text-center" id="mobile-sheet-description">Game Info</SheetTitle>
         </SheetHeader>
         
-        <Tabs defaultValue="essential" className="mt-4 h-[calc(100%-4rem)] overflow-hidden">
-          <TabsList className="grid w-full grid-cols-3 mb-4 h-11" aria-label="Game information tabs">
+        <Tabs defaultValue="hand-analysis" className="mt-4 h-[calc(100%-4rem)] overflow-hidden">
+          <TabsList className="grid w-full grid-cols-4 mb-4 h-11" aria-label="Game information tabs">
+            <TabsTrigger 
+              value="hand-analysis" 
+              data-testid="tab-hand-analysis" 
+              className="text-xs sm:text-sm min-h-11 px-2"
+              aria-label="Hand analysis tab"
+            >
+              <Activity className="w-3.5 h-3.5 mr-1 sm:w-4 sm:h-4 sm:mr-1.5" aria-hidden="true" />
+              <span className="truncate">Analysis</span>
+            </TabsTrigger>
             <TabsTrigger 
               value="essential" 
               data-testid="tab-essential" 
-              className="text-sm min-h-11"
+              className="text-xs sm:text-sm min-h-11 px-2"
               aria-label="Essential stats tab"
             >
-              <TrendingUp className="w-4 h-4 mr-1.5" aria-hidden="true" />
-              Essential
+              <TrendingUp className="w-3.5 h-3.5 mr-1 sm:w-4 sm:h-4 sm:mr-1.5" aria-hidden="true" />
+              <span className="truncate">Stats</span>
             </TabsTrigger>
             <TabsTrigger 
               value="detailed" 
               data-testid="tab-detailed" 
-              className="text-sm min-h-11"
+              className="text-xs sm:text-sm min-h-11 px-2"
               aria-label="Detailed stats and achievements tab"
             >
-              <BarChart3 className="w-4 h-4 mr-1.5" aria-hidden="true" />
-              Detailed
+              <BarChart3 className="w-3.5 h-3.5 mr-1 sm:w-4 sm:h-4 sm:mr-1.5" aria-hidden="true" />
+              <span className="truncate">Detail</span>
             </TabsTrigger>
             <TabsTrigger 
               value="history" 
               data-testid="tab-history" 
-              className="text-sm min-h-11"
+              className="text-xs sm:text-sm min-h-11 px-2"
               aria-label="Action history tab"
             >
-              <History className="w-4 h-4 mr-1.5" aria-hidden="true" />
-              History
+              <History className="w-3.5 h-3.5 mr-1 sm:w-4 sm:h-4 sm:mr-1.5" aria-hidden="true" />
+              <span className="truncate">History</span>
             </TabsTrigger>
           </TabsList>
+          
+          <TabsContent value="hand-analysis" className="h-[calc(100%-3.5rem)] overflow-y-auto mt-0 px-3">
+            <div className="space-y-4 pb-4">
+              {gameState && (
+                <>
+                  {/* Hand Strength Section */}
+                  <Collapsible open={handStrengthOpen} onOpenChange={setHandStrengthOpen}>
+                    <CollapsibleTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-between p-3 h-auto hover-elevate"
+                        data-testid="button-toggle-hand-strength-mobile"
+                      >
+                        <div className="flex items-center gap-2">
+                          {handStrengthOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                          <span className="font-medium">Current Hand</span>
+                        </div>
+                        {gameState.currentPlayerIndex === 0 && (
+                          <Badge variant="secondary" className="animate-pulse">Your Turn</Badge>
+                        )}
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="pt-2">
+                      {gameState.players[0].hand && gameState.players[0].hand.length > 0 ? (
+                        <HandStrengthIndicator
+                          hand={gameState.players[0].hand}
+                          communityCards={gameState.communityCards}
+                        />
+                      ) : (
+                        <div className="text-sm text-muted-foreground text-center py-4">
+                          Waiting for cards...
+                        </div>
+                      )}
+                    </CollapsibleContent>
+                  </Collapsible>
+                  
+                  {/* Pot Odds Section */}
+                  <Collapsible open={potOddsOpen} onOpenChange={setPotOddsOpen}>
+                    <CollapsibleTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-between p-3 h-auto hover-elevate"
+                        data-testid="button-toggle-pot-odds-mobile"
+                      >
+                        <div className="flex items-center gap-2">
+                          {potOddsOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                          <Calculator className="w-4 h-4" />
+                          <span className="font-medium">Pot Odds</span>
+                        </div>
+                        {gameState.pot > 0 && (
+                          <Badge variant="outline">${gameState.pot}</Badge>
+                        )}
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="pt-2">
+                      <PotOddsDisplay gameState={gameState} />
+                    </CollapsibleContent>
+                  </Collapsible>
+                  
+                  {/* Quick Stats */}
+                  <div className="p-4 bg-muted/30 rounded-lg">
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">Stack:</span>
+                        <span className="ml-2 font-mono font-semibold">
+                          ${gameState.players[0].chips}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">To Call:</span>
+                        <span className="ml-2 font-mono font-semibold">
+                          ${Math.max(0, gameState.currentBet - gameState.players[0].bet)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </TabsContent>
           
           <TabsContent value="essential" className="h-[calc(100%-3.5rem)] overflow-y-auto mt-0 px-1">
             <div className="pb-4">
