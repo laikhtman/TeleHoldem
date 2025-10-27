@@ -274,16 +274,23 @@ export function PlayingCard({
         }}
       >
         <div 
-          className="w-full h-full rounded-lg overflow-hidden border-2 border-gray-500 shadow-lg"
+          className="w-full h-full rounded-lg overflow-hidden shadow-card-3d bg-gradient-to-br from-blue-700 via-blue-600 to-blue-800 border border-gray-700/80"
           data-testid="card-back"
         >
+          {/* High-quality card back with pattern */}
           <svg
             viewBox="0 0 169.075 244.640"
             className="w-full h-full"
             xmlns="http://www.w3.org/2000/svg"
+            style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))' }}
           >
-            <use href={`${svgCardsPath}#back`} fill="#0062ff" />
+            <use href={`${svgCardsPath}#back`} fill="#1e40af" />
           </svg>
+          {/* Subtle texture overlay for premium feel */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-white/10 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-blue-500/10 to-transparent pointer-events-none" />
+          {/* Inner border for depth */}
+          <div className="absolute inset-[2px] rounded-md border border-blue-400/20 pointer-events-none" />
         </div>
       </motion.div>
       
@@ -296,20 +303,33 @@ export function PlayingCard({
         }}
       >
         <div 
-          className={`w-full h-full rounded-lg overflow-hidden border-2 border-gray-500 shadow-lg relative ${isTouched ? 'ring-2 ring-poker-chipGold ring-opacity-50' : ''}`}
+          className={`w-full h-full rounded-lg overflow-hidden shadow-card-3d relative bg-white ${isTouched ? 'ring-2 ring-poker-chipGold ring-opacity-70' : ''}`}
           data-testid={`card-${card.id}`}
         >
+          {/* Premium white card background with subtle gradient */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white via-gray-50 to-white pointer-events-none" />
+          
           {/* Colorblind-friendly suit indicator badge (only in colorblind mode) */}
           {colorblindMode && getSuitIndicator()}
           
-          {/* SVG Card from professional deck */}
+          {/* High-quality SVG Card with enhanced rendering */}
           <svg
             viewBox="0 0 169.075 244.640"
-            className="w-full h-full"
+            className="w-full h-full relative z-10"
             xmlns="http://www.w3.org/2000/svg"
+            style={{ 
+              filter: 'contrast(1.1) brightness(1.02)',
+              imageRendering: 'crisp-edges'
+            }}
           >
             <use href={`${svgCardsPath}#${cardSvgId}`} />
           </svg>
+          
+          {/* Subtle inner border for depth and separation */}
+          <div className="absolute inset-[1px] rounded-md border border-gray-300/50 pointer-events-none" />
+          
+          {/* Gloss effect for premium card feel */}
+          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-transparent to-white/20 pointer-events-none" />
         </div>
       </motion.div>
     </motion.div>

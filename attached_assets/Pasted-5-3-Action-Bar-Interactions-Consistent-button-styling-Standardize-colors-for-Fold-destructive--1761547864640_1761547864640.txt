@@ -1,0 +1,27 @@
+5.3 Action Bar & Interactions
+
+Consistent button styling – Standardize colors for Fold (destructive red), Call/Check (primary color), Raise (secondary color) and All‑in (highlight color). Ensure each button is at least 48 px high with clear labels
+teleholdem.replit.app
+. Use icons sparingly to reduce clutter.
+
+State‑driven visibility – Only show valid actions at any time. Hide the Raise button until raising is allowed; change “Call $20” to “Check” when appropriate. When actions are disabled (e.g., after folding), visually disable the button rather than simply hiding it.
+
+Accessible keyboard shortcuts – Make sure the F, C, R and A keys trigger their actions reliably on desktop. Provide visible hints on the buttons (e.g., “Fold (F)”) and allow re‑mapping via settings.
+
+Slider redesign for raising – The yellow bet slider uses a horizontal track with preset buttons (½ POT, POT, 2× POT, ALL‑IN)
+teleholdem.replit.app
+. Increase the track height, enlarge the knob and present preset chips as large pill buttons above or below the slider. Make it clear which preset is currently selected and allow dragging the knob fluidly between min and max. Provide haptic feedback on drag (if supported) and use color ticks to show different ranges (e.g., green for pot, orange for 2× pot).
+
+Gesture hints – The text hints (“Swipe left to fold • Swipe right to call”) appear small and are repeated in multiple places. Consolidate gesture hints into a single unobtrusive tooltip or a first‑time tutorial. Ensure swipe detection doesn’t conflict with scrolling on mobile.
+
+5.4 Animations & Performance
+
+Smooth dealing animations – Cards should animate from the deck to each player’s hand with a natural speed (0.5 s) and ease‑out motion. Use transform and opacity transitions to keep performance high.
+
+Chip animations – When bets are made, animate chip stacks moving from the player seat to the pot. Use subtle scaling to show chip movement and ensure animations are optional for users who enable “reduce motion”.
+
+Reduced motion support – Respect the user’s prefers-reduced-motion setting by disabling or shortening animations. Provide a toggle in settings to manually reduce animations.
+
+Loading transitions – The “Shuffling the deck…” spinner on page load
+teleholdem.replit.app
+ is currently plain. Use a consistent loader that matches the brand colors and show a progress indicator if initial loading is lengthy. Consider prefetching assets for quicker game start.
