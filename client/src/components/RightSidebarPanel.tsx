@@ -1,12 +1,26 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense, memo } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ActionHistory } from './ActionHistory';
-import { SessionStats } from './SessionStats';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, ChevronLeft, History, BarChart3 } from 'lucide-react';
 import { GameState } from '@shared/schema';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
+
+// Lazy load tab content for better performance
+const LazyActionHistory = lazy(() => import('./ActionHistory').then(module => ({ default: module.ActionHistory })));
+const LazySessionStats = lazy(() => import('./SessionStats').then(module => ({ default: module.SessionStats })));
+
+// Loading skeleton for tab content
+const TabContentSkeleton = () => (
+  <div className="p-4 space-y-3">
+    <Skeleton className="h-4 w-full" />
+    <Skeleton className="h-4 w-3/4" />
+    <Skeleton className="h-4 w-5/6" />
+    <Skeleton className="h-4 w-full" />
+    <Skeleton className="h-4 w-2/3" />
+  </div>
+);
 
 interface RightSidebarPanelProps {
   gameState: GameState | null;
@@ -78,10 +92,12 @@ export function RightSidebarPanel({
               >
                 <ScrollArea className="h-full">
                   <div className="p-4">
-                    <ActionHistory 
-                      history={gameState.actionHistory} 
-                      currentPlayerName={gameState.players[0]?.name}
-                    />
+                    <Suspense fallback={<TabContentSkeleton />}>
+                      <LazyActionHistory 
+                        history={gameState.actionHistory} 
+                        currentPlayerName={gameState.players[0]?.name}
+                      />
+                    </Suspense>
                   </div>
                 </ScrollArea>
               </TabsContent>
@@ -94,7 +110,9 @@ export function RightSidebarPanel({
               >
                 <ScrollArea className="h-full">
                   <div className="p-4">
-                    <SessionStats stats={gameState.sessionStats} />
+                    <Suspense fallback={<TabContentSkeleton />}>
+                      <LazySessionStats stats={gameState.sessionStats} />
+                    </Suspense>
                     
                     {/* Additional Stats Info */}
                     <div className="mt-6 space-y-4">

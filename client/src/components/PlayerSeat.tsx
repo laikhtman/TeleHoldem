@@ -5,7 +5,7 @@ import { Coins, Trophy, XCircle, CheckCircle, ArrowUpCircle, User, Crown } from 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FlyingChip } from './Chip';
-import { useAnimatedCounter } from '@/hooks/useAnimatedCounter';
+import { useRAFAnimatedCounter } from '@/hooks/useRAFAnimatedCounter';
 import { TurnTimer } from './TurnTimer';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { useHaptic } from '@/hooks/useHaptic';
@@ -51,7 +51,9 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
   });
   const prevBet = useRef(player.bet);
   const seatRef = useRef<HTMLDivElement>(null);
-  const animatedChipCount = useAnimatedCounter(player.chips);
+  const animatedChipCount = useRAFAnimatedCounter(player.chips, 400, { 
+    easingFn: (t) => t * (2 - t) // smooth ease-out
+  });
   const { triggerHaptic } = useHaptic();
   const { playSound } = useSound();
   const { toast } = useToast();

@@ -1,5 +1,5 @@
 import { Coins } from 'lucide-react';
-import { useAnimatedCounter } from '@/hooks/useAnimatedCounter';
+import { useRAFAnimatedCounter } from '@/hooks/useRAFAnimatedCounter';
 import { ChipStack, FlyingChip } from './Chip';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
@@ -10,7 +10,9 @@ interface PotDisplayProps {
 }
 
 export function PotDisplay({ amount, onRef }: PotDisplayProps) {
-  const animatedAmount = useAnimatedCounter(amount);
+  const animatedAmount = useRAFAnimatedCounter(amount, 600, { 
+    easingFn: (t) => t * (2 - t) // ease-out for smooth deceleration
+  });
   const chipCount = Math.min(Math.floor(amount / 50), 12);
   const [previousAmount, setPreviousAmount] = useState(amount);
   const [isIncreasing, setIsIncreasing] = useState(false);
