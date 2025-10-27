@@ -45,7 +45,6 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
   const [textSize, setTextSize] = useState({ name: '16px', chips: '16px' });
   const prevBet = useRef(player.bet);
   const seatRef = useRef<HTMLDivElement>(null);
-  const cardsRef = useRef<HTMLDivElement>(null);
   const animatedChipCount = useAnimatedCounter(player.chips);
   const { triggerHaptic } = useHaptic();
   const { playSound } = useSound();
@@ -150,10 +149,24 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
     const radiusX = maxRadiusX - (isVerySmall ? 1 : isSmall ? 3 : 8);
     const radiusY = maxRadiusY - (isVerySmall ? 1 : isSmall ? 3 : 6);
     
-    const angle = (position / totalPlayers) * 2 * Math.PI - Math.PI / 2;
+    // Map seat indices to specific angles for better distribution
+    // User (seat 0) is placed at bottom center for ergonomic reasons
+    const seatAngles = [
+      90,   // Seat 0: Bottom center (human player)
+      30,   // Seat 1: Bottom-right
+      330,  // Seat 2: Top-right
+      270,  // Seat 3: Top center
+      210,  // Seat 4: Top-left
+      150   // Seat 5: Bottom-left
+    ];
     
-    const x = Math.cos(angle) * radiusX + baseWidth / 2;
-    const y = Math.sin(angle) * radiusY + baseHeight / 2;
+    // Get the angle for this seat position
+    const angleDeg = seatAngles[position] || (position * 60); // Fallback for more than 6 players
+    // Convert to radians (0° is right, 90° is bottom, 270° is top)
+    const angleRad = (angleDeg * Math.PI) / 180;
+    
+    const x = Math.cos(angleRad) * radiusX + baseWidth / 2;
+    const y = Math.sin(angleRad) * radiusY + baseHeight / 2;
     
     return {
       left: `${x}%`,
@@ -195,7 +208,7 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
   };
   
   // Swipe up gesture for folding on player's hole cards (only for human player)
-  useSwipeGesture(cardsRef, {
+  const swipeRef = useSwipeGesture({
     onSwipeUp: () => {
       // Only allow swipe fold for human player when it's their turn
       if (player.isHuman && isCurrentPlayer && onFold && !isProcessing && !player.folded) {
@@ -215,9 +228,10 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
           duration: 1500
         });
       }
-    },
-    threshold: 50, // Lower threshold for easier activation
-    enabled: player.isHuman && isCurrentPlayer && !isProcessing && !player.folded
+    }
+  }, {
+    minSwipeDistance: 50, // Lower threshold for easier activation
+    disabled: !(player.isHuman && isCurrentPlayer && !isProcessing && !player.folded)
   });
 
   return (
@@ -327,7 +341,7 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
 
         {/* Player cards */}
         <div 
-          ref={cardsRef}
+          ref={swipeRef}
           className="flex gap-1 xs:gap-1.5 justify-center flex-shrink-0" 
           data-testid={`player-cards-${player.id}`}
           style={player.isHuman && isCurrentPlayer && !player.folded ? { cursor: 'grab' } : {}}
