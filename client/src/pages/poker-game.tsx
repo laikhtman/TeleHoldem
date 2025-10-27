@@ -23,7 +23,7 @@ import { PotOddsDisplay } from '@/components/PotOddsDisplay';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FlyingChip } from '@/components/Chip';
 import { Trash2, ChevronRight, ChevronLeft, TrendingUp, Settings } from 'lucide-react';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { PokerLoader, PokerSpinner } from '@/components/PokerLoader';
 import { useSound } from '@/hooks/useSound';
 import { useHaptic } from '@/hooks/useHaptic';
 import { useSwipe } from '@/hooks/useSwipe';
@@ -112,18 +112,27 @@ export default function PokerGame() {
     try {
       const savedSettings = localStorage.getItem('pokerGameSettings');
       if (savedSettings) {
-        return JSON.parse(savedSettings);
+        const parsed = JSON.parse(savedSettings);
+        // Check for system reduced motion preference if no manual setting
+        if (parsed.reducedAnimations === undefined) {
+          const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          parsed.reducedAnimations = prefersReducedMotion;
+        }
+        return parsed;
       }
     } catch (error) {
       console.error('Failed to load settings from localStorage:', error);
     }
+    // Check system preference for reduced motion
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     return {
       soundEnabled: true,
       soundVolume: 0.5,
       animationSpeed: 1,
       tableTheme: 'classic',
       colorblindMode: false,
-      isPaused: false
+      isPaused: false,
+      reducedAnimations: prefersReducedMotion
     };
   });
 
@@ -1005,6 +1014,31 @@ export default function PokerGame() {
       playSound('chip-place', { volume: settings.soundVolume * 0.3 });
     }
     
+    // Trigger chip animation from player to pot
+    if (!settings.reducedAnimations && amountToCall > 0) {
+      const playerSeat = document.querySelector('[data-testid="player-seat-0"]');
+      const pot = document.querySelector('[data-testid="pot-display"]');
+      
+      if (playerSeat && pot) {
+        const playerRect = playerSeat.getBoundingClientRect();
+        const potRect = pot.getBoundingClientRect();
+        
+        // Create multiple chips for larger amounts
+        const numChips = Math.min(Math.ceil(amountToCall / 100), 5);
+        for (let i = 0; i < numChips; i++) {
+          setTimeout(() => {
+            setFlyingChips(prev => [...prev, {
+              id: Date.now() + i,
+              startX: playerRect.left + playerRect.width / 2,
+              startY: playerRect.top + playerRect.height / 2,
+              endX: potRect.left + potRect.width / 2,
+              endY: potRect.top + potRect.height / 2
+            }]);
+          }, i * 100);
+        }
+      }
+    }
+    
     let newState = gameEngine.playerBet(gameState, 0, amountToCall);
     newState = addActionHistory(
       newState,
@@ -1044,6 +1078,31 @@ export default function PokerGame() {
       triggerHaptic('light');
       if (settings.soundEnabled) {
         playSound('chip-place', { volume: settings.soundVolume * 0.25 });
+      }
+    }
+    
+    // Trigger chip animation from player to pot
+    if (!settings.reducedAnimations && amount > 0) {
+      const playerSeat = document.querySelector('[data-testid="player-seat-0"]');
+      const pot = document.querySelector('[data-testid="pot-display"]');
+      
+      if (playerSeat && pot) {
+        const playerRect = playerSeat.getBoundingClientRect();
+        const potRect = pot.getBoundingClientRect();
+        
+        // Create multiple chips for larger amounts
+        const numChips = Math.min(Math.ceil(amount / 100), 7);
+        for (let i = 0; i < numChips; i++) {
+          setTimeout(() => {
+            setFlyingChips(prev => [...prev, {
+              id: Date.now() + i,
+              startX: playerRect.left + playerRect.width / 2,
+              startY: playerRect.top + playerRect.height / 2,
+              endX: potRect.left + potRect.width / 2,
+              endY: potRect.top + potRect.height / 2
+            }]);
+          }, i * 80);
+        }
       }
     }
     
@@ -1090,6 +1149,31 @@ export default function PokerGame() {
       }
     }
     
+    // Trigger chip animation from player to pot
+    if (!settings.reducedAnimations && amount > 0) {
+      const playerSeat = document.querySelector('[data-testid="player-seat-0"]');
+      const pot = document.querySelector('[data-testid="pot-display"]');
+      
+      if (playerSeat && pot) {
+        const playerRect = playerSeat.getBoundingClientRect();
+        const potRect = pot.getBoundingClientRect();
+        
+        // Create more chips for raises (they're bigger bets)
+        const numChips = Math.min(Math.ceil(amount / 75), 10);
+        for (let i = 0; i < numChips; i++) {
+          setTimeout(() => {
+            setFlyingChips(prev => [...prev, {
+              id: Date.now() + i,
+              startX: playerRect.left + playerRect.width / 2,
+              startY: playerRect.top + playerRect.height / 2,
+              endX: potRect.left + potRect.width / 2,
+              endY: potRect.top + potRect.height / 2
+            }]);
+          }, i * 60);
+        }
+      }
+    }
+    
     let newState = gameEngine.playerBet(gameState, 0, amount);
     newState = addActionHistory(
       newState,
@@ -1128,9 +1212,11 @@ export default function PokerGame() {
 
   if (!gameState) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-background text-white">
-        <LoadingSpinner className="w-12 h-12 mb-4 text-poker-chipGold" />
-        <p className="text-lg font-semibold">Shuffling the deck...</p>
+      <div className="flex flex-col items-center justify-center h-screen bg-background">
+        <PokerLoader 
+          size="lg" 
+          message="Shuffling the deck..."
+        />
       </div>
     );
   }
@@ -1174,7 +1260,7 @@ export default function PokerGame() {
         >
           {isReconnecting ? (
             <>
-              <LoadingSpinner className="w-4 h-4" />
+              <PokerSpinner size={16} />
               <span className="text-xs font-medium">Reconnecting...</span>
             </>
           ) : (

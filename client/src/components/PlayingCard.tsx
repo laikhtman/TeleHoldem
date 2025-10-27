@@ -177,26 +177,26 @@ export function PlayingCard({
   const getInitialState = () => {
     if (prefersReducedMotion) {
       // No animation for reduced motion
-      return { opacity: 1, transform: 'translateY(0) scale(1) rotateY(0deg)' };
+      return { opacity: 1, transform: 'translate3d(0, 0, 0) scale(1) rotateY(0deg)' };
     }
     
     if (animateDeal) {
-      // Use transform instead of individual properties for better performance
-      return { opacity: 0, transform: 'translateY(-300px) scale(0.3) rotateY(0deg)' };
+      // Use translate3d for GPU acceleration, start from deck position
+      return { opacity: 0, transform: 'translate3d(0, -400px, 0) scale(0.5) rotateY(180deg)' };
     }
-    return { opacity: 1, transform: `translateY(0) scale(1) rotateY(${isFlipped ? 180 : 0}deg)` };
+    return { opacity: 1, transform: `translate3d(0, 0, 0) scale(1) rotateY(${isFlipped ? 180 : 0}deg)` };
   };
 
   const getAnimateState = () => {
     if (prefersReducedMotion) {
       // No animation for reduced motion
-      return { opacity: 1, transform: `translateY(0) scale(1) rotateY(${isFlipped ? 180 : 0}deg)` };
+      return { opacity: 1, transform: `translate3d(0, 0, 0) scale(1) rotateY(${isFlipped ? 180 : 0}deg)` };
     }
     
     if (animateDeal && !isDealt) {
       return getInitialState();
     }
-    return { opacity: 1, transform: `translateY(0) scale(1) rotateY(${isFlipped ? 180 : 0}deg)` };
+    return { opacity: 1, transform: `translate3d(0, 0, 0) scale(1) rotateY(${isFlipped ? 180 : 0}deg)` };
   };
 
   const cardSvgId = card ? getCardSvgId(card) : '';
@@ -225,19 +225,19 @@ export function PlayingCard({
   const transitionConfig = prefersReducedMotion 
     ? { duration: 0.01 } // Almost instant
     : { 
-        duration: animateDeal ? 0.8 : 0.4, 
-        ease: animateDeal ? [0.4, 0, 0.2, 1] : "easeInOut",
+        duration: animateDeal ? 0.5 : 0.4, // 0.5s for dealing as requested
+        ease: animateDeal ? [0.22, 0.61, 0.36, 1] : "easeInOut", // ease-out for natural motion
         delay: animateDeal ? dealDelay / 1000 : 0
       };
 
   // Hover/tap animations - disabled for reduced motion
   const hoverAnimation = !faceDown && !prefersReducedMotion ? { 
-    transform: 'translateY(-8px) scale(1.05) rotateY(' + (isFlipped ? 180 : 0) + 'deg)',
+    transform: 'translate3d(0, -8px, 0) scale(1.05) rotateY(' + (isFlipped ? 180 : 0) + 'deg)',
     transition: { duration: 0.2, ease: 'easeOut' }
   } : undefined;
 
   const tapAnimation = !faceDown && card && !prefersReducedMotion ? { 
-    transform: 'translateY(-10px) scale(1.08) rotateY(' + (isFlipped ? 180 : 0) + 'deg)',
+    transform: 'translate3d(0, -10px, 0) scale(1.08) rotateY(' + (isFlipped ? 180 : 0) + 'deg)',
     transition: { duration: 0.1 }
   } : undefined;
 

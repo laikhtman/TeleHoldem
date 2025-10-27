@@ -2,7 +2,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
-import { Settings, Volume2, VolumeX, Zap, Palette, Pause, Play, Eye } from 'lucide-react';
+import { Settings, Volume2, VolumeX, Zap, Palette, Pause, Play, Eye, Sparkles } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useSound } from '@/hooks/useSound';
 import { Label } from '@/components/ui/label';
@@ -15,6 +15,7 @@ export interface GameSettings {
   tableTheme: 'classic' | 'blue' | 'red' | 'purple';
   colorblindMode: boolean;
   isPaused: boolean;
+  reducedAnimations?: boolean; // Manual toggle for reduced animations
 }
 
 interface SettingsPanelProps {
@@ -179,36 +180,62 @@ export function SettingsPanel({ settings, onSettingsChange, onPauseToggle, disab
             </div>
           )}
 
-          {/* Animation Speed */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Zap className="h-5 w-5 text-muted-foreground" />
-              <Label htmlFor="animation-speed" className="text-base font-medium">
-                Animation Speed
-              </Label>
-            </div>
-            <div className="space-y-2">
-              <Slider
-                id="animation-speed"
-                min={0.5}
-                max={1.5}
-                step={0.1}
-                value={[settings.animationSpeed]}
-                onValueChange={handleAnimationSpeedChange}
-                className="w-full"
-                data-testid="slider-animation-speed"
-                aria-label="Animation speed"
-                aria-valuetext={getSpeedLabel(settings.animationSpeed)}
+          {/* Reduced Animations Toggle */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-muted-foreground" />
+                <Label htmlFor="reduced-animations" className="text-base font-medium">
+                  Reduced Animations
+                </Label>
+              </div>
+              <Switch
+                id="reduced-animations"
+                checked={settings.reducedAnimations || false}
+                onCheckedChange={(checked) => onSettingsChange({ reducedAnimations: checked })}
+                data-testid="switch-reduced-animations"
+                aria-label="Toggle reduced animations"
               />
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span>Slow</span>
-                <span className="font-medium text-foreground">
-                  {getSpeedLabel(settings.animationSpeed)}
-                </span>
-                <span>Fast</span>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {settings.reducedAnimations 
+                ? 'Animations minimized for better performance' 
+                : 'Full animations enabled'}
+            </p>
+          </div>
+
+          {/* Animation Speed */}
+          {!settings.reducedAnimations && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Zap className="h-5 w-5 text-muted-foreground" />
+                <Label htmlFor="animation-speed" className="text-base font-medium">
+                  Animation Speed
+                </Label>
+              </div>
+              <div className="space-y-2">
+                <Slider
+                  id="animation-speed"
+                  min={0.5}
+                  max={1.5}
+                  step={0.1}
+                  value={[settings.animationSpeed]}
+                  onValueChange={handleAnimationSpeedChange}
+                  className="w-full"
+                  data-testid="slider-animation-speed"
+                  aria-label="Animation speed"
+                  aria-valuetext={getSpeedLabel(settings.animationSpeed)}
+                />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Slow</span>
+                  <span className="font-medium text-foreground">
+                    {getSpeedLabel(settings.animationSpeed)}
+                  </span>
+                  <span>Fast</span>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Table Theme */}
           <div className="space-y-3">
