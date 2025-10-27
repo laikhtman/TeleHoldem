@@ -14,12 +14,13 @@ const ToastViewport = React.forwardRef<
   <ToastPrimitives.Viewport
     ref={ref}
     className={cn(
-      // Mobile: top-center to avoid FAB and controls
-      "fixed top-[calc(var(--safe-area-top,0px)+1rem)] left-1/2 -translate-x-1/2 z-[150]",
+      // Both mobile and desktop: top-right position
+      "fixed top-[calc(var(--safe-area-top,0px)+1rem)] z-[150]",
       "flex flex-col gap-2 p-4 pointer-events-none",
       "w-[calc(100%-2rem)] max-w-[420px]",
-      // Desktop: bottom-right as before
-      "sm:bottom-4 sm:right-4 sm:left-auto sm:top-auto sm:translate-x-0",
+      // Center on small screens, right-aligned on larger screens
+      "left-1/2 -translate-x-1/2",
+      "sm:left-auto sm:right-[calc(var(--safe-area-right,0px)+1rem)] sm:translate-x-0",
       "[&>*]:pointer-events-auto",
       className
     )}
@@ -29,7 +30,7 @@ const ToastViewport = React.forwardRef<
 ToastViewport.displayName = ToastPrimitives.Viewport.displayName
 
 const toastVariants = cva(
-  "group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-6 pr-8 shadow-lg transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full",
+  "group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-6 pr-8 shadow-lg transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full",
   {
     variants: {
       variant: {
@@ -59,6 +60,9 @@ const Toast = React.forwardRef<
     <ToastPrimitives.Root
       ref={ref}
       className={cn(toastVariants({ variant }), className)}
+      aria-live="polite"
+      aria-atomic="true"
+      role="status"
       {...props}
     />
   )

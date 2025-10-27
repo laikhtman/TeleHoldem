@@ -50,7 +50,7 @@ export function FloatingActionMenu({
   ].filter(item => item.onClick); // Only show items with handlers
 
   return (
-    <div className={cn("fixed bottom-20 right-4 z-50 md:bottom-8 md:right-8", className)}>
+    <div className={cn("fixed bottom-[calc(var(--safe-area-bottom)+6rem)] right-[calc(var(--safe-area-right)+1rem)] z-50", className)}>
       <AnimatePresence>
         {isOpen && (
           <>
@@ -100,7 +100,7 @@ export function FloatingActionMenu({
 
                   {/* Button */}
                   <motion.button
-                    onClick={() => handleAction(item.onClick)}
+                    onClick={() => item.onClick && handleAction(item.onClick)}
                     className={cn(
                       "w-12 h-12 rounded-full flex items-center justify-center shadow-lg text-white min-h-[48px]",
                       item.color

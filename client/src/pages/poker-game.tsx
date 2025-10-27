@@ -10,6 +10,7 @@ import { PotDisplay } from '@/components/PotDisplay';
 import { ActionControls } from '@/components/ActionControls';
 import { ActionHistory } from '@/components/ActionHistory';
 import { SessionStats } from '@/components/SessionStats';
+import { RightSidebarPanel } from '@/components/RightSidebarPanel';
 import { HandDistributionChart } from '@/components/HandDistributionChart';
 import { AchievementsList } from '@/components/AchievementsList';
 import { AchievementToast } from '@/components/AchievementToast';
@@ -82,7 +83,7 @@ export default function PokerGame() {
   const [phaseKey, setPhaseKey] = useState(0);
   const [showPhaseTransition, setShowPhaseTransition] = useState(false);
   const [flyingChips, setFlyingChips] = useState<FlyingChipData[]>([]);
-  const [isHistoryCollapsed, setIsHistoryCollapsed] = useState(false);
+  const [isRightPanelCollapsed, setIsRightPanelCollapsed] = useState(false);
   const [isHandStrengthCollapsed, setIsHandStrengthCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isTabletPanelOpen, setIsTabletPanelOpen] = useState(false);
@@ -1541,9 +1542,35 @@ export default function PokerGame() {
 
       {/* Floating Action Menu for easy access to secondary features */}
       <FloatingActionMenu
-        onStatsClick={() => setIsMobileMenuOpen(true)}
-        onHistoryClick={() => setIsMobileMenuOpen(true)}
-        onTableInfoClick={() => setIsMobileMenuOpen(true)}
+        onStatsClick={() => {
+          setIsMobileMenuOpen(true);
+          // Set the tab to stats when opened via FAB
+          setTimeout(() => {
+            const statsTab = document.querySelector('[data-testid="tab-essential"]') as HTMLButtonElement;
+            if (statsTab) statsTab.click();
+          }, 100);
+        }}
+        onHistoryClick={() => {
+          setIsMobileMenuOpen(true);
+          // Set the tab to history when opened via FAB
+          setTimeout(() => {
+            const historyTab = document.querySelector('[data-testid="tab-history"]') as HTMLButtonElement;
+            if (historyTab) historyTab.click();
+          }, 100);
+        }}
+        onTableInfoClick={() => {
+          setIsMobileMenuOpen(true);
+          // Set the tab to hand analysis when opened via FAB
+          setTimeout(() => {
+            const analysisTab = document.querySelector('[data-testid="tab-hand-analysis"]') as HTMLButtonElement;
+            if (analysisTab) analysisTab.click();
+          }, 100);
+        }}
+        onSettingsClick={() => {
+          // Navigate to settings page
+          const settingsButton = document.querySelector('[data-testid="button-admin-settings"]') as HTMLButtonElement;
+          if (settingsButton) settingsButton.click();
+        }}
         className="lg:hidden"
       />
 
@@ -1553,6 +1580,15 @@ export default function PokerGame() {
           open={isMobileMenuOpen}
           onOpenChange={setIsMobileMenuOpen}
           gameState={gameState}
+        />
+      </div>
+
+      {/* Desktop Right Sidebar Panel - Action History and Stats */}
+      <div className="hidden lg:block absolute top-0 right-0 h-full">
+        <RightSidebarPanel 
+          gameState={gameState} 
+          isCollapsed={isRightPanelCollapsed}
+          onToggleCollapse={() => setIsRightPanelCollapsed(!isRightPanelCollapsed)}
         />
       </div>
     </div>
