@@ -15,6 +15,22 @@
   /* Sets the root font size for proper rem scaling across devices */
   font-size: 14px; /* Mobile base (<768px) */
   
+  /* ================== iOS SAFE AREA SUPPORT ================== */
+  /* Safe area insets with fallbacks for iOS devices */
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+  
+  /* iOS status bar height (20px standard, 44px on notched) */
+  --ios-status-bar: max(env(safe-area-inset-top, 0px), 20px);
+  
+  /* iOS home indicator height */
+  --ios-home-indicator: max(env(safe-area-inset-bottom, 0px), 34px);
+  
+  /* Custom viewport height for iOS */
+  --vh: 1vh;
+  
   /* ================== SPACING TOKENS ================== */
   /* Use these for all padding, margin, and gap values */
   --spacing-xs: 0.25rem;   /* 4px at base 16px */
@@ -1089,4 +1105,182 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--color-border-secondary));
+}
+
+/* ================================================
+   iOS SPECIFIC FIXES
+   ================================================ */
+
+/* Prevent body scroll on iOS */
+html {
+  overscroll-behavior-y: contain;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  position: fixed;
+  overflow: hidden;
+  width: 100%;
+  height: 100vh;
+  height: -webkit-fill-available;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: none;
+}
+
+/* Main app container */
+#root {
+  height: 100vh;
+  height: -webkit-fill-available;
+  overflow: hidden;
+  position: relative;
+}
+
+/* iOS momentum scrolling for scrollable areas */
+.scrollable-area, .allow-scroll {
+  -webkit-overflow-scrolling: touch;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+}
+
+/* Prevent text selection on interactive elements */
+button, .button, .card, .clickable, [role="button"] {
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+/* iOS Input and Form Fixes */
+input, select, textarea {
+  font-size: 16px !important; /* Prevents zoom on focus */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border-radius: 0; /* Remove iOS default radius */
+}
+
+/* Restore border radius for styled inputs */
+input.rounded, select.rounded, textarea.rounded,
+input[class*="rounded"], select[class*="rounded"], textarea[class*="rounded"] {
+  border-radius: var(--radius-md);
+}
+
+/* Fix iOS select dropdowns */
+select {
+  background-image: none;
+  padding-right: 30px;
+}
+
+/* iOS numeric inputs */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* iOS date inputs */
+input[type="date"] {
+  min-height: 48px;
+  -webkit-appearance: none;
+  position: relative;
+}
+
+/* iOS search input */
+input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+
+/* iOS Safari Specific Fixes */
+
+/* Fix iOS Safari flexbox bugs */
+.flex, [class*="flex"] {
+  display: -webkit-flex;
+  display: flex;
+}
+
+.flex-1, [class*="flex-1"] {
+  -webkit-flex: 1;
+  flex: 1;
+}
+
+/* Fix iOS position fixed + transform bug */
+.fixed {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* Fix iOS backdrop filter performance */
+.backdrop-blur, [class*="backdrop-blur"] {
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  will-change: backdrop-filter;
+}
+
+/* Fix iOS 100vh issue */
+.h-screen, .min-h-screen {
+  height: 100vh;
+  height: -webkit-fill-available;
+  min-height: -webkit-fill-available;
+}
+
+/* iOS landscape orientation fixes */
+@supports (padding: env(safe-area-inset-left)) {
+  @media (orientation: landscape) {
+    .game-container {
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+    }
+    
+    /* Adjust poker table in landscape */
+    .poker-table-container {
+      padding-left: var(--safe-area-left);
+      padding-right: var(--safe-area-right);
+    }
+  }
+}
+
+/* iOS class for specific styling */
+.ios button,
+.ios [role="button"] {
+  min-height: 48px;
+  touch-action: manipulation;
+}
+
+/* Prevent double-tap zoom on iOS */
+.ios * {
+  touch-action: manipulation;
+}
+
+/* iOS safe area padding utilities */
+.safe-area-inset-top {
+  padding-top: var(--safe-area-top);
+}
+
+.safe-area-inset-bottom {
+  padding-bottom: var(--safe-area-bottom);
+}
+
+.safe-area-inset-left {
+  padding-left: var(--safe-area-left);
+}
+
+.safe-area-inset-right {
+  padding-right: var(--safe-area-right);
+}
+
+/* iOS specific scroll snap for better UX */
+@supports (-webkit-touch-callout: none) {
+  .scroll-snap {
+    scroll-snap-type: y mandatory;
+  }
+  
+  .scroll-snap > * {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
 }

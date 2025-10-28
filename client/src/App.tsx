@@ -7,6 +7,7 @@ import { TelegramAuthGate } from "@/components/TelegramAuthGate";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { OfflineBanner } from "@/hooks/useOnlineStatus";
+import { useIOSFixes } from "@/hooks/useIOSFixes";
 import PokerGame from "@/pages/poker-game";
 import SettingsPage from "@/pages/SettingsPage";
 import LandingPage from "@/pages/LandingPage";
@@ -38,15 +39,22 @@ function Router() {
   );
 }
 
+function IOSFixWrapper({ children }: { children: React.ReactNode }) {
+  useIOSFixes();
+  return <>{children}</>;
+}
+
 function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
           <TooltipProvider>
-            <OfflineBanner />
-            <Toaster />
-            <Router />
+            <IOSFixWrapper>
+              <OfflineBanner />
+              <Toaster />
+              <Router />
+            </IOSFixWrapper>
           </TooltipProvider>
         </ThemeProvider>
       </QueryClientProvider>

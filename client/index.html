@@ -2,9 +2,36 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <!-- Enhanced iOS Viewport with safe area -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
     <title>Texas Hold'em Poker - Play Against AI</title>
     <meta name="description" content="Play Texas Hold'em poker against AI opponents. Experience realistic poker gameplay with professional table design and smart bot players." />
+    
+    <!-- iOS Web App capabilities -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="TeleHoldem" />
+    <meta name="format-detection" content="telephone=no" />
+    
+    <!-- PWA capability for iOS -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    
+    <!-- iOS touch icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="apple-touch-startup-image" href="/launch.png" />
+    
+    <!-- Disable iOS tap highlight -->
+    <style>
+      * { 
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+      }
+      
+      /* Prevent iOS bounce scrolling globally */
+      html, body {
+        overscroll-behavior: none;
+      }
+    </style>
     
     <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>

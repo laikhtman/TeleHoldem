@@ -67,7 +67,12 @@ export function MobileBottomSheet({
         <Button
           variant="outline"
           size="icon"
-          className="fixed bottom-[calc(var(--safe-area-bottom)+5.5rem)] right-[calc(1rem+var(--safe-area-right))] z-50 h-14 w-14 rounded-full shadow-lg bg-primary text-primary-foreground hover:bg-primary/90 xs:flex lg:hidden"
+          className="fixed z-50 h-14 w-14 min-h-[56px] rounded-full shadow-lg bg-primary text-primary-foreground hover:bg-primary/90 xs:flex lg:hidden touch-manipulation"
+          style={{
+            bottom: `calc(max(env(safe-area-inset-bottom, 0px), var(--safe-area-bottom, 0px)) + 5.5rem)`,
+            right: `calc(max(env(safe-area-inset-right, 0px), var(--safe-area-right, 0px)) + 1rem)`,
+            touchAction: 'manipulation'
+          }}
           data-testid="button-mobile-menu"
         >
           <TrendingUp className="w-6 h-6" />
@@ -76,7 +81,12 @@ export function MobileBottomSheet({
       
       <SheetContent 
         side="bottom" 
-        className="h-[75vh] max-h-[75vh] rounded-t-3xl pb-[var(--safe-area-bottom)] z-[100] overflow-hidden"
+        className="h-[75vh] max-h-[75vh] rounded-t-3xl z-[100] overflow-hidden allow-scroll"
+        style={{
+          paddingBottom: 'max(env(safe-area-inset-bottom, 0px), var(--safe-area-bottom, 0px))',
+          WebkitOverflowScrolling: 'touch',
+          overscrollBehavior: 'contain'
+        }}
         data-testid="mobile-bottom-sheet"
         aria-label="Game information panel"
         aria-describedby="mobile-sheet-description"
@@ -147,7 +157,7 @@ export function MobileBottomSheet({
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="hand-analysis" className="h-[calc(100%-3.5rem)] overflow-y-auto mt-0 px-3">
+          <TabsContent value="hand-analysis" className="h-[calc(100%-3.5rem)] overflow-y-auto mt-0 px-3 allow-scroll" style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}>
             <div className="space-y-4 pb-4">
               {gameState && (
                 <>

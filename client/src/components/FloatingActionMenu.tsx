@@ -50,7 +50,17 @@ export function FloatingActionMenu({
   ].filter(item => item.onClick); // Only show items with handlers
 
   return (
-    <div className={cn("fixed bottom-[calc(var(--safe-area-bottom)+6rem)] right-[calc(var(--safe-area-right)+1rem)] z-50", className)}>
+    <div 
+      className={cn(
+        "fixed z-50", 
+        className
+      )}
+      style={{
+        bottom: `calc(max(env(safe-area-inset-bottom, 0px), var(--safe-area-bottom, 0px)) + 6rem)`,
+        right: `calc(max(env(safe-area-inset-right, 0px), var(--safe-area-right, 0px)) + 1rem)`,
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)'
+      }}
+    >
       <AnimatePresence>
         {isOpen && (
           <>
