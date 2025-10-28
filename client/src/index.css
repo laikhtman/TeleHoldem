@@ -1285,3 +1285,173 @@ input[type="search"]::-webkit-search-cancel-button {
     scroll-snap-stop: always;
   }
 }
+
+/* ================== MOBILE DIALOG FIXES ================== */
+/* Ensure dialogs work properly on mobile viewports */
+@media (max-width: 768px) {
+  /* Dialog content mobile constraints */
+  .dialog-content-mobile {
+    max-height: calc(100vh - var(--safe-area-top) - var(--safe-area-bottom) - 2rem) !important;
+    max-height: calc(100dvh - var(--safe-area-top) - var(--safe-area-bottom) - 2rem) !important;
+    margin: 1rem !important;
+    width: calc(100% - 2rem) !important;
+  }
+  
+  /* Dialog scrollable content */
+  .dialog-scrollable-content {
+    max-height: calc(100vh - 6rem);
+    max-height: calc(100dvh - 6rem);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overflow-scrolling: touch;
+    padding-right: 2rem; /* Space for close button */
+  }
+  
+  /* Dialog footer sticky positioning */
+  [role="dialog"] .dialog-footer,
+  .dialog-footer {
+    position: sticky;
+    bottom: 0;
+    background: hsl(var(--background));
+    padding-top: 1rem;
+    margin-top: auto;
+    z-index: 10;
+    border-top: 1px solid hsl(var(--border));
+  }
+  
+  /* Ensure form fields in dialogs are accessible */
+  [role="dialog"] input,
+  [role="dialog"] textarea,
+  [role="dialog"] select,
+  [role="dialog"] button,
+  .dialog-content-mobile input,
+  .dialog-content-mobile textarea,
+  .dialog-content-mobile select {
+    font-size: 16px !important; /* Prevent iOS zoom on focus */
+  }
+  
+  /* Dialog close button always visible */
+  [role="dialog"] button[aria-label="Close"] {
+    background: hsl(var(--background)) !important;
+    border: 1px solid hsl(var(--border)) !important;
+    padding: 0.25rem !important;
+    border-radius: var(--radius-md) !important;
+  }
+  
+  /* Ensure dialog content is scrollable */
+  [role="dialog"] > div {
+    display: flex;
+    flex-direction: column;
+    max-height: 100%;
+  }
+  
+  /* Ensure dialog body content is scrollable */
+  [role="dialog"] > div > div:not(.dialog-footer):not([aria-label="Close"]) {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+/* ================================================
+   MOBILE MODAL BUTTON FIXES (iOS)
+   ================================================ */
+/* Fix modal button click issues on iOS mobile devices */
+
+/* All buttons in dialogs should be clickable with high z-index */
+[role="dialog"] button {
+  position: relative;
+  z-index: 50 !important;
+  pointer-events: auto !important;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Dialog close button specific fixes with higher z-index */
+[role="dialog"] button[aria-label*="Close"],
+[role="dialog"] button[data-testid="dialog-close-button"],
+[data-radix-dialog-close] {
+  position: absolute;
+  z-index: 100 !important;
+  pointer-events: auto !important;
+  touch-action: manipulation;
+  min-width: 44px;
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Modal footer buttons must be clickable */
+.dialog-footer button {
+  pointer-events: auto !important;
+  z-index: 50 !important;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Ensure overlay doesn't block button clicks */
+[data-radix-dialog-overlay],
+[data-state="open"][data-radix-dialog-overlay] {
+  pointer-events: auto;
+}
+
+/* Ensure dialog content allows interaction */
+[data-radix-dialog-content],
+[data-state="open"][data-radix-dialog-content] {
+  pointer-events: auto;
+}
+
+/* Mobile-specific dialog adjustments */
+@media (max-width: 768px) {
+  /* Ensure proper viewport constraints */
+  [data-radix-dialog-content] {
+    max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+    max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+  }
+  
+  /* Increase touch targets on mobile for better accessibility */
+  [role="dialog"] button {
+    min-height: 44px;
+    padding: 12px 16px;
+  }
+  
+  /* Dialog close button larger hit area on mobile */
+  [role="dialog"] button[aria-label*="Close"],
+  [data-radix-dialog-close] {
+    padding: 12px;
+    margin: -4px;
+  }
+  
+  /* Footer buttons with proper spacing on mobile */
+  .dialog-footer {
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+  
+  .dialog-footer button {
+    min-height: 48px;
+  }
+}
+
+/* iOS-specific touch interaction fixes */
+@supports (-webkit-touch-callout: none) {
+  /* Remove iOS touch delays */
+  [role="dialog"] button {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  
+  /* Fix iOS viewport issues with fixed positioned dialogs */
+  [data-radix-dialog-content] {
+    position: fixed !important;
+    transform: translate(-50%, -50%) !important;
+    left: 50% !important;
+    top: 50% !important;
+  }
+}
+
+/* Ensure Cancel buttons are always clickable */
+[data-testid="button-cancel"],
+[data-testid="button-join-cancel"] {
+  pointer-events: auto !important;
+  z-index: 50 !important;
+  touch-action: manipulation;
+}

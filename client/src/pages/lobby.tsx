@@ -629,7 +629,7 @@ export default function Lobby() {
             </DialogTrigger>
             <DialogContent 
               ref={dialogRef}
-              className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto"
+              className="sm:max-w-[500px]"
               aria-labelledby="create-table-title"
               aria-describedby="create-table-description"
               onOpenAutoFocus={(e) => {
@@ -637,14 +637,14 @@ export default function Lobby() {
                 firstInputRef.current?.focus();
               }}
             >
-              <form onSubmit={handleCreateTable} noValidate>
-                <DialogHeader>
+              <form onSubmit={handleCreateTable} noValidate className="flex flex-col h-full">
+                <DialogHeader className="shrink-0">
                   <DialogTitle id="create-table-title">Create New Table</DialogTitle>
                   <DialogDescription id="create-table-description">
                     Configure your poker table settings. Other players can join once it's created.
                   </DialogDescription>
                 </DialogHeader>
-                <div className="grid gap-6 py-6">
+                <div className="grid gap-6 py-6 flex-1 overflow-y-auto dialog-scrollable-content">
                   {/* Table Name Field */}
                   <div className="space-y-2">
                     <Label htmlFor="tableName">
@@ -774,7 +774,7 @@ export default function Lobby() {
                     />
                   </div>
                 </div>
-                <DialogFooter className="gap-2">
+                <DialogFooter className="dialog-footer gap-2 shrink-0">
                   <Button
                     type="button"
                     variant="outline"
@@ -905,7 +905,7 @@ export default function Lobby() {
         >
           <DialogContent 
             ref={joinDialogRef}
-            className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto"
+            className="sm:max-w-[550px]"
             aria-labelledby="join-table-title"
             aria-describedby="join-table-description"
             onOpenAutoFocus={(e) => {
@@ -924,7 +924,7 @@ export default function Lobby() {
               }
             }}
           >
-            <DialogHeader>
+            <DialogHeader className="shrink-0">
               <DialogTitle id="join-table-title">Choose Your Buy-in</DialogTitle>
               <DialogDescription id="join-table-description">
                 Select the amount of chips you want to bring to the table.
@@ -932,7 +932,7 @@ export default function Lobby() {
             </DialogHeader>
             
             {selectedTableLimits && (
-              <div className="space-y-6 py-6">
+              <div className="space-y-6 py-6 flex-1 overflow-y-auto dialog-scrollable-content">
                 {/* Contextual Information */}
                 <div className="bg-muted/30 rounded-lg p-4 space-y-2">
                   <div className="flex justify-between items-center">
@@ -1052,15 +1052,17 @@ export default function Lobby() {
               </div>
             )}
             
-            <DialogFooter className="flex-col sm:flex-row gap-2">
+            <DialogFooter className="dialog-footer flex-col sm:flex-row gap-2 shrink-0">
               <Button 
+                type="button"
                 variant="outline" 
                 onClick={() => {
                   setSelectedTable(null);
                   setSelectedTableLimits(null);
                 }}
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto z-50 pointer-events-auto touch-manipulation"
                 data-testid="button-join-cancel"
+                aria-label="Cancel joining table"
               >
                 Cancel
               </Button>
