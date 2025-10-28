@@ -102,7 +102,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
                 disabled={disabled}
                 placeholder={placeholder}
                 className={cn(
-                  "flex h-12 w-full rounded-md border border-input bg-background px-3 py-3 text-base ring-offset-background",
+                  "flex h-12 w-full rounded-md border border-input bg-background px-3 py-3 ring-offset-background",
                   "file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground",
                   "placeholder:text-muted-foreground",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
@@ -113,6 +113,10 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
                   errorMessage && "border-destructive focus-visible:ring-destructive",
                   className
                 )}
+                style={{
+                  fontSize: "max(1rem, 16px)",
+                  ...props.style
+                }}
                 {...props}
               />
               {suffix && (

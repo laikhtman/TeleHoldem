@@ -1151,7 +1151,8 @@ button, .button, .card, .clickable, [role="button"] {
 
 /* iOS Input and Form Fixes */
 input, select, textarea {
-  font-size: 16px !important; /* Prevents zoom on focus */
+  /* Ensure minimum 16px to prevent iOS zoom, but allow larger sizes */
+  font-size: max(1rem, 16px) !important; /* Prevents zoom on focus */
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
