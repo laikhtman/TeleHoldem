@@ -36,9 +36,10 @@ interface PlayerSeatProps {
   onFold?: () => void;
   soundEnabled?: boolean;
   soundVolume?: number;
+  highlightCardIds?: Set<string>;
 }
 
-export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, isDealer, isWinner, phase, lastAction, winAmount = 0, onChipAnimationTrigger, isProcessing, colorblindMode = false, onFold, soundEnabled = true, soundVolume = 0.5 }: PlayerSeatProps) {
+export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, isDealer, isWinner, phase, lastAction, winAmount = 0, onChipAnimationTrigger, isProcessing, colorblindMode = false, onFold, soundEnabled = true, soundVolume = 0.5, highlightCardIds }: PlayerSeatProps) {
   const [flyingChips, setFlyingChips] = useState<Array<{ id: number; startX: number; startY: number }>>([]);
   const [actionBadge, setActionBadge] = useState<ActionBadge | null>(null);
   const [showWinAmount, setShowWinAmount] = useState(false);
@@ -390,8 +391,13 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
 
             <div className="flex flex-col items-start">
               {/* Player Name */}
-              <div className="font-bold text-white tracking-wide" style={{ fontSize: textSize.name }}>
+              <div className="font-bold text-white tracking-wide flex items-center gap-2" style={{ fontSize: textSize.name }}>
                 {player.name}
+                {!player.isHuman && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 border border-white/20 text-white/80" aria-label="AI personality tag">
+                    {getPersonalityTag(player)}
+                  </span>
+                )}
               </div>
               
               {/* Chip Count - More prominent */}
@@ -483,6 +489,7 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
                 animateFlip={player.isHuman && phase === 'pre-flop'}
                 className="flex-shrink-0 scale-110 xs:scale-125 sm:scale-125 hover:scale-[1.3] transition-transform duration-200"
                 colorblindMode={colorblindMode}
+                highlight={!!(highlightCardIds && player.hand[0] && highlightCardIds.has(player.hand[0].id))}
               />
               <PlayingCard 
                 card={player.hand[1]} 
@@ -492,6 +499,7 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
                 animateFlip={player.isHuman && phase === 'pre-flop'}
                 className="flex-shrink-0 scale-110 xs:scale-125 sm:scale-125 hover:scale-[1.3] transition-transform duration-200"
                 colorblindMode={colorblindMode}
+                highlight={!!(highlightCardIds && player.hand[1] && highlightCardIds.has(player.hand[1].id))}
               />
             </>
           )}
@@ -499,4 +507,11 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
       </div>
     </div>
   );
+}
+
+function getPersonalityTag(player: Player): 'TAG' | 'LAG' | 'TP' | 'LP' | 'BAL' {
+  if (player.isHuman) return 'BAL';
+  const idx = parseInt(player.id, 10) || 0;
+  const personalities: Array<'TAG' | 'LAG' | 'TP' | 'LP' | 'BAL'> = ['TAG', 'LAG', 'TP', 'LP', 'BAL'];
+  return personalities[idx % personalities.length];
 }

@@ -9,14 +9,16 @@ interface WinnerCelebrationProps {
   winAmount?: number;
 }
 
+
 export function WinnerCelebration({ isWinner, playerName, winAmount = 0 }: WinnerCelebrationProps) {
   const [confetti, setConfetti] = useState<Array<{ id: number; x: number; delay: number; color: string }>>([]);
   const { playSound } = useSound();
+  const isBigWin = winAmount > 300;
 
   useEffect(() => {
     if (isWinner) {
       // Play victory sound based on win amount
-      const isBigWin = winAmount > 100; // Consider wins over $100 as "big wins"
+      const isBigWin = winAmount > 300; // Consider wins over $300 as "big wins"
       if (isBigWin) {
         playSound('victory-big', { volume: 0.35 });
       } else {
@@ -28,17 +30,26 @@ export function WinnerCelebration({ isWinner, playerName, winAmount = 0 }: Winne
         playSound('chip-collect', { volume: 0.25 });
       }, 500);
 
-      const particles = Array.from({ length: 30 }, (_, i) => ({
+      let reduced = false;
+      try {
+        const raw = localStorage.getItem('pokerGameSettings');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          reduced = !!parsed.reducedParticles;
+        }
+      } catch {}
+      const particleCount = reduced ? (isBigWin ? 20 : 12) : (isBigWin ? 50 : 30);
+      const particles = Array.from({ length: particleCount }, (_, i) => ({
         id: i,
-        x: Math.random() * 200 - 100,
-        delay: Math.random() * 0.3,
+        x: Math.random() * (isBigWin ? 300 : 200) - (isBigWin ? 150 : 100),
+        delay: Math.random() * (isBigWin ? 0.6 : 0.3),
         color: ['#FFD700', '#FFA500', '#FF6B6B', '#4ECDC4'][Math.floor(Math.random() * 4)]
       }));
       setConfetti(particles);
       
       const timer = setTimeout(() => {
         setConfetti([]);
-      }, 2500);
+      }, reduced ? 2000 : (isBigWin ? 3500 : 2500));
       
       return () => clearTimeout(timer);
     }
@@ -75,14 +86,14 @@ export function WinnerCelebration({ isWinner, playerName, winAmount = 0 }: Winne
                 rotate: 0
               }}
               animate={{ 
-                x: particle.x * 2,
-                y: [0, -100, 100],
+                x: particle.x * (isBigWin ? 2.5 : 2),
+                y: [0, isBigWin ? -140 : -100, isBigWin ? 120 : 100],
                 opacity: [1, 1, 0],
-                scale: [0, 1, 0.5],
+                scale: [0, 1, 0.6],
                 rotate: Math.random() * 720 - 360
               }}
               transition={{ 
-                duration: 2,
+                duration: isBigWin ? 2.6 : 2,
                 delay: particle.delay,
                 ease: "easeOut"
               }}
@@ -132,7 +143,7 @@ export function WinnerCelebration({ isWinner, playerName, winAmount = 0 }: Winne
           </motion.div>
 
           {/* Floating coins */}
-          {[...Array(8)].map((_, i) => (
+          {[...Array(settings?.reducedParticles ? (isBigWin ? 6 : 4) : (isBigWin ? 12 : 8))].map((_, i) => (
             <motion.div
               key={`coin-${i}`}
               className="absolute"
@@ -146,14 +157,14 @@ export function WinnerCelebration({ isWinner, playerName, winAmount = 0 }: Winne
                 scale: 0
               }}
               animate={{ 
-                y: [-100, -120, -100],
+                y: [isBigWin ? -140 : -100, isBigWin ? -160 : -120, isBigWin ? -140 : -100],
                 opacity: [0, 1, 0],
                 scale: [0, 1, 0],
                 rotate: [0, 360]
               }}
               transition={{ 
-                duration: 2,
-                delay: i * 0.1,
+                duration: isBigWin ? 2.4 : 2,
+                delay: i * (isBigWin ? 0.12 : 0.1),
                 ease: "easeOut"
               }}
             >
@@ -180,3 +191,16 @@ export function WinnerCelebration({ isWinner, playerName, winAmount = 0 }: Winne
     </AnimatePresence>
   );
 }
+          {/* Slow-motion overlay for big wins */}
+          {isBigWin && (
+            <motion.div
+              className="absolute inset-0 flex items-center justify-center pointer-events-none"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 0.5, 0] }}
+              transition={{ duration: 1.6, ease: 'easeInOut', delay: 0.4 }}
+            >
+              <div className="px-4 py-2 rounded-md bg-black/60 border border-yellow-400/60 text-poker-chipGold font-bold tracking-wide">
+                SLOW-MO REPLAY
+              </div>
+            </motion.div>
+          )}

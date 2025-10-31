@@ -7,9 +7,10 @@ import { useRef, useState, useEffect } from 'react';
 interface PotDisplayProps {
   amount: number;
   onRef?: (ref: HTMLDivElement | null) => void;
+  sidePots?: number[];
 }
 
-export function PotDisplay({ amount, onRef }: PotDisplayProps) {
+export function PotDisplay({ amount, onRef, sidePots = [] }: PotDisplayProps) {
   const animatedAmount = useRAFAnimatedCounter(amount, 600, { 
     easingFn: (t) => t * (2 - t) // ease-out for smooth deceleration
   });
@@ -57,6 +58,31 @@ export function PotDisplay({ amount, onRef }: PotDisplayProps) {
             <ChipStack count={chipCount} />
           </motion.div>
         )}
+      </AnimatePresence>
+
+      {/* Side pots visualization: small stacks around the main pot */}
+      <AnimatePresence>
+        {sidePots.length > 1 && sidePots.map((amt, idx) => idx > 0 && amt > 0 ? (
+          <motion.div
+            key={`sidepot-${idx}`}
+            className="absolute"
+            style={{
+              left: `${50 + (idx % 2 === 0 ? -22 - idx * 3 : 22 + idx * 3)}%`,
+              bottom: '-2.5rem',
+              transform: 'translateX(-50%)'
+            }}
+            initial={{ opacity: 0, scale: 0.8, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 10 }}
+            transition={{ duration: 0.3 }}
+            aria-label={`Side pot ${idx}: ${amt} dollars`}
+          >
+            <div className="flex flex-col items-center gap-1">
+              <ChipStack count={Math.min(Math.floor(amt / 80), 8)} />
+              <div className="text-[10px] font-mono text-gray-300 bg-black/70 px-2 py-0.5 rounded-md border border-white/10">SP {idx}: ${amt}</div>
+            </div>
+          </motion.div>
+        ) : null)}
       </AnimatePresence>
 
       {/* Enhanced Pot Display Container */}

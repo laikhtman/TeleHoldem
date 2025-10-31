@@ -1455,3 +1455,7 @@ input[type="search"]::-webkit-search-cancel-button {
   z-index: 50 !important;
   touch-action: manipulation;
 }
+\n/* High Contrast Mode */\n.high-contrast { filter: contrast(1.1) saturate(1.1); }\n.high-contrast .border { border-color: rgba(255,255,255,0.7) !important; }\n.high-contrast .felt-texture { box-shadow: 0 0 0 2px rgba(255,255,255,0.15) inset; }\n.high-contrast [data-testid="text-last-action"] { color: #fff !important; }\n
+\n/* Large Text Preset */\n.large-text { font-size: 112%; }\n.large-text [data-testid="pot-amount"], .large-text [data-testid^="player-chips-"] { font-size: 1.1em !important; }\n.large-text [data-testid="button-fold"], .large-text [data-testid="button-call"], .large-text [data-testid="button-bet-raise"], .large-text [data-testid="button-all-in"] { font-size: 1.05em; }\n
+
+.large-text [data-testid="action-history-sidebar"] { font-size: 1.05em; }

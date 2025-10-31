@@ -276,10 +276,10 @@ export class GameEngine {
     return gameState.players.filter(p => !p.folded);
   }
 
-  resolveShowdown(gameState: GameState): { winners: Player[]; winningHand: string } {
+  resolveShowdown(gameState: GameState): { winners: Player[]; winningHand: string; bestCombos: Record<string, Card[]> } {
     const activePlayers = this.getActivePlayers(gameState);
-    if (activePlayers.length === 0) return { winners: [], winningHand: 'No players' };
-    if (activePlayers.length === 1) return { winners: [activePlayers[0]], winningHand: 'All others folded' };
+    if (activePlayers.length === 0) return { winners: [], winningHand: 'No players', bestCombos: {} };
+    if (activePlayers.length === 1) return { winners: [activePlayers[0]], winningHand: 'All others folded', bestCombos: {} };
 
     const evaluations = activePlayers.map(player => ({
       player,
@@ -289,8 +289,11 @@ export class GameEngine {
     const maxValue = Math.max(...evaluations.map(e => e.value));
     const winners = evaluations.filter(e => e.value === maxValue).map(e => e.player);
     const winningHand = evaluations.find(e => e.value === maxValue)?.description || 'Best Hand';
-    
-    return { winners, winningHand };
+    const bestCombos: Record<string, Card[]> = {};
+    evaluations.filter(e => e.value === maxValue).forEach(e => {
+      bestCombos[e.player.id] = e.winningCards || [];
+    });
+    return { winners, winningHand, bestCombos };
   }
 
   calculatePots(gameState: GameState): GameState {

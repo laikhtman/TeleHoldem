@@ -23,6 +23,15 @@ export interface HandEvaluation {
   draws: DrawInfo;
 }
 
+export interface BoardTextureInfo {
+  suits: Record<string, number>;
+  isMonotone: boolean;
+  isTwoTone: boolean;
+  spread: number; // maxRank - minRank
+  isConnected: boolean; // tight rank spread (<= 4)
+  highCard: number;
+}
+
 export class HandEvaluator {
   evaluateHand(hand: Card[], communityCards: Card[] = []): HandResult {
     const allCards = [...hand, ...(communityCards || [])];
@@ -195,6 +204,32 @@ export class HandEvaluator {
     return {
       hand: currentHand,
       draws
+    };
+  }
+
+  evaluateBoardTexture(communityCards: Card[]): BoardTextureInfo | null {
+    if (!communityCards || communityCards.length < 3) return null;
+    const suits = new Map<Suit, number>();
+    let minRank = 14, maxRank = 2;
+    communityCards.forEach(c => {
+      suits.set(c.suit, (suits.get(c.suit) || 0) + 1);
+      const rv = getRankValue(c.rank);
+      minRank = Math.min(minRank, rv);
+      maxRank = Math.max(maxRank, rv);
+    });
+    const spread = maxRank - minRank;
+    const isConnected = spread <= 4;
+    const suitCounts: Record<string, number> = {};
+    Array.from(suits.entries()).forEach(([s, cnt]) => suitCounts[s] = cnt);
+    const isMonotone = Object.values(suitCounts).some(v => v >= 3);
+    const isTwoTone = Object.values(suitCounts).some(v => v === 2);
+    return {
+      suits: suitCounts,
+      isMonotone,
+      isTwoTone,
+      spread,
+      isConnected,
+      highCard: maxRank,
     };
   }
 

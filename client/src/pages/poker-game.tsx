@@ -43,6 +43,9 @@ import { OnboardingFlow } from '@/components/OnboardingFlow';
 import { GameTip } from '@/components/GameTip';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { useGameTips } from '@/hooks/useGameTips';
+import { DevOverlay } from '@/components/DevOverlay';
+import { FPSOverlay } from '@/components/FPSOverlay';
+import { DevEventLog } from '@/components/DevEventLog';
 
 const NUM_PLAYERS = 6;
 const MAX_HISTORY_ENTRIES = 30;
@@ -53,6 +56,7 @@ interface FlyingChipData {
   startY: number;
   endX: number;
   endY: number;
+  delay?: number;
 }
 
 function addActionHistory(
@@ -88,6 +92,7 @@ export default function PokerGame() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [winningPlayerIds, setWinningPlayerIds] = useState<string[]>([]);
   const [winAmounts, setWinAmounts] = useState<Record<string, number>>({});
+  const [winningCardIds, setWinningCardIds] = useState<Set<string>>(new Set());
   const [phaseKey, setPhaseKey] = useState(0);
   const [showPhaseTransition, setShowPhaseTransition] = useState(false);
   const [flyingChips, setFlyingChips] = useState<FlyingChipData[]>([]);
@@ -95,6 +100,9 @@ export default function PokerGame() {
   const [isHandStrengthCollapsed, setIsHandStrengthCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isTabletPanelOpen, setIsTabletPanelOpen] = useState(false);
+  const [showDevOverlay, setShowDevOverlay] = useState(false);
+  const [showFps, setShowFps] = useState(false);
+  const [showEventLog, setShowEventLog] = useState(false);
   const [tableAspect, setTableAspect] = useState<string>('3 / 2');
   const potPosition = useRef<{ x: number; y: number }>({ x: 400, y: 150 });
   const { toast } = useToast();
@@ -159,7 +167,8 @@ export default function PokerGame() {
       tableTheme: 'classic',
       colorblindMode: false,
       isPaused: false,
-      reducedAnimations: prefersReducedMotion
+      reducedAnimations: prefersReducedMotion,
+      uiScale: 1
     };
   });
 
@@ -669,6 +678,21 @@ export default function PokerGame() {
         e.preventDefault();
         setIsHandStrengthCollapsed(!isHandStrengthCollapsed);
       }
+
+      if (e.key.toLowerCase() === 'd') {
+        e.preventDefault();
+        setShowDevOverlay(prev => !prev);
+      }
+
+      if (e.key.toLowerCase() === 'f') {
+        e.preventDefault();
+        setShowFps(prev => !prev);
+      }
+
+      if (e.key.toLowerCase() === 'e') {
+        e.preventDefault();
+        setShowEventLog(prev => !prev);
+      }
     };
 
     window.addEventListener('keydown', handleKeyPress);
@@ -864,11 +888,14 @@ export default function PokerGame() {
       
       const activePlayers = gameEngine.getActivePlayers(currentState);
       if (activePlayers.length === 1) {
-        const { winners, winningHand } = gameEngine.resolveShowdown(currentState);
+        const { winners, winningHand, bestCombos } = gameEngine.resolveShowdown(currentState);
         const winnerNames = winners.map(player => player.name).join(', ');
         
         const winnerIds = winners.map(player => player.id);
         setWinningPlayerIds(winnerIds);
+        const idSet = new Set<string>();
+        Object.values(bestCombos || {}).forEach(cards => cards?.forEach(c => idSet.add(c.id)));
+        setWinningCardIds(idSet);
         
         // Calculate win amount per winner
         const totalPot = currentState.pots.reduce((sum, pot) => sum + pot.amount, 0);
@@ -975,7 +1002,7 @@ export default function PokerGame() {
 
   const resolveShowdown = async (state: GameState) => {
     await new Promise(resolve => setTimeout(resolve, 1500));
-    const { winners, winningHand } = gameEngine.resolveShowdown(state);
+    const { winners, winningHand, bestCombos } = gameEngine.resolveShowdown(state);
     
     if (winners.length > 0) {
       const winnerIds = winners.map(player => player.id);
@@ -1043,6 +1070,9 @@ export default function PokerGame() {
           winAmountPerWinner
         );
       });
+      const idSet = new Set<string>();
+      Object.values(bestCombos || {}).forEach(cards => cards?.forEach(c => idSet.add(c.id)));
+      setWinningCardIds(idSet);
       
       finalState = { ...finalState, phase: 'waiting' as GamePhase };
       setGameState(finalState);
@@ -1181,7 +1211,7 @@ export default function PokerGame() {
     }
     
     // Trigger chip animation from player to pot
-    if (!settings.reducedAnimations && amountToCall > 0) {
+    if (!settings.reducedAnimations && amountToCall > 0 && !document.hidden) {
       const playerSeat = document.querySelector('[data-testid="player-seat-0"]');
       const pot = document.querySelector('[data-testid="pot-display"]');
       
@@ -1190,17 +1220,21 @@ export default function PokerGame() {
         const potRect = pot.getBoundingClientRect();
         
         // Create multiple chips for larger amounts
-        const numChips = Math.min(Math.ceil(amountToCall / 100), 5);
+        const base = Math.min(Math.ceil(amountToCall / 100), 5);
+        const smallScreen = (typeof window !== 'undefined') && window.innerWidth < 480;
+        const numChips = Math.min(base, smallScreen ? 4 : base);
         for (let i = 0; i < numChips; i++) {
           setTimeout(() => {
+            const jitterX = (Math.random() * 14 - 7);
+            const jitterY = (Math.random() * 10 - 5);
             setFlyingChips(prev => [...prev, {
               id: Date.now() + i,
               startX: playerRect.left + playerRect.width / 2,
               startY: playerRect.top + playerRect.height / 2,
-              endX: potRect.left + potRect.width / 2,
-              endY: potRect.top + potRect.height / 2
+              endX: potRect.left + potRect.width / 2 + jitterX,
+              endY: potRect.top + potRect.height / 2 + jitterY
             }]);
-          }, i * 100);
+          }, i * 90);
         }
       }
     }
@@ -1257,17 +1291,21 @@ export default function PokerGame() {
         const potRect = pot.getBoundingClientRect();
         
         // Create multiple chips for larger amounts
-        const numChips = Math.min(Math.ceil(amount / 100), 7);
+        const baseChips = Math.min(Math.ceil(amount / 100), 7);
+        let numChips = isAllIn ? baseChips + 8 : baseChips;
+        numChips = Math.min(numChips, 20);
         for (let i = 0; i < numChips; i++) {
           setTimeout(() => {
+            const jitterX = isAllIn ? (Math.random() * 30 - 15) : 0;
+            const jitterY = isAllIn ? (Math.random() * 20 - 10) : 0;
             setFlyingChips(prev => [...prev, {
               id: Date.now() + i,
               startX: playerRect.left + playerRect.width / 2,
               startY: playerRect.top + playerRect.height / 2,
-              endX: potRect.left + potRect.width / 2,
-              endY: potRect.top + potRect.height / 2
+              endX: potRect.left + potRect.width / 2 + jitterX,
+              endY: potRect.top + potRect.height / 2 + jitterY
             }]);
-          }, i * 80);
+          }, i * (isAllIn ? 50 : 80));
         }
       }
     }
@@ -1325,17 +1363,21 @@ export default function PokerGame() {
         const potRect = pot.getBoundingClientRect();
         
         // Create more chips for raises (they're bigger bets)
-        const numChips = Math.min(Math.ceil(amount / 75), 10);
+        const baseChips = Math.min(Math.ceil(amount / 75), 10);
+        let numChips = isAllIn ? baseChips + 10 : baseChips;
+        numChips = Math.min(numChips, 20);
         for (let i = 0; i < numChips; i++) {
           setTimeout(() => {
+            const jitterX = isAllIn ? (Math.random() * 40 - 20) : 0;
+            const jitterY = isAllIn ? (Math.random() * 25 - 12) : 0;
             setFlyingChips(prev => [...prev, {
               id: Date.now() + i,
               startX: playerRect.left + playerRect.width / 2,
               startY: playerRect.top + playerRect.height / 2,
-              endX: potRect.left + potRect.width / 2,
-              endY: potRect.top + potRect.height / 2
+              endX: potRect.left + potRect.width / 2 + jitterX,
+              endY: potRect.top + potRect.height / 2 + jitterY
             }]);
-          }, i * 60);
+          }, i * (isAllIn ? 45 : 60));
         }
       }
     }
@@ -1395,15 +1437,19 @@ export default function PokerGame() {
   const minRaiseAmount = gameState.currentBet + (gameState.currentBet - (gameState.players.find(p => p.bet < gameState.currentBet)?.bet || 0));
 
   // Table theme colors
-  const tableThemeColors = {
+  const tableThemeColors: Record<string, string> = {
     classic: 'hsl(140 70% 25%)',
     blue: 'hsl(220 70% 30%)',
     red: 'hsl(0 60% 30%)',
-    purple: 'hsl(280 60% 28%)'
+    purple: 'hsl(280 60% 28%)',
+    luxury: '#0f3b16', // deep green with subtle luxury vibe
+    saloon: '#5e4426', // wood-brown felt
+    minimal: '#184a3b', // modern teal-green
+    neon: '#112244' // dark base; neon accents via table-edge glow css
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col lg:flex-row relative overflow-hidden" role="main" aria-label="Poker game table">
+    <div className={`min-h-screen bg-background flex flex-col lg:flex-row relative overflow-hidden ${settings.highContrast ? 'high-contrast' : ''} ${settings.largeText ? 'large-text' : ''}`} role="main" aria-label="Poker game table">
       {/* Desktop Sidebar - Left Side (Hidden on Mobile/Tablet) */}
       <div className="hidden lg:block w-[300px] h-screen border-r bg-background flex-shrink-0">
         <HandStrengthPanel gameState={gameState} />
@@ -1550,12 +1596,14 @@ export default function PokerGame() {
                 cards={gameState.communityCards} 
                 phase={gameState.phase}
                 colorblindMode={settings.colorblindMode}
+                highlightIds={winningCardIds}
               />
 
               {/* Pot Display */}
               <PotDisplay 
                 amount={gameState.pots.reduce((sum, pot) => sum + pot.amount, 0)} 
                 onRef={handlePotRef}
+                sidePots={gameState.pots.map(p => p.amount)}
               />
 
               {/* Player Seats */}
@@ -1576,6 +1624,7 @@ export default function PokerGame() {
                   onFold={index === 0 ? handleFold : undefined}
                   soundEnabled={settings.soundEnabled}
                   soundVolume={settings.soundVolume}
+                  highlightCardIds={winningCardIds}
                 />
               ))}
 
@@ -1614,7 +1663,7 @@ export default function PokerGame() {
               {/* Last Action */}
               {gameState.lastAction && (
                 <div className="absolute bottom-2 sm:bottom-4 left-1/2 transform -translate-x-1/2" style={{ zIndex: 10 }}>
-                  <div className="bg-black/70 backdrop-blur-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-white/20">
+                  <div className="bg-black/70 backdrop-blur-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-white/20" role="status" aria-live="polite" aria-atomic="true">
                     <div className="text-[0.625rem] sm:text-xs text-white" data-testid="text-last-action">
                       {gameState.lastAction}
                     </div>
@@ -1635,11 +1684,18 @@ export default function PokerGame() {
                   </div>
                 </div>
               )}
+
+              {gameState.phase === 'showdown' && winningPlayerIds.length > 0 && (
+                <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 9 }}>
+                  <div className="absolute inset-0 bg-black/50" />
+                  <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ width: 600, height: 360, background: 'radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0) 60%)' }} />
+                </div>
+              )}
             </div>
           </div>
 
           {/* Controls */}
-          <div id="action-controls" className="w-full max-w-3xl md:max-w-none bg-card/90 sm:bg-card/85 md:bg-card/80 backdrop-blur-lg sm:backdrop-blur-xl rounded-lg border border-card-border shadow-lg p-4 xs:p-5 sm:p-6 md:p-4 pb-[calc(1rem+var(--safe-area-bottom))] sm:pb-[calc(1.25rem+var(--safe-area-bottom))] md:pb-[calc(1rem+var(--safe-area-bottom))]" style={{ zIndex: 5 }}>
+          <div id="action-controls" className="w-full max-w-3xl md:max-w-none bg-card/90 sm:bg-card/85 md:bg-card/80 backdrop-blur-lg sm:backdrop-blur-xl rounded-lg border border-card-border shadow-lg p-4 xs:p-5 sm:p-6 md:p-4 pb-[calc(1rem+var(--safe-area-bottom))] sm:pb-[calc(1.25rem+var(--safe-area-bottom))] md:pb-[calc(1rem+var(--safe-area-bottom))]" style={{ zIndex: 5, transform: `scale(${settings.uiScale ?? 1})`, transformOrigin: 'bottom center' }}>
             {gameState.phase === 'waiting' ? (
               <Button 
                 onClick={startNewHand}
@@ -1650,12 +1706,10 @@ export default function PokerGame() {
               >
                 Start New Hand
               </Button>
-            ) : (
+            ) : gameState.currentPlayerIndex === 0 && !humanPlayer.folded ? (
               <>
                 {/* Pot Odds and Win Probability Display */}
-                {gameState.currentPlayerIndex === 0 && 
-                 !humanPlayer.folded && 
-                 gameState.currentBet > humanPlayer.bet && (
+                {gameState.currentBet > humanPlayer.bet && (
                   <div className="mb-3">
                     <PotOddsDisplay
                       amountToCall={gameState.currentBet - humanPlayer.bet}
@@ -1667,25 +1721,42 @@ export default function PokerGame() {
                   </div>
                 )}
 
-                <ActionControls
-                  onFold={handleFold}
-                  onCheck={handleCheck}
-                  onCall={handleCall}
-                  onBet={handleBet}
-                  onRaise={handleRaise}
-                  canCheck={canCheck}
-                  minBet={minBet}
-                  maxBet={maxBet}
-                  amountToCall={gameState.currentBet - humanPlayer.bet}
-                  currentBet={gameState.currentBet}
-                  minRaiseAmount={minRaiseAmount}
-                  potSize={gameState.pots.reduce((sum, pot) => sum + pot.amount, 0)}
-                  playerChips={humanPlayer.chips}
-                  disabled={gameState.currentPlayerIndex !== 0 || isProcessing || settings.isPaused}
-                  animationSpeed={settings.animationSpeed}
-                  playerFolded={humanPlayer.folded}
-                />
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={`controls-${gameState.currentPlayerIndex}`}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <ActionControls
+                      onFold={handleFold}
+                      onCheck={handleCheck}
+                      onCall={handleCall}
+                      onBet={handleBet}
+                      onRaise={handleRaise}
+                      canCheck={canCheck}
+                      minBet={minBet}
+                      maxBet={maxBet}
+                      amountToCall={gameState.currentBet - humanPlayer.bet}
+                      currentBet={gameState.currentBet}
+                      minRaiseAmount={minRaiseAmount}
+                      potSize={gameState.pots.reduce((sum, pot) => sum + pot.amount, 0)}
+                      playerChips={humanPlayer.chips}
+                      disabled={isProcessing || settings.isPaused}
+                      animationSpeed={settings.animationSpeed}
+                      playerFolded={humanPlayer.folded}
+                      isProcessing={isProcessing}
+                      logScale={true}
+                    />
+                  </motion.div>
+                </AnimatePresence>
               </>
+            ) : (
+              <div className="flex items-center justify-center gap-3 py-3 text-sm text-muted-foreground">
+                <div className="w-2 h-2 rounded-full bg-muted-foreground/60 animate-pulse"></div>
+                <span>Waiting for your turn...</span>
+              </div>
             )}
           </div>
         </div>
@@ -1771,6 +1842,9 @@ export default function PokerGame() {
 
       {/* Game Tips */}
       <GameTip position="top-right" />
+      {showDevOverlay && <DevOverlay state={gameState} />}
+      {showFps && <FPSOverlay />}
+      {showEventLog && <DevEventLog history={gameState?.actionHistory || []} />}
     </div>
   );
 }

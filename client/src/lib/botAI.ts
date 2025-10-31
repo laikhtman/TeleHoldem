@@ -2,6 +2,23 @@ import { Card, BotAction, Player, GameState } from '@shared/schema';
 import { handEvaluator } from './handEvaluator';
 
 export class BotAI {
+  private getPersonality(player: Player): 'TAG' | 'LAG' | 'TP' | 'LP' | 'BAL' {
+    if (player.isHuman) return 'BAL';
+    const idx = parseInt(player.id, 10) || 0;
+    const personalities: Array<'TAG' | 'LAG' | 'TP' | 'LP' | 'BAL'> = ['TAG', 'LAG', 'TP', 'LP', 'BAL'];
+    return personalities[idx % personalities.length];
+  }
+
+  private paramsFor(personality: ReturnType<BotAI['getPersonality']>, humanWinRateAdj: number = 0) {
+    // humanWinRateAdj in [-0.1, 0.1], positive when human winning often
+    switch (personality) {
+      case 'TAG': return { bluffBase: 0.05 - humanWinRateAdj * 0.05, raiseMult: 0.5 + humanWinRateAdj * 0.1, betNoBet: 0.45 - humanWinRateAdj * 0.05, callTightness: 0.35 + humanWinRateAdj * 0.05 };
+      case 'LAG': return { bluffBase: 0.15 - humanWinRateAdj * 0.08, raiseMult: 0.8 + humanWinRateAdj * 0.1, betNoBet: 0.5 - humanWinRateAdj * 0.06, callTightness: 0.25 + humanWinRateAdj * 0.04 };
+      case 'TP':  return { bluffBase: 0.03 - humanWinRateAdj * 0.03, raiseMult: 0.35 + humanWinRateAdj * 0.08, betNoBet: 0.3 - humanWinRateAdj * 0.04, callTightness: 0.45 + humanWinRateAdj * 0.05 };
+      case 'LP':  return { bluffBase: 0.08 - humanWinRateAdj * 0.05, raiseMult: 0.4 + humanWinRateAdj * 0.08, betNoBet: 0.2 - humanWinRateAdj * 0.03, callTightness: 0.5 + humanWinRateAdj * 0.05 };
+      default:    return { bluffBase: 0.1  - humanWinRateAdj * 0.06, raiseMult: 0.6 + humanWinRateAdj * 0.1, betNoBet: 0.4 - humanWinRateAdj * 0.05, callTightness: 0.35 + humanWinRateAdj * 0.05 };
+    }
+  }
   getAction(player: Player, gameState: GameState): BotAction {
     const { currentBet, phase, pots, players } = gameState;
     const totalPot = pots.reduce((acc, pot) => acc + pot.amount, 0);
@@ -11,12 +28,38 @@ export class BotAI {
     const handStrength = this.evaluateHandStrength(player.hand, gameState.communityCards);
     const potOdds = callAmount > 0 ? callAmount / (totalPot + callAmount) : 0;
 
-    // Bluffing logic
+    const personality = this.getPersonality(player);
+    // Rubber-band difficulty based on human win rate
+    const played = Math.max(1, gameState.sessionStats.handsPlayed);
+    const humanWR = gameState.sessionStats.handsWonByPlayer / played;
+    const humanWinAdj = Math.max(-0.1, Math.min(0.1, (humanWR - 0.5))); // clamp [-0.1, 0.1]
+    const p = this.paramsFor(personality, humanWinAdj);
+
+    // Simple board texture analysis (dry boards → slightly higher bluffing)
+    let boardDrynessAdj = 0;
+    if (gameState.communityCards.length >= 3) {
+      const texture = handEvaluator.evaluateBoardTexture(gameState.communityCards as any);
+      if (texture) {
+        if (!texture.isMonotone && !texture.isTwoTone && !texture.isConnected) {
+          boardDrynessAdj = 0.035; // dry board
+        } else if (texture.isMonotone || texture.isConnected) {
+          boardDrynessAdj = -0.025; // wet/monotone
+        }
+      }
+    }
+
+    // Exploit human tendencies from recent action history (last 20)
+    const lastActions = gameState.actionHistory.slice(-20).filter(e => e.playerName === gameState.players[0]?.name && e.type === 'player-action');
+    const humanAggression = lastActions.filter(e => e.action === 'bet' || e.action === 'raise').length / Math.max(1, lastActions.length);
+    const humanPassive = lastActions.filter(e => e.action === 'check' || e.action === 'call').length / Math.max(1, lastActions.length);
+    const exploitAdj = (humanAggression - 0.5) * 0.05 - (humanPassive - 0.5) * 0.03; // slight tighten vs agg, slight loosen vs passive
+
+    // Bluffing logic with personality, board, and exploit adjustment
     const isLatePosition = player.position >= players.length - 2;
-    const bluffChance = isLatePosition ? 0.15 : 0.05;
+    const bluffChance = (isLatePosition ? p.bluffBase + 0.05 : p.bluffBase) + boardDrynessAdj - exploitAdj;
     if (Math.random() < bluffChance && handStrength < 0.4) {
       const raiseAmount = Math.min(
-        callAmount + Math.floor(totalPot * (0.5 + Math.random() * 0.5)),
+        callAmount + Math.floor(totalPot * (p.raiseMult + Math.random() * 0.4)),
         player.chips
       );
       if (raiseAmount > callAmount) {
@@ -25,17 +68,17 @@ export class BotAI {
     }
 
     if (callAmount === 0) { // No bet to call
-      if (handStrength > 0.7) {
+      if (handStrength > (0.65 + (p.callTightness - 0.35))) {
         const betAmount = Math.min(
-          Math.floor(totalPot * (0.4 + Math.random() * 0.3)),
+          Math.floor(totalPot * (p.raiseMult + Math.random() * 0.25)),
           player.chips
         );
         return { action: 'bet', amount: Math.max(betAmount, 20) };
       }
-      if (handStrength > 0.4) {
-        if (Math.random() < 0.5) {
+      if (handStrength > p.betNoBet) {
+        if (Math.random() < 0.5 + (personality === 'LAG' ? 0.2 : 0)) {
           const betAmount = Math.min(
-            Math.floor(totalPot * (0.3 + Math.random() * 0.2)),
+            Math.floor(totalPot * (0.3 + Math.random() * 0.25)),
             player.chips
           );
           return { action: 'bet', amount: Math.max(betAmount, 20) };
@@ -45,29 +88,29 @@ export class BotAI {
     }
 
     // Facing a bet
-    if (handStrength > 0.85) {
+    if (handStrength > (0.8 + (personality === 'TP' ? 0.05 : 0))) {
       const raiseAmount = Math.min(
-        callAmount + Math.floor(totalPot * (0.6 + Math.random() * 0.4)),
+        callAmount + Math.floor(totalPot * (p.raiseMult + Math.random() * 0.5)),
         player.chips
       );
       return { action: 'raise', amount: raiseAmount };
     }
 
-    if (handStrength > 0.6) {
-      if (Math.random() < 0.8) {
+    if (handStrength > (0.55 + (personality === 'LP' ? 0.1 : 0) + exploitAdj)) {
+      if (Math.random() < (0.7 + (personality === 'TP' ? 0.1 : 0) - exploitAdj)) {
         return { action: 'call', amount: callAmount };
       }
       const raiseAmount = Math.min(
-        callAmount + Math.floor(totalPot * (0.4 + Math.random() * 0.2)),
+        callAmount + Math.floor(totalPot * (0.35 + Math.random() * 0.25)),
         player.chips
       );
       return { action: 'raise', amount: raiseAmount };
     }
 
     // Adjust calling strategy based on number of players
-    const requiredStrengthToCall = 0.3 + (activePlayers * 0.05);
+    const requiredStrengthToCall = (0.3 + (activePlayers * 0.05)) + (personality === 'TAG' ? 0.05 : 0) + (personality === 'LP' ? -0.03 : 0);
     if (handStrength > requiredStrengthToCall) {
-      if (potOdds < 0.4) { // Good pot odds
+      if (potOdds < (0.4 + (personality === 'TP' ? -0.05 : 0))) { // Good pot odds
         return { action: 'call', amount: callAmount };
       }
     }

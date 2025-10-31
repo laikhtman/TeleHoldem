@@ -9,11 +9,12 @@ interface CommunityCardsProps {
   cards: Card[];
   phase: GamePhase;
   colorblindMode?: boolean;
+  highlightIds?: Set<string>;
 }
 
 const MAX_CONCURRENT_ANIMATIONS = 3; // Limit concurrent card animations
 
-export function CommunityCards({ cards, phase, colorblindMode = false }: CommunityCardsProps) {
+export function CommunityCards({ cards, phase, colorblindMode = false, highlightIds }: CommunityCardsProps) {
   const [revealedCards, setRevealedCards] = useState<boolean[]>(new Array(5).fill(false));
   const [previousCardCount, setPreviousCardCount] = useState(0);
   const [showGlow, setShowGlow] = useState(false);
@@ -219,6 +220,7 @@ export function CommunityCards({ cards, phase, colorblindMode = false }: Communi
                     card={cards[index]}
                     animateFlip={hasCard && !revealedCards[index] && !prefersReducedMotion}
                     className={hasCard ? 'shadow-lg' : ''}
+                    highlight={!!(cards[index] && highlightIds && highlightIds.has(cards[index]!.id))}
                     colorblindMode={colorblindMode}
                   />
                 )}

@@ -12,10 +12,14 @@ export interface GameSettings {
   soundEnabled: boolean;
   soundVolume: number; // 0 to 1
   animationSpeed: number; // 0.5 = slow, 1 = normal, 1.5 = fast
-  tableTheme: 'classic' | 'blue' | 'red' | 'purple';
+  tableTheme: 'classic' | 'blue' | 'red' | 'purple' | 'luxury' | 'saloon' | 'minimal' | 'neon';
   colorblindMode: boolean;
   isPaused: boolean;
   reducedAnimations?: boolean; // Manual toggle for reduced animations
+  uiScale?: number; // UI scale factor 0.9 - 1.2
+  highContrast?: boolean;
+  largeText?: boolean;
+  reducedParticles?: boolean;
 }
 
 interface SettingsPanelProps {
@@ -81,6 +85,33 @@ export function SettingsPanel({ settings, onSettingsChange, onPauseToggle, disab
         </SheetHeader>
         
         <div className="mt-6 space-y-6">
+          {/* UI Scale */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-muted-foreground" />
+                <Label className="text-base font-medium">UI Scale</Label>
+              </div>
+              <span className="text-sm text-muted-foreground">{Math.round((settings.uiScale ?? 1) * 100)}%</span>
+            </div>
+            <div className="px-1">
+              <Slider
+                value={[settings.uiScale ?? 1]}
+                min={0.9}
+                max={1.2}
+                step={0.01}
+                onValueChange={(v) => onSettingsChange({ uiScale: v[0] })}
+                className="w-full"
+                data-testid="slider-ui-scale"
+                aria-label="UI scale"
+              />
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>90%</span>
+                <span>100%</span>
+                <span>120%</span>
+              </div>
+            </div>
+          </div>
           {/* Pause/Resume */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -312,6 +343,70 @@ export function SettingsPanel({ settings, onSettingsChange, onPauseToggle, disab
                   <span className="text-sm font-medium">Royal Purple</span>
                 </Label>
               </div>
+
+              <div>
+                <RadioGroupItem
+                  value="luxury"
+                  id="theme-luxury"
+                  className="peer sr-only"
+                  data-testid="radio-theme-luxury"
+                />
+                <Label
+                  htmlFor="theme-luxury"
+                  className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-card p-4 hover-elevate active-elevate-2 peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-accent cursor-pointer"
+                >
+                  <div className="w-12 h-12 rounded-full mb-2" style={{ background: 'linear-gradient(135deg, #0b3d0b, #154015)' }}></div>
+                  <span className="text-sm font-medium">Luxury</span>
+                </Label>
+              </div>
+
+              <div>
+                <RadioGroupItem
+                  value="saloon"
+                  id="theme-saloon"
+                  className="peer sr-only"
+                  data-testid="radio-theme-saloon"
+                />
+                <Label
+                  htmlFor="theme-saloon"
+                  className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-card p-4 hover-elevate active-elevate-2 peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-accent cursor-pointer"
+                >
+                  <div className="w-12 h-12 rounded-full mb-2" style={{ background: 'linear-gradient(135deg, #6b4f2a, #8b6b3a)' }}></div>
+                  <span className="text-sm font-medium">Saloon</span>
+                </Label>
+              </div>
+
+              <div>
+                <RadioGroupItem
+                  value="minimal"
+                  id="theme-minimal"
+                  className="peer sr-only"
+                  data-testid="radio-theme-minimal"
+                />
+                <Label
+                  htmlFor="theme-minimal"
+                  className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-card p-4 hover-elevate active-elevate-2 peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-accent cursor-pointer"
+                >
+                  <div className="w-12 h-12 rounded-full mb-2" style={{ background: 'hsl(160 10% 20%)' }}></div>
+                  <span className="text-sm font-medium">Minimal</span>
+                </Label>
+              </div>
+
+              <div>
+                <RadioGroupItem
+                  value="neon"
+                  id="theme-neon"
+                  className="peer sr-only"
+                  data-testid="radio-theme-neon"
+                />
+                <Label
+                  htmlFor="theme-neon"
+                  className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-card p-4 hover-elevate active-elevate-2 peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-accent cursor-pointer"
+                >
+                  <div className="w-12 h-12 rounded-full mb-2" style={{ background: 'linear-gradient(135deg, #0ea5e9, #a21caf)' }}></div>
+                  <span className="text-sm font-medium">Neon</span>
+                </Label>
+              </div>
             </RadioGroup>
           </div>
 
@@ -336,6 +431,76 @@ export function SettingsPanel({ settings, onSettingsChange, onPauseToggle, disab
               {settings.colorblindMode 
                 ? 'Suit patterns enabled for better visibility' 
                 : 'Enable patterns and shapes on cards'}
+            </p>
+          </div>
+
+          {/* High Contrast Mode */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Eye className="h-5 w-5 text-muted-foreground" />
+                <Label htmlFor="high-contrast-toggle" className="text-base font-medium">
+                  High Contrast Mode
+                </Label>
+              </div>
+              <Switch
+                id="high-contrast-toggle"
+                checked={!!settings.highContrast}
+                onCheckedChange={(checked) => onSettingsChange({ highContrast: checked })}
+                data-testid="switch-high-contrast"
+                aria-label="Toggle high contrast mode"
+              />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {settings.highContrast 
+                ? 'High contrast enabled for improved visibility' 
+                : 'Increase contrast for low-vision accessibility'}
+            </p>
+          </div>
+
+          {/* Large Text Preset */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-muted-foreground" />
+                <Label htmlFor="large-text-toggle" className="text-base font-medium">
+                  Large Text
+                </Label>
+              </div>
+              <Switch
+                id="large-text-toggle"
+                checked={!!settings.largeText}
+                onCheckedChange={(checked) => onSettingsChange({ largeText: checked })}
+                data-testid="switch-large-text"
+                aria-label="Toggle large text preset"
+              />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {settings.largeText 
+                ? 'Larger typography for increased readability' 
+                : 'Enable a larger text preset'}
+            </p>
+          </div>
+
+          {/* Reduced Particle Effects */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-muted-foreground" />
+                <Label htmlFor="reduced-particles-toggle" className="text-base font-medium">
+                  Reduced Particle Effects
+                </Label>
+              </div>
+              <Switch
+                id="reduced-particles-toggle"
+                checked={!!settings.reducedParticles}
+                onCheckedChange={(checked) => onSettingsChange({ reducedParticles: checked })}
+                data-testid="switch-reduced-particles"
+                aria-label="Toggle reduced particle effects"
+              />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Reduce confetti and coin particles to improve performance or comfort.
             </p>
           </div>
         </div>

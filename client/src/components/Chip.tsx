@@ -215,9 +215,13 @@ export function ChipStack({ count, className }: ChipStackProps) {
     ? { opacity: 1, transform: 'translateY(0) scale(1)' }
     : { opacity: 0, transform: 'translateY(20px) scale(0.8)' };
 
-  const animateState = { 
-    opacity: 1, 
-    transform: 'translateY(0) scale(1)' 
+  const animateState = prefersReducedMotion ? { opacity: 1, transform: 'translateY(0) scale(1)' } : {
+    opacity: 1,
+    transform: [
+      'translateY(0) scale(1) rotate(0deg)',
+      'translateY(0) scale(1.01) rotate(1deg)',
+      'translateY(0) scale(1) rotate(0deg)'
+    ]
   };
   
   return (
@@ -225,7 +229,9 @@ export function ChipStack({ count, className }: ChipStackProps) {
       {Array.from({ length: displayCount }).map((_, i) => (
         <motion.div
           key={i}
-          className="absolute w-8 h-8 xs:w-9 xs:h-9 sm:w-6 sm:h-6 rounded-full bg-poker-chipGold border-2 border-yellow-600 shadow-lg chip-shine"
+          className={`absolute w-8 h-8 xs:w-9 xs:h-9 sm:w-6 sm:h-6 rounded-full border-2 shadow-lg chip-shine ${
+            i % 3 === 0 ? 'bg-red-600 border-red-800' : i % 3 === 1 ? 'bg-blue-600 border-blue-800' : 'bg-yellow-500 border-yellow-700'
+          }`}
           style={{
             top: `-${i * 3}px`,
             left: 0,
@@ -234,7 +240,7 @@ export function ChipStack({ count, className }: ChipStackProps) {
           }}
           initial={initialState}
           animate={animateState}
-          transition={transitionConfig(i)}
+          transition={prefersReducedMotion ? transitionConfig(i) : { ...transitionConfig(i), repeat: 0, duration: 0.4 }}
         />
       ))}
       {count > 5 && (

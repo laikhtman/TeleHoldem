@@ -13,6 +13,7 @@ interface PlayingCardProps {
   animateDeal?: boolean;
   dealDelay?: number;
   colorblindMode?: boolean;
+  highlight?: boolean;
 }
 
 // Convert our card format to SVG-cards naming convention
@@ -57,7 +58,8 @@ export function PlayingCard({
   animateFlip = false,
   animateDeal = false,
   dealDelay = 0,
-  colorblindMode = false
+  colorblindMode = false,
+  highlight = false
 }: PlayingCardProps) {
   const [isFlipped, setIsFlipped] = useState(!animateFlip);
   const [isDealt, setIsDealt] = useState(!animateDeal);
@@ -67,6 +69,10 @@ export function PlayingCard({
   const prefersReducedMotion = useReducedMotion();
   const cardRef = useRef<HTMLDivElement>(null);
   const animationStateRef = useRef({ willChange: false });
+  const [settleBounceKey, setSettleBounceKey] = useState<number>(0);
+  const [pinchActive, setPinchActive] = useState(false);
+  const [peekActive, setPeekActive] = useState(false);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Handle will-change for performance
   useEffect(() => {
@@ -115,6 +121,10 @@ export function PlayingCard({
         setIsDealt(true);
         if (!prefersReducedMotion) {
           playSound('card-deal', { volume: 0.1 });
+        }
+        // trigger a subtle settle bounce shortly after being dealt
+        if (!prefersReducedMotion) {
+          setTimeout(() => setSettleBounceKey(prev => prev + 1), 120);
         }
       }, delay);
       return () => clearTimeout(timer);
@@ -210,15 +220,33 @@ export function PlayingCard({
   };
 
   // Handle touch interactions for mobile
-  const handleTouchStart = () => {
-    if (!faceDown && card && !prefersReducedMotion) {
-      setIsTouched(true);
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (!card) return;
+    // two-finger pinch to peek/zoom
+    if (e.touches && e.touches.length >= 2 && !prefersReducedMotion) {
+      setPinchActive(true);
       playSound('button-click', { volume: 0.08 });
+    }
+    // long-press to peek (additional zoom)
+    if (!longPressTimer.current && !prefersReducedMotion) {
+      longPressTimer.current = setTimeout(() => setPeekActive(true), 500);
+    }
+    if (!faceDown && !prefersReducedMotion) {
+      setIsTouched(true);
     }
   };
 
   const handleTouchEnd = () => {
     setIsTouched(false);
+    setPinchActive(false);
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+    // end peek shortly after
+    if (peekActive) {
+      setTimeout(() => setPeekActive(false), 150);
+    }
   };
 
   // Animation config based on reduced motion preference
@@ -253,7 +281,7 @@ export function PlayingCard({
         flexShrink: 0,
         transformStyle: 'preserve-3d',
         // Hardware acceleration hint
-        transform: 'translateZ(0)'
+        transform: `translateZ(0) scale(${pinchActive ? 1.2 : 1})`
       }}
       role="img"
       aria-label={getCardAriaLabel()}
@@ -302,9 +330,13 @@ export function PlayingCard({
           transform: 'rotateY(180deg) translateZ(0)' // Hardware acceleration
         }}
       >
-        <div 
-          className={`w-full h-full rounded-lg overflow-hidden shadow-card-3d relative bg-white ${isTouched ? 'ring-2 ring-poker-chipGold ring-opacity-70' : ''}`}
+        <motion.div 
+          className={`w-full h-full rounded-lg overflow-hidden shadow-card-3d relative bg-white ${isTouched ? 'ring-2 ring-poker-chipGold ring-opacity-70' : ''} ${highlight ? 'outline outline-4 outline-poker-chipGold/80' : ''}`}
           data-testid={`card-${card.id}`}
+          key={settleBounceKey}
+          initial={prefersReducedMotion ? {} : { y: 0, scale: 1 }}
+          animate={prefersReducedMotion ? {} : { y: [0, -6, 0], scale: peekActive ? 1.15 : 1 }}
+          transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.25, ease: 'easeOut' }}
         >
           {/* Premium white card background with subtle gradient */}
           <div className="absolute inset-0 bg-gradient-to-br from-white via-gray-50 to-white pointer-events-none" />
@@ -330,7 +362,7 @@ export function PlayingCard({
           
           {/* Gloss effect for premium card feel */}
           <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-transparent to-white/20 pointer-events-none" />
-        </div>
+        </motion.div>
       </motion.div>
     </motion.div>
   );
