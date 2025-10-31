@@ -143,7 +143,7 @@ export function WinnerCelebration({ isWinner, playerName, winAmount = 0 }: Winne
           </motion.div>
 
           {/* Floating coins */}
-          {[...Array(settings?.reducedParticles ? (isBigWin ? 6 : 4) : (isBigWin ? 12 : 8))].map((_, i) => (
+          {[...Array(isBigWin ? 12 : 8)].map((_, i) => (
             <motion.div
               key={`coin-${i}`}
               className="absolute"
@@ -191,16 +191,3 @@ export function WinnerCelebration({ isWinner, playerName, winAmount = 0 }: Winne
     </AnimatePresence>
   );
 }
-          {/* Slow-motion overlay for big wins */}
-          {isBigWin && (
-            <motion.div
-              className="absolute inset-0 flex items-center justify-center pointer-events-none"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: [0, 0.5, 0] }}
-              transition={{ duration: 1.6, ease: 'easeInOut', delay: 0.4 }}
-            >
-              <div className="px-4 py-2 rounded-md bg-black/60 border border-yellow-400/60 text-poker-chipGold font-bold tracking-wide">
-                SLOW-MO REPLAY
-              </div>
-            </motion.div>
-          )}
