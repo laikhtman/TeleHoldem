@@ -50,11 +50,11 @@ export interface Achievement {
   unlockedAt?: number;
 }
 
-export type Card = {
+export interface Card {
   rank: Rank;
   suit: Suit;
   id: string;
-};
+}
 
 export interface Player {
   id: string;
