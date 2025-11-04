@@ -24,6 +24,12 @@ export interface GameSettings {
   reducedParticles?: boolean;
   difficultyMode?: DifficultyMode;
   currentDifficulty?: DifficultyLevel;
+  performanceMetrics?: {
+    winRate: number;
+    consecutiveWins: number;
+    consecutiveLosses: number;
+    bankrollTrend: 'up' | 'down' | 'stable';
+  };
 }
 
 interface SettingsPanelProps {
@@ -137,10 +143,50 @@ export function SettingsPanel({ settings, onSettingsChange, onPauseToggle, disab
             </Select>
             
             {settings.difficultyMode === 'auto' && settings.currentDifficulty && (
-              <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-md">
-                <Info className="h-4 w-4 text-muted-foreground" />
-                <p className="text-sm">
-                  Current difficulty: <span className="font-medium capitalize">{settings.currentDifficulty}</span>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-md">
+                  <Info className="h-4 w-4 text-muted-foreground" />
+                  <div className="flex-1">
+                    <p className="text-sm">
+                      Current difficulty: <span className="font-medium capitalize">{settings.currentDifficulty}</span>
+                    </p>
+                    {settings.performanceMetrics && (
+                      <div className="mt-2 space-y-1">
+                        <p className="text-xs text-muted-foreground">
+                          Win rate: <span className="font-medium">{Math.round(settings.performanceMetrics.winRate * 100)}%</span>
+                        </p>
+                        {settings.performanceMetrics.consecutiveWins > 0 && (
+                          <p className="text-xs text-muted-foreground">
+                            Consecutive wins: <span className="font-medium text-green-600 dark:text-green-400">
+                              {settings.performanceMetrics.consecutiveWins}
+                            </span>
+                          </p>
+                        )}
+                        {settings.performanceMetrics.consecutiveLosses > 0 && (
+                          <p className="text-xs text-muted-foreground">
+                            Consecutive losses: <span className="font-medium text-red-600 dark:text-red-400">
+                              {settings.performanceMetrics.consecutiveLosses}
+                            </span>
+                          </p>
+                        )}
+                        <p className="text-xs text-muted-foreground">
+                          Bankroll trend: <span className={`font-medium ${
+                            settings.performanceMetrics.bankrollTrend === 'up' 
+                              ? 'text-green-600 dark:text-green-400' 
+                              : settings.performanceMetrics.bankrollTrend === 'down' 
+                              ? 'text-red-600 dark:text-red-400' 
+                              : 'text-gray-600 dark:text-gray-400'
+                          }`}>
+                            {settings.performanceMetrics.bankrollTrend === 'up' ? '↑' : 
+                             settings.performanceMetrics.bankrollTrend === 'down' ? '↓' : '→'} {settings.performanceMetrics.bankrollTrend}
+                          </span>
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground px-1">
+                  Difficulty adjusts automatically based on your performance (3+ consecutive wins/losses trigger adjustment)
                 </p>
               </div>
             )}

@@ -1564,7 +1564,17 @@ export default function PokerGame() {
           </Button>
         </Link>
         <SettingsPanel 
-          settings={settings}
+          settings={{
+            ...settings,
+            performanceMetrics: gameState.performanceMetrics ? {
+              winRate: gameState.performanceMetrics.winRate,
+              consecutiveWins: gameState.performanceMetrics.consecutiveWins,
+              consecutiveLosses: gameState.performanceMetrics.consecutiveLosses,
+              bankrollTrend: gameState.performanceMetrics.bankrollTrend
+            } : undefined,
+            currentDifficulty: gameState.difficultySettings?.currentLevel,
+            difficultyMode: gameState.difficultySettings?.mode
+          }}
           onSettingsChange={handleSettingsChange}
           onPauseToggle={handlePauseToggle}
           disabled={isProcessing}

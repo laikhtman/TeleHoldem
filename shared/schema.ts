@@ -104,6 +104,10 @@ export interface PerformanceMetrics {
   }>;
   winRate: number; // Calculated win rate over recent hands
   bankrollTrend: 'up' | 'down' | 'stable';
+  consecutiveWins: number; // Track consecutive wins for rubber-band difficulty
+  consecutiveLosses: number; // Track consecutive losses for rubber-band difficulty
+  averagePotWin: number; // Average pot size when winning
+  lastDifficultyAdjustment: number; // Timestamp of last difficulty change
 }
 
 export interface ActionHistoryEntry {

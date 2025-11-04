@@ -79,7 +79,11 @@ export class GameEngine {
         timestamp: Date.now()
       }],
       winRate: 0.5,
-      bankrollTrend: 'stable'
+      bankrollTrend: 'stable',
+      consecutiveWins: 0,
+      consecutiveLosses: 0,
+      averagePotWin: 0,
+      lastDifficultyAdjustment: Date.now()
     };
 
     return {

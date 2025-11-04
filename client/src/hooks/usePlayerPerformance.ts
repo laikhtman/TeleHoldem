@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { GameState, PerformanceMetrics, DifficultyLevel, DifficultyMode } from '@shared/schema';
 
-const RECENT_HANDS_WINDOW = 25; // Track last 25 hands
+const RECENT_HANDS_WINDOW = 20; // Track last 20 hands as specified
 const BANKROLL_HISTORY_SIZE = 30; // Track last 30 bankroll updates
 const WIN_RATE_HIGH_THRESHOLD = 0.65; // > 65% win rate triggers difficulty increase
 const WIN_RATE_LOW_THRESHOLD = 0.35; // < 35% win rate triggers difficulty decrease
-const DIFFICULTY_ADJUSTMENT_DELAY = 5; // Adjust difficulty after 5 hands
+const CONSECUTIVE_THRESHOLD = 3; // Trigger adjustment after 3+ consecutive wins/losses
+const DIFFICULTY_ADJUSTMENT_COOLDOWN = 10000; // 10 second cooldown between adjustments
 
 interface UsePlayerPerformanceProps {
   gameState: GameState | null;
@@ -45,7 +46,11 @@ export function usePlayerPerformance({
     recentHands: [],
     bankrollHistory: [],
     winRate: 0.5,
-    bankrollTrend: 'stable'
+    bankrollTrend: 'stable',
+    consecutiveWins: 0,
+    consecutiveLosses: 0,
+    averagePotWin: 0,
+    lastDifficultyAdjustment: Date.now()
   });
 
   const [handsPlayedSinceAdjustment, setHandsPlayedSinceAdjustment] = useState(0);
@@ -86,6 +91,13 @@ export function usePlayerPerformance({
     return 'stable';
   }, []);
 
+  // Calculate average pot win
+  const calculateAveragePotWin = useCallback((hands: PerformanceMetrics['recentHands']): number => {
+    const wins = hands.filter(h => h.won);
+    if (wins.length === 0) return 0;
+    return wins.reduce((sum, h) => sum + h.potSize, 0) / wins.length;
+  }, []);
+
   // Update performance when a hand is completed
   const updatePerformance = useCallback((won: boolean, potSize: number) => {
     setPerformanceMetrics(prev => {
@@ -98,16 +110,24 @@ export function usePlayerPerformance({
 
       const recentHands = [...prev.recentHands, newHand].slice(-RECENT_HANDS_WINDOW);
       const winRate = calculateWinRate(recentHands);
+      const averagePotWin = calculateAveragePotWin(recentHands);
+      
+      // Update consecutive wins/losses
+      let consecutiveWins = won ? prev.consecutiveWins + 1 : 0;
+      let consecutiveLosses = won ? 0 : prev.consecutiveLosses + 1;
 
       return {
         ...prev,
         recentHands,
-        winRate
+        winRate,
+        consecutiveWins,
+        consecutiveLosses,
+        averagePotWin
       };
     });
 
     setHandsPlayedSinceAdjustment(prev => prev + 1);
-  }, [calculateWinRate]);
+  }, [calculateWinRate, calculateAveragePotWin]);
 
   // Update bankroll history
   const updateBankroll = useCallback((amount: number) => {
@@ -128,38 +148,77 @@ export function usePlayerPerformance({
     });
   }, [calculateBankrollTrend]);
 
-  // Get recommended difficulty based on performance
+  // Get recommended difficulty based on performance (rubber-band system)
   const getRecommendedDifficulty = useCallback((): DifficultyLevel => {
-    const { winRate, bankrollTrend } = performanceMetrics;
+    const { winRate, bankrollTrend, consecutiveWins, consecutiveLosses, lastDifficultyAdjustment } = performanceMetrics;
     
-    // Combine win rate and bankroll trend for more nuanced adjustment
-    let adjustmentScore = winRate;
-    
-    // Add weight from bankroll trend
-    if (bankrollTrend === 'up') adjustmentScore += 0.1;
-    if (bankrollTrend === 'down') adjustmentScore -= 0.1;
+    // Check cooldown to prevent rapid adjustments
+    const timeSinceLastAdjustment = Date.now() - lastDifficultyAdjustment;
+    if (timeSinceLastAdjustment < DIFFICULTY_ADJUSTMENT_COOLDOWN) {
+      return currentDifficultyLevel;
+    }
     
     // Ensure we have enough hands played
     if (performanceMetrics.recentHands.length < 5) {
       return currentDifficultyLevel; // Don't adjust with insufficient data
     }
     
-    // Recommend difficulty based on performance
-    if (adjustmentScore > WIN_RATE_HIGH_THRESHOLD) {
-      // Player is winning too much, increase difficulty
+    // RUBBER-BAND DIFFICULTY SYSTEM
+    // Priority 1: Consecutive wins/losses (immediate response)
+    if (consecutiveWins >= CONSECUTIVE_THRESHOLD) {
+      // Player has won 3+ hands in a row - make it harder
       switch (currentDifficultyLevel) {
         case 'easy': return 'normal';
         case 'normal': return 'hard';
         case 'hard': return 'expert';
         case 'expert': return 'expert'; // Can't go higher
       }
-    } else if (adjustmentScore < WIN_RATE_LOW_THRESHOLD) {
-      // Player is losing too much, decrease difficulty
+    }
+    
+    if (consecutiveLosses >= CONSECUTIVE_THRESHOLD) {
+      // Player has lost 3+ hands in a row - make it easier
       switch (currentDifficultyLevel) {
         case 'expert': return 'hard';
         case 'hard': return 'normal';
         case 'normal': return 'easy';
         case 'easy': return 'easy'; // Can't go lower
+      }
+    }
+    
+    // Priority 2: Win rate and bankroll trend (gradual adjustment)
+    let adjustmentScore = winRate;
+    
+    // Add weight from bankroll trend
+    if (bankrollTrend === 'up') adjustmentScore += 0.1;
+    if (bankrollTrend === 'down') adjustmentScore -= 0.1;
+    
+    // Adjust based on longer-term performance
+    if (adjustmentScore > WIN_RATE_HIGH_THRESHOLD) {
+      // Player is winning too much overall
+      switch (currentDifficultyLevel) {
+        case 'easy': return 'normal';
+        case 'normal': return 'hard';
+        case 'hard': return 'expert';
+        case 'expert': return 'expert';
+      }
+    } else if (adjustmentScore < WIN_RATE_LOW_THRESHOLD) {
+      // Player is losing too much overall
+      switch (currentDifficultyLevel) {
+        case 'expert': return 'hard';
+        case 'hard': return 'normal';
+        case 'normal': return 'easy';
+        case 'easy': return 'easy';
+      }
+    }
+    
+    // Return to baseline if performance is balanced
+    if (winRate >= 0.45 && winRate <= 0.55) {
+      // Player performance is balanced, gradually return to normal
+      if (currentDifficultyLevel === 'easy' && performanceMetrics.recentHands.length >= 10) {
+        return 'normal';
+      }
+      if (currentDifficultyLevel === 'hard' && performanceMetrics.recentHands.length >= 10) {
+        return 'normal';
       }
     }
     
@@ -182,6 +241,12 @@ export function usePlayerPerformance({
       const newLevel = getRecommendedDifficulty();
       setCurrentDifficultyLevel(newLevel);
       setHandsPlayedSinceAdjustment(0);
+      
+      // Update last adjustment timestamp
+      setPerformanceMetrics(prev => ({
+        ...prev,
+        lastDifficultyAdjustment: Date.now()
+      }));
       
       // Save to localStorage
       localStorage.setItem('pokerDifficulty', JSON.stringify({

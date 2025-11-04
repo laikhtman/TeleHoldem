@@ -25,7 +25,7 @@ export class BotAI {
     return personalities[idx % personalities.length];
   }
 
-  private applyDifficultyMultiplier(value: number, type: 'error' | 'aggression' | 'tightness'): number {
+  private applyDifficultyMultiplier(value: number, type: 'error' | 'aggression' | 'tightness' | 'fold_probability' | 'bet_size'): number {
     const multiplier = this.difficultySettings.multiplier;
     const level = this.difficultySettings.currentLevel;
     
@@ -39,6 +39,10 @@ export class BotAI {
         
       case 'aggression':
         // Higher difficulty = more aggressive play
+        // Easy mode: AI is less aggressive (smaller raises, less frequent)
+        if (level === 'easy') return value * 0.7; // 30% less aggressive
+        if (level === 'hard') return value * 1.3; // 30% more aggressive
+        if (level === 'expert') return value * 1.5; // 50% more aggressive
         return value * multiplier;
         
       case 'tightness':
@@ -46,6 +50,20 @@ export class BotAI {
         if (level === 'easy') return value * 0.8; // Looser play
         if (level === 'hard') return value * 1.2; // Tighter play
         if (level === 'expert') return value * 1.4; // Much tighter play
+        return value;
+        
+      case 'fold_probability':
+        // Easy mode: AI folds more often to player bets (10-15% increase)
+        if (level === 'easy') return Math.min(1.0, value * 1.15); // 15% more likely to fold
+        if (level === 'hard') return value * 0.9; // 10% less likely to fold
+        if (level === 'expert') return value * 0.8; // 20% less likely to fold
+        return value;
+        
+      case 'bet_size':
+        // Easy mode: AI makes smaller bets
+        if (level === 'easy') return value * 0.75; // 25% smaller bets
+        if (level === 'hard') return value * 1.15; // 15% larger bets
+        if (level === 'expert') return value * 1.25; // 25% larger bets
         return value;
     }
   }
@@ -157,6 +175,10 @@ export class BotAI {
       }
       // Hard and Expert modes make very few mistakes
     }
+    
+    // Apply fold probability modifier when difficulty is easier
+    const foldProbabilityModifier = this.applyDifficultyMultiplier(1.0, 'fold_probability');
+    const betSizeModifier = this.applyDifficultyMultiplier(1.0, 'bet_size');
 
     // Simple board texture analysis (dry boards → slightly higher bluffing)
     let boardDrynessAdj = 0;
@@ -201,7 +223,7 @@ export class BotAI {
     if (callAmount === 0) { // No bet to call
       if (handStrength > (0.65 + (p.callTightness - 0.35))) {
         const betAmount = Math.min(
-          Math.floor(totalPot * (p.raiseMult + Math.random() * 0.25)),
+          Math.floor(totalPot * (p.raiseMult + Math.random() * 0.25) * betSizeModifier),
           player.chips
         );
         return { action: 'bet', amount: Math.max(betAmount, 20) };
@@ -209,7 +231,7 @@ export class BotAI {
       if (handStrength > p.betNoBet) {
         if (Math.random() < 0.5 + (personality === 'LAG' ? 0.2 : 0)) {
           const betAmount = Math.min(
-            Math.floor(totalPot * (0.3 + Math.random() * 0.25)),
+            Math.floor(totalPot * (0.3 + Math.random() * 0.25) * betSizeModifier),
             player.chips
           );
           return { action: 'bet', amount: Math.max(betAmount, 20) };
@@ -221,27 +243,32 @@ export class BotAI {
     // Facing a bet
     if (handStrength > (0.8 + (personality === 'TP' ? 0.05 : 0))) {
       const raiseAmount = Math.min(
-        callAmount + Math.floor(totalPot * (p.raiseMult + Math.random() * 0.5)),
+        callAmount + Math.floor(totalPot * (p.raiseMult + Math.random() * 0.5) * betSizeModifier),
         player.chips
       );
       return { action: 'raise', amount: raiseAmount };
     }
 
     if (handStrength > (0.55 + (personality === 'LP' ? 0.1 : 0) + exploitAdj)) {
-      if (Math.random() < (0.7 + (personality === 'TP' ? 0.1 : 0) - exploitAdj)) {
+      // Apply fold probability modifier for easier difficulty
+      if (Math.random() < (0.7 + (personality === 'TP' ? 0.1 : 0) - exploitAdj) * foldProbabilityModifier) {
         return { action: 'call', amount: callAmount };
       }
       const raiseAmount = Math.min(
-        callAmount + Math.floor(totalPot * (0.35 + Math.random() * 0.25)),
+        callAmount + Math.floor(totalPot * (0.35 + Math.random() * 0.25) * betSizeModifier),
         player.chips
       );
       return { action: 'raise', amount: raiseAmount };
     }
 
-    // Adjust calling strategy based on number of players
+    // Adjust calling strategy based on number of players and difficulty
     const requiredStrengthToCall = (0.3 + (activePlayers * 0.05)) + (personality === 'TAG' ? 0.05 : 0) + (personality === 'LP' ? -0.03 : 0);
     if (handStrength > requiredStrengthToCall) {
       if (potOdds < (0.4 + (personality === 'TP' ? -0.05 : 0))) { // Good pot odds
+        // Apply fold probability modifier - in easy mode, AI is more likely to fold
+        if (Math.random() > foldProbabilityModifier) {
+          return { action: 'fold' };
+        }
         return { action: 'call', amount: callAmount };
       }
     }
