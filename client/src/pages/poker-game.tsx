@@ -293,6 +293,7 @@ export default function PokerGame() {
       console.error('Failed to save settings to localStorage:', error);
     }
   }, [settings]);
+  
 
   // Responsively tune table aspect ratio for better mobile fit
   useEffect(() => {
@@ -791,7 +792,13 @@ export default function PokerGame() {
   }, [navigate, isRightPanelCollapsed, isHandStrengthCollapsed]);
 
   const startNewHand = () => {
-    if (!gameState) return;
+    if (!gameState) {
+      console.error('Cannot start new hand: gameState is null');
+      // Initialize game if not already initialized
+      const initialState = gameEngine.createInitialGameState(NUM_PLAYERS);
+      setGameState(initialState);
+      return;
+    }
     
     // Sound and haptic for shuffling
     if (settings.soundEnabled) {
@@ -803,6 +810,58 @@ export default function PokerGame() {
     setWinAmounts({});
     setFlyingChips([]);
     let newState = gameEngine.startNewHand(gameState);
+    
+    // Check if game is over (human player eliminated)
+    if (newState.gameOver) {
+      setGameState(newState);
+      
+      // Save final stats to backend if authenticated
+      if (isAuthenticated && user) {
+        const humanPlayer = newState.players.find(p => p.isHuman);
+        if (humanPlayer) {
+          saveBankrollMutation.mutate(humanPlayer.chips); // Should be 0
+          saveStatsMutation.mutate({
+            handsPlayed: newState.sessionStats.handsPlayed,
+            handsWon: newState.sessionStats.handsWonByPlayer,
+            biggestPot: humanPlayer.stats?.biggestPot || 0,
+            totalWinnings: 0,
+            achievements: Object.entries(newState.achievements)
+              .filter(([_, ach]) => ach.unlockedAt !== undefined)
+              .map(([id]) => id as AchievementId)
+          });
+        }
+      }
+      
+      // Show game over notification
+      toast({
+        variant: "destructive",
+        title: "Game Over",
+        description: "You are out of chips! Your session stats have been saved.",
+        duration: Infinity,
+        action: (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => handleResetGame()}
+          >
+            Start New Game
+          </Button>
+        ),
+      });
+      return;
+    }
+    
+    // Safety check: ensure players array exists (but don't reset for game over)
+    if (!newState.players || newState.players.length === 0) {
+      console.error('Failed to initialize players in new hand:', newState);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to start new hand. Please refresh the page.",
+        duration: 5000,
+      });
+      return;
+    }
     
     // Clear action history for new hand
     newState = { ...newState, actionHistory: [] };
@@ -828,12 +887,6 @@ export default function PokerGame() {
     const smallBlindIndex = (newState.dealerIndex + 1) % NUM_PLAYERS;
     const bigBlindIndex = (newState.dealerIndex + 2) % NUM_PLAYERS;
     newState = gameEngine.postBlinds(newState, 10, 20);
-    
-    // Safety check: ensure players array exists
-    if (!newState.players || newState.players.length === 0) {
-      console.error('Failed to initialize players in new hand');
-      return;
-    }
     
     // Sound for blinds posting
     if (settings.soundEnabled) {
@@ -890,8 +943,47 @@ export default function PokerGame() {
     
     setIsProcessing(true);
     let currentState = state;
+    let iterations = 0;
+    const MAX_ITERATIONS = 50; // Prevent infinite loops
+    const startTime = Date.now();
+    const MAX_TIME = 30000; // 30 second timeout
 
     while (currentState.currentPlayerIndex !== 0 && !gameEngine.isRoundComplete(currentState)) {
+      // Safety checks to prevent infinite loops
+      iterations++;
+      if (iterations > MAX_ITERATIONS) {
+        console.error('Bot action processing exceeded maximum iterations');
+        toast({
+          variant: "destructive",
+          title: "Game Error",
+          description: "Bot processing stalled. Advancing to next round.",
+          duration: 5000,
+        });
+        // Force advance to next phase as fallback
+        if (currentState.phase !== 'showdown' && currentState.phase !== 'waiting') {
+          currentState = gameEngine.advancePhase(currentState);
+          setGameState(currentState);
+        }
+        break;
+      }
+      
+      // Check for timeout
+      if (Date.now() - startTime > MAX_TIME) {
+        console.error('Bot action processing timed out');
+        toast({
+          variant: "destructive",
+          title: "Game Timeout",
+          description: "Bot decision took too long. Advancing to next round.",
+          duration: 5000,
+        });
+        // Force advance to next phase as fallback
+        if (currentState.phase !== 'showdown' && currentState.phase !== 'waiting') {
+          currentState = gameEngine.advancePhase(currentState);
+          setGameState(currentState);
+        }
+        break;
+      }
+      
       const currentPlayer = currentState.players[currentState.currentPlayerIndex];
       
       if (currentPlayer.folded) {
@@ -902,8 +994,17 @@ export default function PokerGame() {
         continue;
       }
 
-      // Get bot action
-      const botAction = botAI.getAction(currentPlayer, currentState);
+      // Get bot action with error handling
+      let botAction;
+      try {
+        botAction = botAI.getAction(currentPlayer, currentState);
+      } catch (error) {
+        console.error('Error getting bot action:', error);
+        // Default to check/fold as fallback
+        botAction = currentState.currentBet > currentPlayer.bet 
+          ? { action: 'fold' as const }
+          : { action: 'check' as const };
+      }
       
       // Apply action
       await new Promise(resolve => setTimeout(resolve, 800));
@@ -1520,6 +1621,21 @@ export default function PokerGame() {
     );
   }
 
+  // Check if players are initialized
+  if (!gameState.players || gameState.players.length === 0) {
+    console.error('GameState has no players:', gameState);
+    // Try to initialize the game
+    const initialState = gameEngine.createInitialGameState(NUM_PLAYERS);
+    setGameState(initialState);
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-background">
+        <PokerLoader 
+          size="lg" 
+          message="Setting up the table..."
+        />
+      </div>
+    );
+  }
 
   const humanPlayer = gameState.players[0];
   const canCheck = gameState.currentBet === 0 || gameState.currentBet === humanPlayer.bet;
@@ -1636,7 +1752,10 @@ export default function PokerGame() {
 
                   {/* Pot Display */}
                   <PotDisplay 
-                    amount={gameState.pots.reduce((sum, pot) => sum + pot.amount, 0)} 
+                    amount={
+                      gameState.pots.reduce((sum, pot) => sum + pot.amount, 0) + 
+                      gameState.players.reduce((sum, player) => sum + player.bet, 0)
+                    } 
                     onRef={handlePotRef}
                     sidePots={gameState.pots.map(p => p.amount)}
                   />
@@ -1662,6 +1781,65 @@ export default function PokerGame() {
                       highlightCardIds={winningCardIds}
                     />
                   ))}
+
+                  {/* Game Over Overlay */}
+                  {gameState.gameOver && (
+                    <div className="absolute inset-0 flex items-center justify-center z-50 rounded-[210px] bg-black/80">
+                      <div className="bg-card p-8 rounded-lg shadow-2xl text-center max-w-md">
+                        <h2 className="text-3xl font-bold mb-4 text-destructive">Game Over</h2>
+                        <p className="text-lg mb-6">You've run out of chips!</p>
+                        
+                        {/* Display session stats */}
+                        <div className="bg-background rounded-lg p-4 mb-6">
+                          <h3 className="text-sm font-semibold mb-3">Session Stats</h3>
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Hands Played:</span>
+                              <span className="font-medium">{gameState.sessionStats.handsPlayed}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Hands Won:</span>
+                              <span className="font-medium">{gameState.sessionStats.handsWonByPlayer}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Win Rate:</span>
+                              <span className="font-medium">
+                                {gameState.sessionStats.handsPlayed > 0 
+                                  ? `${Math.round((gameState.sessionStats.handsWonByPlayer / gameState.sessionStats.handsPlayed) * 100)}%`
+                                  : '0%'}
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Biggest Pot Won:</span>
+                              <span className="font-medium">${humanPlayer.stats?.biggestPot || 0}</span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex gap-4 justify-center">
+                          <Button
+                            onClick={() => handleResetGame()}
+                            variant="default"
+                            size="lg"
+                            data-testid="button-new-game-after-game-over"
+                          >
+                            Start New Game
+                          </Button>
+                          {tableId && (
+                            <Link href="/lobby">
+                              <Button
+                                variant="outline"
+                                size="lg"
+                                data-testid="button-back-to-lobby-after-game-over"
+                              >
+                                Back to Lobby
+                              </Button>
+                            </Link>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Game Phase Indicator */}
                   <AnimatePresence mode="wait">
@@ -1937,7 +2115,10 @@ export default function PokerGame() {
 
                   {/* Pot Display */}
                   <PotDisplay 
-                    amount={gameState.pots.reduce((sum, pot) => sum + pot.amount, 0)} 
+                    amount={
+                      gameState.pots.reduce((sum, pot) => sum + pot.amount, 0) + 
+                      gameState.players.reduce((sum, player) => sum + player.bet, 0)
+                    } 
                     onRef={handlePotRef}
                     sidePots={gameState.pots.map(p => p.amount)}
                   />
@@ -1963,6 +2144,65 @@ export default function PokerGame() {
                       highlightCardIds={winningCardIds}
                     />
                   ))}
+
+                  {/* Game Over Overlay */}
+                  {gameState.gameOver && (
+                    <div className="absolute inset-0 flex items-center justify-center z-50 rounded-[210px] bg-black/80">
+                      <div className="bg-card p-8 rounded-lg shadow-2xl text-center max-w-md">
+                        <h2 className="text-3xl font-bold mb-4 text-destructive">Game Over</h2>
+                        <p className="text-lg mb-6">You've run out of chips!</p>
+                        
+                        {/* Display session stats */}
+                        <div className="bg-background rounded-lg p-4 mb-6">
+                          <h3 className="text-sm font-semibold mb-3">Session Stats</h3>
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Hands Played:</span>
+                              <span className="font-medium">{gameState.sessionStats.handsPlayed}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Hands Won:</span>
+                              <span className="font-medium">{gameState.sessionStats.handsWonByPlayer}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Win Rate:</span>
+                              <span className="font-medium">
+                                {gameState.sessionStats.handsPlayed > 0 
+                                  ? `${Math.round((gameState.sessionStats.handsWonByPlayer / gameState.sessionStats.handsPlayed) * 100)}%`
+                                  : '0%'}
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Biggest Pot Won:</span>
+                              <span className="font-medium">${humanPlayer.stats?.biggestPot || 0}</span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex gap-4 justify-center">
+                          <Button
+                            onClick={() => handleResetGame()}
+                            variant="default"
+                            size="lg"
+                            data-testid="button-new-game-after-game-over"
+                          >
+                            Start New Game
+                          </Button>
+                          {tableId && (
+                            <Link href="/lobby">
+                              <Button
+                                variant="outline"
+                                size="lg"
+                                data-testid="button-back-to-lobby-after-game-over"
+                              >
+                                Back to Lobby
+                              </Button>
+                            </Link>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Game Phase Indicator */}
                   <AnimatePresence mode="wait">

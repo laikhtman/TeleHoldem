@@ -275,40 +275,74 @@ export class GameEngine {
   }
 
   startNewHand(gameState: GameState): GameState {
-    const activePlayers = gameState.players.filter(p => p.chips > 0 || p.bet > 0);
-
-    if (activePlayers.length < 2) {
-       return { ...gameState, lastAction: "Not enough players to start a new hand." };
+    // First, check if human player is eliminated (has 0 chips)
+    const humanPlayer = gameState.players.find(p => p.isHuman);
+    if (humanPlayer && humanPlayer.chips === 0) {
+      // Return game over state, preserving all session data and players
+      return { 
+        ...gameState, 
+        lastAction: "Game Over! You are out of chips.", 
+        phase: 'waiting',
+        // Add a flag to indicate game over state
+        gameOver: true 
+      };
     }
+
+    // Give rebuys to any bots that are out of chips
+    let playersWithRebuys = gameState.players.map(p => {
+      if (!p.isHuman && p.chips === 0) {
+        return { ...p, chips: 1000 }; // Give bot a rebuy of 1000 chips
+      }
+      return p;
+    });
+
+    // Count active players (those with chips > 0)
+    const activePlayers = playersWithRebuys.filter(p => p.chips > 0);
     
-    if (activePlayers.find(p => p.isHuman)?.chips === 0) {
-      return { ...gameState, lastAction: "Game Over! You are out of chips." };
+    if (activePlayers.length < 2) {
+      return { ...gameState, lastAction: "Not enough players to start a new hand.", phase: 'waiting' };
     }
 
-    const players = activePlayers.map(p => ({
+    // Reset hand state for ALL players (keep everyone in the game)
+    const players = playersWithRebuys.map(p => ({
       ...p,
       hand: [],
       bet: 0,
-      folded: false,
+      folded: p.chips === 0, // Auto-fold players with no chips
       allIn: false
     }));
 
     const deck = this.createDeck();
     let currentDeck = deck;
+    
+    // Deal cards only to active players
     const updatedPlayers = players.map(player => {
-      const { dealtCards, remainingDeck } = this.dealCards(currentDeck, 2);
-      currentDeck = remainingDeck;
-      return { ...player, hand: dealtCards };
+      if (player.chips > 0) {
+        const { dealtCards, remainingDeck } = this.dealCards(currentDeck, 2);
+        currentDeck = remainingDeck;
+        return { ...player, hand: dealtCards };
+      } else {
+        return { ...player, hand: [] }; // No cards for eliminated players
+      }
     });
 
-    const newDealerIndex = (gameState.dealerIndex + 1) % updatedPlayers.length;
+    // Calculate dealer index among active players only
+    const activePlayerIndices = updatedPlayers
+      .map((p, idx) => p.chips > 0 ? idx : null)
+      .filter(idx => idx !== null) as number[];
+    
+    // Find the next dealer among active players
+    let newDealerIndex = gameState.dealerIndex;
+    do {
+      newDealerIndex = (newDealerIndex + 1) % updatedPlayers.length;
+    } while (!activePlayerIndices.includes(newDealerIndex));
 
     return {
       ...gameState,
       players: updatedPlayers,
       deck: currentDeck,
       communityCards: [],
-      pots: [{ amount: 0, eligiblePlayerIds: updatedPlayers.map(p => p.id) }],
+      pots: [{ amount: 0, eligiblePlayerIds: updatedPlayers.filter(p => p.chips > 0).map(p => p.id) }],
       currentBet: 0,
       dealerIndex: newDealerIndex,
       currentPlayerIndex: (newDealerIndex + 1) % updatedPlayers.length,
@@ -318,6 +352,7 @@ export class GameEngine {
         ...gameState.sessionStats,
         handsPlayed: gameState.sessionStats.handsPlayed + 1,
       },
+      gameOver: false // Clear any previous game over state
     };
   }
 
@@ -691,28 +726,47 @@ export class GameEngine {
 
   isRoundComplete(gameState: GameState): boolean {
     const activePlayers = gameState.players.filter(p => !p.folded && !p.allIn);
-    if (activePlayers.length === 0) return true;
+    const allInPlayers = gameState.players.filter(p => !p.folded && p.allIn);
+    const totalInHand = gameState.players.filter(p => !p.folded).length;
     
-    const firstActiveBet = activePlayers[0].bet;
-    const allMatched = activePlayers.every(p => p.bet === firstActiveBet);
-
+    // If everyone is all-in or folded except maybe one player, round is complete
+    // This handles the case where multiple players are all-in and can't act further
+    if (activePlayers.length <= 1) {
+      // But we need at least 2 players total (including all-ins) to continue
+      if (totalInHand >= 2 || activePlayers.length === 1) {
+        return true;
+      }
+    }
+    
+    // All active players must match the current bet
+    const allMatchCurrentBet = activePlayers.every(p => p.bet === gameState.currentBet);
+    
     // Check if enough players have acted
     // For a round to be complete, all active players must have acted at least once
-    // or the number of actions should be at least equal to active players
     const minActionsNeeded = activePlayers.length;
     const hasEnoughActions = gameState.roundActionCount >= minActionsNeeded;
+    
+    // If current bet is 0 and everyone checked, we need to ensure everyone had a turn
+    if (gameState.currentBet === 0) {
+      // For checks, everyone needs to have acted at least once
+      if (!hasEnoughActions) return false;
+    }
 
     // In pre-flop, the big blind can still act if no one raised.
     if (gameState.phase === 'pre-flop') {
         const bigBlindIndex = (gameState.dealerIndex + 2) % gameState.players.length;
         const bbPlayer = gameState.players[bigBlindIndex];
-        if (bbPlayer && !bbPlayer.folded && !bbPlayer.allIn && bbPlayer.bet === gameState.currentBet && gameState.currentPlayerIndex === bigBlindIndex) {
-            const raises = gameState.players.some(p => p.bet > gameState.currentBet);
-            if (!raises) return false;
+        if (bbPlayer && !bbPlayer.folded && !bbPlayer.allIn && bbPlayer.bet === gameState.currentBet) {
+            // Big blind hasn't had a chance to act after posting blind
+            const raisesExist = gameState.players.some(p => p.bet > gameState.currentBet);
+            // If no raises and BB hasn't acted yet (action count check)
+            if (!raisesExist && gameState.roundActionCount < activePlayers.length) {
+              return false;
+            }
         }
     }
 
-    return allMatched && hasEnoughActions;
+    return allMatchCurrentBet && hasEnoughActions;
   }
 
   getActivePlayers(gameState: GameState): Player[] {
@@ -797,6 +851,10 @@ export class GameEngine {
     const playersInHand = gameState.players.filter(p => !p.folded);
     // Create a working copy of player bets to avoid mutating original game state
     const playerBets = playersInHand.map(p => ({ id: p.id, bet: p.bet }));
+    
+    // Calculate the total amount bet in current round
+    const currentRoundBets = playerBets.reduce((sum, p) => sum + p.bet, 0);
+    
     const bets = [...playerBets].sort((a, b) => a.bet - b.bet);
     const pots: Pot[] = [];
     let lastBetLevel = 0;
@@ -827,15 +885,26 @@ export class GameEngine {
     // Consolidate pots from previous rounds
     const totalPreviousPot = gameState.pots.reduce((sum, pot) => sum + pot.amount, 0);
     
-    // If no pots were created (everyone checked), create a main pot
+    // If no new pots were created from current betting (everyone checked or no bets)
     if (pots.length === 0) {
-      pots.push({
-        amount: totalPreviousPot,
-        eligiblePlayerIds: playersInHand.map(p => p.id)
-      });
+      // But we should always have at least one pot if there's money from previous rounds or blinds
+      if (totalPreviousPot > 0 || currentRoundBets > 0) {
+        pots.push({
+          amount: totalPreviousPot + currentRoundBets,
+          eligiblePlayerIds: playersInHand.map(p => p.id)
+        });
+      }
     } else {
       // Add previous pot to the main pot
       pots[0].amount += totalPreviousPot;
+    }
+    
+    // Ensure we always have at least one pot if there are players
+    if (pots.length === 0 && playersInHand.length > 0) {
+      pots.push({
+        amount: 0,
+        eligiblePlayerIds: playersInHand.map(p => p.id)
+      });
     }
 
     return { ...gameState, pots };

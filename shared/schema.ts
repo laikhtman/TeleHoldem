@@ -254,6 +254,7 @@ export interface GameState {
   performanceMetrics?: PerformanceMetrics;
   playerTendencies?: PlayerTendencies; // Track human player tendencies
   metaGameData?: MetaGameData; // Meta-game and table image tracking
+  gameOver?: boolean; // Indicates when human player is eliminated
 }
 
 // Database Tables
