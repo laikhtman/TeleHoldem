@@ -335,6 +335,68 @@ export const tablePlayers = pgTable('table_players', {
   leftAt: timestamp('left_at'),
 });
 
+// Tournament Types
+export type TournamentType = 'sit_and_go' | 'multi_table' | 'scheduled';
+export type TournamentStatus = 'pending' | 'registering' | 'running' | 'completed' | 'cancelled';
+export type TournamentPlayerStatus = 'registered' | 'playing' | 'eliminated';
+export type TournamentTableStatus = 'waiting' | 'active' | 'finished';
+
+export interface BlindLevel {
+  level: number;
+  duration: number;
+  smallBlind: number;
+  bigBlind: number;
+  ante?: number;
+}
+
+export interface PayoutPosition {
+  position: number;
+  percentage: number;
+}
+
+// Tournaments Table
+export const tournaments = pgTable('tournaments', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 255 }).notNull(),
+  type: varchar('type', { length: 50 }).$type<TournamentType>().notNull(),
+  status: varchar('status', { length: 50 }).$type<TournamentStatus>().notNull(),
+  buyIn: integer('buy_in').notNull(),
+  maxPlayers: integer('max_players').notNull(),
+  currentPlayers: integer('current_players').notNull().default(0),
+  startingChips: integer('starting_chips').notNull(),
+  prizePool: integer('prize_pool').notNull().default(0),
+  startTime: timestamp('start_time').notNull(),
+  endTime: timestamp('end_time'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  blindStructure: json('blind_structure').$type<BlindLevel[]>().notNull(),
+  payoutStructure: json('payout_structure').$type<PayoutPosition[]>().notNull(),
+});
+
+// Tournament Players Table
+export const tournamentPlayers = pgTable('tournament_players', {
+  id: serial('id').primaryKey(),
+  tournamentId: integer('tournament_id').notNull().references(() => tournaments.id, { onDelete: 'cascade' }),
+  userId: integer('user_id'),
+  playerName: varchar('player_name', { length: 255 }).notNull(),
+  position: integer('position'),
+  chipCount: integer('chip_count').notNull(),
+  status: varchar('status', { length: 50 }).$type<TournamentPlayerStatus>().notNull(),
+  eliminatedAt: timestamp('eliminated_at'),
+  winnings: integer('winnings').notNull().default(0),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
+// Tournament Tables Table
+export const tournamentTables = pgTable('tournament_tables', {
+  id: serial('id').primaryKey(),
+  tournamentId: integer('tournament_id').notNull().references(() => tournaments.id, { onDelete: 'cascade' }),
+  tableNumber: integer('table_number').notNull(),
+  gameState: json('game_state').$type<GameState>(),
+  playerSeats: json('player_seats').$type<Record<number, string>>().notNull(),
+  status: varchar('status', { length: 50 }).$type<TournamentTableStatus>().notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
 // Zod Schemas and Types
 export const insertTelegramUserSchema = createInsertSchema(telegramUsers).omit({
   id: true,
@@ -389,3 +451,39 @@ export const selectTablePlayerSchema = createSelectSchema(tablePlayers);
 
 export type TablePlayer = typeof tablePlayers.$inferSelect;
 export type InsertTablePlayer = z.infer<typeof insertTablePlayerSchema>;
+
+// Tournament Schemas and Types
+export const insertTournamentSchema = createInsertSchema(tournaments).omit({
+  id: true,
+  currentPlayers: true,
+  prizePool: true,
+  createdAt: true,
+});
+
+export const selectTournamentSchema = createSelectSchema(tournaments);
+
+export type Tournament = typeof tournaments.$inferSelect;
+export type InsertTournament = z.infer<typeof insertTournamentSchema>;
+
+// Tournament Players Schemas and Types
+export const insertTournamentPlayerSchema = createInsertSchema(tournamentPlayers).omit({
+  id: true,
+  winnings: true,
+  createdAt: true,
+});
+
+export const selectTournamentPlayerSchema = createSelectSchema(tournamentPlayers);
+
+export type TournamentPlayer = typeof tournamentPlayers.$inferSelect;
+export type InsertTournamentPlayer = z.infer<typeof insertTournamentPlayerSchema>;
+
+// Tournament Tables Schemas and Types
+export const insertTournamentTableSchema = createInsertSchema(tournamentTables).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const selectTournamentTableSchema = createSelectSchema(tournamentTables);
+
+export type TournamentTable = typeof tournamentTables.$inferSelect;
+export type InsertTournamentTable = z.infer<typeof insertTournamentTableSchema>;
