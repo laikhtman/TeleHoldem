@@ -23,6 +23,16 @@ I prefer iterative development with clear communication on major changes. Please
 
 ## Recent Updates - November 2024
 
+### Progressive Tournament Mode (NEW!)
+- **Complete Tournament System**: Sit & Go, multi-table, and scheduled tournament support
+- **Tournament Manager**: Comprehensive lifecycle management with blind progression, eliminations, and payouts
+- **Tournament Lobby**: Feature-rich lobby page at `/tournament-lobby` with registration, filters, and quick creation
+- **Tournament Game View**: Dedicated tournament gameplay at `/tournament/:id/table/:number` with blind timer, position tracking, and elimination handling
+- **Blind Structures**: Pre-configured for turbo (3-min), normal (10-min), and deep-stack (15-min) tournaments
+- **Payout System**: Dynamic prize distribution based on player count
+- **Table Balancing**: Automatic player redistribution in multi-table tournaments
+- **Event System**: Real-time updates for blind changes, eliminations, and tournament progress
+
 ### AI System Enhancements
 - **Dynamic Difficulty Adaptation**: AI automatically adjusts difficulty based on player win/loss streaks (3+ triggers adjustment)
 - **Advanced Bluffing Logic**: Context-aware bluffing with board texture analysis and multi-street narratives
