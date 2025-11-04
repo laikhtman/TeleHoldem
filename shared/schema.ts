@@ -121,6 +121,30 @@ export interface ActionHistoryEntry {
   message: string;
 }
 
+export interface PlayerTendencies {
+  totalActions: number;
+  foldCount: number;
+  callCount: number;
+  checkCount: number;
+  betCount: number;
+  raiseCount: number;
+  foldToBetFrequency: number; // Percentage of times player folded when facing a bet
+  callToBetFrequency: number; // Percentage of times player called when facing a bet
+  raiseToBetFrequency: number; // Percentage of times player raised when facing a bet
+  aggressionFactor: number; // (bets + raises) / calls
+  vpip: number; // Voluntarily put in pot percentage
+  pfr: number; // Pre-flop raise percentage
+  wtsd: number; // Went to showdown percentage
+  showdownWinRate: number; // Win rate when going to showdown
+  recentActions: PlayerAction[]; // Last 20 actions for pattern detection
+  streetAggression: {
+    preFlop: number;
+    flop: number;
+    turn: number;
+    river: number;
+  };
+}
+
 export interface GameState {
   players: Player[];
   deck: Card[];
@@ -141,6 +165,7 @@ export interface GameState {
   achievements: Record<AchievementId, Achievement>;
   difficultySettings?: DifficultySettings;
   performanceMetrics?: PerformanceMetrics;
+  playerTendencies?: PlayerTendencies; // Track human player tendencies
 }
 
 // Database Tables

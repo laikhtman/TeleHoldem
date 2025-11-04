@@ -1,4 +1,4 @@
-import { Card, Player, GameState, SUITS, RANKS, GamePhase, Pot, ACHIEVEMENT_LIST, Achievement, AchievementId, DifficultySettings, PerformanceMetrics } from '@shared/schema';
+import { Card, Player, GameState, SUITS, RANKS, GamePhase, Pot, ACHIEVEMENT_LIST, Achievement, AchievementId, DifficultySettings, PerformanceMetrics, PlayerTendencies, PlayerAction } from '@shared/schema';
 import { handEvaluator } from './handEvaluator';
 import { achievementEngine } from './achievementEngine';
 
@@ -86,6 +86,31 @@ export class GameEngine {
       lastDifficultyAdjustment: Date.now()
     };
 
+    // Initialize player tendencies
+    const playerTendencies: PlayerTendencies = {
+      totalActions: 0,
+      foldCount: 0,
+      callCount: 0,
+      checkCount: 0,
+      betCount: 0,
+      raiseCount: 0,
+      foldToBetFrequency: 0,
+      callToBetFrequency: 0,
+      raiseToBetFrequency: 0,
+      aggressionFactor: 0,
+      vpip: 0,
+      pfr: 0,
+      wtsd: 0,
+      showdownWinRate: 0,
+      recentActions: [],
+      streetAggression: {
+        preFlop: 0,
+        flop: 0,
+        turn: 0,
+        river: 0,
+      },
+    };
+
     return {
       players,
       deck: this.createDeck(),
@@ -108,6 +133,7 @@ export class GameEngine {
       ) as Record<AchievementId, Achievement>,
       difficultySettings,
       performanceMetrics,
+      playerTendencies,
     };
   }
 
@@ -475,6 +501,80 @@ export class GameEngine {
     }
 
     return { newState: { ...gameState, players, pots: [], sessionStats, achievements }, unlockedAchievements };
+  }
+  
+  // Track player actions to update tendencies
+  updatePlayerTendencies(gameState: GameState, playerIndex: number, action: PlayerAction): PlayerTendencies | undefined {
+    const player = gameState.players[playerIndex];
+    if (!player.isHuman || !gameState.playerTendencies) return gameState.playerTendencies;
+    
+    const tendencies = { ...gameState.playerTendencies };
+    
+    // Update action counts
+    tendencies.totalActions++;
+    switch (action) {
+      case 'fold':
+        tendencies.foldCount++;
+        break;
+      case 'call':
+        tendencies.callCount++;
+        break;
+      case 'check':
+        tendencies.checkCount++;
+        break;
+      case 'bet':
+        tendencies.betCount++;
+        break;
+      case 'raise':
+        tendencies.raiseCount++;
+        break;
+    }
+    
+    // Update recent actions (keep last 20)
+    tendencies.recentActions = [...tendencies.recentActions, action].slice(-20);
+    
+    // Update frequencies when facing a bet
+    if (gameState.currentBet > 0 && action !== 'bet') {
+      const facingBetActions = tendencies.foldCount + tendencies.callCount + tendencies.raiseCount;
+      if (facingBetActions > 0) {
+        tendencies.foldToBetFrequency = tendencies.foldCount / facingBetActions;
+        tendencies.callToBetFrequency = tendencies.callCount / facingBetActions;
+        tendencies.raiseToBetFrequency = tendencies.raiseCount / facingBetActions;
+      }
+    }
+    
+    // Update aggression factor
+    const aggressiveActions = tendencies.betCount + tendencies.raiseCount;
+    const passiveActions = Math.max(1, tendencies.callCount);
+    tendencies.aggressionFactor = aggressiveActions / passiveActions;
+    
+    // Update street aggression
+    const streetKey = this.getStreetKey(gameState.phase);
+    if (streetKey) {
+      const currentAgg = tendencies.streetAggression[streetKey];
+      const streetActions = gameState.roundActionCount || 1;
+      const isAggressive = action === 'bet' || action === 'raise';
+      tendencies.streetAggression[streetKey] = (currentAgg * (streetActions - 1) + (isAggressive ? 1 : 0)) / streetActions;
+    }
+    
+    // Update VPIP (Voluntarily Put In Pot) for pre-flop
+    if (gameState.phase === 'pre-flop' && action !== 'fold' && action !== 'check') {
+      const preFlopActions = Math.floor(tendencies.totalActions / 4); // Rough estimate
+      tendencies.vpip = (tendencies.betCount + tendencies.callCount + tendencies.raiseCount) / Math.max(1, preFlopActions);
+      tendencies.pfr = tendencies.raiseCount / Math.max(1, preFlopActions);
+    }
+    
+    return tendencies;
+  }
+  
+  private getStreetKey(phase: GamePhase): keyof PlayerTendencies['streetAggression'] | null {
+    switch (phase) {
+      case 'pre-flop': return 'preFlop';
+      case 'flop': return 'flop';
+      case 'turn': return 'turn';
+      case 'river': return 'river';
+      default: return null;
+    }
   }
 }
 

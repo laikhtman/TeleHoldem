@@ -30,6 +30,13 @@ export interface BoardTextureInfo {
   spread: number; // maxRank - minRank
   isConnected: boolean; // tight rank spread (<= 4)
   highCard: number;
+  isDry: boolean; // Dry board (few draws possible)
+  isWet: boolean; // Wet board (many draws possible)
+  isPaired: boolean; // Board has a pair
+  hasFlushDraw: boolean; // Board has flush draw potential
+  hasStraightDraw: boolean; // Board has straight draw potential
+  scaryCards: Card[]; // Cards that complete draws
+  boardStrength: 'dry' | 'semi-dry' | 'semi-wet' | 'wet'; // Overall board texture
 }
 
 export class HandEvaluator {
@@ -209,20 +216,57 @@ export class HandEvaluator {
 
   evaluateBoardTexture(communityCards: Card[]): BoardTextureInfo | null {
     if (!communityCards || communityCards.length < 3) return null;
+    
     const suits = new Map<Suit, number>();
+    const ranks = new Map<Rank, number>();
     let minRank = 14, maxRank = 2;
+    
+    // Count suits and ranks
     communityCards.forEach(c => {
       suits.set(c.suit, (suits.get(c.suit) || 0) + 1);
+      ranks.set(c.rank, (ranks.get(c.rank) || 0) + 1);
       const rv = getRankValue(c.rank);
       minRank = Math.min(minRank, rv);
       maxRank = Math.max(maxRank, rv);
     });
+    
     const spread = maxRank - minRank;
     const isConnected = spread <= 4;
     const suitCounts: Record<string, number> = {};
     Array.from(suits.entries()).forEach(([s, cnt]) => suitCounts[s] = cnt);
+    
+    // Check for monotone (3+ of same suit) and two-tone (2 of same suit)
     const isMonotone = Object.values(suitCounts).some(v => v >= 3);
     const isTwoTone = Object.values(suitCounts).some(v => v === 2);
+    const hasFlushDraw = isMonotone || isTwoTone;
+    
+    // Check if board is paired
+    const isPaired = Array.from(ranks.values()).some(count => count >= 2);
+    
+    // Check for straight draw potential
+    const hasStraightDraw = this.checkStraightPotential(communityCards);
+    
+    // Identify scary cards (high cards, flush/straight completers)
+    const scaryCards = this.identifyScaryCards(communityCards);
+    
+    // Determine overall board texture
+    let wetScore = 0;
+    if (isMonotone) wetScore += 3;
+    if (isTwoTone) wetScore += 1;
+    if (isConnected) wetScore += 2;
+    if (hasStraightDraw) wetScore += 1;
+    if (isPaired) wetScore -= 1; // Paired boards are typically drier
+    if (highCard <= 10) wetScore -= 1; // Low boards are drier
+    
+    let boardStrength: 'dry' | 'semi-dry' | 'semi-wet' | 'wet';
+    if (wetScore <= 1) boardStrength = 'dry';
+    else if (wetScore <= 3) boardStrength = 'semi-dry';
+    else if (wetScore <= 5) boardStrength = 'semi-wet';
+    else boardStrength = 'wet';
+    
+    const isDry = boardStrength === 'dry' || boardStrength === 'semi-dry';
+    const isWet = boardStrength === 'wet' || boardStrength === 'semi-wet';
+    
     return {
       suits: suitCounts,
       isMonotone,
@@ -230,7 +274,83 @@ export class HandEvaluator {
       spread,
       isConnected,
       highCard: maxRank,
+      isDry,
+      isWet,
+      isPaired,
+      hasFlushDraw,
+      hasStraightDraw,
+      scaryCards,
+      boardStrength
     };
+  }
+  
+  private checkStraightPotential(cards: Card[]): boolean {
+    if (cards.length < 3) return false;
+    
+    const rankValues = cards.map(c => getRankValue(c.rank));
+    const uniqueRanks = Array.from(new Set(rankValues)).sort((a, b) => a - b);
+    
+    // Check for connected cards (3+ cards within a 4-rank spread)
+    for (let i = 0; i < uniqueRanks.length - 2; i++) {
+      if (uniqueRanks[i + 2] - uniqueRanks[i] <= 4) {
+        return true;
+      }
+    }
+    
+    // Check for wheel potential (A-2-3-4-5)
+    const hasAce = uniqueRanks.includes(14);
+    const hasLowCards = uniqueRanks.filter(r => r <= 5).length >= 2;
+    if (hasAce && hasLowCards) return true;
+    
+    return false;
+  }
+  
+  private identifyScaryCards(communityCards: Card[]): Card[] {
+    const scaryCards: Card[] = [];
+    
+    // High cards (K, A) are scary
+    communityCards.forEach(card => {
+      const rankValue = getRankValue(card.rank);
+      if (rankValue >= 13) { // King or Ace
+        scaryCards.push(card);
+      }
+    });
+    
+    // Cards that complete obvious draws
+    if (communityCards.length >= 4) {
+      const lastCard = communityCards[communityCards.length - 1];
+      const previousCards = communityCards.slice(0, -1);
+      
+      // Check if last card completes flush
+      const suitCount = previousCards.filter(c => c.suit === lastCard.suit).length;
+      if (suitCount >= 2) {
+        scaryCards.push(lastCard);
+      }
+      
+      // Check if last card completes straight
+      const prevRanks = previousCards.map(c => getRankValue(c.rank));
+      const lastRankValue = getRankValue(lastCard.rank);
+      if (this.couldCompleteStraight(prevRanks, lastRankValue)) {
+        if (!scaryCards.includes(lastCard)) {
+          scaryCards.push(lastCard);
+        }
+      }
+    }
+    
+    return scaryCards;
+  }
+  
+  private couldCompleteStraight(existingRanks: number[], newRank: number): boolean {
+    const allRanks = [...existingRanks, newRank].sort((a, b) => a - b);
+    
+    // Check if adding this rank creates 4+ cards within a 4-rank spread
+    for (let i = 0; i <= allRanks.length - 4; i++) {
+      if (allRanks[i + 3] - allRanks[i] <= 4) {
+        return true;
+      }
+    }
+    
+    return false;
   }
 
   private detectDraws(hand: Card[], communityCards: Card[]): DrawInfo {
