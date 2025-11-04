@@ -1952,8 +1952,8 @@ export default function PokerGame() {
         className="lg:hidden"
       />
 
-      {/* Mobile Bottom Sheet - Only visible on xs: and hidden on lg: */}
-      <div className="xs:block lg:hidden">
+      {/* Mobile Bottom Sheet - Only visible on mobile and tablet, hidden on desktop */}
+      <div className="block lg:hidden">
         <MobileBottomSheet
           open={isMobileMenuOpen}
           onOpenChange={setIsMobileMenuOpen}

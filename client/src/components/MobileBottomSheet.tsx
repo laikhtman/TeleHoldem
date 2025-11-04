@@ -62,12 +62,12 @@ export function MobileBottomSheet({
   const currentChips = gameState?.players[0]?.chips || 0;
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={onOpenChange} modal={true}>
       <SheetTrigger asChild>
         <Button
           variant="outline"
           size="icon"
-          className="fixed z-50 h-14 w-14 min-h-[56px] rounded-full shadow-lg bg-primary text-primary-foreground hover:bg-primary/90 xs:flex lg:hidden touch-manipulation"
+          className="fixed z-50 h-14 w-14 min-h-[56px] rounded-full shadow-lg bg-primary text-primary-foreground hover:bg-primary/90 flex lg:hidden touch-manipulation"
           style={{
             bottom: `calc(max(env(safe-area-inset-bottom, 0px), var(--safe-area-bottom, 0px)) + 5.5rem)`,
             right: `calc(max(env(safe-area-inset-right, 0px), var(--safe-area-right, 0px)) + 1rem)`,
@@ -81,11 +81,17 @@ export function MobileBottomSheet({
       
       <SheetContent 
         side="bottom" 
-        className="h-[75vh] max-h-[75vh] rounded-t-3xl z-[100] overflow-hidden allow-scroll"
+        className="rounded-t-3xl z-[100] overflow-hidden"
         style={{
-          paddingBottom: 'max(env(safe-area-inset-bottom, 0px), var(--safe-area-bottom, 0px))',
+          height: '75vh',
+          maxHeight: '75dvh',
+          paddingBottom: 'calc(max(env(safe-area-inset-bottom, 0px), var(--safe-area-bottom, 0px)) + 1rem)',
           WebkitOverflowScrolling: 'touch',
-          overscrollBehavior: 'contain'
+          overscrollBehavior: 'contain',
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0
         }}
         data-testid="mobile-bottom-sheet"
         aria-label="Game information panel"
@@ -117,8 +123,8 @@ export function MobileBottomSheet({
           <SheetTitle className="text-center" id="mobile-sheet-description">Game Info</SheetTitle>
         </SheetHeader>
         
-        <Tabs defaultValue="hand-analysis" className="mt-4 h-[calc(100%-4rem)] overflow-hidden">
-          <TabsList className="grid w-full grid-cols-4 mb-4 h-11" aria-label="Game information tabs">
+        <Tabs defaultValue="hand-analysis" className="mt-4 h-[calc(100%-5rem)] flex flex-col">
+          <TabsList className="grid w-full grid-cols-4 mb-4 h-11 flex-shrink-0" aria-label="Game information tabs">
             <TabsTrigger 
               value="hand-analysis" 
               data-testid="tab-hand-analysis" 
@@ -157,8 +163,8 @@ export function MobileBottomSheet({
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="hand-analysis" className="h-[calc(100%-3.5rem)] overflow-y-auto mt-0 px-3 allow-scroll" style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}>
-            <div className="space-y-4 pb-4">
+          <TabsContent value="hand-analysis" className="flex-1 overflow-y-auto mt-0 px-3" style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}>
+            <div className="space-y-4 pb-4 pt-2">
               {gameState && (
                 <>
                   {/* Hand Strength Section */}
@@ -243,8 +249,8 @@ export function MobileBottomSheet({
             </div>
           </TabsContent>
           
-          <TabsContent value="essential" className="h-[calc(100%-3.5rem)] overflow-y-auto mt-0 px-1">
-            <div className="pb-4">
+          <TabsContent value="essential" className="flex-1 overflow-y-auto mt-0 px-1" style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}>
+            <div className="pb-4 pt-2">
               {gameState && (
                 <MobileStatsCompact 
                   stats={gameState.sessionStats} 
@@ -254,8 +260,8 @@ export function MobileBottomSheet({
             </div>
           </TabsContent>
           
-          <TabsContent value="detailed" className="h-[calc(100%-3.5rem)] overflow-y-auto mt-0 px-1">
-            <div className="space-y-6 pb-4">
+          <TabsContent value="detailed" className="flex-1 overflow-y-auto mt-0 px-1" style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}>
+            <div className="space-y-6 pb-4 pt-2">
               {gameState && (
                 <>
                   <SessionStats stats={gameState.sessionStats} />
@@ -266,7 +272,7 @@ export function MobileBottomSheet({
             </div>
           </TabsContent>
           
-          <TabsContent value="history" className="h-[calc(100%-3.5rem)] overflow-y-auto mt-0 px-1">
+          <TabsContent value="history" className="flex-1 overflow-y-auto mt-0 px-1" style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}>
             {gameState && <ActionHistory history={gameState.actionHistory} />}
           </TabsContent>
         </Tabs>
