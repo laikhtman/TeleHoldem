@@ -296,13 +296,58 @@ export default function TournamentGame() {
   useEffect(() => {
     if (!tournamentId) return;
     
-    // Initialize tournament manager if not already done
+    // For demo tournaments, create a simplified game without TournamentManager
+    if (tournamentId.startsWith('demo-')) {
+      // Create demo tournament state
+      const demoTournament: TournamentState = {
+        id: tournamentId,
+        name: tournamentId === 'demo-3' ? 'Big Sunday Special' : 'Demo Tournament',
+        type: 'multi_table',
+        status: 'running',
+        buyIn: 500,
+        startingChips: 5000,
+        maxPlayers: 200,
+        currentPlayers: 156,
+        prizePool: 100000,
+        blindStructure: [],
+        payoutStructure: [],
+        currentBlindLevel: 3,
+        blindTimer: 420000,
+        players: new Map(),
+        tables: new Map(),
+        startTime: Date.now() - 1800000,
+      };
+      
+      setTournament(demoTournament);
+      setBlindTimer(420000); // 7 minutes
+      
+      // Create a basic game engine for demo
+      const engine = new GameEngine();
+      gameEngineRef.current = engine;
+      
+      // Start a new demo game
+      const initialState = engine.startNewGame(1500);
+      setGameState(initialState);
+      
+      // Deal initial cards
+      setTimeout(() => {
+        const dealtState = engine.dealCards(initialState);
+        setGameState(dealtState);
+      }, 1000);
+      
+      return;
+    }
+    
+    // For real tournaments, use TournamentManager
     if (!tournamentManagerRef.current) {
       tournamentManagerRef.current = new TournamentManager();
     }
     
     // Get tournament state
-    const tournamentState = tournamentManagerRef.current.getTournament(tournamentId);
+    console.log('Looking for tournament:', tournamentId);
+    console.log('All tournaments in manager:', tournamentManagerRef.current.tournaments);
+    const tournamentState = tournamentManagerRef.current.getTournamentStatus(tournamentId);
+    console.log('Found tournament state:', tournamentState);
     if (tournamentState) {
       setTournament(tournamentState);
       
@@ -381,12 +426,14 @@ export default function TournamentGame() {
     };
     
     // Subscribe to events
-    tournamentManagerRef.current.on(tournamentId, handleTournamentEvent);
+    // TODO: Implement event subscription in TournamentManager
+    // tournamentManagerRef.current.on(tournamentId, handleTournamentEvent);
     
     return () => {
-      if (tournamentManagerRef.current) {
-        tournamentManagerRef.current.off(tournamentId, handleTournamentEvent);
-      }
+      // TODO: Implement event unsubscription
+      // if (tournamentManagerRef.current) {
+      //   tournamentManagerRef.current.off(tournamentId, handleTournamentEvent);
+      // }
     };
   }, [tournamentId, currentPlayer, gameState, toast, playSound, triggerHaptic]);
 

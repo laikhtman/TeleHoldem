@@ -501,6 +501,18 @@ export default function TournamentLobby() {
     setIsRefreshing(false);
   };
   
+  // Register demo tournaments in TournamentManager for spectating
+  useEffect(() => {
+    DEMO_TOURNAMENTS.forEach(tournament => {
+      // Only register if not already registered
+      if (!tournamentManager.getTournamentStatus(tournament.id)) {
+        // Create a minimal tournament in the manager for demo tournaments
+        // These are pre-existing running tournaments for demo purposes
+        tournamentManager.tournaments.set(tournament.id, tournament);
+      }
+    });
+  }, []);
+  
   // Filter tournaments
   const filteredTournaments = useMemo(() => {
     let filtered = [...tournaments];
@@ -579,8 +591,9 @@ export default function TournamentLobby() {
   
   // Handle join/spectate
   const handleJoin = (tournamentId: string) => {
-    // Navigate to tournament table with tournamentId
-    setLocation(`/poker-game?tournamentId=${tournamentId}`);
+    // Navigate to tournament game page with proper route
+    // For single-table tournaments (sit & go), table number is 0
+    setLocation(`/tournament/${tournamentId}/table/0`);
   };
   
   // Create quick tournament
