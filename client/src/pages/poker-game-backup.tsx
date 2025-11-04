@@ -1607,414 +1607,334 @@ export default function PokerGame() {
           
           {/* Game Table Area */}
           <div className="flex-1 overflow-hidden flex items-center justify-center p-6">
-            <div className="w-full max-w-5xl">
-              {/* Poker Table with Wood Border */}
-              <div 
-                className="rounded-[220px] wood-grain p-[12px] table-edge-glow w-full mx-auto"
-                style={{ 
-                  aspectRatio: tableAspect,
-                }}
-              >
-                {/* Poker Table Felt Surface */}
-                <div 
-                  className="relative felt-texture vignette table-depth rounded-[210px] overflow-visible w-full h-full"
-                  style={{ 
-                    backgroundColor: tableThemeColors[settings.tableTheme]
-                  }}
-                  data-testid="poker-table"
-                  aria-label={`Poker table - ${getPhaseTitle(gameState.phase)} phase - ${gameState.players.filter(p => !p.folded).length} players active`}
-                >
-                  {/* Community Cards */}
-                  <CommunityCards 
-                    cards={gameState.communityCards} 
-                    phase={gameState.phase}
-                    colorblindMode={settings.colorblindMode}
-                    highlightIds={winningCardIds}
-                  />
-
-                  {/* Pot Display */}
-                  <PotDisplay 
-                    amount={gameState.pots.reduce((sum, pot) => sum + pot.amount, 0)} 
-                    onRef={handlePotRef}
-                    sidePots={gameState.pots.map(p => p.amount)}
-                  />
-
-                  {/* Player Seats */}
-                  {gameState.players.map((player, index) => (
-                    <PlayerSeat
-                      key={player.id}
-                      player={player}
-                      position={index}
-                      totalPlayers={NUM_PLAYERS}
-                      isCurrentPlayer={index === gameState.currentPlayerIndex}
-                      isDealer={index === gameState.dealerIndex}
-                      isWinner={winningPlayerIds.includes(player.id)}
-                      phase={gameState.phase}
-                      lastAction={gameState.lastAction}
-                      winAmount={winAmounts[player.id] || 0}
-                      isProcessing={isProcessing}
-                      colorblindMode={settings.colorblindMode}
-                      onFold={index === 0 ? handleFold : undefined}
-                      soundEnabled={settings.soundEnabled}
-                      soundVolume={settings.soundVolume}
-                      highlightCardIds={winningCardIds}
-                    />
-                  ))}
-
-                  {/* Game Phase Indicator */}
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={phaseKey}
-                      className="absolute top-4 left-1/2 transform -translate-x-1/2"
-                      style={{ zIndex: 10 }}
-                      initial={{ opacity: 0, y: -20, scale: 0.8 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -20, scale: 0.8 }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      <div className="bg-black/80 backdrop-blur-sm px-6 py-3 rounded-lg border-2 border-poker-chipGold shadow-lg shadow-poker-chipGold/20">
-                        <div className="text-base text-poker-chipGold font-bold tracking-wide" data-testid="text-game-phase">
-                          {getPhaseTitle(gameState.phase)}
-                        </div>
-                      </div>
-                    </motion.div>
-                  </AnimatePresence>
-
-                  {/* Chip Physics Animations */}
-                  {activeChipAnimations.map(animation => {
-                    if (animation.type === 'bet' && animation.playerPosition && animation.potPosition) {
-                      return (
-                        <BettingAnimation
-                          key={animation.id}
-                          playerPosition={animation.playerPosition}
-                          betPosition={animation.potPosition}
-                          amount={animation.amount}
-                          isAllIn={animation.isAllIn}
-                          onComplete={() => {
-                            setActiveChipAnimations(prev => prev.filter(a => a.id !== animation.id));
-                          }}
-                        />
-                      );
-                    } else if (animation.type === 'pot-collection' && animation.potPosition && animation.playerPosition) {
-                      return (
-                        <PotCollectionAnimation
-                          key={animation.id}
-                          potPosition={animation.potPosition}
-                          winnerPosition={animation.playerPosition}
-                          amount={animation.amount}
-                          isSplitPot={animation.isSplitPot}
-                          splitCount={animation.splitCount}
-                          winType={animation.winType}
-                          onComplete={() => {
-                            setActiveChipAnimations(prev => prev.filter(a => a.id !== animation.id));
-                          }}
-                        />
-                      );
-                    }
-                    return null;
-                  })}
-
-                  {/* Winner Celebration */}
-                  {winningPlayerIds.length > 0 && winningPlayerIds.map(winnerId => {
-                    const winner = gameState.players.find(p => p.id === winnerId);
-                    return winner ? (
-                      <WinnerCelebration 
-                        key={winnerId} 
-                        isWinner={true} 
-                        playerName={winner.name} 
-                        winAmount={winAmounts[winnerId] || 0}
-                      />
-                    ) : null;
-                  })}
-
-                  {/* Last Action */}
-                  {gameState.lastAction && (
-                    <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2" style={{ zIndex: 10 }}>
-                      <div className="bg-black/70 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/20">
-                        <div className="text-xs text-white" data-testid="text-last-action">
-                          {gameState.lastAction}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Game Paused Overlay */}
-                  {settings.isPaused && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm rounded-[210px]" style={{ zIndex: 100 }}>
-                      <div className="bg-card/95 backdrop-blur-md px-8 py-6 rounded-lg border-2 border-poker-chipGold shadow-2xl">
-                        <div className="text-2xl font-bold text-center text-poker-chipGold" data-testid="text-game-paused">
-                          Game Paused
-                        </div>
-                        <p className="text-sm text-muted-foreground text-center mt-2">
-                          Click Resume in Settings to continue
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          {/* Action Controls Dock - Fixed at Bottom of Center Column */}
-          <div className="border-t bg-background p-4">
-            <div id="action-controls" className="w-full max-w-3xl mx-auto" style={{ transform: `scale(${settings.uiScale ?? 1})`, transformOrigin: 'bottom center' }}>
-              {gameState.phase === 'waiting' ? (
-                <Button 
-                  onClick={startNewHand}
-                  size="lg"
-                  className="w-full min-h-[48px] bg-poker-chipGold text-black hover:bg-poker-chipGold/90 font-bold text-base"
-                  data-testid="button-start-hand"
-                  aria-label="Start new hand"
-                >
-                  Start New Hand
-                </Button>
-              ) : gameState.currentPlayerIndex === 0 && !humanPlayer.folded ? (
-                <>
-                  {/* Pot Odds Display */}
-                  {gameState.currentBet > humanPlayer.bet && (
-                    <div className="mb-3">
-                      <PotOddsDisplay
-                        amountToCall={gameState.currentBet - humanPlayer.bet}
-                        potSize={gameState.pots.reduce((sum, pot) => sum + pot.amount, 0)}
-                        playerCards={humanPlayer.hand}
-                        communityCards={gameState.communityCards}
-                        numOpponents={gameState.players.filter(p => !p.folded && p !== humanPlayer).length}
-                      />
-                    </div>
-                  )}
-
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={`controls-${gameState.currentPlayerIndex}`}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <ActionControls
-                        onFold={handleFold}
-                        onCheck={handleCheck}
-                        onCall={handleCall}
-                        onBet={handleBet}
-                        onRaise={handleRaise}
-                        canCheck={canCheck}
-                        minBet={minBet}
-                        maxBet={maxBet}
-                        amountToCall={gameState.currentBet - humanPlayer.bet}
-                        currentBet={gameState.currentBet}
-                        minRaiseAmount={minRaiseAmount}
-                        potSize={gameState.pots.reduce((sum, pot) => sum + pot.amount, 0)}
-                        playerChips={humanPlayer.chips}
-                        disabled={isProcessing || settings.isPaused}
-                        animationSpeed={settings.animationSpeed}
-                        playerFolded={humanPlayer.folded}
-                        isProcessing={isProcessing}
-                        logScale={true}
-                      />
-                    </motion.div>
-                  </AnimatePresence>
-                </>
-              ) : (
-                <div className="flex items-center justify-center gap-3 py-3 text-sm text-muted-foreground">
-                  <div className="w-2 h-2 rounded-full bg-muted-foreground/60 animate-pulse"></div>
-                  <span>Waiting for your turn...</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+            {/* Skip link for keyboard users */}
+        <a 
+          href="#action-controls" 
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[200] focus:bg-poker-chipGold focus:text-black focus:px-4 focus:py-2 focus:rounded-md focus:font-bold"
+          data-testid="skip-to-controls"
+        >
+          Skip to action controls
+        </a>
         
-        {/* Desktop Right Sidebar - Action History and Stats */}
-        <div className="border-l bg-background overflow-y-auto">
-          <RightSidebarPanel 
-            gameState={gameState} 
-            isCollapsed={false}
-          />
+        {/* Network Status Indicator */}
+      {(!isOnline || isReconnecting) && (
+        <div 
+          className="fixed top-[calc(var(--safe-area-top,0px)+4.5rem)] left-1/2 -translate-x-1/2 z-[140] 
+                     bg-destructive/95 text-destructive-foreground px-4 py-2 rounded-full 
+                     shadow-lg backdrop-blur-sm flex items-center gap-2 animate-pulse"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          data-testid="network-status-indicator"
+        >
+          {isReconnecting ? (
+            <>
+              <PokerSpinner size={16} />
+              <span className="text-xs font-medium">Reconnecting...</span>
+            </>
+          ) : (
+            <>
+              <span className="w-2 h-2 bg-destructive-foreground rounded-full animate-pulse" />
+              <span className="text-xs font-medium">Offline Mode</span>
+            </>
+          )}
         </div>
+      )}
+      
+      {/* Live region for game status announcements */}
+      <div 
+        aria-live="polite" 
+        aria-atomic="true" 
+        className="sr-only"
+        role="status"
+      >
+        {gameState.lastAction || `${getPhaseTitle(gameState.phase)} phase`}
       </div>
       
-      {/* Mobile and Tablet Layout (< lg) */}
-      <div className="lg:hidden flex flex-col min-h-screen">
-        {/* Mobile/Tablet Header */}
-        <div className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b">
-          <div className="flex justify-between items-center p-4 gap-2">
-            <div className="flex gap-2">
-              {/* Mobile Menu Button */}
-              <Button
-                variant="outline"
-                size="icon"
-                className="md:hidden"
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                data-testid="button-mobile-menu"
-              >
-                <Menu className="w-5 h-5" />
-              </Button>
-              
-              {/* Tablet Toggle Button */}
-              <Button
-                variant="outline"
-                size="icon"
-                className="hidden md:flex lg:hidden"
-                onClick={() => setIsTabletPanelOpen(!isTabletPanelOpen)}
-                data-testid="button-toggle-tablet-panel"
-              >
-                <Menu className="w-5 h-5" />
-              </Button>
-              
-              {tableId && (
-                <Link href="/lobby">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    aria-label="Back to Lobby"
-                    data-testid="button-back-to-lobby-mobile"
-                  >
-                    <ChevronLeft className="w-4 h-4 mr-1" />
-                    Back
-                  </Button>
-                </Link>
-              )}
-            </div>
-            
-            <div className="flex gap-2">
-              <ThemeToggle />
-              <Link href="/help">
-                <Button 
-                  variant="outline" 
-                  size="icon"
-                  aria-label="Help and Documentation"
-                  data-testid="button-help-mobile"
-                  className="min-h-10 min-w-10"
-                >
-                  <HelpCircle className="w-5 h-5" />
-                </Button>
-              </Link>
-              <Link href="/settings">
-                <Button 
-                  variant="outline" 
-                  size="icon"
-                  aria-label="Application Settings"
-                  data-testid="button-admin-settings-mobile"
-                  className="min-h-10 min-w-10"
-                >
-                  <Settings className="w-5 h-5" />
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-        
-        {/* Mobile Game Area with padding for header */}
-        <div className="flex-1 mt-16 relative">
-          {/* Mobile Game Table */}
-          <div className="p-4">
-            <PokerTable
-              gameState={gameState}
-              playerPositions={playerPositions}
-              currentUserId={userId}
-              onPlayerLeave={handlePlayerLeave}
-              onPlayerKick={handlePlayerKick}
-              onPlayerBan={handlePlayerBan}
-              debugMode={debugMode}
-              tableId={tableId || ''}
-              isAdmin={isAdmin}
-              selectedSeat={selectedSeat}
-              onSeatSelect={(position) => setSelectedSeat(position)}
-              bottomPadding={120}
-            />
-          </div>
-        </div>
-        
-        {/* Mobile Bottom Sheet for Action Controls */}
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-background border-t shadow-lg">
-          <ActionControls 
-            gameState={gameState}
-            userId={userId}
-            onAction={handlePlayerAction}
-            minimumBet={minimumBet}
-            maximumBet={maximumBet}
-            onQuickBetSelect={(value) => setQuickBetAmount(value)}
-            quickBetAmount={quickBetAmount}
-            isMobile={true}
-          />
-        </div>
-        
-        {/* Mobile Menu Sheet (for stats, history, etc) */}
-        <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-          <SheetContent 
-            side="left" 
-            className="w-[300px] sm:w-[400px] p-0 bg-background/95 backdrop-blur-sm"
+      {/* Header Controls - Fixed Top Right with safe-area padding */}
+      <div className="fixed top-[calc(1rem+var(--safe-area-top))] right-[calc(1rem+var(--safe-area-right))] z-50 flex gap-2">
+        <ThemeToggle />
+        {tableId && (
+          <Link href="/lobby">
+            <Button 
+              variant="outline" 
+              size="default"
+              aria-label="Back to Lobby"
+              data-testid="button-back-to-lobby"
+              className="min-h-11"
+            >
+              <ChevronLeft className="w-4 h-4 mr-1" />
+              Back to Lobby
+            </Button>
+          </Link>
+        )}
+        <Link href="/help">
+          <Button 
+            variant="outline" 
+            size="icon"
+            aria-label="Help and Documentation"
+            data-testid="button-help"
+            className="min-h-11 min-w-11"
           >
-            <SheetHeader className="p-4 border-b">
-              <SheetTitle>Game Menu</SheetTitle>
-            </SheetHeader>
-            <ScrollArea className="h-[calc(100vh-5rem)]">
-              <div className="p-4 space-y-4">
-                {/* Hand Strength Analysis */}
-                <div className="space-y-2">
-                  <h3 className="font-semibold text-sm">Hand Analysis</h3>
-                  <HandStrengthPanel gameState={gameState} currentUserId={userId} />
-                </div>
-                
-                {/* Game Stats */}
-                <div className="space-y-2">
-                  <h3 className="font-semibold text-sm">Game Statistics</h3>
-                  <Card className="p-4">
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Players</span>
-                        <span>{gameState.players.filter(p => p).length}/{gameState.players.length}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Pot Size</span>
-                        <span className="font-bold">${gameState.pot}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Hand #</span>
-                        <span>{gameState.handNumber}</span>
-                      </div>
-                      {gameState.performanceMetrics && (
-                        <>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Win Rate</span>
-                            <span>{gameState.performanceMetrics.winRate}%</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Streak</span>
-                            <span>
-                              {gameState.performanceMetrics.consecutiveWins > 0 
-                                ? `🔥 ${gameState.performanceMetrics.consecutiveWins} wins`
-                                : gameState.performanceMetrics.consecutiveLosses > 0
-                                ? `${gameState.performanceMetrics.consecutiveLosses} losses`
-                                : 'None'}
-                            </span>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </Card>
-                </div>
-                
-                {/* Action History */}
-                <div className="space-y-2">
-                  <h3 className="font-semibold text-sm">Recent Actions</h3>
-                  <ScrollArea className="h-[200px] w-full rounded-md border p-2">
-                    {gameState.actionHistory?.slice(-10).reverse().map((action, idx) => (
-                      <div key={idx} className="text-xs py-1">
-                        <span className="text-muted-foreground">{action}</span>
-                      </div>
-                    )) || <div className="text-xs text-muted-foreground">No actions yet</div>}
-                  </ScrollArea>
-                </div>
-              </div>
-            </ScrollArea>
-          </SheetContent>
-        </Sheet>
+            <HelpCircle className="w-5 h-5" />
+          </Button>
+        </Link>
+        <Link href="/settings">
+          <Button 
+            variant="outline" 
+            size="icon"
+            aria-label="Application Settings"
+            data-testid="button-admin-settings"
+            className="min-h-11 min-w-11"
+          >
+            <Settings className="w-5 h-5" />
+          </Button>
+        </Link>
+        <SettingsPanel 
+          settings={{
+            ...settings,
+            performanceMetrics: gameState.performanceMetrics ? {
+              winRate: gameState.performanceMetrics.winRate,
+              consecutiveWins: gameState.performanceMetrics.consecutiveWins,
+              consecutiveLosses: gameState.performanceMetrics.consecutiveLosses,
+              bankrollTrend: gameState.performanceMetrics.bankrollTrend
+            } : undefined,
+            currentDifficulty: gameState.difficultySettings?.currentLevel,
+            difficultyMode: gameState.difficultySettings?.mode
+          }}
+          onSettingsChange={handleSettingsChange}
+          onPauseToggle={handlePauseToggle}
+          disabled={isProcessing}
+        />
       </div>
 
-      {/* Common Elements for both layouts */}
-      
+      {/* Main Game Content - Center */}
+      <div className="flex-1 flex items-center justify-center p-2 sm:p-4 lg:p-6">
+        <div className="w-full max-w-5xl flex flex-col gap-4 items-center">
+          {/* Poker Table with Wood Border */}
+          <div 
+            className="rounded-[100px] xs:rounded-[120px] sm:rounded-[165px] md:rounded-[190px] lg:rounded-[220px] wood-grain p-[7px] xs:p-[8px] sm:p-[10px] md:p-[11px] lg:p-[12px] table-edge-glow w-full max-w-[96%] xs:max-w-[97%] sm:max-w-[98%] md:max-w-full md:min-h-[60vh] lg:min-h-[70vh] max-h-[min(68vh,720px)] xs:max-h-[min(70vh,760px)] sm:max-h-[min(72vh,780px)] md:max-h-[min(75vh,800px)] mx-auto"
+            style={{ 
+              aspectRatio: tableAspect,
+            }}
+          >
+            {/* Poker Table Felt Surface */}
+            <div 
+              className="relative felt-texture vignette table-depth rounded-[95px] xs:rounded-[118px] sm:rounded-[158px] md:rounded-[181px] lg:rounded-[210px] overflow-visible w-full h-full"
+              style={{ 
+                zIndex: 0,
+                backgroundColor: tableThemeColors[settings.tableTheme]
+              }}
+              data-testid="poker-table"
+              aria-label={`Poker table - ${getPhaseTitle(gameState.phase)} phase - ${gameState.players.filter(p => !p.folded).length} players active`}
+            >
+              {/* Community Cards */}
+              <CommunityCards 
+                cards={gameState.communityCards} 
+                phase={gameState.phase}
+                colorblindMode={settings.colorblindMode}
+                highlightIds={winningCardIds}
+              />
+
+              {/* Pot Display */}
+              <PotDisplay 
+                amount={gameState.pots.reduce((sum, pot) => sum + pot.amount, 0)} 
+                onRef={handlePotRef}
+                sidePots={gameState.pots.map(p => p.amount)}
+              />
+
+              {/* Player Seats */}
+              {gameState.players.map((player, index) => (
+                <PlayerSeat
+                  key={player.id}
+                  player={player}
+                  position={index}
+                  totalPlayers={NUM_PLAYERS}
+                  isCurrentPlayer={index === gameState.currentPlayerIndex}
+                  isDealer={index === gameState.dealerIndex}
+                  isWinner={winningPlayerIds.includes(player.id)}
+                  phase={gameState.phase}
+                  lastAction={gameState.lastAction}
+                  winAmount={winAmounts[player.id] || 0}
+                  isProcessing={isProcessing}
+                  colorblindMode={settings.colorblindMode}
+                  onFold={index === 0 ? handleFold : undefined}
+                  soundEnabled={settings.soundEnabled}
+                  soundVolume={settings.soundVolume}
+                  highlightCardIds={winningCardIds}
+                />
+              ))}
+
+              {/* Game Phase Indicator */}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={phaseKey}
+                  className="absolute top-4 left-1/2 transform -translate-x-1/2"
+                  style={{ zIndex: 10 }}
+                  initial={{ opacity: 0, y: -20, scale: 0.8 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -20, scale: 0.8 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <div className="bg-black/80 backdrop-blur-sm px-6 py-3 rounded-lg border-2 border-poker-chipGold shadow-lg shadow-poker-chipGold/20">
+                    <div className="text-base md:text-base sm:text-lg text-poker-chipGold font-bold tracking-wide" data-testid="text-game-phase">
+                      {getPhaseTitle(gameState.phase)}
+                    </div>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+
+              {/* Chip Physics Animations */}
+              {activeChipAnimations.map(animation => {
+                if (animation.type === 'bet' && animation.playerPosition && animation.potPosition) {
+                  return (
+                    <BettingAnimation
+                      key={animation.id}
+                      playerPosition={animation.playerPosition}
+                      betPosition={animation.potPosition}
+                      amount={animation.amount}
+                      isAllIn={animation.isAllIn}
+                      onComplete={() => {
+                        setActiveChipAnimations(prev => prev.filter(a => a.id !== animation.id));
+                      }}
+                    />
+                  );
+                } else if (animation.type === 'pot-collection' && animation.potPosition && animation.playerPosition) {
+                  return (
+                    <PotCollectionAnimation
+                      key={animation.id}
+                      potPosition={animation.potPosition}
+                      winnerPosition={animation.playerPosition}
+                      amount={animation.amount}
+                      isSplitPot={animation.isSplitPot}
+                      splitCount={animation.splitCount}
+                      winType={animation.winType}
+                      onComplete={() => {
+                        setActiveChipAnimations(prev => prev.filter(a => a.id !== animation.id));
+                      }}
+                    />
+                  );
+                }
+                return null;
+              })}
+
+              {/* Winner Celebration */}
+              {winningPlayerIds.length > 0 && winningPlayerIds.map(winnerId => {
+                const winner = gameState.players.find(p => p.id === winnerId);
+                return winner ? (
+                  <WinnerCelebration 
+                    key={winnerId} 
+                    isWinner={true} 
+                    playerName={winner.name} 
+                    winAmount={winAmounts[winnerId] || 0}
+                  />
+                ) : null;
+              })}
+
+              {/* Last Action */}
+              {gameState.lastAction && (
+                <div className="absolute bottom-2 sm:bottom-4 left-1/2 transform -translate-x-1/2" style={{ zIndex: 10 }}>
+                  <div className="bg-black/70 backdrop-blur-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-white/20" role="status" aria-live="polite" aria-atomic="true">
+                    <div className="text-[0.625rem] sm:text-xs text-white" data-testid="text-last-action">
+                      {gameState.lastAction}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Game Paused Overlay */}
+              {settings.isPaused && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm rounded-[113px] sm:rounded-[152px] md:rounded-[181px] lg:rounded-[210px]" style={{ zIndex: 100 }}>
+                  <div className="bg-card/95 backdrop-blur-md px-8 py-6 rounded-lg border-2 border-poker-chipGold shadow-2xl">
+                    <div className="text-2xl font-bold text-center text-poker-chipGold" data-testid="text-game-paused">
+                      Game Paused
+                    </div>
+                    <p className="text-sm text-muted-foreground text-center mt-2">
+                      Click Resume in Settings to continue
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {gameState.phase === 'showdown' && winningPlayerIds.length > 0 && (
+                <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 9 }}>
+                  <div className="absolute inset-0 bg-black/50" />
+                  <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ width: 600, height: 360, background: 'radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0) 60%)' }} />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Controls */}
+          <div id="action-controls" className="w-full max-w-3xl md:max-w-none bg-card/90 sm:bg-card/85 md:bg-card/80 backdrop-blur-lg sm:backdrop-blur-xl rounded-lg border border-card-border shadow-lg p-4 xs:p-5 sm:p-6 md:p-4 pb-[calc(1rem+var(--safe-area-bottom))] sm:pb-[calc(1.25rem+var(--safe-area-bottom))] md:pb-[calc(1rem+var(--safe-area-bottom))]" style={{ zIndex: 5, transform: `scale(${settings.uiScale ?? 1})`, transformOrigin: 'bottom center' }}>
+            {gameState.phase === 'waiting' ? (
+              <Button 
+                onClick={startNewHand}
+                size="lg"
+                className="w-full min-h-[48px] bg-poker-chipGold text-black hover:bg-poker-chipGold/90 font-bold text-base sm:text-lg"
+                data-testid="button-start-hand"
+                aria-label="Start new hand"
+              >
+                Start New Hand
+              </Button>
+            ) : gameState.currentPlayerIndex === 0 && !humanPlayer.folded ? (
+              <>
+                {/* Pot Odds and Win Probability Display */}
+                {gameState.currentBet > humanPlayer.bet && (
+                  <div className="mb-3">
+                    <PotOddsDisplay
+                      amountToCall={gameState.currentBet - humanPlayer.bet}
+                      potSize={gameState.pots.reduce((sum, pot) => sum + pot.amount, 0)}
+                      playerCards={humanPlayer.hand}
+                      communityCards={gameState.communityCards}
+                      numOpponents={gameState.players.filter(p => !p.folded && p !== humanPlayer).length}
+                    />
+                  </div>
+                )}
+
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={`controls-${gameState.currentPlayerIndex}`}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <ActionControls
+                      onFold={handleFold}
+                      onCheck={handleCheck}
+                      onCall={handleCall}
+                      onBet={handleBet}
+                      onRaise={handleRaise}
+                      canCheck={canCheck}
+                      minBet={minBet}
+                      maxBet={maxBet}
+                      amountToCall={gameState.currentBet - humanPlayer.bet}
+                      currentBet={gameState.currentBet}
+                      minRaiseAmount={minRaiseAmount}
+                      potSize={gameState.pots.reduce((sum, pot) => sum + pot.amount, 0)}
+                      playerChips={humanPlayer.chips}
+                      disabled={isProcessing || settings.isPaused}
+                      animationSpeed={settings.animationSpeed}
+                      playerFolded={humanPlayer.folded}
+                      isProcessing={isProcessing}
+                      logScale={true}
+                    />
+                  </motion.div>
+                </AnimatePresence>
+              </>
+            ) : (
+              <div className="flex items-center justify-center gap-3 py-3 text-sm text-muted-foreground">
+                <div className="w-2 h-2 rounded-full bg-muted-foreground/60 animate-pulse"></div>
+                <span>Waiting for your turn...</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        </div>
+      </div>
+
       {/* Flying Chips Animation */}
       {flyingChips.map((chip) => (
         <FlyingChip
