@@ -2,11 +2,13 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
-import { Settings, Volume2, VolumeX, Zap, Palette, Pause, Play, Eye, Sparkles } from 'lucide-react';
+import { Settings, Volume2, VolumeX, Zap, Palette, Pause, Play, Eye, Sparkles, Brain, Info } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useSound } from '@/hooks/useSound';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { DifficultyMode, DifficultyLevel } from '@shared/schema';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export interface GameSettings {
   soundEnabled: boolean;
@@ -20,6 +22,8 @@ export interface GameSettings {
   highContrast?: boolean;
   largeText?: boolean;
   reducedParticles?: boolean;
+  difficultyMode?: DifficultyMode;
+  currentDifficulty?: DifficultyLevel;
 }
 
 interface SettingsPanelProps {
@@ -85,6 +89,63 @@ export function SettingsPanel({ settings, onSettingsChange, onPauseToggle, disab
         </SheetHeader>
         
         <div className="mt-6 space-y-6">
+          {/* AI Difficulty */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Brain className="h-5 w-5 text-muted-foreground" />
+              <Label className="text-base font-medium">AI Difficulty</Label>
+            </div>
+            <Select 
+              value={settings.difficultyMode || 'auto'} 
+              onValueChange={(value) => onSettingsChange({ difficultyMode: value as DifficultyMode })}
+            >
+              <SelectTrigger className="w-full" data-testid="select-difficulty">
+                <SelectValue placeholder="Select difficulty mode" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="auto">
+                  <div className="flex flex-col">
+                    <span className="font-medium">Auto (Adaptive)</span>
+                    <span className="text-xs text-muted-foreground">Adjusts based on your performance</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="easy">
+                  <div className="flex flex-col">
+                    <span className="font-medium">Easy</span>
+                    <span className="text-xs text-muted-foreground">AI makes more mistakes, folds more often</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="normal">
+                  <div className="flex flex-col">
+                    <span className="font-medium">Normal</span>
+                    <span className="text-xs text-muted-foreground">Balanced AI behavior</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="hard">
+                  <div className="flex flex-col">
+                    <span className="font-medium">Hard</span>
+                    <span className="text-xs text-muted-foreground">More aggressive, better bluffing</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="expert">
+                  <div className="flex flex-col">
+                    <span className="font-medium">Expert</span>
+                    <span className="text-xs text-muted-foreground">Near-optimal play, advanced strategies</span>
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            
+            {settings.difficultyMode === 'auto' && settings.currentDifficulty && (
+              <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-md">
+                <Info className="h-4 w-4 text-muted-foreground" />
+                <p className="text-sm">
+                  Current difficulty: <span className="font-medium capitalize">{settings.currentDifficulty}</span>
+                </p>
+              </div>
+            )}
+          </div>
+
           {/* UI Scale */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">

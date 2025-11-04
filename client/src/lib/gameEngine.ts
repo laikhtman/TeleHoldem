@@ -1,4 +1,4 @@
-import { Card, Player, GameState, SUITS, RANKS, GamePhase, Pot, ACHIEVEMENT_LIST, Achievement, AchievementId } from '@shared/schema';
+import { Card, Player, GameState, SUITS, RANKS, GamePhase, Pot, ACHIEVEMENT_LIST, Achievement, AchievementId, DifficultySettings, PerformanceMetrics } from '@shared/schema';
 import { handEvaluator } from './handEvaluator';
 import { achievementEngine } from './achievementEngine';
 
@@ -57,6 +57,31 @@ export class GameEngine {
       },
     }));
 
+    // Load saved difficulty settings
+    const savedDifficulty = localStorage.getItem('pokerDifficulty');
+    const difficultySettings: DifficultySettings = savedDifficulty 
+      ? {
+          mode: JSON.parse(savedDifficulty).mode || 'auto',
+          currentLevel: JSON.parse(savedDifficulty).level || 'normal',
+          multiplier: 1.0
+        }
+      : {
+          mode: 'auto',
+          currentLevel: 'normal',
+          multiplier: 1.0
+        };
+
+    // Initialize performance metrics
+    const performanceMetrics: PerformanceMetrics = {
+      recentHands: [],
+      bankrollHistory: [{
+        amount: 1000, // Starting bankroll
+        timestamp: Date.now()
+      }],
+      winRate: 0.5,
+      bankrollTrend: 'stable'
+    };
+
     return {
       players,
       deck: this.createDeck(),
@@ -77,6 +102,8 @@ export class GameEngine {
       achievements: Object.fromEntries(
         Object.entries(ACHIEVEMENT_LIST).map(([id, ach]) => [id, { ...ach, unlockedAt: undefined }])
       ) as Record<AchievementId, Achievement>,
+      difficultySettings,
+      performanceMetrics,
     };
   }
 
@@ -274,6 +301,60 @@ export class GameEngine {
 
   getActivePlayers(gameState: GameState): Player[] {
     return gameState.players.filter(p => !p.folded);
+  }
+
+  updatePerformanceMetrics(gameState: GameState, humanWon: boolean, potSize: number): GameState {
+    const newMetrics = { ...gameState.performanceMetrics } || {
+      recentHands: [],
+      bankrollHistory: [],
+      winRate: 0.5,
+      bankrollTrend: 'stable' as const
+    };
+
+    // Add new hand result
+    const newHand = {
+      handId: `hand-${Date.now()}`,
+      won: humanWon,
+      potSize,
+      timestamp: Date.now()
+    };
+
+    // Update recent hands (keep last 25)
+    newMetrics.recentHands = [...newMetrics.recentHands, newHand].slice(-25);
+
+    // Calculate new win rate
+    if (newMetrics.recentHands.length > 0) {
+      const wins = newMetrics.recentHands.filter(h => h.won).length;
+      newMetrics.winRate = wins / newMetrics.recentHands.length;
+    }
+
+    // Update bankroll history
+    const humanPlayer = gameState.players.find(p => p.isHuman);
+    if (humanPlayer) {
+      const bankrollEntry = {
+        amount: humanPlayer.chips,
+        timestamp: Date.now()
+      };
+      newMetrics.bankrollHistory = [...newMetrics.bankrollHistory, bankrollEntry].slice(-30);
+
+      // Calculate bankroll trend
+      if (newMetrics.bankrollHistory.length >= 3) {
+        const recent = newMetrics.bankrollHistory.slice(-10);
+        const firstHalf = recent.slice(0, Math.floor(recent.length / 2));
+        const secondHalf = recent.slice(Math.floor(recent.length / 2));
+        
+        const avgFirst = firstHalf.reduce((sum, h) => sum + h.amount, 0) / firstHalf.length;
+        const avgSecond = secondHalf.reduce((sum, h) => sum + h.amount, 0) / secondHalf.length;
+        
+        const changePercent = (avgSecond - avgFirst) / avgFirst;
+        
+        if (changePercent > 0.1) newMetrics.bankrollTrend = 'up';
+        else if (changePercent < -0.1) newMetrics.bankrollTrend = 'down';
+        else newMetrics.bankrollTrend = 'stable';
+      }
+    }
+
+    return { ...gameState, performanceMetrics: newMetrics };
   }
 
   resolveShowdown(gameState: GameState): { winners: Player[]; winningHand: string; bestCombos: Record<string, Card[]> } {

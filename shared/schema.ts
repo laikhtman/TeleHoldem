@@ -81,6 +81,31 @@ export interface Pot {
 
 export type PlayerAction = 'fold' | 'check' | 'call' | 'bet' | 'raise';
 
+// Difficulty System Types
+export type DifficultyLevel = 'easy' | 'normal' | 'hard' | 'expert';
+export type DifficultyMode = 'auto' | DifficultyLevel;
+
+export interface DifficultySettings {
+  mode: DifficultyMode;
+  currentLevel: DifficultyLevel; // Current level when in auto mode
+  multiplier: number; // Current difficulty multiplier
+}
+
+export interface PerformanceMetrics {
+  recentHands: Array<{
+    handId: string;
+    won: boolean;
+    potSize: number;
+    timestamp: number;
+  }>;
+  bankrollHistory: Array<{
+    amount: number;
+    timestamp: number;
+  }>;
+  winRate: number; // Calculated win rate over recent hands
+  bankrollTrend: 'up' | 'down' | 'stable';
+}
+
 export interface ActionHistoryEntry {
   id: string;
   type: 'player-action' | 'phase-change' | 'cards-dealt' | 'pot-award' | 'blinds-posted';
@@ -110,6 +135,8 @@ export interface GameState {
     handDistribution: Record<string, number>;
   };
   achievements: Record<AchievementId, Achievement>;
+  difficultySettings?: DifficultySettings;
+  performanceMetrics?: PerformanceMetrics;
 }
 
 // Database Tables
