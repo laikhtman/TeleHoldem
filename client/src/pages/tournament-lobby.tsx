@@ -25,6 +25,7 @@ import {
   TournamentEvent,
   subscribeToTournamentEvents,
   getTournamentStatus,
+  getActiveTournaments,
   tournamentManager
 } from '@/lib/tournamentManager';
 import {
@@ -470,9 +471,21 @@ export default function TournamentLobby() {
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 500));
     
-    // Update tournament states (mock data for demo)
-    setTournaments(prevTournaments => 
-      prevTournaments.map(t => {
+    // Get all active tournaments from the manager
+    const activeTournaments = getActiveTournaments();
+    
+    // Merge with existing demo tournaments, avoiding duplicates
+    setTournaments(prevTournaments => {
+      const existingIds = new Set(prevTournaments.map(t => t.id));
+      const newTournaments = activeTournaments.filter(t => !existingIds.has(t.id));
+      
+      // Update existing tournaments and add new ones
+      const updatedTournaments = prevTournaments.map(t => {
+        const activeTourn = activeTournaments.find(at => at.id === t.id);
+        if (activeTourn) {
+          return activeTourn;
+        }
+        // Update timer for running tournaments
         if (t.status === 'running' && t.blindTimer) {
           return {
             ...t,
@@ -480,8 +493,10 @@ export default function TournamentLobby() {
           };
         }
         return t;
-      })
-    );
+      });
+      
+      return [...updatedTournaments, ...newTournaments];
+    });
     
     setIsRefreshing(false);
   };
@@ -528,20 +543,29 @@ export default function TournamentLobby() {
   // Confirm registration
   const confirmRegistration = () => {
     if (selectedTournament) {
-      tournamentManager.registerPlayer(selectedTournament.id, {
-        id: `player-${Date.now()}`,
-        name: playerName,
-        chipCount: selectedTournament.startingChips,
-      });
+      // Fix: registerPlayer expects (tournamentId, playerName, playerId?)
+      const success = tournamentManager.registerPlayer(
+        selectedTournament.id, 
+        playerName,
+        `player-${Date.now()}`
+      );
       
-      toast({
-        title: 'Registration Successful',
-        description: `You're registered for ${selectedTournament.name}!`,
-      });
-      
-      setShowRegistrationDialog(false);
-      setSelectedTournament(null);
-      refreshTournaments();
+      if (success) {
+        toast({
+          title: 'Registration Successful',
+          description: `You're registered for ${selectedTournament.name}!`,
+        });
+        
+        setShowRegistrationDialog(false);
+        setSelectedTournament(null);
+        refreshTournaments();
+      } else {
+        toast({
+          title: 'Registration Failed',
+          description: 'Unable to register for this tournament.',
+          variant: 'destructive',
+        });
+      }
     }
   };
   
