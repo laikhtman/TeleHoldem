@@ -39,6 +39,7 @@ export function PotDisplay({ amount, onRef, sidePots = [] }: PotDisplayProps) {
       aria-live="polite"
       aria-atomic="true"
       aria-label={`Current pot: ${amount} dollars`}
+      data-testid="pot-display"
     >
       {/* Enhanced Chip Stack Display */}
       <AnimatePresence>

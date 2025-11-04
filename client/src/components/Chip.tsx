@@ -4,33 +4,127 @@ import { useSound } from '@/hooks/useSound';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useEffect, useRef } from 'react';
 
+// Chip denomination configurations with physics weights
+export const CHIP_CONFIGS = {
+  1: { 
+    color: 'bg-white', 
+    border: 'border-gray-400', 
+    text: 'text-gray-900',
+    weight: 1.0, // Lightweight
+    symbol: '$1'
+  },
+  5: { 
+    color: 'bg-red-600', 
+    border: 'border-red-800', 
+    text: 'text-white',
+    weight: 1.1, // Standard weight
+    symbol: '$5'
+  },
+  25: { 
+    color: 'bg-green-600', 
+    border: 'border-green-800', 
+    text: 'text-white',
+    weight: 1.2, // Heavier
+    symbol: '$25'
+  },
+  100: { 
+    color: 'bg-gray-900', 
+    border: 'border-gray-700', 
+    text: 'text-white',
+    weight: 1.3, // Heaviest standard
+    symbol: '$100'
+  },
+  500: { 
+    color: 'bg-purple-600', 
+    border: 'border-purple-800', 
+    text: 'text-white',
+    weight: 1.4, // Premium weight
+    symbol: '★500'
+  },
+  1000: { 
+    color: 'bg-yellow-500', 
+    border: 'border-yellow-700', 
+    text: 'text-gray-900',
+    weight: 1.5, // Heaviest premium
+    symbol: '♦1K'
+  }
+} as const;
+
 interface ChipProps {
   className?: string;
   style?: React.CSSProperties;
   size?: 'sm' | 'md' | 'lg';
+  denomination?: keyof typeof CHIP_CONFIGS;
+  showValue?: boolean;
+  physicsEnabled?: boolean;
 }
 
-export function Chip({ className, style, size = 'md' }: ChipProps) {
+export function Chip({ 
+  className, 
+  style, 
+  size = 'md',
+  denomination = 100,
+  showValue = false,
+  physicsEnabled = false
+}: ChipProps) {
   const prefersReducedMotion = useReducedMotion();
+  const config = CHIP_CONFIGS[denomination] || CHIP_CONFIGS[100];
   
   const sizeClasses = {
-    sm: 'w-4 h-4',
-    md: 'w-6 h-6',
-    lg: 'w-8 h-8',
+    sm: 'w-4 h-4 text-[8px]',
+    md: 'w-6 h-6 text-[10px]',
+    lg: 'w-8 h-8 text-xs',
   };
 
-  const animationConfig = prefersReducedMotion
-    ? { opacity: 1, transform: 'scale(1)' }
-    : { opacity: [0, 1], transform: ['scale(0.5)', 'scale(1)'] };
+  // Physics-based animation for enabled chips
+  const physicsAnimation = physicsEnabled && !prefersReducedMotion ? {
+    initial: { 
+      opacity: 0, 
+      scale: 0.5, 
+      rotateY: -180,
+      y: -50 
+    },
+    animate: { 
+      opacity: 1, 
+      scale: 1, 
+      rotateY: 0,
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 300 / config.weight, // Heavier chips move slower
+        damping: 20 * config.weight,
+        duration: 0.5
+      }
+    },
+    exit: {
+      opacity: 0,
+      scale: 0.8,
+      y: 20,
+      transition: {
+        duration: 0.3
+      }
+    }
+  } : {};
 
-  const transitionConfig = prefersReducedMotion
-    ? { duration: 0.01 }
-    : { duration: 0.3, ease: 'easeOut' };
+  const standardAnimation = !physicsEnabled ? {
+    initial: prefersReducedMotion ? {} : { opacity: 0, scale: 0.5 },
+    animate: prefersReducedMotion 
+      ? { opacity: 1, scale: 1 } 
+      : { opacity: [0, 1], scale: [0.5, 1] },
+    exit: prefersReducedMotion ? {} : { opacity: 0, scale: 0.5 },
+    transition: prefersReducedMotion 
+      ? { duration: 0.01 } 
+      : { duration: 0.3, ease: 'easeOut' }
+  } : {};
+
+  const animationProps = physicsEnabled ? physicsAnimation : standardAnimation;
 
   return (
     <motion.div
       className={cn(
-        'rounded-full bg-poker-chipGold border-2 border-yellow-600 shadow-md chip-shine',
+        'rounded-full border-2 shadow-md chip-shine flex items-center justify-center font-bold',
+        config.color,
+        config.border,
         sizeClasses[size],
         className
       )}
@@ -38,11 +132,14 @@ export function Chip({ className, style, size = 'md' }: ChipProps) {
         ...style,
         transform: 'translateZ(0)' // Hardware acceleration
       }}
-      initial={prefersReducedMotion ? {} : { opacity: 0, transform: 'scale(0.5)' }}
-      animate={animationConfig}
-      exit={prefersReducedMotion ? {} : { opacity: 0, transform: 'scale(0.5)' }}
-      transition={transitionConfig}
-    />
+      {...animationProps}
+    >
+      {showValue && (
+        <span className={config.text}>
+          {denomination >= 500 ? config.symbol : ''}
+        </span>
+      )}
+    </motion.div>
   );
 }
 

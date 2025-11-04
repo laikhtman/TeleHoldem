@@ -10,7 +10,38 @@ const BOT_NAMES = [
   'Sofia Martinez'
 ];
 
+// Chip animation event types for physics system
+export interface ChipAnimationEvent {
+  type: 'bet' | 'call' | 'raise' | 'all-in' | 'pot-win' | 'split-pot' | 'blind';
+  playerId: string;
+  playerPosition?: { x: number; y: number };
+  potPosition?: { x: number; y: number };
+  amount: number;
+  isAllIn?: boolean;
+  isSplitPot?: boolean;
+  splitCount?: number;
+  winnerId?: string;
+  winnerPosition?: { x: number; y: number };
+}
+
+// Callback for chip animations
+type ChipAnimationCallback = (event: ChipAnimationEvent) => void;
+
 export class GameEngine {
+  private chipAnimationCallback?: ChipAnimationCallback;
+
+  // Register callback for chip animations
+  onChipAnimation(callback: ChipAnimationCallback) {
+    this.chipAnimationCallback = callback;
+  }
+
+  // Trigger chip animation
+  private triggerChipAnimation(event: ChipAnimationEvent) {
+    if (this.chipAnimationCallback) {
+      // Add a small delay to make animations sequential
+      setTimeout(() => this.chipAnimationCallback!(event), 0);
+    }
+  }
   createDeck(): Card[] {
     const deck: Card[] = [];
     for (const suit of SUITS) {
@@ -366,28 +397,48 @@ export class GameEngine {
 
     let actionText = '';
     let action: PlayerAction = 'bet';
+    let chipAnimationType: ChipAnimationEvent['type'] = 'bet';
+    
     if (!isBlind) {
       if (gameState.currentBet === 0) {
         actionText = `${player.name} bet $${actualBet}`;
         action = 'bet';
+        chipAnimationType = 'bet';
       } else if (newTotalBet < gameState.currentBet) {
         actionText = `${player.name} called $${actualBet} (all-in)`;
         action = 'call';
+        chipAnimationType = 'all-in';
       } else if (newTotalBet === gameState.currentBet) {
         actionText = `${player.name} called $${actualBet}`;
         action = 'call';
+        chipAnimationType = 'call';
       } else {
         actionText = `${player.name} raised to $${newTotalBet}`;
         action = 'raise';
+        chipAnimationType = 'raise';
       }
+    } else {
+      chipAnimationType = 'blind';
     }
+    
+    const isAllIn = player.chips - actualBet === 0;
     
     players[playerIndex] = {
       ...player,
       chips: player.chips - actualBet,
       bet: newTotalBet,
-      allIn: player.chips - actualBet === 0
+      allIn: isAllIn
     };
+
+    // Trigger chip animation for betting action
+    if (actualBet > 0) {
+      this.triggerChipAnimation({
+        type: chipAnimationType,
+        playerId: player.id,
+        amount: actualBet,
+        isAllIn: isAllIn && !isBlind
+      });
+    }
 
     let newState = {
       ...gameState,
@@ -804,6 +855,7 @@ export class GameEngine {
 
       const potShare = Math.floor(pot.amount / winners.length);
       const remainder = pot.amount % winners.length;
+      const isSplitPot = winners.length > 1;
 
       winners.forEach((winner, idx) => {
         const winnerIndex = players.findIndex(p => p.id === winner.id);
@@ -815,6 +867,18 @@ export class GameEngine {
           }
           const extraChip = idx < remainder ? 1 : 0;
           const winAmount = potShare + extraChip;
+          
+          // Trigger chip animation for pot collection
+          if (winAmount > 0) {
+            this.triggerChipAnimation({
+              type: isSplitPot ? 'split-pot' : 'pot-win',
+              playerId: winner.id,
+              winnerId: winner.id,
+              amount: winAmount,
+              isSplitPot: isSplitPot,
+              splitCount: winners.length
+            });
+          }
           
           players[winnerIndex] = {
             ...players[winnerIndex],

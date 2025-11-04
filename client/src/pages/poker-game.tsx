@@ -28,6 +28,13 @@ import { HandStrengthPanel } from '@/components/HandStrengthPanel';
 import { PotOddsDisplay } from '@/components/PotOddsDisplay';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FlyingChip } from '@/components/Chip';
+import { 
+  ChipPhysics, 
+  BettingAnimation, 
+  PotCollectionAnimation,
+  createChipParticles,
+  ChipAnimationEvent
+} from '@/components/ChipPhysics';
 import { Trash2, ChevronRight, ChevronLeft, TrendingUp, Settings, Menu, HelpCircle } from 'lucide-react';
 import { PokerLoader, PokerSpinner } from '@/components/PokerLoader';
 import { useSound } from '@/hooks/useSound';
@@ -57,6 +64,19 @@ interface FlyingChipData {
   endX: number;
   endY: number;
   delay?: number;
+}
+
+// Interface for chip physics animation data
+interface ChipPhysicsAnimation {
+  id: string;
+  type: 'bet' | 'pot-collection';
+  playerPosition?: { x: number; y: number };
+  potPosition?: { x: number; y: number };
+  amount: number;
+  isAllIn?: boolean;
+  isSplitPot?: boolean;
+  splitCount?: number;
+  winnerId?: string;
 }
 
 function addActionHistory(
@@ -105,6 +125,11 @@ export default function PokerGame() {
   const [showEventLog, setShowEventLog] = useState(false);
   const [tableAspect, setTableAspect] = useState<string>('3 / 2');
   const potPosition = useRef<{ x: number; y: number }>({ x: 400, y: 150 });
+  
+  // Chip physics animation state
+  const [activeChipAnimations, setActiveChipAnimations] = useState<ChipPhysicsAnimation[]>([]);
+  const tableRef = useRef<HTMLDivElement>(null);
+  const playerPositionsRef = useRef<Map<string, { x: number; y: number }>>(new Map());
   const { toast } = useToast();
   const { playSound } = useSound();
   const { triggerHaptic } = useHaptic();
@@ -521,6 +546,69 @@ export default function PokerGame() {
     }
   });
 
+  // Set up chip animation callback on game engine
+  useEffect(() => {
+    const handleChipAnimation = (event: ChipAnimationEvent) => {
+      if (settings.reducedAnimations) return;
+      
+      // Get player position
+      const playerSeat = document.querySelector(`[data-testid="player-seat-${event.playerId}"]`);
+      const pot = document.querySelector('[data-testid="pot-display"]');
+      
+      if (!playerSeat || !pot) return;
+      
+      const playerRect = playerSeat.getBoundingClientRect();
+      const potRect = pot.getBoundingClientRect();
+      
+      const playerPos = {
+        x: playerRect.left + playerRect.width / 2,
+        y: playerRect.top + playerRect.height / 2
+      };
+      
+      const potPos = {
+        x: potRect.left + potRect.width / 2,
+        y: potRect.top + potRect.height / 2
+      };
+      
+      // Create chip physics animation
+      const animationId = `chip-anim-${Date.now()}-${Math.random()}`;
+      
+      if (event.type === 'pot-win' || event.type === 'split-pot') {
+        // Pot collection animation
+        setActiveChipAnimations(prev => [...prev, {
+          id: animationId,
+          type: 'pot-collection',
+          potPosition: potPos,
+          playerPosition: playerPos,
+          amount: event.amount,
+          isSplitPot: event.isSplitPot,
+          splitCount: event.splitCount,
+          winnerId: event.winnerId
+        }]);
+      } else {
+        // Betting animation
+        setActiveChipAnimations(prev => [...prev, {
+          id: animationId,
+          type: 'bet',
+          playerPosition: playerPos,
+          potPosition: potPos,
+          amount: event.amount,
+          isAllIn: event.isAllIn
+        }]);
+      }
+      
+      // Clean up animation after 4 seconds
+      setTimeout(() => {
+        setActiveChipAnimations(prev => prev.filter(a => a.id !== animationId));
+      }, 4000);
+    };
+    
+    // Register the callback
+    gameEngine.onChipAnimation(handleChipAnimation);
+    
+    // No cleanup needed as the callback is on the singleton gameEngine
+  }, [settings.reducedAnimations]);
+  
   useEffect(() => {
     // Save game state
     if (gameState) {
@@ -1656,6 +1744,39 @@ export default function PokerGame() {
                   </div>
                 </motion.div>
               </AnimatePresence>
+
+              {/* Chip Physics Animations */}
+              {activeChipAnimations.map(animation => {
+                if (animation.type === 'bet' && animation.playerPosition && animation.potPosition) {
+                  return (
+                    <BettingAnimation
+                      key={animation.id}
+                      playerPosition={animation.playerPosition}
+                      betPosition={animation.potPosition}
+                      amount={animation.amount}
+                      isAllIn={animation.isAllIn}
+                      onComplete={() => {
+                        setActiveChipAnimations(prev => prev.filter(a => a.id !== animation.id));
+                      }}
+                    />
+                  );
+                } else if (animation.type === 'pot-collection' && animation.potPosition && animation.playerPosition) {
+                  return (
+                    <PotCollectionAnimation
+                      key={animation.id}
+                      potPosition={animation.potPosition}
+                      winnerPosition={animation.playerPosition}
+                      amount={animation.amount}
+                      isSplitPot={animation.isSplitPot}
+                      splitCount={animation.splitCount}
+                      onComplete={() => {
+                        setActiveChipAnimations(prev => prev.filter(a => a.id !== animation.id));
+                      }}
+                    />
+                  );
+                }
+                return null;
+              })}
 
               {/* Winner Celebration */}
               {winningPlayerIds.length > 0 && winningPlayerIds.map(winnerId => {
