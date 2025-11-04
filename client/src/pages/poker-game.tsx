@@ -583,7 +583,8 @@ export default function PokerGame() {
           amount: event.amount,
           isSplitPot: event.isSplitPot,
           splitCount: event.splitCount,
-          winnerId: event.winnerId
+          winnerId: event.winnerId,
+          winType: event.winType // Pass win type for special effects
         }]);
       } else {
         // Betting animation
@@ -1769,6 +1770,7 @@ export default function PokerGame() {
                       amount={animation.amount}
                       isSplitPot={animation.isSplitPot}
                       splitCount={animation.splitCount}
+                      winType={animation.winType}
                       onComplete={() => {
                         setActiveChipAnimations(prev => prev.filter(a => a.id !== animation.id));
                       }}

@@ -1459,3 +1459,216 @@ input[type="search"]::-webkit-search-cancel-button {
 \n/* Large Text Preset */\n.large-text { font-size: 112%; }\n.large-text [data-testid="pot-amount"], .large-text [data-testid^="player-chips-"] { font-size: 1.1em !important; }\n.large-text [data-testid="button-fold"], .large-text [data-testid="button-call"], .large-text [data-testid="button-bet-raise"], .large-text [data-testid="button-all-in"] { font-size: 1.05em; }\n
 
 .large-text [data-testid="action-history-sidebar"] { font-size: 1.05em; }
+
+/* ================== WINNER CELEBRATION ANIMATIONS ================== */
+/* Enhanced chip celebration effects */
+
+/* Screen shake for massive wins */
+.animate-screen-shake {
+  animation: screen-shake 0.6s ease-in-out;
+}
+
+@keyframes screen-shake {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-3px, -2px); }
+  20% { transform: translate(3px, -1px); }
+  30% { transform: translate(-2px, 3px); }
+  40% { transform: translate(2px, 1px); }
+  50% { transform: translate(-1px, -1px); }
+  60% { transform: translate(1px, 2px); }
+  70% { transform: translate(0, -3px); }
+  80% { transform: translate(-1px, 2px); }
+  90% { transform: translate(3px, 1px); }
+}
+
+/* Chip glow effect for winners */
+.chip-glow {
+  animation: chip-glow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes chip-glow-pulse {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.6),
+                0 0 40px rgba(255, 215, 0, 0.4),
+                0 0 60px rgba(255, 215, 0, 0.2);
+  }
+  50% { 
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.8),
+                0 0 60px rgba(255, 215, 0, 0.6),
+                0 0 90px rgba(255, 215, 0, 0.4);
+  }
+}
+
+/* Rainbow trail for Royal Flush */
+.chip-rainbow-trail {
+  animation: rainbow-trail 2s linear infinite;
+}
+
+@keyframes rainbow-trail {
+  0% { background: hsl(0, 100%, 50%); filter: blur(2px); }
+  16.66% { background: hsl(60, 100%, 50%); }
+  33.33% { background: hsl(120, 100%, 50%); }
+  50% { background: hsl(180, 100%, 50%); }
+  66.66% { background: hsl(240, 100%, 50%); }
+  83.33% { background: hsl(300, 100%, 50%); }
+  100% { background: hsl(360, 100%, 50%); filter: blur(2px); }
+}
+
+/* Floating chip animation */
+.chip-float {
+  animation: chip-float 3s ease-in-out infinite;
+}
+
+@keyframes chip-float {
+  0% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(180deg); }
+  100% { transform: translateY(0) rotate(360deg); }
+}
+
+/* Sparkle burst effect */
+.sparkle-burst {
+  animation: sparkle-burst 1s ease-out forwards;
+}
+
+@keyframes sparkle-burst {
+  0% {
+    transform: scale(0) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5) rotate(180deg);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Firework particle effect */
+.chip-firework {
+  filter: blur(0.5px);
+  animation: firework-glow 1.8s ease-out forwards;
+}
+
+@keyframes firework-glow {
+  0% { 
+    filter: blur(0px) brightness(1.5);
+  }
+  50% { 
+    filter: blur(1px) brightness(2);
+  }
+  100% { 
+    filter: blur(3px) brightness(0.5);
+  }
+}
+
+/* Chip motion blur for fast movement */
+.chip-motion-blur {
+  filter: blur(2px);
+  transition: filter 0.3s ease-out;
+}
+
+.chip-motion-blur.landed {
+  filter: blur(0px);
+}
+
+/* Chip shadow effects */
+.chip-shadow-dynamic {
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
+  transition: filter 0.2s ease-out;
+}
+
+.chip-shadow-dynamic.flying {
+  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.5));
+}
+
+/* Winner aura glow */
+.winner-aura {
+  position: relative;
+}
+
+.winner-aura::before {
+  content: '';
+  position: absolute;
+  inset: -20px;
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.4) 0%, transparent 70%);
+  animation: aura-pulse 2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes aura-pulse {
+  0%, 100% { 
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+/* Lightning effect for Straight Flush */
+.lightning-path {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: lightning-strike 0.6s ease-out forwards;
+}
+
+@keyframes lightning-strike {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Explosion particles */
+.explosion-particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: radial-gradient(circle, #ff6b00, #ff9500);
+  border-radius: 50%;
+  animation: explode-out 1.2s ease-out forwards;
+}
+
+@keyframes explode-out {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--tx), var(--ty)) scale(0);
+    opacity: 0;
+  }
+}
+
+/* House formation effect */
+.house-formation {
+  animation: form-house 2s ease-in-out forwards;
+}
+
+@keyframes form-house {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(-90deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.8) rotate(90deg);
+  }
+}
+
+/* Slow motion effect wrapper */
+.slow-motion {
+  animation-duration: 3s !important;
+  transition-duration: 3s !important;
+}
+
+.slow-motion * {
+  animation-duration: 3s !important;
+  transition-duration: 3s !important;
+}

@@ -22,6 +22,7 @@ export interface ChipAnimationEvent {
   splitCount?: number;
   winnerId?: string;
   winnerPosition?: { x: number; y: number };
+  winType?: string; // Added for special effects based on hand type
 }
 
 // Callback for chip animations
@@ -868,7 +869,7 @@ export class GameEngine {
           const extraChip = idx < remainder ? 1 : 0;
           const winAmount = potShare + extraChip;
           
-          // Trigger chip animation for pot collection
+          // Trigger chip animation for pot collection with win type for special effects
           if (winAmount > 0) {
             this.triggerChipAnimation({
               type: isSplitPot ? 'split-pot' : 'pot-win',
@@ -876,7 +877,8 @@ export class GameEngine {
               winnerId: winner.id,
               amount: winAmount,
               isSplitPot: isSplitPot,
-              splitCount: winners.length
+              splitCount: winners.length,
+              winType: winningHand // Pass the winning hand type for special effects
             });
           }
           
