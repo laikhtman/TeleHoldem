@@ -12,20 +12,42 @@ export function useRAFAnimatedCounter(
     formatFn?: (value: number) => number;
   } = {}
 ) {
-  const [displayValue, setDisplayValue] = useState(targetValue);
+  // Initialize with formatted target value to ensure correct initial display
+  const formatFn = options.formatFn || Math.round;
+  const [displayValue, setDisplayValue] = useState(formatFn(targetValue));
   const previousValueRef = useRef(targetValue);
   const rafRef = useRef<number | null>(null);
+  const isMountedRef = useRef(false);
   
   // Default ease-out-quad function for smooth deceleration
   const easingFn = options.easingFn || ((t: number) => t * (2 - t));
-  const formatFn = options.formatFn || Math.round;
 
+  // Update display value immediately when targetValue changes (for synchronization)
   useEffect(() => {
-    // Skip if value hasn't changed
-    if (previousValueRef.current === targetValue) return;
+    // On first mount, just set the display value directly
+    if (!isMountedRef.current) {
+      isMountedRef.current = true;
+      setDisplayValue(formatFn(targetValue));
+      previousValueRef.current = targetValue;
+      return;
+    }
+
+    // Skip animation if value hasn't changed, but still update display
+    if (previousValueRef.current === targetValue) {
+      setDisplayValue(formatFn(targetValue));
+      return;
+    }
 
     const startValue = previousValueRef.current;
     const difference = targetValue - startValue;
+    
+    // For very small changes, just update immediately
+    if (Math.abs(difference) < 1) {
+      setDisplayValue(formatFn(targetValue));
+      previousValueRef.current = targetValue;
+      return;
+    }
+
     let startTime: number | null = null;
 
     const animate = (timestamp: number) => {

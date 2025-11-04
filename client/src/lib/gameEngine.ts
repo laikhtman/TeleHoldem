@@ -271,6 +271,9 @@ export class GameEngine {
     newState.currentBet = bigBlindAmount;
     newState.lastAction = `Blinds posted: $${smallBlindAmount}/$${bigBlindAmount}`;
     
+    // The pot is already updated by playerBet calls above since we added calculatePots there
+    // No additional action needed here
+    
     return newState;
   }
 
@@ -488,6 +491,10 @@ export class GameEngine {
     if (!isBlind && gameState.metaGameData) {
       newState = this.updateTableImageForAction(newState, playerIndex, action);
     }
+    
+    // CRITICAL FIX: Calculate and update pots immediately after each bet
+    // This ensures the pot display shows the correct amount as soon as players bet
+    newState = this.calculatePots(newState);
     
     return newState;
   }
