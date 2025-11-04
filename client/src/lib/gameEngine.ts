@@ -1,4 +1,4 @@
-import { Card, Player, GameState, SUITS, RANKS, GamePhase, Pot, ACHIEVEMENT_LIST, Achievement, AchievementId, DifficultySettings, PerformanceMetrics, PlayerTendencies, PlayerAction } from '@shared/schema';
+import { Card, Player, GameState, SUITS, RANKS, GamePhase, Pot, ACHIEVEMENT_LIST, Achievement, AchievementId, DifficultySettings, PerformanceMetrics, PlayerTendencies, PlayerAction, MetaGameData, TableImage, TableDynamics, BotMemory, PlayerStyle, TightnessLevel, AggressionLevel } from '@shared/schema';
 import { handEvaluator } from './handEvaluator';
 import { achievementEngine } from './achievementEngine';
 
@@ -111,6 +111,9 @@ export class GameEngine {
       },
     };
 
+    // Initialize meta-game data
+    const metaGameData = this.initializeMetaGameData(players);
+
     return {
       players,
       deck: this.createDeck(),
@@ -134,6 +137,84 @@ export class GameEngine {
       difficultySettings,
       performanceMetrics,
       playerTendencies,
+      metaGameData,
+    };
+  }
+
+  private initializeMetaGameData(players: Player[]): MetaGameData {
+    const tableImages = new Map<string, TableImage>();
+    const botMemories = new Map<string, BotMemory>();
+    
+    // Initialize table images for all players
+    players.forEach(player => {
+      tableImages.set(player.id, this.createInitialTableImage(player));
+      
+      // Initialize bot memories for non-human players
+      if (!player.isHuman) {
+        botMemories.set(player.id, this.createInitialBotMemory(player));
+      }
+    });
+    
+    // Initialize table dynamics
+    const tableDynamics: TableDynamics = {
+      overallAggression: 0.5,
+      averagePotSize: 0,
+      averageVPIP: 0,
+      averagePFR: 0,
+      tableTightness: 'normal',
+      tableFlow: 'normal',
+      tableCaptains: [],
+      weakPlayers: [],
+      recentBigPots: [],
+      momentum: 'steady'
+    };
+    
+    return {
+      tableImages,
+      botMemories,
+      tableDynamics,
+      handCounter: 0,
+      lastDynamicsUpdate: Date.now()
+    };
+  }
+
+  private createInitialTableImage(player: Player): TableImage {
+    return {
+      playerId: player.id,
+      playerName: player.name,
+      style: 'UNKNOWN',
+      tightness: 'neutral',
+      aggression: 'neutral',
+      vpip: 0,
+      pfr: 0,
+      threeBetFrequency: 0,
+      cBetFrequency: 0,
+      foldToThreeBet: 0,
+      wtsd: 0,
+      handsSeen: 0,
+      lastUpdated: Date.now(),
+      recentHandsWeight: 0.7, // Weight recent hands 70%
+      blindStealAttempts: 0,
+      blindDefenseRate: 0,
+      isolationRaiseFrequency: 0,
+      checkRaiseFrequency: 0,
+      floatFrequency: 0,
+      exploitablePatterns: [],
+      adjustmentsMade: []
+    };
+  }
+
+  private createInitialBotMemory(player: Player): BotMemory {
+    return {
+      playerHistories: new Map(),
+      identifiedPatterns: new Map(),
+      tableAggression: 0.5,
+      averagePotSize: 0,
+      tableCaptain: null,
+      scaredMoney: false,
+      myTableImage: null,
+      currentStrategy: 'balanced',
+      strategyShiftTimer: 0
     };
   }
 
@@ -246,20 +327,34 @@ export class GameEngine {
   playerFold(gameState: GameState, playerIndex: number): GameState {
     const players = [...gameState.players];
     players[playerIndex] = { ...players[playerIndex], folded: true };
-    return { 
+    
+    // Update table image
+    let newState = { 
       ...gameState, 
       players, 
       lastAction: `${players[playerIndex].name} folded`,
       roundActionCount: gameState.roundActionCount + 1
     };
+    
+    if (gameState.metaGameData) {
+      newState = this.updateTableImageForAction(newState, playerIndex, 'fold');
+    }
+    
+    return newState;
   }
 
   playerCheck(gameState: GameState, playerIndex: number): GameState {
-    return { 
+    let newState = { 
       ...gameState, 
       lastAction: `${gameState.players[playerIndex].name} checked`,
       roundActionCount: gameState.roundActionCount + 1
     };
+    
+    if (gameState.metaGameData) {
+      newState = this.updateTableImageForAction(newState, playerIndex, 'check');
+    }
+    
+    return newState;
   }
 
   playerBet(gameState: GameState, playerIndex: number, amount: number, isBlind: boolean = false): GameState {
@@ -270,11 +365,21 @@ export class GameEngine {
     const newTotalBet = player.bet + actualBet;
 
     let actionText = '';
+    let action: PlayerAction = 'bet';
     if (!isBlind) {
-      if (gameState.currentBet === 0) actionText = `${player.name} bet $${actualBet}`;
-      else if (newTotalBet < gameState.currentBet) actionText = `${player.name} called $${actualBet} (all-in)`;
-      else if (newTotalBet === gameState.currentBet) actionText = `${player.name} called $${actualBet}`;
-      else actionText = `${player.name} raised to $${newTotalBet}`;
+      if (gameState.currentBet === 0) {
+        actionText = `${player.name} bet $${actualBet}`;
+        action = 'bet';
+      } else if (newTotalBet < gameState.currentBet) {
+        actionText = `${player.name} called $${actualBet} (all-in)`;
+        action = 'call';
+      } else if (newTotalBet === gameState.currentBet) {
+        actionText = `${player.name} called $${actualBet}`;
+        action = 'call';
+      } else {
+        actionText = `${player.name} raised to $${newTotalBet}`;
+        action = 'raise';
+      }
     }
     
     players[playerIndex] = {
@@ -284,13 +389,242 @@ export class GameEngine {
       allIn: player.chips - actualBet === 0
     };
 
-    return {
+    let newState = {
       ...gameState,
       players,
       currentBet: Math.max(gameState.currentBet, newTotalBet),
       lastAction: isBlind ? gameState.lastAction : actionText,
       roundActionCount: isBlind ? gameState.roundActionCount : gameState.roundActionCount + 1
     };
+    
+    // Update table image if not a blind
+    if (!isBlind && gameState.metaGameData) {
+      newState = this.updateTableImageForAction(newState, playerIndex, action);
+    }
+    
+    return newState;
+  }
+  
+  private updateTableImageForAction(gameState: GameState, playerIndex: number, action: PlayerAction): GameState {
+    if (!gameState.metaGameData) return gameState;
+    
+    const player = gameState.players[playerIndex];
+    const playerId = player.id;
+    const metaGameData = { ...gameState.metaGameData };
+    const tableImage = metaGameData.tableImages.get(playerId);
+    
+    if (!tableImage) return gameState;
+    
+    // Clone the table image for updates
+    const updatedImage = { ...tableImage };
+    updatedImage.handsSeen++;
+    updatedImage.lastUpdated = Date.now();
+    
+    // Update VPIP (Voluntarily Put In Pot)
+    if (gameState.phase === 'pre-flop' && action !== 'fold' && action !== 'check') {
+      const weight = updatedImage.recentHandsWeight;
+      updatedImage.vpip = (updatedImage.vpip * (1 - weight) + weight) / updatedImage.handsSeen;
+      
+      if (action === 'raise') {
+        updatedImage.pfr = (updatedImage.pfr * (1 - weight) + weight) / updatedImage.handsSeen;
+      }
+    }
+    
+    // Track aggression patterns
+    const isAggressive = action === 'bet' || action === 'raise';
+    const isPassive = action === 'call' || action === 'check';
+    
+    // Update aggression level based on recent actions
+    if (isAggressive) {
+      const aggressionUpdate = 0.1; // Incremental update
+      updatedImage.aggression = this.adjustAggressionLevel(updatedImage.aggression, aggressionUpdate);
+    } else if (isPassive) {
+      const aggressionUpdate = -0.05; // Smaller decrement for passive play
+      updatedImage.aggression = this.adjustAggressionLevel(updatedImage.aggression, aggressionUpdate);
+    }
+    
+    // Update tightness based on folding frequency
+    if (action === 'fold') {
+      const tightnessUpdate = 0.05;
+      updatedImage.tightness = this.adjustTightnessLevel(updatedImage.tightness, tightnessUpdate);
+    } else if (action !== 'check' && gameState.phase === 'pre-flop') {
+      const tightnessUpdate = -0.05;
+      updatedImage.tightness = this.adjustTightnessLevel(updatedImage.tightness, tightnessUpdate);
+    }
+    
+    // Classify player style based on accumulated stats
+    updatedImage.style = this.classifyPlayerStyle(updatedImage);
+    
+    // Detect exploitable patterns
+    this.detectExploitablePatterns(updatedImage, gameState, action);
+    
+    // Update the table image
+    metaGameData.tableImages.set(playerId, updatedImage);
+    
+    // Update bot memories if this was observed by other bots
+    this.updateBotMemories(metaGameData, playerId, action, gameState);
+    
+    // Update table dynamics periodically
+    if (Date.now() - metaGameData.lastDynamicsUpdate > 5000) { // Every 5 seconds
+      this.updateTableDynamics(metaGameData, gameState);
+      metaGameData.lastDynamicsUpdate = Date.now();
+    }
+    
+    return { ...gameState, metaGameData };
+  }
+  
+  private adjustAggressionLevel(current: AggressionLevel, change: number): AggressionLevel {
+    const levels: AggressionLevel[] = ['very-passive', 'passive', 'neutral', 'aggressive', 'very-aggressive'];
+    const currentIndex = levels.indexOf(current);
+    const newIndex = Math.max(0, Math.min(4, currentIndex + Math.round(change * 10)));
+    return levels[newIndex];
+  }
+  
+  private adjustTightnessLevel(current: TightnessLevel, change: number): TightnessLevel {
+    const levels: TightnessLevel[] = ['very-loose', 'loose', 'neutral', 'tight', 'very-tight'];
+    const currentIndex = levels.indexOf(current);
+    const newIndex = Math.max(0, Math.min(4, currentIndex + Math.round(change * 10)));
+    return levels[newIndex];
+  }
+  
+  private classifyPlayerStyle(image: TableImage): PlayerStyle {
+    const { vpip, pfr, aggression, tightness } = image;
+    
+    // Classification based on VPIP and PFR
+    if (vpip < 0.15 && pfr < 0.10) {
+      if (aggression === 'very-passive' || aggression === 'passive') return 'ROCK';
+      return 'NIT';
+    } else if (vpip < 0.25 && pfr < 0.20) {
+      if (aggression === 'aggressive' || aggression === 'very-aggressive') return 'TAG';
+      return 'TP';
+    } else if (vpip > 0.35) {
+      if (aggression === 'very-aggressive') return 'MANIAC';
+      if (aggression === 'aggressive') return 'LAG';
+      return 'STATION'; // Calls a lot
+    } else {
+      if (aggression === 'aggressive' || aggression === 'very-aggressive') {
+        if (tightness === 'tight' || tightness === 'very-tight') return 'TAG';
+        return 'LAG';
+      } else {
+        if (tightness === 'tight' || tightness === 'very-tight') return 'TP';
+        return 'LP';
+      }
+    }
+  }
+  
+  private detectExploitablePatterns(image: TableImage, gameState: GameState, action: PlayerAction): void {
+    const patterns = image.exploitablePatterns;
+    
+    // Pattern: Always folds to 3-bets
+    if (action === 'fold' && gameState.roundActionCount > 2 && gameState.phase === 'pre-flop') {
+      image.foldToThreeBet = (image.foldToThreeBet * (image.handsSeen - 1) + 1) / image.handsSeen;
+      if (image.foldToThreeBet > 0.7 && !patterns.includes('FOLDS_TO_3BET')) {
+        patterns.push('FOLDS_TO_3BET');
+      }
+    }
+    
+    // Pattern: Never bluffs
+    if (gameState.phase === 'river' && image.handsSeen > 10) {
+      const bluffRatio = image.checkRaiseFrequency + image.floatFrequency;
+      if (bluffRatio < 0.05 && !patterns.includes('NEVER_BLUFFS')) {
+        patterns.push('NEVER_BLUFFS');
+      }
+    }
+    
+    // Pattern: Over-aggressive blind stealer
+    const isStealPosition = gameState.currentPlayerIndex >= gameState.players.length - 3;
+    if (isStealPosition && action === 'raise' && gameState.phase === 'pre-flop') {
+      image.blindStealAttempts++;
+      const stealFreq = image.blindStealAttempts / Math.max(1, image.handsSeen);
+      if (stealFreq > 0.4 && !patterns.includes('BLIND_STEALER')) {
+        patterns.push('BLIND_STEALER');
+      }
+    }
+  }
+  
+  private updateBotMemories(metaGameData: MetaGameData, actingPlayerId: string, action: PlayerAction, gameState: GameState): void {
+    // Update each bot's memory of the acting player
+    metaGameData.botMemories.forEach((memory, botId) => {
+      if (botId === actingPlayerId) return; // Don't track self
+      
+      let history = memory.playerHistories.get(actingPlayerId);
+      if (!history) {
+        history = {
+          encounters: 0,
+          lastPlayed: Date.now(),
+          observedActions: [],
+          successfulBluffs: 0,
+          caughtBluffing: 0,
+          showdownsWon: 0,
+          showdownsLost: 0,
+          moneyWon: 0,
+          moneyLost: 0
+        };
+      }
+      
+      history.encounters++;
+      history.lastPlayed = Date.now();
+      history.observedActions.push(action);
+      if (history.observedActions.length > 50) {
+        history.observedActions.shift(); // Keep last 50 actions
+      }
+      
+      memory.playerHistories.set(actingPlayerId, history);
+    });
+  }
+  
+  private updateTableDynamics(metaGameData: MetaGameData, gameState: GameState): void {
+    const dynamics = metaGameData.tableDynamics;
+    const tableImages = Array.from(metaGameData.tableImages.values());
+    
+    // Calculate average VPIP and PFR
+    dynamics.averageVPIP = tableImages.reduce((sum, img) => sum + img.vpip, 0) / tableImages.length;
+    dynamics.averagePFR = tableImages.reduce((sum, img) => sum + img.pfr, 0) / tableImages.length;
+    
+    // Calculate overall aggression
+    let aggressionScore = 0;
+    tableImages.forEach(img => {
+      switch(img.aggression) {
+        case 'very-aggressive': aggressionScore += 1.0; break;
+        case 'aggressive': aggressionScore += 0.75; break;
+        case 'neutral': aggressionScore += 0.5; break;
+        case 'passive': aggressionScore += 0.25; break;
+        case 'very-passive': aggressionScore += 0; break;
+      }
+    });
+    dynamics.overallAggression = aggressionScore / tableImages.length;
+    
+    // Determine table tightness
+    if (dynamics.averageVPIP < 0.15) dynamics.tableTightness = 'very-tight';
+    else if (dynamics.averageVPIP < 0.22) dynamics.tableTightness = 'tight';
+    else if (dynamics.averageVPIP < 0.30) dynamics.tableTightness = 'normal';
+    else if (dynamics.averageVPIP < 0.40) dynamics.tableTightness = 'loose';
+    else dynamics.tableTightness = 'very-loose';
+    
+    // Determine table flow
+    if (dynamics.overallAggression < 0.3) dynamics.tableFlow = 'passive';
+    else if (dynamics.overallAggression < 0.6) dynamics.tableFlow = 'normal';
+    else if (dynamics.overallAggression < 0.8) dynamics.tableFlow = 'aggressive';
+    else dynamics.tableFlow = 'maniac';
+    
+    // Identify table captains (most aggressive players)
+    const aggressivePlayers = tableImages
+      .filter(img => img.aggression === 'aggressive' || img.aggression === 'very-aggressive')
+      .sort((a, b) => b.pfr - a.pfr)
+      .slice(0, 2);
+    dynamics.tableCaptains = aggressivePlayers.map(img => img.playerId);
+    
+    // Identify weak players (exploitable)
+    const weakPlayers = tableImages
+      .filter(img => img.exploitablePatterns.length > 0 || img.style === 'STATION' || img.style === 'LP')
+      .map(img => img.playerId);
+    dynamics.weakPlayers = weakPlayers;
+    
+    // Update momentum based on recent pot sizes
+    const recentPots = dynamics.recentBigPots.filter(pot => Date.now() - pot.timestamp < 60000); // Last minute
+    if (recentPots.length > 3) dynamics.momentum = 'building';
+    else if (recentPots.length > 1) dynamics.momentum = 'steady';
+    else dynamics.momentum = 'cooling';
   }
 
   getNextPlayerIndex(gameState: GameState): number {

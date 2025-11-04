@@ -145,6 +145,93 @@ export interface PlayerTendencies {
   };
 }
 
+// Table Image Types for Meta-Game
+export type PlayerStyle = 'TAG' | 'LAG' | 'TP' | 'LP' | 'MANIAC' | 'NIT' | 'ROCK' | 'STATION' | 'UNKNOWN';
+export type TightnessLevel = 'very-tight' | 'tight' | 'neutral' | 'loose' | 'very-loose';
+export type AggressionLevel = 'very-passive' | 'passive' | 'neutral' | 'aggressive' | 'very-aggressive';
+
+export interface TableImage {
+  playerId: string;
+  playerName: string;
+  style: PlayerStyle;
+  tightness: TightnessLevel;
+  aggression: AggressionLevel;
+  vpip: number; // Voluntarily Put In Pot %
+  pfr: number; // Pre-Flop Raise %
+  threeBetFrequency: number; // 3-bet frequency
+  cBetFrequency: number; // Continuation bet frequency
+  foldToThreeBet: number; // Fold to 3-bet frequency
+  wtsd: number; // Went to showdown %
+  handsSeen: number; // Total hands played together
+  lastUpdated: number; // Timestamp of last update
+  recentHandsWeight: number; // Weight for recent hands (0-1)
+  // Pattern tracking
+  blindStealAttempts: number;
+  blindDefenseRate: number;
+  isolationRaiseFrequency: number;
+  checkRaiseFrequency: number;
+  floatFrequency: number; // Call in position with weak hand
+  // Exploit tracking
+  exploitablePatterns: string[]; // List of identified patterns
+  adjustmentsMade: string[]; // List of counter-adjustments
+}
+
+export interface BotMemory {
+  // Bot-to-bot history tracking
+  playerHistories: Map<string, {
+    encounters: number;
+    lastPlayed: number;
+    observedActions: PlayerAction[];
+    successfulBluffs: number;
+    caughtBluffing: number;
+    showdownsWon: number;
+    showdownsLost: number;
+    moneyWon: number;
+    moneyLost: number;
+  }>;
+  // Pattern recognition
+  identifiedPatterns: Map<string, {
+    pattern: string;
+    confidence: number;
+    lastSeen: number;
+    frequency: number;
+  }>;
+  // Table dynamics awareness
+  tableAggression: number; // Overall table aggression level (0-1)
+  averagePotSize: number;
+  tableCaptain: string | null; // Most aggressive player ID
+  scaredMoney: boolean; // Table playing scared
+  // Self-awareness
+  myTableImage: TableImage | null; // How others perceive this bot
+  currentStrategy: string; // Current strategic approach
+  strategyShiftTimer: number; // When to shift strategy
+}
+
+export interface TableDynamics {
+  overallAggression: number; // 0-1 scale
+  averagePotSize: number;
+  averageVPIP: number;
+  averagePFR: number;
+  tableTightness: 'very-tight' | 'tight' | 'normal' | 'loose' | 'very-loose';
+  tableFlow: 'passive' | 'normal' | 'aggressive' | 'maniac';
+  tableCaptains: string[]; // IDs of most aggressive players
+  weakPlayers: string[]; // IDs of exploitable players
+  recentBigPots: Array<{
+    amount: number;
+    winner: string;
+    timestamp: number;
+  }>;
+  momentum: 'building' | 'steady' | 'cooling'; // Table temperature
+}
+
+export interface MetaGameData {
+  tableImages: Map<string, TableImage>; // Player ID -> Table Image
+  botMemories: Map<string, BotMemory>; // Bot ID -> Memory
+  tableDynamics: TableDynamics;
+  handCounter: number; // Total hands at this table
+  lastDynamicsUpdate: number; // Timestamp
+}
+
 export interface GameState {
   players: Player[];
   deck: Card[];
@@ -166,6 +253,7 @@ export interface GameState {
   difficultySettings?: DifficultySettings;
   performanceMetrics?: PerformanceMetrics;
   playerTendencies?: PlayerTendencies; // Track human player tendencies
+  metaGameData?: MetaGameData; // Meta-game and table image tracking
 }
 
 // Database Tables

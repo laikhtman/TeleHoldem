@@ -1,4 +1,4 @@
-import { Card, BotAction, Player, GameState, DifficultyLevel, DifficultySettings, PlayerTendencies, GamePhase } from '@shared/schema';
+import { Card, BotAction, Player, GameState, DifficultyLevel, DifficultySettings, PlayerTendencies, GamePhase, TableImage, BotMemory, MetaGameData, PlayerStyle, TableDynamics } from '@shared/schema';
 import { handEvaluator, BoardTextureInfo } from './handEvaluator';
 
 interface BluffContext {
@@ -10,6 +10,16 @@ interface BluffContext {
   boardTexture?: BoardTextureInfo;
   streetAggression?: number; // Track aggression on current street
   previousStreetAction?: 'bet' | 'check' | 'raise' | 'call' | 'fold' | null;
+}
+
+interface MetaGameAdjustments {
+  aggressionMultiplier: number;
+  callingStandardsAdjustment: number;
+  bluffFrequencyAdjustment: number;
+  targetedPlayers: string[]; // Players to exploit
+  defensivePlayers: string[]; // Players to be careful against
+  strategyShift: 'default' | 'tight-aggressive' | 'loose-aggressive' | 'tight-passive' | 'exploitative';
+  exploitMode: boolean;
 }
 
 export class BotAI {
@@ -215,14 +225,20 @@ export class BotAI {
     
     const params = this.paramsFor(personality, humanWinAdj);
     
+    // Get meta-game adjustments based on table dynamics and player images
+    const metaGameAdjustments = this.calculateMetaGameAdjustments(player, gameState);
+    
+    // Apply meta-game adjustments to parameters
+    const adjustedParams = this.applyMetaGameAdjustments(params, metaGameAdjustments);
+    
     // Analyze context for advanced bluffing
     const context = this.analyzeBluffContext(player, gameState);
     
-    // Calculate advanced bluff frequency
-    const advancedBluffFrequency = this.calculateAdvancedBluffFrequency(context, personality, params, gameState);
+    // Calculate advanced bluff frequency with meta-game awareness
+    const advancedBluffFrequency = this.calculateAdvancedBluffFrequency(context, personality, adjustedParams, gameState);
     
     // Make random mistakes based on difficulty
-    if (Math.random() < params.mistakeChance) {
+    if (Math.random() < adjustedParams.mistakeChance) {
       const mistakeType = Math.random();
       if (this.difficultySettings.currentLevel === 'easy') {
         if (mistakeType < 0.3 && callAmount > 0) return { action: 'fold' };
@@ -232,6 +248,11 @@ export class BotAI {
       }
     }
     
+    // Check if being exploited and need to counter-adjust
+    if (metaGameAdjustments.exploitMode && metaGameAdjustments.defensivePlayers.length > 0) {
+      return this.getCounterExploitAction(player, gameState, adjustedParams, handStrength, metaGameAdjustments);
+    }
+    
     // Check for multi-street bluff continuation
     const handId = `${gameState.sessionStats.handsPlayed}`;
     const bluffHistory = this.bluffHistory.get(handId);
@@ -239,8 +260,8 @@ export class BotAI {
       const lastBluff = bluffHistory[bluffHistory.length - 1];
       // If we were bluffing and hand strength is still weak
       if (lastBluff.handStrength < 0.4 && handStrength < 0.5) {
-        if (this.shouldContinueBluff(player, gameState, params)) {
-          const bluffAction = this.executeAdvancedBluff(player, gameState, context, params);
+        if (this.shouldContinueBluff(player, gameState, adjustedParams)) {
+          const bluffAction = this.executeAdvancedBluff(player, gameState, context, adjustedParams);
           if (bluffAction) return bluffAction;
         } else {
           // Give up on bluff
@@ -255,8 +276,25 @@ export class BotAI {
     
     if (shouldBluff) {
       // Execute advanced bluff
-      const bluffAction = this.executeAdvancedBluff(player, gameState, context, params);
+      const bluffAction = this.executeAdvancedBluff(player, gameState, context, adjustedParams);
       if (bluffAction) return bluffAction;
+    }
+    
+    // Target exploitable players with increased aggression
+    if (metaGameAdjustments.targetedPlayers.length > 0) {
+      const targetInHand = gameState.players.some(p => 
+        !p.folded && metaGameAdjustments.targetedPlayers.includes(p.id)
+      );
+      if (targetInHand && handStrength > 0.35) {
+        // Increase aggression against weak players
+        if (callAmount === 0 && Math.random() < adjustedParams.betNoBet * 1.5) {
+          const betAmount = Math.min(Math.floor(totalPot * 0.75), player.chips);
+          return { action: 'bet', amount: betAmount };
+        } else if (callAmount > 0 && handStrength > 0.45 && Math.random() < adjustedParams.raiseMult * 1.5) {
+          const raiseAmount = Math.min(currentBet * 2.5, player.chips);
+          return { action: 'raise', amount: Math.floor(raiseAmount) };
+        }
+      }
     }
     
     // Value betting and standard play
@@ -267,16 +305,16 @@ export class BotAI {
       // Strong hand - value bet
       if (handStrength > 0.75) {
         const betAmount = Math.min(
-          Math.floor(totalPot * (params.raiseMult + Math.random() * 0.3) * betSizeModifier),
+          Math.floor(totalPot * (adjustedParams.raiseMult + Math.random() * 0.3) * betSizeModifier),
           player.chips
         );
         return { action: 'bet', amount: Math.max(betAmount, 20) };
       }
       
       // Medium hand - sometimes bet (based on personality)
-      if (handStrength > params.betNoBet) {
+      if (handStrength > adjustedParams.betNoBet) {
         // Continuation betting frequency
-        const cbetChance = phase === 'flop' ? params.cbetFrequency : params.betNoBet;
+        const cbetChance = phase === 'flop' ? adjustedParams.cbetFrequency : adjustedParams.betNoBet;
         if (Math.random() < cbetChance) {
           const betAmount = Math.min(
             Math.floor(totalPot * (0.4 + Math.random() * 0.2) * betSizeModifier),
@@ -295,7 +333,7 @@ export class BotAI {
     // Very strong hand - raise for value
     if (handStrength > 0.85) {
       const raiseAmount = Math.min(
-        callAmount + Math.floor(totalPot * (params.raiseMult + Math.random() * 0.4) * betSizeModifier),
+        callAmount + Math.floor(totalPot * (adjustedParams.raiseMult + Math.random() * 0.4) * betSizeModifier),
         player.chips
       );
       return { action: 'raise', amount: raiseAmount };
@@ -319,7 +357,7 @@ export class BotAI {
     // Medium hand - consider pot odds and tendencies
     if (handStrength > 0.35) {
       // Use player tendencies to make decision
-      let callThreshold = params.callTightness;
+      let callThreshold = adjustedParams.callTightness;
       if (gameState.playerTendencies && gameState.playerTendencies.aggressionFactor > 1.5) {
         // Tighten up against aggressive players
         callThreshold += 0.1;
@@ -573,6 +611,218 @@ export class BotAI {
       const betAmount = Math.min(Math.max(bluffAmount, 20), player.chips);
       return { action: 'bet', amount: betAmount };
     }
+  }
+  
+  private calculateMetaGameAdjustments(player: Player, gameState: GameState): MetaGameAdjustments {
+    const adjustments: MetaGameAdjustments = {
+      aggressionMultiplier: 1.0,
+      callingStandardsAdjustment: 0,
+      bluffFrequencyAdjustment: 0,
+      targetedPlayers: [],
+      defensivePlayers: [],
+      strategyShift: 'default',
+      exploitMode: false
+    };
+    
+    if (!gameState.metaGameData) return adjustments;
+    
+    const metaData = gameState.metaGameData;
+    const myMemory = metaData.botMemories.get(player.id);
+    const tableDynamics = metaData.tableDynamics;
+    
+    // Adjust based on table dynamics
+    if (tableDynamics.tableFlow === 'aggressive' || tableDynamics.tableFlow === 'maniac') {
+      // Tighten up at aggressive tables
+      adjustments.aggressionMultiplier *= 0.8;
+      adjustments.callingStandardsAdjustment += 0.1; // Be more selective
+      adjustments.strategyShift = 'tight-aggressive';
+    } else if (tableDynamics.tableFlow === 'passive') {
+      // Loosen up and be more aggressive at passive tables
+      adjustments.aggressionMultiplier *= 1.3;
+      adjustments.callingStandardsAdjustment -= 0.1; // Can play more hands
+      adjustments.bluffFrequencyAdjustment += 0.15; // More bluffs work
+      adjustments.strategyShift = 'loose-aggressive';
+    }
+    
+    // Identify exploitable players
+    const tableImages = Array.from(metaData.tableImages.values());
+    tableImages.forEach(image => {
+      if (image.playerId === player.id) {
+        // Check if we're being exploited
+        if (myMemory && image.exploitablePatterns.includes('FOLDS_TO_3BET')) {
+          adjustments.exploitMode = true;
+          adjustments.aggressionMultiplier *= 1.2; // Fight back
+        }
+      } else {
+        // Find players to exploit
+        if (image.exploitablePatterns.includes('FOLDS_TO_3BET')) {
+          adjustments.targetedPlayers.push(image.playerId);
+        }
+        if (image.exploitablePatterns.includes('NEVER_BLUFFS')) {
+          adjustments.targetedPlayers.push(image.playerId);
+        }
+        if (image.style === 'STATION' || image.style === 'LP') {
+          adjustments.targetedPlayers.push(image.playerId);
+        }
+        
+        // Be careful against aggressive players
+        if (image.style === 'LAG' || image.style === 'MANIAC') {
+          adjustments.defensivePlayers.push(image.playerId);
+        }
+      }
+    });
+    
+    // Check our own memory for specific player adjustments
+    if (myMemory) {
+      myMemory.playerHistories.forEach((history, playerId) => {
+        const playerImage = metaData.tableImages.get(playerId);
+        if (!playerImage) return;
+        
+        // If this player has been successfully bluffing us
+        if (history.caughtBluffing > history.successfulBluffs * 2) {
+          adjustments.defensivePlayers.push(playerId);
+        }
+        
+        // If we've been dominating this player
+        if (history.moneyWon > history.moneyLost * 2) {
+          adjustments.targetedPlayers.push(playerId);
+        }
+      });
+      
+      // Adjust strategy based on our perceived image
+      if (myMemory.myTableImage) {
+        if (myMemory.myTableImage.style === 'NIT' || myMemory.myTableImage.style === 'ROCK') {
+          // We're seen as too tight, need to loosen up
+          adjustments.bluffFrequencyAdjustment += 0.2;
+          adjustments.strategyShift = 'loose-aggressive';
+        } else if (myMemory.myTableImage.style === 'MANIAC') {
+          // We're seen as too loose, tighten up
+          adjustments.callingStandardsAdjustment += 0.15;
+          adjustments.strategyShift = 'tight-aggressive';
+        }
+      }
+      
+      // Table captain awareness
+      if (tableDynamics.tableCaptains.includes(player.id)) {
+        // We're the table captain, maintain dominance
+        adjustments.aggressionMultiplier *= 1.1;
+      } else if (tableDynamics.tableCaptains.length > 0) {
+        // Someone else is dominating, adjust accordingly
+        const captainInHand = gameState.players.some(p => 
+          !p.folded && tableDynamics.tableCaptains.includes(p.id)
+        );
+        if (captainInHand) {
+          adjustments.callingStandardsAdjustment += 0.05;
+        }
+      }
+    }
+    
+    // Momentum-based adjustments
+    if (tableDynamics.momentum === 'building') {
+      // Action is heating up, be more selective
+      adjustments.callingStandardsAdjustment += 0.05;
+    } else if (tableDynamics.momentum === 'cooling') {
+      // Table is tightening up, increase aggression
+      adjustments.aggressionMultiplier *= 1.15;
+      adjustments.bluffFrequencyAdjustment += 0.1;
+    }
+    
+    return adjustments;
+  }
+  
+  private applyMetaGameAdjustments(params: any, adjustments: MetaGameAdjustments): any {
+    const adjusted = { ...params };
+    
+    // Apply aggression multiplier
+    adjusted.raiseMult *= adjustments.aggressionMultiplier;
+    adjusted.betNoBet *= adjustments.aggressionMultiplier;
+    
+    // Apply calling standards adjustment
+    adjusted.callTightness += adjustments.callingStandardsAdjustment;
+    
+    // Apply bluff frequency adjustment
+    adjusted.bluffBase += adjustments.bluffFrequencyAdjustment;
+    adjusted.bluffFrequency += adjustments.bluffFrequencyAdjustment;
+    adjusted.cbetFrequency *= (1 + adjustments.bluffFrequencyAdjustment);
+    
+    // Ensure values stay within reasonable bounds
+    adjusted.raiseMult = Math.max(0.2, Math.min(1.0, adjusted.raiseMult));
+    adjusted.betNoBet = Math.max(0.1, Math.min(0.7, adjusted.betNoBet));
+    adjusted.callTightness = Math.max(0.1, Math.min(0.7, adjusted.callTightness));
+    adjusted.bluffBase = Math.max(0, Math.min(0.3, adjusted.bluffBase));
+    adjusted.bluffFrequency = Math.max(0, Math.min(0.5, adjusted.bluffFrequency));
+    
+    return adjusted;
+  }
+  
+  private getCounterExploitAction(
+    player: Player, 
+    gameState: GameState, 
+    params: any, 
+    handStrength: number,
+    adjustments: MetaGameAdjustments
+  ): BotAction {
+    const { currentBet, pots } = gameState;
+    const totalPot = pots.reduce((acc, pot) => acc + pot.amount, 0);
+    const callAmount = currentBet - player.bet;
+    
+    // Counter-exploit strategy: become unexploitable
+    
+    // If we're being 3-bet too often, start 4-betting light occasionally
+    if (adjustments.exploitMode && gameState.phase === 'pre-flop' && gameState.roundActionCount > 2) {
+      if (handStrength > 0.3 && Math.random() < 0.25) { // 25% 4-bet frequency with decent hands
+        const fourBetAmount = Math.min(currentBet * 2.5, player.chips);
+        if (fourBetAmount > currentBet) {
+          return { action: 'raise', amount: Math.floor(fourBetAmount) };
+        }
+      }
+    }
+    
+    // If someone is targeting our blinds, defend more frequently
+    const isBlindDefense = (gameState.dealerIndex + 1) % gameState.players.length === player.position ||
+                          (gameState.dealerIndex + 2) % gameState.players.length === player.position;
+    
+    if (isBlindDefense && adjustments.defensivePlayers.length > 0) {
+      const raiserIsTargeting = adjustments.defensivePlayers.some(id => {
+        const p = gameState.players.find(pl => pl.id === id);
+        return p && !p.folded && p.bet > 0;
+      });
+      
+      if (raiserIsTargeting && handStrength > 0.25) { // Defend wider
+        if (callAmount > 0 && callAmount <= totalPot * 0.3) {
+          return { action: 'call' };
+        }
+      }
+    }
+    
+    // Mix in some check-raises when out of position against aggressive players
+    if (callAmount === 0 && handStrength > 0.4 && Math.random() < 0.2) {
+      return { action: 'check' }; // Set up for check-raise
+    }
+    
+    // Default to standard play with adjustments
+    if (handStrength > 0.6 - params.callTightness) {
+      if (callAmount > 0) {
+        const raiseChance = params.raiseMult * 1.2; // Slightly more aggressive
+        if (Math.random() < raiseChance && currentBet < player.chips) {
+          const raiseAmount = Math.min(currentBet * 2 + totalPot * 0.5, player.chips);
+          return { action: 'raise', amount: Math.floor(raiseAmount) };
+        }
+        return { action: 'call' };
+      } else {
+        if (Math.random() < params.betNoBet * 1.3) {
+          const betAmount = Math.min(Math.floor(totalPot * 0.6), player.chips);
+          return { action: 'bet', amount: betAmount };
+        }
+        return { action: 'check' };
+      }
+    }
+    
+    // Otherwise play defensively
+    if (callAmount > 0) {
+      return { action: 'fold' };
+    }
+    return { action: 'check' };
   }
 }
 
