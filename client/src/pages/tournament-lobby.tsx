@@ -60,7 +60,7 @@ const DEMO_TOURNAMENTS: TournamentState[] = [
   {
     id: 'demo-1',
     name: 'Daily Freeroll',
-    type: 'multi-table',
+    type: 'multi_table',  // Fixed: use 'multi_table' instead of 'multi-table'
     status: 'registering',
     buyIn: 0,
     startingChips: 1500,
@@ -77,7 +77,7 @@ const DEMO_TOURNAMENTS: TournamentState[] = [
   {
     id: 'demo-2',
     name: 'Turbo Sit & Go #42',
-    type: 'sit-n-go',
+    type: 'sit_and_go',  // Fixed: use 'sit_and_go' instead of 'sit-n-go'
     status: 'registering',
     buyIn: 100,
     startingChips: 1000,
@@ -111,7 +111,7 @@ const DEMO_TOURNAMENTS: TournamentState[] = [
   {
     id: 'demo-4',
     name: 'Heads Up Championship',
-    type: 'sit-n-go',
+    type: 'sit_and_go',  // Fixed: use 'sit_and_go' instead of 'sit-n-go'
     status: 'completed',
     buyIn: 1000,
     startingChips: 3000,
@@ -471,8 +471,8 @@ export default function TournamentLobby() {
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 500));
     
-    // Get all active tournaments from the manager
-    const activeTournaments = getActiveTournaments();
+    // Get all active tournaments from the manager using direct call
+    const activeTournaments = tournamentManager.getActiveTournaments();
     
     // Merge with existing demo tournaments, avoiding duplicates
     setTournaments(prevTournaments => {
@@ -510,6 +510,14 @@ export default function TournamentLobby() {
       filtered = filtered.filter(t => {
         if (filter === 'turbo') {
           return t.name.toLowerCase().includes('turbo');
+        }
+        // Fix: handle both 'sit-n-go' filter and 'sit_and_go' tournament type
+        if (filter === 'sit-n-go') {
+          return t.type === 'sit_and_go';
+        }
+        // Fix: handle both 'multi-table' filter and 'multi_table' tournament type  
+        if (filter === 'multi-table') {
+          return t.type === 'multi_table';
         }
         return t.type === filter;
       });
@@ -576,12 +584,12 @@ export default function TournamentLobby() {
   };
   
   // Create quick tournament
-  const createQuickTournament = () => {
+  const createQuickTournament = async () => {
     console.log('Creating tournament...', { createType, createBuyIn });
     
     const config: TournamentConfig = {
       name: createType === 'turbo' ? `Turbo Tournament #${Date.now()}` : `Sit & Go #${Date.now()}`,
-      type: 'sit-n-go',
+      type: 'sit_and_go',  // Fixed: use 'sit_and_go' instead of 'sit-n-go'
       buyIn: createBuyIn,
       startingChips: createBuyIn * 10,
       maxPlayers: 6,
@@ -594,7 +602,12 @@ export default function TournamentLobby() {
       const tournamentId = tournamentManager.createTournament(config);
       console.log('Tournament created with ID:', tournamentId);
       
-      const newTournament = getTournamentStatus(tournamentId);
+      // Use direct manager calls instead of exported helper functions
+      const allTournaments = tournamentManager.getActiveTournaments();
+      console.log('All active tournaments after creation:', allTournaments);
+      console.log('Number of active tournaments:', allTournaments.length);
+      
+      const newTournament = tournamentManager.getTournamentStatus(tournamentId);
       console.log('Tournament status:', newTournament);
       
       if (newTournament) {
@@ -606,11 +619,26 @@ export default function TournamentLobby() {
         });
       } else {
         console.error('Failed to get tournament status after creation');
-        toast({
-          title: 'Error',
-          description: 'Failed to create tournament. Please try again.',
-          variant: 'destructive',
-        });
+        // Try to use refreshTournaments as fallback
+        console.log('Attempting to refresh tournaments as fallback...');
+        await refreshTournaments();
+        
+        // Check if it appears after refresh
+        const afterRefresh = tournamentManager.getActiveTournaments();
+        console.log('Active tournaments after refresh:', afterRefresh);
+        
+        if (afterRefresh.some(t => t.id === tournamentId)) {
+          toast({
+            title: 'Tournament Created',
+            description: `${config.name} is ready for registration!`,
+          });
+        } else {
+          toast({
+            title: 'Error',
+            description: 'Failed to create tournament. Please try again.',
+            variant: 'destructive',
+          });
+        }
       }
     } catch (error) {
       console.error('Error creating tournament:', error);
