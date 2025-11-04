@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams, Link, useLocation } from 'wouter';
 import { GameState, GamePhase, Card, ActionHistoryEntry, PlayerAction, ACHIEVEMENT_LIST, BlindLevel, PayoutPosition } from '@shared/schema';
 import { GameEngine } from '@/lib/gameEngine';
-import { TournamentManager, TournamentState, TournamentPlayer, TournamentEventCallback } from '@/lib/tournamentManager';
+import { tournamentManager, TournamentState, TournamentPlayer, TournamentEventCallback } from '@/lib/tournamentManager';
 import { botAI } from '@/lib/botAI';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState, FullPageLoader } from '@/components/LoadingState';
@@ -282,7 +282,6 @@ export default function TournamentGame() {
   const [isHandStrengthCollapsed, setIsHandStrengthCollapsed] = useState(false);
   
   const gameEngineRef = useRef<GameEngine | null>(null);
-  const tournamentManagerRef = useRef<TournamentManager | null>(null);
   const tableRef = useRef<HTMLDivElement>(null);
   const playerPositionsRef = useRef<Map<string, { x: number; y: number }>>(new Map());
   const potPosition = useRef<{ x: number; y: number }>({ x: 400, y: 150 });
@@ -338,15 +337,12 @@ export default function TournamentGame() {
       return;
     }
     
-    // For real tournaments, use TournamentManager
-    if (!tournamentManagerRef.current) {
-      tournamentManagerRef.current = new TournamentManager();
-    }
+    // For real tournaments, use the singleton TournamentManager
     
     // Get tournament state
     console.log('Looking for tournament:', tournamentId);
-    console.log('All tournaments in manager:', tournamentManagerRef.current.tournaments);
-    const tournamentState = tournamentManagerRef.current.getTournamentStatus(tournamentId);
+    console.log('Active tournaments in manager:', tournamentManager.getActiveTournaments());
+    const tournamentState = tournamentManager.getTournamentStatus(tournamentId);
     console.log('Found tournament state:', tournamentState);
     if (tournamentState) {
       setTournament(tournamentState);
@@ -377,7 +373,7 @@ export default function TournamentGame() {
 
   // Subscribe to tournament events
   useEffect(() => {
-    if (!tournamentManagerRef.current || !tournamentId) return;
+    if (!tournamentId) return;
     
     const handleTournamentEvent: TournamentEventCallback = (event) => {
       switch (event.type) {
@@ -427,13 +423,13 @@ export default function TournamentGame() {
     
     // Subscribe to events
     // TODO: Implement event subscription in TournamentManager
-    // tournamentManagerRef.current.on(tournamentId, handleTournamentEvent);
+    // tournamentManager.onEvent(tournamentId, handleTournamentEvent);
     
     return () => {
       // TODO: Implement event unsubscription
-      // if (tournamentManagerRef.current) {
-      //   tournamentManagerRef.current.off(tournamentId, handleTournamentEvent);
-      // }
+      // Note: tournamentManager.onEvent returns an unsubscribe function
+      // const unsubscribe = tournamentManager.onEvent(tournamentId, handleTournamentEvent);
+      // unsubscribe();
     };
   }, [tournamentId, currentPlayer, gameState, toast, playSound, triggerHaptic]);
 
