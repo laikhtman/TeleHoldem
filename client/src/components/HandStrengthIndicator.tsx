@@ -93,8 +93,8 @@ export function HandStrengthIndicator({ hand, communityCards }: HandStrengthIndi
       >
         {/* Main Hand Strength */}
         <motion.div
-          animate={isImproving ? { scale: [1, 1.15, 1] } : {}}
-          transition={{ duration: 0.5 }}
+          animate={isImproving ? { scale: [1, 1.15] } : {}}
+          transition={{ duration: 0.5, repeat: 1, repeatType: "reverse" }}
           className="flex items-center gap-3"
         >
           <Badge

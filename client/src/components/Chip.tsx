@@ -316,8 +316,7 @@ export function ChipStack({ count, className }: ChipStackProps) {
     opacity: 1,
     transform: [
       'translateY(0) scale(1) rotate(0deg)',
-      'translateY(0) scale(1.01) rotate(1deg)',
-      'translateY(0) scale(1) rotate(0deg)'
+      'translateY(0) scale(1.01) rotate(1deg)'
     ]
   };
   
@@ -337,7 +336,7 @@ export function ChipStack({ count, className }: ChipStackProps) {
           }}
           initial={initialState}
           animate={animateState}
-          transition={prefersReducedMotion ? transitionConfig(i) : { ...transitionConfig(i), repeat: 0, duration: 0.4 }}
+          transition={prefersReducedMotion ? transitionConfig(i) : { ...transitionConfig(i), repeat: 1, repeatType: "reverse", duration: 0.4 }}
         />
       ))}
       {count > 5 && (

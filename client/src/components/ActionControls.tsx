@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { AlertCircle, ChevronLeft, ChevronRight, X, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useShake } from '@/hooks/useShake';
@@ -496,8 +496,8 @@ export function ActionControls({
                   className="text-lg font-mono font-bold text-poker-chipGold" 
                   data-testid="text-bet-amount"
                   initial={{ scale: 1 }}
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ duration: 0.2 }}
+                  animate={{ scale: [1, 1.1] }}
+                  transition={{ duration: 0.2, repeat: 1, repeatType: "reverse" }}
                 >
                   ${betAmount}
                 </motion.span>

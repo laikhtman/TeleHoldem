@@ -335,8 +335,8 @@ export function PlayingCard({
           data-testid={`card-${card.id}`}
           key={settleBounceKey}
           initial={prefersReducedMotion ? {} : { y: 0, scale: 1 }}
-          animate={prefersReducedMotion ? {} : { y: [0, -6, 0], scale: peekActive ? 1.15 : 1 }}
-          transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.25, ease: 'easeOut' }}
+          animate={prefersReducedMotion ? {} : { y: [0, -6], scale: peekActive ? 1.15 : 1 }}
+          transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.25, ease: 'easeOut', repeat: 1, repeatType: "reverse" }}
         >
           {/* Premium white card background with subtle gradient */}
           <div className="absolute inset-0 bg-gradient-to-br from-white via-gray-50 to-white pointer-events-none" />

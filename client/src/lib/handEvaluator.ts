@@ -256,7 +256,7 @@ export class HandEvaluator {
     if (isConnected) wetScore += 2;
     if (hasStraightDraw) wetScore += 1;
     if (isPaired) wetScore -= 1; // Paired boards are typically drier
-    if (highCard <= 10) wetScore -= 1; // Low boards are drier
+    if (maxRank <= 10) wetScore -= 1; // Low boards are drier
     
     let boardStrength: 'dry' | 'semi-dry' | 'semi-wet' | 'wet';
     if (wetScore <= 1) boardStrength = 'dry';

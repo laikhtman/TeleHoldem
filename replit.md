@@ -21,6 +21,25 @@ A comprehensive Texas Hold'em poker web application designed to provide a realis
 ## User Preferences
 I prefer iterative development with clear communication on major changes. Please ask before making significant architectural alterations or introducing new external dependencies. I value detailed explanations for complex features or decisions.
 
+## Recent Updates - November 2024
+
+### AI System Enhancements
+- **Dynamic Difficulty Adaptation**: AI automatically adjusts difficulty based on player win/loss streaks (3+ triggers adjustment)
+- **Advanced Bluffing Logic**: Context-aware bluffing with board texture analysis and multi-street narratives
+- **Table Image & Meta-game**: Bots track each other's playing styles and adjust strategies dynamically
+- **Exploit Detection**: AI detects when being exploited and implements counter-strategies
+
+### Visual & Animation Improvements  
+- **Chip Physics Engine**: Realistic gravity-based chip movements with denomination-specific physics
+- **Winner Celebrations**: Spectacular effects with golden particles, fireworks for big wins, hand-type specific animations
+- **Betting Choreography**: Arc trajectories, chip streams, all-in avalanche effects
+- **Cascade Stacking**: Realistic chip stacking with collision detection at winner's position
+
+### Technical Fixes
+- **Production Deployment**: Fixed JavaScript errors preventing production loading
+- **Framer Motion**: Resolved all keyframe animation issues for smooth gameplay
+- **Import Errors**: Fixed missing imports (useRef, etc.) causing runtime failures
+
 ## Recent Updates - Section 6 Global Enhancements (Completed)
 
 ### Design Tokens System
