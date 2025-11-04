@@ -482,8 +482,8 @@ export default function Lobby() {
           <p className="text-muted-foreground">Choose a table to join or create your own</p>
         </div>
 
-        {/* Quick Play Button - For Demo */}
-        <div className="mb-6 flex justify-center">
+        {/* Quick Play Button - For Demo and Tournament Lobby */}
+        <div className="mb-6 flex justify-center gap-3">
           <Link href="/demo">
             <Button
               size="lg"
@@ -492,6 +492,17 @@ export default function Lobby() {
             >
               <Trophy className="mr-2 h-5 w-5" />
               Quick Play (Demo)
+            </Button>
+          </Link>
+          <Link href="/tournament-lobby">
+            <Button
+              size="lg"
+              variant="outline"
+              className="font-semibold px-6 py-5 text-base shadow-sm"
+              data-testid="button-tournament-lobby"
+            >
+              <Trophy className="mr-2 h-5 w-5" />
+              Tournaments
             </Button>
           </Link>
         </div>

@@ -13,6 +13,7 @@ import SettingsPage from "@/pages/SettingsPage";
 import LandingPage from "@/pages/LandingPage";
 import HelpPage from "@/pages/HelpPage";
 import Lobby from "@/pages/lobby";
+import TournamentLobby from "@/pages/tournament-lobby";
 
 function Router() {
   return (
@@ -22,6 +23,9 @@ function Router() {
       </Route>
       <Route path="/settings">
         <SettingsPage />
+      </Route>
+      <Route path="/tournament-lobby">
+        <TournamentLobby />
       </Route>
       <Route path="/lobby">
         <Lobby />
