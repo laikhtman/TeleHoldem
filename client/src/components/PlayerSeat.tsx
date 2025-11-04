@@ -171,20 +171,49 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
     const baseWidth = 100;
     const baseHeight = 66.67;
     
-    // Slightly expand seating radius on small screens to reduce crowding
+    // Detect screen size for proper seat positioning
     let vw = 1024;
     if (typeof window !== 'undefined') {
       vw = window.innerWidth;
     }
-    const isSmall = vw < 480;
-    const isVerySmall = vw < 360;
-
-    const bufferPercentage = isVerySmall ? 0.055 : isSmall ? 0.075 : 0.12;
-    const maxRadiusX = (baseWidth / 2) * (1 - bufferPercentage);
-    const maxRadiusY = (baseHeight / 2) * (1 - bufferPercentage);
     
-    const radiusX = maxRadiusX - (isVerySmall ? 1 : isSmall ? 3 : 8);
-    const radiusY = maxRadiusY - (isVerySmall ? 1 : isSmall ? 3 : 6);
+    // Define screen size breakpoints
+    const isDesktop = vw >= 1024;
+    const isTablet = vw >= 768 && vw < 1024;
+    const isMobile = vw < 768;
+    const isSmallMobile = vw < 480;
+    const isVerySmallMobile = vw < 360;
+    
+    // Calculate radius based on screen size
+    // Desktop: Seats positioned around the outside edge of the table
+    // Tablet: Slightly closer positioning
+    // Mobile: Closer positioning to fit smaller screens
+    let radiusX: number;
+    let radiusY: number;
+    
+    if (isDesktop) {
+      // Desktop: Position seats around the outside edge of the table
+      // Use larger radius values to push seats to the outer edge
+      radiusX = (baseWidth / 2) * 0.92;  // 92% of half-width
+      radiusY = (baseHeight / 2) * 0.88; // 88% of half-height
+    } else if (isTablet) {
+      // Tablet: Medium positioning
+      radiusX = (baseWidth / 2) * 0.85;  // 85% of half-width
+      radiusY = (baseHeight / 2) * 0.80; // 80% of half-height
+    } else if (isSmallMobile) {
+      // Small mobile: Tighter positioning
+      if (isVerySmallMobile) {
+        radiusX = (baseWidth / 2) * 0.70;  // 70% of half-width for very small screens
+        radiusY = (baseHeight / 2) * 0.65; // 65% of half-height
+      } else {
+        radiusX = (baseWidth / 2) * 0.75;  // 75% of half-width for small screens
+        radiusY = (baseHeight / 2) * 0.70; // 70% of half-height
+      }
+    } else {
+      // Regular mobile: Moderate positioning
+      radiusX = (baseWidth / 2) * 0.78;  // 78% of half-width
+      radiusY = (baseHeight / 2) * 0.73; // 73% of half-height
+    }
     
     // Map seat indices to specific angles for better distribution
     // User (seat 0) is placed at bottom center for ergonomic reasons
