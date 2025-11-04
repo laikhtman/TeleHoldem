@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Link, useLocation } from 'wouter';
-import { GameState, GamePhase, ActionHistoryEntry, PlayerAction, ACHIEVEMENT_LIST } from '@shared/schema';
-import type { Card } from '@shared/schema';
+import { GameState, GamePhase, Card as PlayingCard, ActionHistoryEntry, PlayerAction, ACHIEVEMENT_LIST } from '@shared/schema';
 import { gameEngine } from '@/lib/gameEngine';
 import { botAI } from '@/lib/botAI';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState, FullPageLoader } from '@/components/LoadingState';
+import { Card } from '@/components/ui/card';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { logError, ErrorCategory } from '@/lib/errorHandler';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { PlayerSeat } from '@/components/PlayerSeat';
@@ -33,8 +35,7 @@ import {
   ChipPhysics, 
   BettingAnimation, 
   PotCollectionAnimation,
-  createChipParticles,
-  ChipAnimationEvent
+  createChipParticles
 } from '@/components/ChipPhysics';
 import { Trash2, ChevronRight, ChevronLeft, TrendingUp, Settings, Menu, HelpCircle } from 'lucide-react';
 import { PokerLoader, PokerSpinner } from '@/components/PokerLoader';
@@ -160,7 +161,7 @@ export default function PokerGame() {
   
   // Query to fetch table data if tableId exists
   const { data: tableData, isLoading: isLoadingTable } = useQuery<{
-    table: PokerTable;
+    table: any; // Table data from lobby
     players: any[];
   }>({
     queryKey: [`/api/tables/${tableId}`],
@@ -487,7 +488,7 @@ export default function PokerGame() {
   useEffect(() => {
     // If we have a tableId, load from table data
     if (tableId && tableData?.table) {
-      const table = tableData.table as PokerTable;
+      const table = tableData.table;
       
       // If table has a saved game state, use it
       if (table.gameState) {
@@ -549,7 +550,7 @@ export default function PokerGame() {
 
   // Set up chip animation callback on game engine
   useEffect(() => {
-    const handleChipAnimation = (event: ChipAnimationEvent) => {
+    const handleChipAnimation = (event: any) => {
       if (settings.reducedAnimations) return;
       
       // Get player position
@@ -712,8 +713,8 @@ export default function PokerGame() {
     if (gameState.phase === 'pre-flop' && 
         gameState.players && 
         gameState.players[0] && 
-        gameState.players[0].cards && 
-        gameState.players[0].cards.length === 2) {
+        gameState.players[0].hand && 
+        gameState.players[0].hand.length === 2) {
       triggerTip('cards_dealt');
     }
   }, [gameState?.phase, gameState?.players, triggerTip, tipsEnabled]);
@@ -1705,7 +1706,6 @@ export default function PokerGame() {
                           amount={animation.amount}
                           isSplitPot={animation.isSplitPot}
                           splitCount={animation.splitCount}
-                          winType={animation.winType}
                           onComplete={() => {
                             setActiveChipAnimations(prev => prev.filter(a => a.id !== animation.id));
                           }}
@@ -1907,38 +1907,155 @@ export default function PokerGame() {
         </div>
         
         {/* Mobile Game Area with padding for header */}
-        <div className="flex-1 mt-16 relative">
+        <div className="flex-1 mt-16 relative overflow-hidden">
           {/* Mobile Game Table */}
-          <div className="p-4">
-            <PokerTable
-              gameState={gameState}
-              playerPositions={playerPositions}
-              currentUserId={userId}
-              onPlayerLeave={handlePlayerLeave}
-              onPlayerKick={handlePlayerKick}
-              onPlayerBan={handlePlayerBan}
-              debugMode={debugMode}
-              tableId={tableId || ''}
-              isAdmin={isAdmin}
-              selectedSeat={selectedSeat}
-              onSeatSelect={(position) => setSelectedSeat(position)}
-              bottomPadding={120}
-            />
+          <div className="flex items-center justify-center h-full p-4">
+            <div className="w-full max-w-lg">
+              {/* Poker Table with Wood Border */}
+              <div 
+                className="rounded-[220px] wood-grain p-[8px] table-edge-glow w-full mx-auto"
+                style={{ 
+                  aspectRatio: tableAspect,
+                }}
+              >
+                {/* Poker Table Felt Surface */}
+                <div 
+                  className="relative felt-texture vignette table-depth rounded-[210px] overflow-visible w-full h-full"
+                  style={{ 
+                    backgroundColor: tableThemeColors[settings.tableTheme]
+                  }}
+                  data-testid="poker-table-mobile"
+                  aria-label={`Poker table - ${getPhaseTitle(gameState.phase)} phase - ${gameState.players.filter(p => !p.folded).length} players active`}
+                >
+                  {/* Community Cards */}
+                  <CommunityCards 
+                    cards={gameState.communityCards} 
+                    phase={gameState.phase}
+                    colorblindMode={settings.colorblindMode}
+                    highlightIds={winningCardIds}
+                  />
+
+                  {/* Pot Display */}
+                  <PotDisplay 
+                    amount={gameState.pots.reduce((sum, pot) => sum + pot.amount, 0)} 
+                    onRef={handlePotRef}
+                    sidePots={gameState.pots.map(p => p.amount)}
+                  />
+
+                  {/* Player Seats */}
+                  {gameState.players.map((player, index) => (
+                    <PlayerSeat
+                      key={player.id}
+                      player={player}
+                      position={index}
+                      totalPlayers={NUM_PLAYERS}
+                      isCurrentPlayer={index === gameState.currentPlayerIndex}
+                      isDealer={index === gameState.dealerIndex}
+                      isWinner={winningPlayerIds.includes(player.id)}
+                      phase={gameState.phase}
+                      lastAction={gameState.lastAction}
+                      winAmount={winAmounts[player.id] || 0}
+                      isProcessing={isProcessing}
+                      colorblindMode={settings.colorblindMode}
+                      onFold={index === 0 ? handleFold : undefined}
+                      soundEnabled={settings.soundEnabled}
+                      soundVolume={settings.soundVolume}
+                      highlightCardIds={winningCardIds}
+                    />
+                  ))}
+
+                  {/* Game Phase Indicator */}
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={phaseKey}
+                      className="absolute top-2 left-1/2 transform -translate-x-1/2"
+                      style={{ zIndex: 10 }}
+                      initial={{ opacity: 0, y: -20, scale: 0.8 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -20, scale: 0.8 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <div className="bg-black/80 backdrop-blur-sm px-4 py-2 rounded-lg border-2 border-poker-chipGold shadow-lg shadow-poker-chipGold/20">
+                        <div className="text-xs text-poker-chipGold font-bold tracking-wide" data-testid="text-game-phase-mobile">
+                          {getPhaseTitle(gameState.phase)}
+                        </div>
+                      </div>
+                    </motion.div>
+                  </AnimatePresence>
+
+                  {/* Last Action */}
+                  {gameState.lastAction && (
+                    <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2" style={{ zIndex: 10 }}>
+                      <div className="bg-black/70 backdrop-blur-sm px-3 py-1 rounded-lg border border-white/20">
+                        <div className="text-xs text-white" data-testid="text-last-action-mobile">
+                          {gameState.lastAction}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Game Paused Overlay */}
+                  {settings.isPaused && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm rounded-[210px]" style={{ zIndex: 100 }}>
+                      <div className="bg-card/95 backdrop-blur-md px-6 py-4 rounded-lg border-2 border-poker-chipGold shadow-2xl">
+                        <div className="text-lg font-bold text-center text-poker-chipGold" data-testid="text-game-paused-mobile">
+                          Game Paused
+                        </div>
+                        <p className="text-xs text-muted-foreground text-center mt-1">
+                          Click Resume in Settings
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         
         {/* Mobile Bottom Sheet for Action Controls */}
         <div className="fixed bottom-0 left-0 right-0 z-40 bg-background border-t shadow-lg">
-          <ActionControls 
-            gameState={gameState}
-            userId={userId}
-            onAction={handlePlayerAction}
-            minimumBet={minimumBet}
-            maximumBet={maximumBet}
-            onQuickBetSelect={(value) => setQuickBetAmount(value)}
-            quickBetAmount={quickBetAmount}
-            isMobile={true}
-          />
+          {gameState.phase === 'waiting' ? (
+            <div className="p-4">
+              <Button 
+                onClick={startNewHand}
+                size="lg"
+                className="w-full min-h-[48px] bg-poker-chipGold text-black hover:bg-poker-chipGold/90 font-bold text-base"
+                data-testid="button-start-hand-mobile"
+                aria-label="Start new hand"
+              >
+                Start New Hand
+              </Button>
+            </div>
+          ) : gameState.currentPlayerIndex === 0 && !humanPlayer.folded ? (
+            <div className="p-4">
+              <ActionControls
+                onFold={handleFold}
+                onCheck={handleCheck}
+                onCall={handleCall}
+                onBet={handleBet}
+                onRaise={handleRaise}
+                canCheck={canCheck}
+                minBet={minBet}
+                maxBet={maxBet}
+                amountToCall={gameState.currentBet - humanPlayer.bet}
+                currentBet={gameState.currentBet}
+                minRaiseAmount={minRaiseAmount}
+                potSize={gameState.pots.reduce((sum, pot) => sum + pot.amount, 0)}
+                playerChips={humanPlayer.chips}
+                disabled={isProcessing || settings.isPaused}
+                animationSpeed={settings.animationSpeed}
+                playerFolded={humanPlayer.folded}
+                isProcessing={isProcessing}
+                logScale={true}
+              />
+            </div>
+          ) : (
+            <div className="flex items-center justify-center gap-3 p-4 text-sm text-muted-foreground">
+              <div className="w-2 h-2 rounded-full bg-muted-foreground/60 animate-pulse"></div>
+              <span>Waiting for your turn...</span>
+            </div>
+          )}
         </div>
         
         {/* Mobile Menu Sheet (for stats, history, etc) */}
@@ -1955,7 +2072,7 @@ export default function PokerGame() {
                 {/* Hand Strength Analysis */}
                 <div className="space-y-2">
                   <h3 className="font-semibold text-sm">Hand Analysis</h3>
-                  <HandStrengthPanel gameState={gameState} currentUserId={userId} />
+                  <HandStrengthPanel gameState={gameState} />
                 </div>
                 
                 {/* Game Stats */}
@@ -1969,11 +2086,7 @@ export default function PokerGame() {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Pot Size</span>
-                        <span className="font-bold">${gameState.pot}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Hand #</span>
-                        <span>{gameState.handNumber}</span>
+                        <span className="font-bold">${gameState.pots.reduce((sum, pot) => sum + pot.amount, 0)}</span>
                       </div>
                       {gameState.performanceMetrics && (
                         <>
@@ -2003,7 +2116,7 @@ export default function PokerGame() {
                   <ScrollArea className="h-[200px] w-full rounded-md border p-2">
                     {gameState.actionHistory?.slice(-10).reverse().map((action, idx) => (
                       <div key={idx} className="text-xs py-1">
-                        <span className="text-muted-foreground">{action}</span>
+                        <span className="text-muted-foreground">{action.message}</span>
                       </div>
                     )) || <div className="text-xs text-muted-foreground">No actions yet</div>}
                   </ScrollArea>
