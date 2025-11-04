@@ -22,7 +22,10 @@ import {
   TournamentState, 
   TournamentPlayer,
   TournamentEventType,
-  TournamentEvent
+  TournamentEvent,
+  subscribeToTournamentEvents,
+  getTournamentStatus,
+  tournamentManager
 } from '@/lib/tournamentManager';
 import {
   Trophy,
@@ -448,14 +451,15 @@ export default function TournamentLobby() {
     };
     
     // Subscribe to all tournament events
+    const unsubscribers: (() => void)[] = [];
     tournaments.forEach(tournament => {
-      tournamentManager.addEventListener(tournament.id, handleTournamentEvent);
+      const unsubscribe = subscribeToTournamentEvents(tournament.id, handleTournamentEvent);
+      unsubscribers.push(unsubscribe);
     });
     
     return () => {
-      tournaments.forEach(tournament => {
-        tournamentManager.removeEventListener(tournament.id, handleTournamentEvent);
-      });
+      // Call all unsubscribe functions
+      unsubscribers.forEach(unsubscribe => unsubscribe());
     };
   }, [tournaments]);
   
@@ -549,6 +553,8 @@ export default function TournamentLobby() {
   
   // Create quick tournament
   const createQuickTournament = () => {
+    console.log('Creating tournament...', { createType, createBuyIn });
+    
     const config: TournamentConfig = {
       name: createType === 'turbo' ? `Turbo Tournament #${Date.now()}` : `Sit & Go #${Date.now()}`,
       type: 'sit-n-go',
@@ -558,15 +564,36 @@ export default function TournamentLobby() {
       blindStructureType: createType === 'turbo' ? 'turbo' : 'normal',
     };
     
-    const tournamentId = tournamentManager.createTournament(config);
-    const newTournament = tournamentManager.getTournamentState(tournamentId);
+    console.log('Tournament config:', config);
     
-    if (newTournament) {
-      setTournaments(prev => [...prev, newTournament]);
+    try {
+      const tournamentId = tournamentManager.createTournament(config);
+      console.log('Tournament created with ID:', tournamentId);
       
+      const newTournament = getTournamentStatus(tournamentId);
+      console.log('Tournament status:', newTournament);
+      
+      if (newTournament) {
+        setTournaments(prev => [...prev, newTournament]);
+        
+        toast({
+          title: 'Tournament Created',
+          description: `${config.name} is ready for registration!`,
+        });
+      } else {
+        console.error('Failed to get tournament status after creation');
+        toast({
+          title: 'Error',
+          description: 'Failed to create tournament. Please try again.',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      console.error('Error creating tournament:', error);
       toast({
-        title: 'Tournament Created',
-        description: `${config.name} is ready for registration!`,
+        title: 'Error',
+        description: 'Failed to create tournament. Please try again.',
+        variant: 'destructive',
       });
     }
     
