@@ -383,7 +383,7 @@ export function ActionControls({
           size="lg"
           disabled={disabled}
           data-testid="button-fold"
-          className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] text-base font-bold touch-manipulation"
+          className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] min-h-[56px] text-base font-bold touch-manipulation"
           style={{ touchAction: 'manipulation', minHeight: '56px' }}
           aria-label="Fold your hand. Keyboard shortcut: F key"
           aria-disabled={disabled}
@@ -400,7 +400,7 @@ export function ActionControls({
               size="lg"
               disabled={disabled}
               data-testid="button-check"
-              className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] text-base font-bold touch-manipulation"
+              className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] min-h-[56px] text-base font-bold touch-manipulation"
               style={{ touchAction: 'manipulation', minHeight: '56px' }}
               aria-label="Check - pass your turn without betting. Keyboard shortcut: C key"
               aria-disabled={disabled}
@@ -416,7 +416,7 @@ export function ActionControls({
               size="lg"
               disabled={disabled || amountToCall <= 0}
               data-testid="button-call"
-              className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] text-base font-bold touch-manipulation"
+              className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] min-h-[56px] text-base font-bold touch-manipulation"
               style={{ touchAction: 'manipulation', minHeight: '56px' }}
               aria-label={`Call ${amountToCall} dollars to match the current bet. Keyboard shortcut: C key`}
               aria-disabled={disabled || amountToCall <= 0}
@@ -433,7 +433,7 @@ export function ActionControls({
             size="lg"
             disabled={disabled || amountToCall <= 0}
             data-testid="button-snap-call"
-            className="min-w-[110px] text-base font-semibold"
+            className="min-w-[110px] min-h-[56px] text-base font-semibold"
             style={{ minHeight: '56px' }}
             aria-label={`Snap call ${amountToCall} dollars`}
           >
@@ -449,7 +449,7 @@ export function ActionControls({
             size="lg"
             disabled={disabled || (!canRaise && !canBet)}
             data-testid="button-bet-raise"
-            className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[140px] text-base font-bold touch-manipulation"
+            className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[140px] min-h-[56px] text-base font-bold touch-manipulation"
             style={{ touchAction: 'manipulation', minHeight: '56px' }}
             aria-label={currentBet === 0 ? `Bet ${betAmount} dollars. Keyboard shortcut: R key` : `Raise to ${betAmount} dollars. Keyboard shortcut: R key`}
             aria-disabled={disabled || (!canRaise && !canBet)}
@@ -470,7 +470,7 @@ export function ActionControls({
           size="lg"
           disabled={disabled || maxBet <= (currentBet > 0 ? minRaiseAmount : minBet)}
           data-testid="button-all-in"
-          className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[140px] text-base font-bold bg-poker-chipGold/20 border-2 border-poker-chipGold text-poker-chipGold hover:bg-poker-chipGold/30 touch-manipulation"
+          className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[140px] min-h-[56px] text-base font-bold bg-poker-chipGold/20 border-2 border-poker-chipGold text-poker-chipGold hover:bg-poker-chipGold/30 touch-manipulation"
           style={{ touchAction: 'manipulation', minHeight: '56px' }}
           aria-label={`Go all-in with ${maxBet} dollars. Keyboard shortcut: A key`}
           aria-disabled={disabled || maxBet <= (currentBet > 0 ? minRaiseAmount : minBet)}
@@ -576,9 +576,10 @@ export function ActionControls({
                   size="lg"
                   disabled={disabled || Math.floor(potSize * 0.66) < (currentBet > 0 ? minRaiseAmount : minBet)}
                   data-testid="button-quick-protection"
-                  className={`min-w-[100px] font-bold transition-all ${
+                  className={`min-w-[100px] min-h-[48px] font-bold transition-all ${
                     betAmount === Math.floor(potSize * 0.66) ? 'ring-2 ring-primary ring-offset-2' : ''
                   }`}
+                  style={{ minHeight: '48px' }}
                   aria-label={`Protection bet two thirds pot: ${Math.floor(potSize * 0.66)} dollars`}
                 >
                   <div className="flex flex-col items-center">
@@ -594,9 +595,10 @@ export function ActionControls({
                   size="lg"
                   disabled={disabled || Math.floor(potSize / 3) < (currentBet > 0 ? minRaiseAmount : minBet)}
                   data-testid="button-quick-third-pot"
-                  className={`min-w-[100px] font-bold transition-all ${
+                  className={`min-w-[100px] min-h-[48px] font-bold transition-all ${
                     betAmount === Math.floor(potSize / 3) ? 'ring-2 ring-primary ring-offset-2' : ''
                   }`}
+                  style={{ minHeight: '48px' }}
                   aria-label={`Quick bet one third pot: ${Math.floor(potSize / 3)} dollars`}
                 >
                   <div className="flex flex-col items-center">
@@ -611,9 +613,10 @@ export function ActionControls({
                 size="lg"
                 disabled={disabled || halfPot < (currentBet > 0 ? minRaiseAmount : minBet) || halfPot > maxBet}
                 data-testid="button-quick-half-pot"
-                className={`min-w-[100px] font-bold transition-all ${
+                className={`min-w-[100px] min-h-[48px] font-bold transition-all ${
                   betAmount === halfPot ? 'ring-2 ring-primary ring-offset-2' : ''
                 }`}
+                style={{ minHeight: '48px' }}
                 aria-label={`Quick bet half pot: ${halfPot} dollars`}
               >
                 <div className="flex flex-col items-center">
@@ -627,9 +630,10 @@ export function ActionControls({
                 size="lg"
                 disabled={disabled || potSize < (currentBet > 0 ? minRaiseAmount : minBet) || potSize > maxBet}
                 data-testid="button-quick-pot"
-                className={`min-w-[100px] font-bold transition-all ${
+                className={`min-w-[100px] min-h-[48px] font-bold transition-all ${
                   betAmount === potSize ? 'ring-2 ring-primary ring-offset-2' : ''
                 }`}
+                style={{ minHeight: '48px' }}
                 aria-label={`Quick bet pot size: ${potSize} dollars`}
               >
                 <div className="flex flex-col items-center">
@@ -643,9 +647,10 @@ export function ActionControls({
                 size="lg"
                 disabled={disabled || potSize * 2 < (currentBet > 0 ? minRaiseAmount : minBet) || potSize * 2 > maxBet}
                 data-testid="button-quick-2x-pot"
-                className={`min-w-[100px] font-bold transition-all ${
+                className={`min-w-[100px] min-h-[48px] font-bold transition-all ${
                   betAmount === potSize * 2 ? 'ring-2 ring-primary ring-offset-2' : ''
                 }`}
+                style={{ minHeight: '48px' }}
                 aria-label={`Quick bet double pot: ${potSize * 2} dollars`}
               >
                 <div className="flex flex-col items-center">
@@ -659,9 +664,10 @@ export function ActionControls({
                 size="lg"
                 disabled={disabled || maxBet <= (currentBet > 0 ? minRaiseAmount : minBet)}
                 data-testid="button-quick-all-in-preset"
-                className={`min-w-[100px] font-bold bg-poker-chipGold/20 border-2 border-poker-chipGold text-poker-chipGold hover:bg-poker-chipGold/30 transition-all ${
+                className={`min-w-[100px] min-h-[48px] font-bold bg-poker-chipGold/20 border-2 border-poker-chipGold text-poker-chipGold hover:bg-poker-chipGold/30 transition-all ${
                   betAmount === maxBet ? 'ring-2 ring-poker-chipGold ring-offset-2' : ''
                 }`}
+                style={{ minHeight: '48px' }}
                 aria-label={`Set bet to all-in amount: ${maxBet} dollars`}
               >
                 <div className="flex flex-col items-center">

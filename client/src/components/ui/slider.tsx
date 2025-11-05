@@ -64,7 +64,8 @@ const Slider = React.forwardRef<
           ))}
         </SliderPrimitive.Track>
         <SliderPrimitive.Thumb 
-          className="block h-11 w-11 rounded-full border-3 border-poker-chipGold bg-poker-chipGold shadow-xl transition-all hover:scale-110 hover:shadow-2xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-poker-chipGold/20 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 cursor-grab active:cursor-grabbing active:scale-105"
+          className="block h-[44px] w-[44px] min-h-[44px] min-w-[44px] rounded-full border-3 border-poker-chipGold bg-poker-chipGold shadow-xl transition-all hover:scale-110 hover:shadow-2xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-poker-chipGold/20 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 cursor-grab active:cursor-grabbing active:scale-105"
+          style={{ minWidth: '44px', minHeight: '44px', width: '44px', height: '44px' }}
           aria-label="Buy-in amount slider" 
         />
       </SliderPrimitive.Root>

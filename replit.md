@@ -23,6 +23,24 @@ I prefer iterative development with clear communication on major changes. Please
 
 ## Recent Updates - November 2024
 
+### Complete iPhone/iOS Compatibility (Latest)
+- **Apple HIG Compliance**: All touch targets meet Apple's Human Interface Guidelines
+  - Primary action buttons (Fold, Call, Raise, All-in): 56px minimum height enforced
+  - Secondary buttons (Quick bets): 48px minimum height
+  - Slider thumb: Exactly 44x44px for easy dragging
+- **Safe Area Support**: Full iOS safe area handling for all iPhone models
+  - Notch, Dynamic Island, and home indicator padding via `env(safe-area-inset-*)`
+  - Landscape orientation support with proper safe area adjustments
+- **Mobile Optimizations**:
+  - Dynamic viewport height (100dvh) for iOS Safari
+  - Input font-size 16px minimum prevents unwanted zoom
+  - Touch-action: manipulation prevents double-tap zoom
+  - Webkit-specific momentum scrolling
+- **Responsive Design**: Optimized for iPhone screens (375-430px widths)
+  - Adaptive card sizing for readability on small screens
+  - Proper player seat spacing and positioning
+  - Efficient use of screen real estate
+
 ### Progressive Tournament Mode (NEW!)
 - **Complete Tournament System**: Sit & Go, multi-table, and scheduled tournament support
 - **Tournament Manager**: Comprehensive lifecycle management with blind progression, eliminations, and payouts
@@ -49,6 +67,7 @@ I prefer iterative development with clear communication on major changes. Please
 - **Production Deployment**: Fixed JavaScript errors preventing production loading
 - **Framer Motion**: Resolved all keyframe animation issues for smooth gameplay
 - **Import Errors**: Fixed missing imports (useRef, etc.) causing runtime failures
+- **TypeScript Errors**: Resolved all type definition and import issues
 
 ## Recent Updates - Section 6 Global Enhancements (Completed)
 
