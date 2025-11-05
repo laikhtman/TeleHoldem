@@ -2036,9 +2036,19 @@ export default function PokerGame() {
       
       {/* Mobile and Tablet Layout (< lg) */}
       <div className="lg:hidden flex flex-col min-h-screen">
-        {/* Mobile/Tablet Header */}
-        <div className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b">
-          <div className="flex justify-between items-center p-4 gap-2">
+        {/* Mobile/Tablet Header with Safe Area */}
+        <div 
+          className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b"
+          style={{ 
+            paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0px)',
+          }}
+        >
+          <div 
+            className="flex justify-between items-center p-4 gap-2"
+            style={{ 
+              paddingLeft: 'calc(env(safe-area-inset-left, 0px) + 1rem)',
+              paddingRight: 'calc(env(safe-area-inset-right, 0px) + 1rem)',
+            }}>
             <div className="flex gap-2">
               {/* Mobile Menu Button */}
               <Button
@@ -2105,8 +2115,15 @@ export default function PokerGame() {
           </div>
         </div>
         
-        {/* Mobile Game Area with padding for header */}
-        <div className="flex-1 mt-16 relative overflow-hidden">
+        {/* Mobile Game Area with safe area padding for header and bottom */}
+        <div 
+          className="flex-1 relative overflow-hidden"
+          style={{
+            marginTop: 'calc(4rem + env(safe-area-inset-top, 0px))',
+            marginBottom: 'calc(13rem + env(safe-area-inset-bottom, 0px))',
+            paddingLeft: 'calc(env(safe-area-inset-left, 0px) + 0.5rem)',
+            paddingRight: 'calc(env(safe-area-inset-right, 0px) + 0.5rem)',
+          }}>
           {/* Mobile Game Table */}
           <div className="flex items-center justify-center h-full p-4">
             <div className="w-full max-w-lg">
@@ -2271,10 +2288,17 @@ export default function PokerGame() {
           </div>
         </div>
         
-        {/* Mobile Bottom Sheet for Action Controls */}
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-background border-t shadow-lg">
+        {/* Mobile Bottom Sheet for Action Controls with Safe Area */}
+        <div 
+          className="fixed bottom-0 left-0 right-0 z-40 bg-background border-t shadow-lg"
+          style={{ 
+            paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0px)',
+            paddingLeft: 'calc(env(safe-area-inset-left, 0px) + 0px)',
+            paddingRight: 'calc(env(safe-area-inset-right, 0px) + 0px)',
+          }}
+        >
           {gameState.phase === 'waiting' ? (
-            <div className="p-4">
+            <div className="p-4" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)' }}>
               <Button 
                 onClick={startNewHand}
                 size="lg"
@@ -2286,7 +2310,7 @@ export default function PokerGame() {
               </Button>
             </div>
           ) : gameState.currentPlayerIndex === 0 && !humanPlayer.folded ? (
-            <div className="p-4">
+            <div className="p-4" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)' }}>
               <ActionControls
                 onFold={handleFold}
                 onCheck={handleCheck}
@@ -2309,7 +2333,7 @@ export default function PokerGame() {
               />
             </div>
           ) : (
-            <div className="flex items-center justify-center gap-3 p-4 text-sm text-muted-foreground">
+            <div className="flex items-center justify-center gap-3 p-4 text-sm text-muted-foreground" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)' }}>
               <div className="w-2 h-2 rounded-full bg-muted-foreground/60 animate-pulse"></div>
               <span>Waiting for your turn...</span>
             </div>

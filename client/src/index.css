@@ -3,6 +3,86 @@
 @tailwind utilities;
 
 /* ================================================
+   iOS-SPECIFIC OPTIMIZATIONS
+   ================================================
+   Apply iOS-specific fixes for optimal mobile experience
+   ================================================ */
+
+@layer base {
+  /* Global iOS optimizations */
+  html {
+    /* Prevent double-tap zoom on iOS */
+    touch-action: manipulation;
+    /* Smooth scrolling on iOS */
+    -webkit-overflow-scrolling: touch;
+    /* Prevent text size adjustment on orientation change */
+    -webkit-text-size-adjust: 100%;
+    /* Use dynamic viewport height for proper iOS Safari support */
+    height: 100dvh;
+    /* Prevent overscroll bounce on iOS */
+    overscroll-behavior-y: contain;
+  }
+
+  body {
+    /* Ensure full height on iOS */
+    min-height: 100dvh;
+    /* Prevent iOS bounce scrolling on body */
+    overscroll-behavior: none;
+  }
+
+  /* Prevent double-tap zoom on all interactive elements */
+  button, 
+  input, 
+  select, 
+  textarea,
+  a,
+  .clickable,
+  [role="button"],
+  [role="link"],
+  [data-testid*="button"] {
+    touch-action: manipulation;
+    /* Disable iOS tap highlight */
+    -webkit-tap-highlight-color: transparent;
+    /* Prevent iOS zoom on input focus (minimum 16px) */
+    font-size: max(1rem, 16px);
+  }
+
+  /* Ensure sliders work smoothly on iOS */
+  input[type="range"] {
+    touch-action: pan-y;
+  }
+
+  /* Fix for fixed positioning on iOS Safari */
+  .fixed {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+
+  /* Momentum scrolling for scrollable areas */
+  .scroll-area,
+  .overflow-auto,
+  .overflow-y-auto,
+  .overflow-x-auto,
+  .overflow-scroll,
+  [class*="overflow-"] {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Prevent text selection on game elements */
+  .poker-table,
+  .playing-card,
+  .player-seat,
+  .action-controls,
+  [data-testid*="poker-table"],
+  [data-testid*="playing-card"],
+  [data-testid*="player-seat"] {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+}
+
+/* ================================================
    COMPREHENSIVE DESIGN TOKEN SYSTEM
    ================================================
    All design tokens are centralized here for consistency.
@@ -1710,4 +1790,196 @@ input[type="range"]::-moz-range-thumb {
 .slow-motion * {
   animation-duration: 3s !important;
   transition-duration: 3s !important;
+}
+
+/* ================================================
+   MOBILE-SPECIFIC RESPONSIVE IMPROVEMENTS
+   ================================================
+   Optimized for iPhone screen sizes (375px-430px)
+   ================================================ */
+
+/* iPhone SE (375px width) */
+@media (max-width: 375px) {
+  /* Reduce player seat spacing on very small screens */
+  .player-seat {
+    padding: 8px !important;
+    min-height: 60px !important;
+  }
+  
+  /* Adjust card sizes for small screens */
+  .playing-card {
+    width: 52px !important;
+    height: 74px !important;
+    font-size: 1.5rem !important;
+  }
+  
+  /* Community cards spacing */
+  .community-cards {
+    gap: 2px !important;
+  }
+  
+  /* Action buttons optimized for small screens */
+  .action-controls button {
+    min-height: 44px !important;
+    font-size: 14px !important;
+  }
+}
+
+/* iPhone 14/15 and Pro (390px-393px width) */
+@media (min-width: 376px) and (max-width: 393px) {
+  /* Optimal player seat sizing */
+  .player-seat {
+    padding: 10px !important;
+    min-height: 65px !important;
+  }
+  
+  /* Standard card sizes */
+  .playing-card {
+    width: 56px !important;
+    height: 80px !important;
+    font-size: 1.75rem !important;
+  }
+  
+  /* Community cards with proper spacing */
+  .community-cards {
+    gap: 4px !important;
+    padding: 8px !important;
+  }
+  
+  /* Action controls with good touch targets */
+  .action-controls button {
+    min-height: 48px !important;
+    font-size: 15px !important;
+  }
+}
+
+/* iPhone 14/15 Pro Max (430px width) */
+@media (min-width: 394px) and (max-width: 430px) {
+  /* Larger player seats for bigger screens */
+  .player-seat {
+    padding: 12px !important;
+    min-height: 72px !important;
+  }
+  
+  /* Optimal card sizes */
+  .playing-card {
+    width: 60px !important;
+    height: 85px !important;
+    font-size: 2rem !important;
+  }
+  
+  /* Community cards with generous spacing */
+  .community-cards {
+    gap: 6px !important;
+    padding: 10px !important;
+  }
+  
+  /* Action controls with premium touch targets */
+  .action-controls button {
+    min-height: 52px !important;
+    font-size: 16px !important;
+    padding: 12px 20px !important;
+  }
+}
+
+/* Portrait orientation optimizations for all iPhones */
+@media (orientation: portrait) and (max-width: 430px) {
+  /* Stack player seats vertically */
+  .poker-table {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+  }
+  
+  /* Opponents at top */
+  .player-seat:not(.human-player) {
+    margin-bottom: 4px !important;
+  }
+  
+  /* Human player at bottom */
+  .player-seat.human-player {
+    margin-top: auto !important;
+    border: 2px solid var(--color-primary) !important;
+  }
+  
+  /* Center community cards */
+  .community-cards-container {
+    margin: 12px auto !important;
+    max-width: calc(100% - 24px) !important;
+  }
+  
+  /* Pot display prominently */
+  .pot-display {
+    font-size: 1.25rem !important;
+    padding: 8px 16px !important;
+    background: rgba(0, 0, 0, 0.8) !important;
+  }
+}
+
+/* Landscape orientation adjustments */
+@media (orientation: landscape) and (max-width: 844px) {
+  /* Use more horizontal space */
+  .poker-table {
+    padding: 8px calc(env(safe-area-inset-left) + 16px) 8px calc(env(safe-area-inset-right) + 16px) !important;
+  }
+  
+  /* Arrange seats around the table */
+  .player-seat {
+    position: absolute !important;
+  }
+  
+  /* Reduce vertical elements */
+  .action-controls {
+    max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 120px) !important;
+  }
+}
+
+/* Touch target optimizations for all mobile devices */
+@media (pointer: coarse) {
+  /* Ensure all interactive elements meet iOS HIG minimum */
+  button,
+  a,
+  input[type="range"],
+  .clickable,
+  [role="button"] {
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+  
+  /* Slider thumb optimizations */
+  input[type="range"]::-webkit-slider-thumb {
+    width: 44px !important;
+    height: 44px !important;
+    cursor: pointer !important;
+  }
+  
+  input[type="range"]::-moz-range-thumb {
+    width: 44px !important;
+    height: 44px !important;
+    cursor: pointer !important;
+  }
+}
+
+/* High contrast mode for accessibility */
+@media (prefers-contrast: high) {
+  .playing-card {
+    border: 2px solid currentColor !important;
+  }
+  
+  .player-seat {
+    border: 1px solid currentColor !important;
+  }
+  
+  button {
+    border: 2px solid currentColor !important;
+  }
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

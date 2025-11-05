@@ -62,7 +62,7 @@ export function ActionControls({
   });
   const [recentSizes, setRecentSizes] = useState<number[]>([]);
   const [quickMenuOpen, setQuickMenuOpen] = useState(false);
-  const longPressTimer = (useRef as any)<ReturnType<typeof setTimeout> | null>(null);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const startLongPress = () => {
     if (longPressTimer.current) clearTimeout(longPressTimer.current);
