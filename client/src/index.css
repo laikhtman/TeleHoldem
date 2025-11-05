@@ -1336,16 +1336,33 @@ input[type="reset"] {
   min-height: 56px; /* Larger for primary actions */
 }
 
-/* Slider thumb minimum size */
+/* Slider thumb minimum size - Apple HIG requirement */
 input[type="range"]::-webkit-slider-thumb {
   width: 44px !important;
   height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
   -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  border-radius: 50%;
+  background: hsl(var(--primary));
+  border: 2px solid hsl(var(--primary-foreground));
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  touch-action: manipulation;
 }
 
 input[type="range"]::-moz-range-thumb {
   width: 44px !important;
   height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  appearance: none;
+  cursor: pointer;
+  border-radius: 50%;
+  background: hsl(var(--primary));
+  border: 2px solid hsl(var(--primary-foreground));
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* iOS landscape orientation fixes */
@@ -1946,17 +1963,32 @@ input[type="range"]::-moz-range-thumb {
     min-height: 44px !important;
   }
   
-  /* Slider thumb optimizations */
+  /* Slider thumb optimizations - Apple HIG requirement */
   input[type="range"]::-webkit-slider-thumb {
     width: 44px !important;
     height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
     cursor: pointer !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    border-radius: 50% !important;
+    background: hsl(var(--primary)) !important;
+    border: 2px solid hsl(var(--primary-foreground)) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
   }
   
   input[type="range"]::-moz-range-thumb {
     width: 44px !important;
     height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
     cursor: pointer !important;
+    appearance: none !important;
+    border-radius: 50% !important;
+    background: hsl(var(--primary)) !important;
+    border: 2px solid hsl(var(--primary-foreground)) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
   }
 }
 

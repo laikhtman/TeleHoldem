@@ -39,7 +39,7 @@ export function DraggableChip({ value, onDrop, disabled = false, className = '',
     setIsDragging(true);
     setHasBeenDragged(true);
     triggerHaptic('light');
-    playSound('chip-pickup', { volume: soundVolume * 0.3 });
+    playSound('chip-collect', { volume: soundVolume * 0.3 });
   };
 
   const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
@@ -108,7 +108,7 @@ export function DraggableChip({ value, onDrop, disabled = false, className = '',
   };
 
   return (
-    <div ref={constraintsRef} className="relative">
+    <div ref={constraintsRef} className="relative min-w-[48px] min-h-[48px]">
       <motion.div
         drag={!disabled}
         dragConstraints={constraintsRef}
@@ -122,12 +122,12 @@ export function DraggableChip({ value, onDrop, disabled = false, className = '',
           x: hasBeenDragged && !isDragging ? 0 : x.get(),
           y: hasBeenDragged && !isDragging ? 0 : y.get(),
         }}
+        className={`min-w-[48px] min-h-[48px] flex items-center justify-center touch-manipulation relative ${disabled ? 'opacity-50' : 'cursor-grab'} ${className}`}
         transition={{
           type: "spring",
           damping: 25,
           stiffness: 300
         }}
-        className={`relative ${disabled ? 'opacity-50' : 'cursor-grab'} ${className}`}
       >
         <div className={`relative ${isDragging ? 'shadow-2xl' : 'shadow-lg'} transition-shadow`}>
           {/* Custom chip with value display */}

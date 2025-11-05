@@ -383,8 +383,8 @@ export function ActionControls({
           size="lg"
           disabled={disabled}
           data-testid="button-fold"
-          className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] text-base font-bold min-h-[56px] touch-manipulation"
-          style={{ touchAction: 'manipulation' }}
+          className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] text-base font-bold touch-manipulation"
+          style={{ touchAction: 'manipulation', minHeight: '56px' }}
           aria-label="Fold your hand. Keyboard shortcut: F key"
           aria-disabled={disabled}
         >
@@ -400,8 +400,8 @@ export function ActionControls({
               size="lg"
               disabled={disabled}
               data-testid="button-check"
-              className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] text-base font-bold min-h-[56px] touch-manipulation"
-              style={{ touchAction: 'manipulation' }}
+              className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] text-base font-bold touch-manipulation"
+              style={{ touchAction: 'manipulation', minHeight: '56px' }}
               aria-label="Check - pass your turn without betting. Keyboard shortcut: C key"
               aria-disabled={disabled}
             >
@@ -416,8 +416,8 @@ export function ActionControls({
               size="lg"
               disabled={disabled || amountToCall <= 0}
               data-testid="button-call"
-              className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] text-base font-bold min-h-[56px] touch-manipulation"
-              style={{ touchAction: 'manipulation' }}
+              className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] text-base font-bold touch-manipulation"
+              style={{ touchAction: 'manipulation', minHeight: '56px' }}
               aria-label={`Call ${amountToCall} dollars to match the current bet. Keyboard shortcut: C key`}
               aria-disabled={disabled || amountToCall <= 0}
             >
@@ -433,7 +433,8 @@ export function ActionControls({
             size="lg"
             disabled={disabled || amountToCall <= 0}
             data-testid="button-snap-call"
-            className="min-w-[110px] text-base font-semibold min-h-[56px]"
+            className="min-w-[110px] text-base font-semibold"
+            style={{ minHeight: '56px' }}
             aria-label={`Snap call ${amountToCall} dollars`}
           >
             Snap Call
@@ -448,8 +449,8 @@ export function ActionControls({
             size="lg"
             disabled={disabled || (!canRaise && !canBet)}
             data-testid="button-bet-raise"
-            className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[140px] text-base font-bold min-h-[48px] touch-manipulation"
-            style={{ touchAction: 'manipulation' }}
+            className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[140px] text-base font-bold touch-manipulation"
+            style={{ touchAction: 'manipulation', minHeight: '56px' }}
             aria-label={currentBet === 0 ? `Bet ${betAmount} dollars. Keyboard shortcut: R key` : `Raise to ${betAmount} dollars. Keyboard shortcut: R key`}
             aria-disabled={disabled || (!canRaise && !canBet)}
             onMouseDown={startLongPress}
@@ -469,8 +470,8 @@ export function ActionControls({
           size="lg"
           disabled={disabled || maxBet <= (currentBet > 0 ? minRaiseAmount : minBet)}
           data-testid="button-all-in"
-          className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[140px] text-base font-bold bg-poker-chipGold/20 border-2 border-poker-chipGold text-poker-chipGold hover:bg-poker-chipGold/30 min-h-[48px] touch-manipulation"
-          style={{ touchAction: 'manipulation' }}
+          className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[140px] text-base font-bold bg-poker-chipGold/20 border-2 border-poker-chipGold text-poker-chipGold hover:bg-poker-chipGold/30 touch-manipulation"
+          style={{ touchAction: 'manipulation', minHeight: '56px' }}
           aria-label={`Go all-in with ${maxBet} dollars. Keyboard shortcut: A key`}
           aria-disabled={disabled || maxBet <= (currentBet > 0 ? minRaiseAmount : minBet)}
         >
@@ -755,11 +756,10 @@ export function ActionControls({
                   {recentSizes.slice(0, 3).map((v) => (
                     <Button
                       key={v}
-                      size="sm"
                       variant="outline"
                       onClick={() => handleQuickBet(v)}
                       aria-label={`Replay size ${v} dollars`}
-                      className="h-7 px-2"
+                      className="min-h-[48px] px-3 text-sm font-medium"
                     >
                       ${v}
                     </Button>
@@ -809,8 +809,9 @@ export function ActionControls({
               { label: 'POT', amount: potSize || minRequired },
               { label: 'AI', amount: maxBet }
             ].map(({ label, amount }) => (
-              <Button key={label} size="sm" variant="outline" disabled={disabled || amount < minRequired || amount > maxBet}
-                onClick={() => { handleQuickBet(amount); setQuickMenuOpen(false); }} aria-label={`Quick set ${label}`}>
+              <Button key={label} variant="outline" disabled={disabled || amount < minRequired || amount > maxBet}
+                onClick={() => { handleQuickBet(amount); setQuickMenuOpen(false); }} aria-label={`Quick set ${label}`}
+                className="min-h-[48px] px-3 text-sm font-medium">
                 {label}
               </Button>
             ))}
