@@ -383,7 +383,7 @@ export function ActionControls({
           size="lg"
           disabled={disabled}
           data-testid="button-fold"
-          className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] text-base font-bold min-h-[48px] touch-manipulation"
+          className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] text-base font-bold min-h-[56px] touch-manipulation"
           style={{ touchAction: 'manipulation' }}
           aria-label="Fold your hand. Keyboard shortcut: F key"
           aria-disabled={disabled}
@@ -400,7 +400,7 @@ export function ActionControls({
               size="lg"
               disabled={disabled}
               data-testid="button-check"
-              className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] text-base font-bold min-h-[48px] touch-manipulation"
+              className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] text-base font-bold min-h-[56px] touch-manipulation"
               style={{ touchAction: 'manipulation' }}
               aria-label="Check - pass your turn without betting. Keyboard shortcut: C key"
               aria-disabled={disabled}
@@ -416,7 +416,7 @@ export function ActionControls({
               size="lg"
               disabled={disabled || amountToCall <= 0}
               data-testid="button-call"
-              className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] text-base font-bold min-h-[48px] touch-manipulation"
+              className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] text-base font-bold min-h-[56px] touch-manipulation"
               style={{ touchAction: 'manipulation' }}
               aria-label={`Call ${amountToCall} dollars to match the current bet. Keyboard shortcut: C key`}
               aria-disabled={disabled || amountToCall <= 0}
@@ -433,7 +433,7 @@ export function ActionControls({
             size="lg"
             disabled={disabled || amountToCall <= 0}
             data-testid="button-snap-call"
-            className="min-w-[110px] text-base font-semibold min-h-[48px]"
+            className="min-w-[110px] text-base font-semibold min-h-[56px]"
             aria-label={`Snap call ${amountToCall} dollars`}
           >
             Snap Call

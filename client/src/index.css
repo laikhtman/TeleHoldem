@@ -1115,6 +1115,8 @@ body {
 html {
   overscroll-behavior-y: contain;
   -webkit-text-size-adjust: 100%;
+  /* Disable tap highlight globally */
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -1122,14 +1124,18 @@ body {
   overflow: hidden;
   width: 100%;
   height: 100vh;
+  height: 100dvh; /* Dynamic viewport height */
   height: -webkit-fill-available;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior: none;
+  overscroll-behavior: contain; /* Prevent pull-to-refresh */
+  /* Disable text callout on long press */
+  -webkit-touch-callout: none;
 }
 
 /* Main app container */
 #root {
   height: 100vh;
+  height: 100dvh; /* Dynamic viewport height */
   height: -webkit-fill-available;
   overflow: hidden;
   position: relative;
@@ -1222,11 +1228,44 @@ input[type="search"]::-webkit-search-cancel-button {
   will-change: backdrop-filter;
 }
 
-/* Fix iOS 100vh issue */
+/* Fix iOS 100vh issue - Use dynamic viewport height */
 .h-screen, .min-h-screen {
   height: 100vh;
+  height: 100dvh; /* Dynamic viewport height */
   height: -webkit-fill-available;
   min-height: -webkit-fill-available;
+}
+
+/* Touch target minimum sizes for iOS */
+button, 
+[role="button"], 
+.btn,
+a.button,
+input[type="button"],
+input[type="submit"],
+input[type="reset"] {
+  min-height: 44px; /* Apple HIG minimum */
+  touch-action: manipulation;
+}
+
+/* Primary action buttons need larger touch targets */
+.btn-primary,
+.btn-action,
+[data-testid*="button-"],
+.action-button {
+  min-height: 56px; /* Larger for primary actions */
+}
+
+/* Slider thumb minimum size */
+input[type="range"]::-webkit-slider-thumb {
+  width: 44px !important;
+  height: 44px !important;
+  -webkit-appearance: none;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 44px !important;
+  height: 44px !important;
 }
 
 /* iOS landscape orientation fixes */

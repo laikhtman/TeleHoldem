@@ -112,9 +112,10 @@ export function FloatingActionMenu({
                   <motion.button
                     onClick={() => item.onClick && handleAction(item.onClick)}
                     className={cn(
-                      "w-12 h-12 rounded-full flex items-center justify-center shadow-lg text-white min-h-[48px]",
+                      "w-12 h-12 rounded-full flex items-center justify-center shadow-lg text-white min-h-[48px] min-w-[48px] touch-manipulation",
                       item.color
                     )}
+                    style={{ touchAction: 'manipulation' }}
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
                     aria-label={item.label}
