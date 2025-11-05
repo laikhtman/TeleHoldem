@@ -11,9 +11,23 @@ interface PotDisplayProps {
 }
 
 export function PotDisplay({ amount, onRef, sidePots = [] }: PotDisplayProps) {
+  // Add debug logging
+  const [hasMounted, setHasMounted] = useState(false);
+  
+  useEffect(() => {
+    console.log('[PotDisplay] Component mounted/updated - Amount:', amount, 'SidePots:', sidePots);
+    if (!hasMounted) {
+      console.log('[PotDisplay] Initial mount with amount:', amount);
+      setHasMounted(true);
+    }
+  }, [amount, sidePots, hasMounted]);
+
+  // Use the fixed animated counter with skipAnimation for initial non-zero values
   const animatedAmount = useRAFAnimatedCounter(amount, 600, { 
-    easingFn: (t) => t * (2 - t) // ease-out for smooth deceleration
+    easingFn: (t) => t * (2 - t), // ease-out for smooth deceleration
+    skipAnimation: !hasMounted && amount > 0 // Skip animation on initial mount if amount > 0
   });
+  
   const chipCount = Math.min(Math.floor(amount / 50), 12);
   const [previousAmount, setPreviousAmount] = useState(amount);
   const [isIncreasing, setIsIncreasing] = useState(false);
@@ -29,6 +43,15 @@ export function PotDisplay({ amount, onRef, sidePots = [] }: PotDisplayProps) {
     }
     setPreviousAmount(amount);
   }, [amount, previousAmount]);
+
+  // Log the rendered value to ensure it's never 0 when amount > 0
+  useEffect(() => {
+    if (amount > 0 && animatedAmount === 0) {
+      console.error('[PotDisplay] CRITICAL: Showing $0 when amount is', amount);
+    } else {
+      console.log('[PotDisplay] Rendering - Actual:', amount, 'Animated:', animatedAmount);
+    }
+  }, [amount, animatedAmount]);
 
   return (
     <div 

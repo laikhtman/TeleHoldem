@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Link, useLocation } from 'wouter';
 import { GameState, GamePhase, Card as PlayingCard, ActionHistoryEntry, PlayerAction, ACHIEVEMENT_LIST } from '@shared/schema';
@@ -284,6 +284,30 @@ export default function PokerGame() {
       }
     },
   });
+
+  // CRITICAL FIX: Memoize pot calculation to ensure all PotDisplay components get the same value
+  // This MUST be defined BEFORE any conditional returns to follow React's rules of hooks
+  const totalPotAmount = useMemo(() => {
+    if (!gameState) return 0;
+    
+    const potAmount = gameState.pots.reduce((sum, pot) => sum + pot.amount, 0);
+    const currentBetsAmount = gameState.players.reduce((sum, player) => sum + player.bet, 0);
+    const total = potAmount + currentBetsAmount;
+    
+    // Log for debugging pot synchronization
+    console.log('[PokerGame] Pot calculation:', {
+      pots: gameState.pots,
+      potAmount,
+      currentBetsAmount,
+      total,
+      phase: gameState.phase
+    });
+    
+    return total;
+  }, [gameState?.pots, gameState?.players]);
+
+  // Memoize side pots as well
+  const sidePots = useMemo(() => gameState ? gameState.pots.map(p => p.amount) : [], [gameState?.pots]);
 
   // Save settings to localStorage whenever they change
   useEffect(() => {
@@ -1752,12 +1776,9 @@ export default function PokerGame() {
 
                   {/* Pot Display */}
                   <PotDisplay 
-                    amount={
-                      gameState.pots.reduce((sum, pot) => sum + pot.amount, 0) + 
-                      gameState.players.reduce((sum, player) => sum + player.bet, 0)
-                    } 
+                    amount={totalPotAmount} 
                     onRef={handlePotRef}
-                    sidePots={gameState.pots.map(p => p.amount)}
+                    sidePots={sidePots}
                   />
 
                   {/* Player Seats */}
@@ -2115,12 +2136,9 @@ export default function PokerGame() {
 
                   {/* Pot Display */}
                   <PotDisplay 
-                    amount={
-                      gameState.pots.reduce((sum, pot) => sum + pot.amount, 0) + 
-                      gameState.players.reduce((sum, player) => sum + player.bet, 0)
-                    } 
+                    amount={totalPotAmount} 
                     onRef={handlePotRef}
-                    sidePots={gameState.pots.map(p => p.amount)}
+                    sidePots={sidePots}
                   />
 
                   {/* Player Seats */}
