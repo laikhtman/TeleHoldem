@@ -218,74 +218,94 @@
 
   /* ================== COLOR TOKENS ================== */
   
-  /* Core Color System - Semantic tokens for consistent theming */
+  /* Core Color System - Crypto/Web3 Dark Theme with Neon Accents */
   
-  /* Background Colors */
-  --color-background: 0 0% 98%;              /* Main background */
-  --color-background-secondary: 0 0% 96%;    /* Secondary background */
-  --color-background-tertiary: 0 0% 94%;     /* Tertiary background */
-  --color-background-elevated: 0 0% 100%;    /* Elevated surfaces */
+  /* Background Colors - Dark Theme Default */
+  --color-background: 240 18% 4%;            /* Deep space black #0A0A0F */
+  --color-background-secondary: 252 25% 10%; /* Dark purple-black #13111C */
+  --color-background-tertiary: 252 25% 8%;   /* Darker purple-black */
+  --color-background-elevated: 252 25% 12%;  /* Elevated surfaces */
   
-  /* Foreground/Text Colors */
-  --color-foreground: 0 0% 10%;              /* Primary text */
-  --color-foreground-secondary: 0 0% 30%;    /* Secondary text */
+  /* Foreground/Text Colors - Light for Dark Theme */
+  --color-foreground: 0 0% 100%;             /* Primary text - white */
+  --color-foreground-secondary: 0 0% 70%;    /* Secondary text */
   --color-foreground-tertiary: 0 0% 50%;     /* Tertiary text */
-  --color-foreground-muted: 0 0% 60%;        /* Muted text */
-  --color-foreground-inverse: 0 0% 98%;      /* Inverse text */
+  --color-foreground-muted: 0 0% 40%;        /* Muted text */
+  --color-foreground-inverse: 240 18% 4%;    /* Inverse text */
   
-  /* Surface Colors (Cards, Modals, etc) */
-  --color-surface: 0 0% 96%;                 /* Card backgrounds */
-  --color-surface-secondary: 0 0% 94%;       /* Secondary surfaces */
-  --color-surface-tertiary: 0 0% 92%;        /* Tertiary surfaces */
+  /* Surface Colors (Cards, Modals, etc) - Glass Morphism */
+  --color-surface: 252 25% 9%;               /* Card backgrounds with glass */
+  --color-surface-secondary: 252 25% 11%;    /* Secondary surfaces */
+  --color-surface-tertiary: 252 25% 13%;     /* Tertiary surfaces */
   
-  /* Border Colors */
-  --color-border: 0 0% 88%;                  /* Default borders */
-  --color-border-secondary: 0 0% 85%;        /* Secondary borders */
-  --color-border-tertiary: 0 0% 82%;         /* Tertiary borders */
-  --color-border-focus: 45 90% 55%;          /* Focus borders */
+  /* Border Colors - Purple/Pink with Low Opacity */
+  --color-border: 255 40% 50%;               /* Purple border with low opacity */
+  --color-border-secondary: 330 45% 50%;     /* Pink border with low opacity */
+  --color-border-tertiary: 187 48% 40%;      /* Cyan border with low opacity */
+  --color-border-focus: 255 84% 67%;         /* Purple focus borders */
   
-  /* Brand/Primary Colors */
-  --color-primary: 45 90% 45%;               /* Primary brand color */
-  --color-primary-hover: 45 90% 40%;         /* Primary hover state */
-  --color-primary-active: 45 90% 35%;        /* Primary active state */
-  --color-primary-foreground: 45 5% 98%;     /* Text on primary */
+  /* Brand/Primary Colors - Neon Purple */
+  --color-primary: 255 84% 67%;              /* Primary purple #8B5CF6 */
+  --color-primary-hover: 255 84% 72%;        /* Primary hover state */
+  --color-primary-active: 255 84% 62%;       /* Primary active state */
+  --color-primary-foreground: 0 0% 100%;     /* Text on primary - white */
   
-  /* Secondary Colors */
-  --color-secondary: 0 0% 86%;               /* Secondary color */
-  --color-secondary-hover: 0 0% 82%;         /* Secondary hover */
-  --color-secondary-active: 0 0% 78%;        /* Secondary active */
-  --color-secondary-foreground: 0 0% 18%;    /* Text on secondary */
+  /* Secondary Colors - Neon Pink */
+  --color-secondary: 330 91% 71%;            /* Secondary pink #EC4899 */
+  --color-secondary-hover: 330 91% 76%;      /* Secondary hover */
+  --color-secondary-active: 330 91% 66%;     /* Secondary active */
+  --color-secondary-foreground: 0 0% 100%;   /* Text on secondary - white */
   
   /* State Colors */
-  --color-success: 140 60% 50%;              /* Success state */
-  --color-success-foreground: 140 5% 98%;    /* Text on success */
-  --color-warning: 45 90% 55%;               /* Warning state */
-  --color-warning-foreground: 45 5% 10%;     /* Text on warning */
-  --color-error: 0 70% 50%;                  /* Error state */
-  --color-error-foreground: 0 5% 98%;        /* Text on error */
-  --color-info: 220 60% 45%;                 /* Info state */
-  --color-info-foreground: 220 5% 98%;       /* Text on info */
+  --color-success: 187 95% 43%;              /* Success state - cyan */
+  --color-success-foreground: 0 0% 100%;     /* Text on success - white */
+  --color-warning: 43 96% 56%;               /* Warning state - gold */
+  --color-warning-foreground: 240 18% 4%;    /* Text on warning - dark */
+  --color-error: 0 91% 71%;                  /* Error state - pink/red */
+  --color-error-foreground: 0 0% 100%;       /* Text on error - white */
+  --color-info: 255 84% 67%;                 /* Info state - purple */
+  --color-info-foreground: 0 0% 100%;        /* Text on info - white */
   
-  /* Accent Colors */
-  --color-accent: 140 15% 88%;               /* Accent color */
-  --color-accent-hover: 140 15% 84%;         /* Accent hover */
-  --color-accent-active: 140 15% 80%;        /* Accent active */
-  --color-accent-foreground: 140 10% 22%;    /* Text on accent */
+  /* Accent Colors - Cyan */
+  --color-accent: 187 95% 43%;               /* Accent cyan #06B6D4 */
+  --color-accent-hover: 187 95% 48%;         /* Accent hover */
+  --color-accent-active: 187 95% 38%;        /* Accent active */
+  --color-accent-foreground: 0 0% 100%;      /* Text on accent - white */
   
   /* Muted Colors */
-  --color-muted: 140 8% 90%;                 /* Muted backgrounds */
-  --color-muted-hover: 140 8% 86%;           /* Muted hover */
-  --color-muted-active: 140 8% 82%;          /* Muted active */
-  --color-muted-foreground: 140 10% 25%;     /* Text on muted */
+  --color-muted: 252 25% 15%;                /* Muted backgrounds */
+  --color-muted-hover: 252 25% 20%;          /* Muted hover */
+  --color-muted-active: 252 25% 25%;         /* Muted active */
+  --color-muted-foreground: 0 0% 60%;        /* Text on muted */
   
   /* Interactive Element States */
-  --color-hover: rgba(0, 0, 0, 0.03);        /* Hover overlay */
-  --color-active: rgba(0, 0, 0, 0.08);       /* Active overlay */
-  --color-disabled: rgba(0, 0, 0, 0.38);     /* Disabled overlay */
+  --color-hover: rgba(139, 92, 246, 0.1);    /* Purple hover overlay */
+  --color-active: rgba(139, 92, 246, 0.2);   /* Purple active overlay */
+  --color-disabled: rgba(255, 255, 255, 0.2); /* Disabled overlay */
   
   /* Focus/Selection Colors */
-  --color-focus: 45 90% 55%;                 /* Focus rings */
-  --color-selection: 45 90% 85%;             /* Text selection */
+  --color-focus: 255 84% 67%;                /* Purple focus rings */
+  --color-selection: 255 84% 30%;            /* Purple text selection */
+  
+  /* Gradient Variables - New for Crypto Theme */
+  --gradient-primary: linear-gradient(135deg, hsl(255 84% 67%) 0%, hsl(330 91% 71%) 100%); /* Purple to Pink */
+  --gradient-button: linear-gradient(135deg, hsl(263 68% 55%) 0%, hsl(327 74% 52%) 100%); /* Button gradient */
+  --gradient-text: linear-gradient(135deg, hsl(255 84% 67%) 0%, hsl(187 95% 43%) 100%); /* Purple to Cyan */
+  --gradient-gold: linear-gradient(135deg, hsl(43 96% 56%) 0%, hsl(43 96% 70%) 100%); /* Gold gradient */
+  
+  /* Glow Effects - New for Crypto Theme */
+  --glow-purple: 0 0 20px rgba(139, 92, 246, 0.5);
+  --glow-pink: 0 0 20px rgba(236, 72, 153, 0.5);
+  --glow-cyan: 0 0 20px rgba(6, 182, 212, 0.5);
+  --glow-gold: 0 0 20px rgba(251, 191, 36, 0.5);
+  --glow-intense: 0 0 30px rgba(139, 92, 246, 0.7), 0 0 60px rgba(139, 92, 246, 0.4);
+  
+  /* Glass Morphism Effects */
+  --glass-background: rgba(20, 18, 30, 0.6);
+  --glass-background-darker: rgba(20, 18, 30, 0.8);
+  --glass-border: rgba(139, 92, 246, 0.3);
+  --glass-blur: blur(20px);
+  --glass-blur-intense: blur(24px)
   
   /* Legacy mappings for backwards compatibility */
   --background: var(--color-background);
@@ -335,23 +355,23 @@
   --chart-4: 220 60% 45%;
   --chart-5: 280 60% 45%;
   
-  /* Poker-specific colors */
-  --poker-felt: 140 70% 25%;
-  --poker-felt-light: 140 60% 30%;
-  --poker-table-border: 25 35% 28%;
-  --poker-card-bg: 0 0% 95%;
-  --poker-card-red: 0 85% 45%;
-  --poker-card-black: 0 0% 10%;
-  --poker-chip-gold: 45 90% 55%;
-  --poker-success: 140 60% 50%;
+  /* Poker-specific colors - Crypto Theme */
+  --poker-felt: 252 25% 8%;                  /* Dark purple-black table */
+  --poker-felt-light: 252 25% 12%;           /* Lighter purple-black */
+  --poker-table-border: 255 84% 67%;         /* Purple border */
+  --poker-card-bg: 0 0% 98%;                 /* Near white for cards */
+  --poker-card-red: 0 85% 45%;               /* Red suits */
+  --poker-card-black: 0 0% 10%;              /* Black suits */
+  --poker-chip-gold: 43 96% 56%;             /* Gold chips */
+  --poker-success: 187 95% 43%;              /* Cyan success */
   
   /* Elevation system overlays */
   --elevate-1: var(--color-hover);
   --elevate-2: var(--color-active);
   
-  /* Button outlines */
-  --button-outline: rgba(0, 0, 0, .10);
-  --badge-outline: rgba(0, 0, 0, .05);
+  /* Button outlines - Updated for dark theme */
+  --button-outline: rgba(139, 92, 246, .15);
+  --badge-outline: rgba(139, 92, 246, .10);
   
   /* Border intensity for computed borders */
   --opaque-button-border-intensity: -8;
@@ -430,92 +450,92 @@
 
 /* DARK MODE TOKENS */
 .dark {
-  /* Dark mode colors - all other tokens remain the same */
+  /* Dark mode uses the same crypto theme - maintaining consistency */
   
-  /* Background Colors */
-  --color-background: 222 6% 12%;
-  --color-background-secondary: 222 5% 15%;
-  --color-background-tertiary: 222 4% 18%;
-  --color-background-elevated: 222 4% 20%;
+  /* Background Colors - Keep crypto dark theme */
+  --color-background: 240 18% 4%;            /* Deep space black #0A0A0F */
+  --color-background-secondary: 252 25% 10%; /* Dark purple-black #13111C */
+  --color-background-tertiary: 252 25% 8%;   /* Darker purple-black */
+  --color-background-elevated: 252 25% 12%;  /* Elevated surfaces */
   
-  /* Foreground/Text Colors */
-  --color-foreground: 0 0% 98%;
-  --color-foreground-secondary: 0 0% 85%;
-  --color-foreground-tertiary: 0 0% 70%;
-  --color-foreground-muted: 0 0% 55%;
-  --color-foreground-inverse: 0 0% 10%;
+  /* Foreground/Text Colors - Light for dark theme */
+  --color-foreground: 0 0% 100%;             /* Primary text - white */
+  --color-foreground-secondary: 0 0% 70%;    /* Secondary text */
+  --color-foreground-tertiary: 0 0% 50%;     /* Tertiary text */
+  --color-foreground-muted: 0 0% 40%;        /* Muted text */
+  --color-foreground-inverse: 240 18% 4%;    /* Inverse text */
   
-  /* Surface Colors */
-  --color-surface: 222 5% 15%;
-  --color-surface-secondary: 222 4% 18%;
-  --color-surface-tertiary: 222 4% 20%;
+  /* Surface Colors - Glass morphism */
+  --color-surface: 252 25% 9%;               /* Card backgrounds with glass */
+  --color-surface-secondary: 252 25% 11%;    /* Secondary surfaces */
+  --color-surface-tertiary: 252 25% 13%;     /* Tertiary surfaces */
   
-  /* Border Colors */
-  --color-border: 222 5% 22%;
-  --color-border-secondary: 222 4% 26%;
-  --color-border-tertiary: 222 4% 30%;
-  --color-border-focus: 45 90% 55%;
+  /* Border Colors - Purple/Pink with low opacity */
+  --color-border: 255 40% 50%;               /* Purple border */
+  --color-border-secondary: 330 45% 50%;     /* Pink border */
+  --color-border-tertiary: 187 48% 40%;      /* Cyan border */
+  --color-border-focus: 255 84% 67%;         /* Purple focus borders */
   
-  /* Brand/Primary Colors */
-  --color-primary: 45 90% 50%;
-  --color-primary-hover: 45 90% 55%;
-  --color-primary-active: 45 90% 60%;
-  --color-primary-foreground: 45 5% 10%;
+  /* Brand/Primary Colors - Neon Purple */
+  --color-primary: 255 84% 67%;              /* Primary purple #8B5CF6 */
+  --color-primary-hover: 255 84% 72%;        /* Primary hover state */
+  --color-primary-active: 255 84% 62%;       /* Primary active state */
+  --color-primary-foreground: 0 0% 100%;     /* Text on primary - white */
   
-  /* Secondary Colors */
-  --color-secondary: 222 3% 24%;
-  --color-secondary-hover: 222 3% 28%;
-  --color-secondary-active: 222 3% 32%;
-  --color-secondary-foreground: 0 0% 90%;
+  /* Secondary Colors - Neon Pink */
+  --color-secondary: 330 91% 71%;            /* Secondary pink #EC4899 */
+  --color-secondary-hover: 330 91% 76%;      /* Secondary hover */
+  --color-secondary-active: 330 91% 66%;     /* Secondary active */
+  --color-secondary-foreground: 0 0% 100%;   /* Text on secondary - white */
   
   /* State Colors */
-  --color-success: 140 60% 50%;
-  --color-success-foreground: 140 5% 10%;
-  --color-warning: 45 90% 55%;
-  --color-warning-foreground: 45 5% 10%;
-  --color-error: 0 70% 45%;
-  --color-error-foreground: 0 5% 98%;
-  --color-info: 220 60% 55%;
-  --color-info-foreground: 220 5% 10%;
+  --color-success: 187 95% 43%;              /* Success state - cyan */
+  --color-success-foreground: 0 0% 100%;     /* Text on success - white */
+  --color-warning: 43 96% 56%;               /* Warning state - gold */
+  --color-warning-foreground: 240 18% 4%;    /* Text on warning - dark */
+  --color-error: 0 91% 71%;                  /* Error state - pink/red */
+  --color-error-foreground: 0 0% 100%;       /* Text on error - white */
+  --color-info: 255 84% 67%;                 /* Info state - purple */
+  --color-info-foreground: 0 0% 100%;        /* Text on info - white */
   
-  /* Accent Colors */
-  --color-accent: 140 12% 22%;
-  --color-accent-hover: 140 12% 26%;
-  --color-accent-active: 140 12% 30%;
-  --color-accent-foreground: 140 8% 88%;
+  /* Accent Colors - Cyan */
+  --color-accent: 187 95% 43%;               /* Accent cyan #06B6D4 */
+  --color-accent-hover: 187 95% 48%;         /* Accent hover */
+  --color-accent-active: 187 95% 38%;        /* Accent active */
+  --color-accent-foreground: 0 0% 100%;      /* Text on accent - white */
   
   /* Muted Colors */
-  --color-muted: 140 6% 20%;
-  --color-muted-hover: 140 6% 24%;
-  --color-muted-active: 140 6% 28%;
-  --color-muted-foreground: 140 6% 75%;
+  --color-muted: 252 25% 15%;                /* Muted backgrounds */
+  --color-muted-hover: 252 25% 20%;          /* Muted hover */
+  --color-muted-active: 252 25% 25%;         /* Muted active */
+  --color-muted-foreground: 0 0% 60%;        /* Text on muted */
   
   /* Interactive Element States */
-  --color-hover: rgba(255, 255, 255, 0.04);
-  --color-active: rgba(255, 255, 255, 0.09);
-  --color-disabled: rgba(255, 255, 255, 0.38);
+  --color-hover: rgba(139, 92, 246, 0.1);    /* Purple hover overlay */
+  --color-active: rgba(139, 92, 246, 0.2);   /* Purple active overlay */
+  --color-disabled: rgba(255, 255, 255, 0.2); /* Disabled overlay */
   
   /* Focus/Selection Colors */
-  --color-focus: 45 90% 55%;
-  --color-selection: 45 90% 25%;
+  --color-focus: 255 84% 67%;                /* Purple focus rings */
+  --color-selection: 255 84% 30%;            /* Purple text selection */
   
-  /* Dark mode shadow adjustments */
-  --shadow-2xs: 0px 1px 2px 0px hsl(0 0% 0% / 0.20);
-  --shadow-xs: 0px 1px 3px 0px hsl(0 0% 0% / 0.25);
-  --shadow-sm: 0px 2px 4px -1px hsl(0 0% 0% / 0.22), 0px 1px 2px -1px hsl(0 0% 0% / 0.15);
-  --shadow: 0px 4px 6px -1px hsl(0 0% 0% / 0.28), 0px 2px 4px -2px hsl(0 0% 0% / 0.18);
-  --shadow-md: 0px 6px 12px -2px hsl(0 0% 0% / 0.32), 0px 3px 6px -3px hsl(0 0% 0% / 0.20);
-  --shadow-lg: 0px 10px 20px -4px hsl(0 0% 0% / 0.38), 0px 4px 8px -4px hsl(0 0% 0% / 0.22);
-  --shadow-xl: 0px 20px 30px -6px hsl(0 0% 0% / 0.45), 0px 8px 12px -6px hsl(0 0% 0% / 0.28);
-  --shadow-2xl: 0px 25px 50px -12px hsl(0 0% 0% / 0.60);
+  /* Dark mode shadow adjustments with purple tint */
+  --shadow-2xs: 0px 1px 2px 0px rgba(139, 92, 246, 0.08);
+  --shadow-xs: 0px 1px 3px 0px rgba(139, 92, 246, 0.10);
+  --shadow-sm: 0px 2px 4px -1px rgba(139, 92, 246, 0.12), 0px 1px 2px -1px rgba(0, 0, 0, 0.25);
+  --shadow: 0px 4px 6px -1px rgba(139, 92, 246, 0.15), 0px 2px 4px -2px rgba(0, 0, 0, 0.30);
+  --shadow-md: 0px 6px 12px -2px rgba(139, 92, 246, 0.18), 0px 3px 6px -3px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0px 10px 20px -4px rgba(139, 92, 246, 0.20), 0px 4px 8px -4px rgba(0, 0, 0, 0.40);
+  --shadow-xl: 0px 20px 30px -6px rgba(139, 92, 246, 0.25), 0px 8px 12px -6px rgba(0, 0, 0, 0.45);
+  --shadow-2xl: 0px 25px 50px -12px rgba(139, 92, 246, 0.30), 0px 25px 50px -12px rgba(0, 0, 0, 0.50);
   
   /* Dark mode elevation overlays */
   --elevate-1: var(--color-hover);
   --elevate-2: var(--color-active);
   
-  /* Dark mode button outlines */
-  --button-outline: rgba(255, 255, 255, .10);
-  --badge-outline: rgba(255, 255, 255, .05);
+  /* Dark mode button outlines with purple accent */
+  --button-outline: rgba(139, 92, 246, .15);
+  --badge-outline: rgba(139, 92, 246, .10);
   
   /* Dark mode border intensity */
   --opaque-button-border-intensity: 9;
