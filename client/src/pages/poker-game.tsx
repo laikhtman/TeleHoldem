@@ -1750,18 +1750,34 @@ export default function PokerGame() {
           {/* Game Table Area */}
           <div className="flex-1 overflow-hidden flex items-center justify-center p-6">
             <div className="w-full max-w-5xl">
-              {/* Poker Table with Wood Border */}
+              {/* Crypto Gaming Table */}
               <div 
-                className="rounded-[220px] wood-grain p-[12px] table-edge-glow w-full mx-auto"
+                className="crypto-table crypto-table-border rounded-[220px] w-full mx-auto relative"
                 style={{ 
                   aspectRatio: tableAspect,
+                  overflow: 'visible'
                 }}
               >
-                {/* Poker Table Felt Surface */}
+                {/* Glow orbs for corner effects */}
+                <div className="glow-orb glow-orb-purple" style={{ top: '-150px', left: '-150px' }} />
+                <div className="glow-orb glow-orb-pink" style={{ top: '-150px', right: '-150px' }} />
+                <div className="glow-orb glow-orb-cyan" style={{ bottom: '-150px', left: '-100px' }} />
+                <div className="glow-orb glow-orb-cyan" style={{ bottom: '-150px', right: '-100px' }} />
+                
+                {/* Grid pattern overlay */}
+                <div className="crypto-table-grid rounded-[220px]" />
+                
+                {/* Ambient particles */}
+                <div className="ambient-particle" style={{ top: '20%', left: '10%', animationDelay: '0s' }} />
+                <div className="ambient-particle" style={{ top: '30%', right: '15%', animationDelay: '2s' }} />
+                <div className="ambient-particle" style={{ top: '70%', left: '20%', animationDelay: '4s' }} />
+                <div className="ambient-particle" style={{ bottom: '20%', right: '25%', animationDelay: '6s' }} />
+                
+                {/* Inner Table Surface */}
                 <div 
-                  className="relative felt-texture vignette table-depth rounded-[210px] overflow-visible w-full h-full"
+                  className="relative rounded-[210px] overflow-visible w-full h-full"
                   style={{ 
-                    backgroundColor: tableThemeColors[settings.tableTheme]
+                    zIndex: 2
                   }}
                   data-testid="poker-table"
                   aria-label={`Poker table - ${getPhaseTitle(gameState.phase)} phase - ${gameState.players.filter(p => !p.folded).length} players active`}
@@ -2127,18 +2143,32 @@ export default function PokerGame() {
           {/* Mobile Game Table */}
           <div className="flex items-center justify-center h-full p-4">
             <div className="w-full max-w-lg">
-              {/* Poker Table with Wood Border */}
+              {/* Crypto Gaming Table - Mobile */}
               <div 
-                className="rounded-[220px] wood-grain p-[8px] table-edge-glow w-full mx-auto"
+                className="crypto-table crypto-table-border rounded-[220px] w-full mx-auto relative"
                 style={{ 
                   aspectRatio: tableAspect,
+                  overflow: 'visible'
                 }}
               >
-                {/* Poker Table Felt Surface */}
+                {/* Glow orbs for corner effects - smaller for mobile */}
+                <div className="glow-orb glow-orb-purple" style={{ top: '-100px', left: '-100px', transform: 'scale(0.7)' }} />
+                <div className="glow-orb glow-orb-pink" style={{ top: '-100px', right: '-100px', transform: 'scale(0.7)' }} />
+                <div className="glow-orb glow-orb-cyan" style={{ bottom: '-80px', left: '-80px', transform: 'scale(0.6)' }} />
+                <div className="glow-orb glow-orb-cyan" style={{ bottom: '-80px', right: '-80px', transform: 'scale(0.6)' }} />
+                
+                {/* Grid pattern overlay */}
+                <div className="crypto-table-grid rounded-[220px]" />
+                
+                {/* Ambient particles - fewer for mobile performance */}
+                <div className="ambient-particle" style={{ top: '25%', left: '15%', animationDelay: '0s' }} />
+                <div className="ambient-particle" style={{ bottom: '25%', right: '20%', animationDelay: '3s' }} />
+                
+                {/* Inner Table Surface */}
                 <div 
-                  className="relative felt-texture vignette table-depth rounded-[210px] overflow-visible w-full h-full"
+                  className="relative rounded-[210px] overflow-visible w-full h-full"
                   style={{ 
-                    backgroundColor: tableThemeColors[settings.tableTheme]
+                    zIndex: 2
                   }}
                   data-testid="poker-table-mobile"
                   aria-label={`Poker table - ${getPhaseTitle(gameState.phase)} phase - ${gameState.players.filter(p => !p.folded).length} players active`}
