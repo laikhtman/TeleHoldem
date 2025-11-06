@@ -171,7 +171,7 @@ export function CommunityCards({ cards, phase, colorblindMode = false, highlight
       role="group" 
       aria-label="Community cards"
     >
-      <div className="relative">
+      <div className={`relative glass-neon rounded-xl p-4 ${cards.length > 0 ? 'cyan-glow' : ''}`}>
         {/* Glow effect container */}
         <AnimatePresence>
           {showGlow && !prefersReducedMotion && (
@@ -219,7 +219,7 @@ export function CommunityCards({ cards, phase, colorblindMode = false, highlight
                   <PlayingCard 
                     card={cards[index]}
                     animateFlip={hasCard && !revealedCards[index] && !prefersReducedMotion}
-                    className={hasCard ? 'shadow-lg' : ''}
+                    className={hasCard ? 'shadow-lg card-stagger-reveal hover-glow' : 'border-2 border-purple-500/30 border-dashed animate-pulse'}
                     highlight={!!(cards[index] && highlightIds && highlightIds.has(cards[index]!.id))}
                     colorblindMode={colorblindMode}
                   />

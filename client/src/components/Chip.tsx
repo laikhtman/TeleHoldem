@@ -11,42 +11,48 @@ export const CHIP_CONFIGS = {
     border: 'border-gray-400', 
     text: 'text-gray-900',
     weight: 1.0, // Lightweight
-    symbol: '$1'
+    symbol: '$1',
+    glowClass: 'chip-glow-white'
   },
   5: { 
     color: 'bg-red-600', 
     border: 'border-red-800', 
     text: 'text-white',
     weight: 1.1, // Standard weight
-    symbol: '$5'
+    symbol: '$5',
+    glowClass: 'chip-glow-red'
   },
   25: { 
     color: 'bg-green-600', 
     border: 'border-green-800', 
     text: 'text-white',
     weight: 1.2, // Heavier
-    symbol: '$25'
+    symbol: '$25',
+    glowClass: 'chip-glow-green'
   },
   100: { 
     color: 'bg-gray-900', 
     border: 'border-gray-700', 
     text: 'text-white',
     weight: 1.3, // Heaviest standard
-    symbol: '$100'
+    symbol: '$100',
+    glowClass: 'chip-glow-black'
   },
   500: { 
     color: 'bg-purple-600', 
     border: 'border-purple-800', 
     text: 'text-white',
     weight: 1.4, // Premium weight
-    symbol: '★500'
+    symbol: '★500',
+    glowClass: 'chip-glow-purple'
   },
   1000: { 
     color: 'bg-yellow-500', 
     border: 'border-yellow-700', 
     text: 'text-gray-900',
     weight: 1.5, // Heaviest premium
-    symbol: '♦1K'
+    symbol: '♦1K',
+    glowClass: 'chip-glow-gold'
   }
 } as const;
 
@@ -122,9 +128,10 @@ export function Chip({
   return (
     <motion.div
       className={cn(
-        'rounded-full border-2 shadow-md chip-shine flex items-center justify-center font-bold',
+        'rounded-full border-2 shadow-md chip-shine flex items-center justify-center font-bold hover-glow',
         config.color,
         config.border,
+        config.glowClass,
         sizeClasses[size],
         className
       )}
@@ -325,8 +332,8 @@ export function ChipStack({ count, className }: ChipStackProps) {
       {Array.from({ length: displayCount }).map((_, i) => (
         <motion.div
           key={i}
-          className={`absolute w-8 h-8 xs:w-9 xs:h-9 sm:w-6 sm:h-6 rounded-full border-2 shadow-lg chip-shine ${
-            i % 3 === 0 ? 'bg-red-600 border-red-800' : i % 3 === 1 ? 'bg-blue-600 border-blue-800' : 'bg-yellow-500 border-yellow-700'
+          className={`absolute w-8 h-8 xs:w-9 xs:h-9 sm:w-6 sm:h-6 rounded-full border-2 shadow-lg chip-shine hover-glow ${
+            i % 3 === 0 ? 'bg-red-600 border-red-800 chip-glow-red' : i % 3 === 1 ? 'bg-purple-600 border-purple-800 chip-glow-purple' : 'bg-yellow-500 border-yellow-700 chip-glow-gold'
           }`}
           style={{
             top: `-${i * 3}px`,

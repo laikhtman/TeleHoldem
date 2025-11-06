@@ -27,16 +27,16 @@ const getColorClass = (rank: HandRank): string => {
   const rankValue = handRankValues[rank];
   
   if (rankValue >= 5) {
-    return 'bg-poker-chipGold text-black border-poker-chipGold';
+    return 'glass-neon gold-glow-text hand-glow-strong';
   } else if (rankValue >= 2) {
-    return 'bg-primary text-primary-foreground border-primary';
+    return 'glass-neon neon-purple-pink hand-glow-moderate';
   } else {
-    return 'bg-muted text-muted-foreground border-muted';
+    return 'glass-neon hand-glow-weak';
   }
 };
 
 const getDrawColorClass = (): string => {
-  return 'bg-accent text-accent-foreground border-accent';
+  return 'glass-neon cyan-glow';
 };
 
 export function HandStrengthIndicator({ hand, communityCards }: HandStrengthIndicatorProps) {

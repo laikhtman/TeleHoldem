@@ -30,19 +30,19 @@ const ToastViewport = React.forwardRef<
 ToastViewport.displayName = ToastPrimitives.Viewport.displayName
 
 const toastVariants = cva(
-  "group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-6 pr-8 shadow-lg transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full",
+  "group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-lg p-6 pr-8 shadow-lg transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full glass-morphism",
   {
     variants: {
       variant: {
-        default: "border bg-background text-foreground",
+        default: "border-2 border-purple-500/30 text-foreground",
         destructive:
-          "destructive group border-destructive bg-destructive text-destructive-foreground",
+          "border-2 border-red-500 bg-red-500/10 text-red-400 shadow-[0_0_20px_rgba(239,68,68,0.3)]",
         success:
-          "border-poker-success bg-poker-success/10 text-poker-success backdrop-blur-sm",
+          "border-2 neon-gold-border bg-yellow-500/10 text-yellow-300 shadow-[0_0_20px_rgba(255,215,0,0.4)]",
         info:
-          "border-poker-info bg-poker-info/10 text-poker-info backdrop-blur-sm",
+          "border-2 neon-cyan-border bg-cyan-500/10 text-cyan-300 shadow-[0_0_20px_rgba(6,182,212,0.3)]",
         warning:
-          "border-poker-warning bg-poker-warning/10 text-poker-warning backdrop-blur-sm",
+          "border-2 neon-purple-pink-border bg-purple-500/10 text-purple-300 shadow-[0_0_20px_rgba(139,92,246,0.3)]",
       },
     },
     defaultVariants: {

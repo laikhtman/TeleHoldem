@@ -43,7 +43,7 @@ export function WinnerCelebration({ isWinner, playerName, winAmount = 0 }: Winne
         id: i,
         x: Math.random() * (isBigWin ? 300 : 200) - (isBigWin ? 150 : 100),
         delay: Math.random() * (isBigWin ? 0.6 : 0.3),
-        color: ['#FFD700', '#FFA500', '#FF6B6B', '#4ECDC4'][Math.floor(Math.random() * 4)]
+        color: ['#8B5CF6', '#EC4899', '#06B6D4', '#FBBF24'][Math.floor(Math.random() * 4)]
       }));
       setConfetti(particles);
       
@@ -119,7 +119,7 @@ export function WinnerCelebration({ isWinner, playerName, winAmount = 0 }: Winne
               ease: "easeOut"
             }}
           >
-            <div className="bg-gradient-to-br from-poker-chipGold via-yellow-400 to-poker-chipGold text-black px-8 py-4 rounded-lg shadow-2xl border-4 border-yellow-300">
+            <div className="glass-neon neon-purple-pink px-8 py-4 rounded-lg shadow-2xl border-2 gold-glow">
               <div className="flex items-center gap-3">
                 <motion.div
                   animate={{ 
@@ -132,11 +132,11 @@ export function WinnerCelebration({ isWinner, playerName, winAmount = 0 }: Winne
                     ease: "easeInOut"
                   }}
                 >
-                  <Trophy className="w-8 h-8" />
+                  <Trophy className="w-8 h-8 text-poker-chipGold" />
                 </motion.div>
                 <div>
-                  <div className="text-2xl font-bold tracking-wider">WINNER!</div>
-                  <div className="text-sm font-semibold opacity-80">{playerName}</div>
+                  <div className="text-2xl font-bold tracking-wider gold-glow-text">WINNER!</div>
+                  <div className="text-sm font-semibold text-white/90">{playerName}</div>
                 </div>
               </div>
             </div>
