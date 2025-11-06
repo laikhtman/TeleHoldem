@@ -42,11 +42,11 @@ export function FloatingActionMenu({
   };
 
   const menuItems = [
-    { icon: BarChart3, label: 'Stats', onClick: onStatsClick, color: 'bg-blue-500' },
-    { icon: History, label: 'History', onClick: onHistoryClick, color: 'bg-green-500' },
-    { icon: Users, label: 'Players', onClick: onPlayersClick, color: 'bg-purple-500' },
-    { icon: Info, label: 'Table Info', onClick: onTableInfoClick, color: 'bg-orange-500' },
-    { icon: Settings, label: 'Settings', onClick: onSettingsClick, color: 'bg-gray-500' },
+    { icon: BarChart3, label: 'Stats', onClick: onStatsClick, color: 'bg-gradient-to-br from-cyan-600 to-cyan-700' },
+    { icon: History, label: 'History', onClick: onHistoryClick, color: 'bg-gradient-to-br from-purple-600 to-purple-700' },
+    { icon: Users, label: 'Players', onClick: onPlayersClick, color: 'bg-gradient-to-br from-pink-600 to-pink-700' },
+    { icon: Info, label: 'Table Info', onClick: onTableInfoClick, color: 'bg-gradient-to-br from-poker-chipGold to-amber-600' },
+    { icon: Settings, label: 'Settings', onClick: onSettingsClick, color: 'bg-gradient-to-br from-gray-600 to-gray-700' },
   ].filter(item => item.onClick); // Only show items with handlers
 
   return (

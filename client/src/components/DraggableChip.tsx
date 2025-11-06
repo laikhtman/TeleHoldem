@@ -100,7 +100,7 @@ export function DraggableChip({ value, onDrop, disabled = false, className = '',
 
   // Get chip color based on value - crypto theme with denomination-based colors
   const getChipColor = (amount: number) => {
-    if (amount >= 100) return 'bg-gradient-to-br from-poker-chipGold to-yellow-600 text-black';
+    if (amount >= 100) return 'bg-gradient-to-br from-poker-chipGold to-amber-600 text-black';
     if (amount >= 50) return 'bg-gradient-to-br from-purple-600 to-pink-600 text-white';
     if (amount >= 25) return 'bg-gradient-to-br from-purple-500 to-purple-700 text-white';
     if (amount >= 10) return 'bg-gradient-to-br from-cyan-500 to-cyan-700 text-white';
