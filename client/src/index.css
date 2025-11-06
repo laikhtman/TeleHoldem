@@ -2449,3 +2449,166 @@ input[type="range"]::-moz-range-thumb {
                 0 0 40px rgba(6, 182, 212, 0.3);
   }
 }
+
+/* ================================================
+   PLAYER SEAT GLASS MORPHISM STYLES
+   ================================================ */
+
+/* Glass morphism panel for player seats */
+.glass-morphism-panel {
+  background: rgba(20, 18, 30, 0.6) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* Glass morphism chip for status badges */
+.glass-morphism-chip {
+  background: rgba(20, 18, 30, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Active player gradient border */
+.gradient-border-active {
+  position: relative;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.gradient-border-active::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 16px;
+  padding: 2px;
+  background: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: -1;
+  animation: gradient-rotate 4s linear infinite;
+}
+
+/* All-in player gradient border */
+.gradient-border-allin {
+  position: relative;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.gradient-border-allin::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 16px;
+  padding: 2px;
+  background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: -1;
+}
+
+/* Animated purple glow pulse for active player */
+.animate-purple-glow-pulse {
+  animation: purple-glow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes purple-glow-pulse {
+  0%, 100% {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4),
+                0 0 30px rgba(139, 92, 246, 0.6);
+  }
+  50% {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4),
+                0 0 50px rgba(139, 92, 246, 0.8),
+                0 0 70px rgba(139, 92, 246, 0.4);
+  }
+}
+
+@keyframes gradient-rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Avatar with gradient border */
+.avatar-gradient-border {
+  position: relative;
+  display: inline-block;
+}
+
+.avatar-gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  padding: 2px;
+  background: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: 1;
+}
+
+/* Gradient text for chip counts */
+.gradient-text-primary {
+  background: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+  text-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+}
+
+/* Text shadow glow */
+.text-shadow-glow {
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.2),
+               0 0 20px rgba(139, 92, 246, 0.1);
+}
+
+/* Dealer button gradient */
+.dealer-button-gradient {
+  background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%);
+  border: 1px solid rgba(251, 191, 36, 0.6);
+  position: relative;
+}
+
+.dealer-button-gradient::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FBBF24 20%, transparent 60%);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* Timer ring gradient animation */
+.timer-ring-gradient {
+  stroke: url(#purple-pink-gradient);
+  stroke-linecap: round;
+  animation: timer-rotate 2s linear infinite;
+}
+
+@keyframes timer-rotate {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+
+/* Define gradient for SVG use */
+@supports (background: paint(id)) {
+  #purple-pink-gradient {
+    --start-color: #8B5CF6;
+    --end-color: #EC4899;
+  }
+}

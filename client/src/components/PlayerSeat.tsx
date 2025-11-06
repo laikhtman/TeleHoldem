@@ -240,37 +240,37 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
     } as React.CSSProperties;
   };
 
-  // Enhanced seat styling with better visual hierarchy
+  // Glass morphism panel styling with crypto aesthetic
   const getSeatClasses = () => {
-    const baseClasses = 'rounded-xl p-4 xs:p-5 sm:p-5 md:p-6 lg:p-6 backdrop-blur-md transition-all duration-300 relative shadow-xl';
+    const baseClasses = 'rounded-2xl p-4 backdrop-blur-[20px] transition-all duration-300 relative';
     
     if (player.chips === 0) {
-      // Eliminated players - heavily dimmed
-      return `${baseClasses} bg-black/40 border-2 border-gray-800/50 opacity-40 grayscale`;
+      // Eliminated players - heavily dimmed with grayscale
+      return `${baseClasses} glass-morphism-panel opacity-40 grayscale`;
     }
     
     if (player.folded) {
-      // Folded players - dimmed but still visible
-      return `${baseClasses} bg-black/50 border-2 border-gray-600/50 opacity-60`;
+      // Folded players - reduced opacity with grayscale
+      return `${baseClasses} glass-morphism-panel opacity-50 grayscale`;
     }
     
     if (isCurrentPlayer) {
-      // Current player - highly prominent with animated glow
-      return `${baseClasses} bg-gradient-to-br from-black/90 to-black/80 border-4 border-poker-chipGold animate-pulse-glow-enhanced shadow-poker-glow`;
+      // Current player - gradient border with animated glow pulse
+      return `${baseClasses} glass-morphism-panel gradient-border-active animate-purple-glow-pulse`;
     }
     
     if (isWinner) {
-      // Winner - gold theme
-      return `${baseClasses} bg-gradient-to-br from-poker-chipGold/30 to-poker-chipGold/20 border-4 border-poker-chipGold shadow-poker-gold`;
+      // Winner - gold gradient glow
+      return `${baseClasses} glass-morphism-panel border-2 border-poker-chipGold/60 shadow-[0_8px_32px_rgba(0,0,0,0.4),0_0_30px_rgba(251,191,36,0.5)]`;
     }
     
     if (player.allIn) {
-      // All-in player - special red glow effect
-      return `${baseClasses} bg-gradient-to-br from-red-900/80 to-black/80 border-3 border-red-500 shadow-red-glow`;
+      // All-in player - intense purple-pink glow
+      return `${baseClasses} glass-morphism-panel gradient-border-allin shadow-[0_8px_32px_rgba(0,0,0,0.4),0_0_40px_rgba(236,72,153,0.6)]`;
     }
     
-    // Default seat styling
-    return `${baseClasses} bg-gradient-to-br from-black/80 to-black/70 border-2 border-white/20 hover:border-white/30`;
+    // Default seat styling with glass morphism
+    return `${baseClasses} glass-morphism-panel`;
   };
 
   const seatClasses = getSeatClasses();
@@ -404,51 +404,53 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
         <div className="flex flex-col items-center mb-3">
           {/* Avatar and Name Row */}
           <div className="flex items-center gap-3 mb-2">
-            {/* Player Avatar - Larger and more prominent */}
-            <Avatar className="w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 border-2 border-white/20 shadow-lg">
-              <AvatarFallback 
-                className={`text-lg xs:text-xl sm:text-2xl font-bold ${
-                  player.folded ? 'bg-gray-700 text-gray-400' : 
-                  player.allIn ? 'bg-red-900 text-white' :
-                  isCurrentPlayer ? 'bg-poker-chipGold text-black' :
-                  'bg-gradient-to-br from-blue-600 to-blue-800 text-white'
-                }`}
-              >
-                {player.name.substring(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+            {/* Player Avatar with gradient border */}
+            <div className="relative avatar-gradient-border">
+              <Avatar className="w-10 h-10 sm:w-12 sm:h-12 relative z-10">
+                <AvatarFallback 
+                  className={`text-lg font-bold shadow-[0_0_15px_rgba(139,92,246,0.3)] ${
+                    player.folded ? 'bg-gradient-to-br from-gray-700 to-gray-800 text-gray-400' : 
+                    player.allIn ? 'bg-gradient-to-br from-[#EC4899] to-[#DB2777] text-white' :
+                    isCurrentPlayer ? 'bg-gradient-to-br from-[#8B5CF6] to-[#EC4899] text-white' :
+                    'bg-gradient-to-br from-[#06B6D4] to-[#3B82F6] text-white'
+                  }`}
+                >
+                  {player.name.substring(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            </div>
 
             <div className="flex flex-col items-start">
-              {/* Player Name */}
-              <div className="font-bold text-white tracking-wide flex items-center gap-2" style={{ fontSize: textSize.name }}>
+              {/* Player Name with subtle glow */}
+              <div className="font-semibold text-white tracking-wide flex items-center gap-2 text-[13px] text-shadow-glow">
                 {player.name}
                 {!player.isHuman && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 border border-white/20 text-white/80" aria-label="AI personality tag">
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full glass-morphism-chip border border-glass-border text-white/80" aria-label="AI personality tag">
                     {getPersonalityTag(player)}
                   </span>
                 )}
               </div>
               
-              {/* Chip Count - More prominent */}
-              <div className="flex items-center gap-1 text-poker-chipGold font-mono font-bold" style={{ fontSize: textSize.chips }}>
-                <Coins className="w-6 h-6 xs:w-7 xs:h-7" aria-hidden="true" />
+              {/* Chip Count with gradient text */}
+              <div className="flex items-center gap-1 font-bold tabular-nums text-[16px] gradient-text-primary">
+                <Coins className="w-5 h-5" aria-hidden="true" />
                 <span data-testid={`player-chips-${player.id}`}>
                   ${animatedChipCount}
                 </span>
               </div>
             </div>
 
-            {/* Enhanced Dealer Button */}
+            {/* Enhanced Dealer Button with gradient and glow */}
             {isDealer && (
               <motion.div 
-                className="absolute -top-2 -right-2 w-10 h-10 xs:w-12 xs:h-12 rounded-full bg-gradient-to-br from-poker-chipGold to-yellow-600 text-black font-bold flex items-center justify-center shadow-lg border-2 border-yellow-400"
+                className="absolute -top-2 -right-2 w-10 h-10 xs:w-12 xs:h-12 rounded-full dealer-button-gradient shadow-[0_0_20px_rgba(251,191,36,0.5)] flex items-center justify-center"
                 initial={{ scale: 0, rotate: -180 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ type: "spring", stiffness: 260, damping: 20 }}
                 whileHover={{ scale: 1.1 }}
                 aria-label="Dealer button"
               >
-                <Crown className="w-5 h-5 xs:w-6 xs:h-6" />
+                <Crown className="w-5 h-5 xs:w-6 xs:h-6 text-black" />
               </motion.div>
             )}
           </div>
@@ -457,45 +459,44 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
           <div className="flex flex-col items-center gap-1">
             {player.bet > 0 && (
               <motion.div 
-                className="text-poker-success font-bold" 
-                style={{ fontSize: textSize.bet }}
+                className="glass-morphism-chip px-3 py-1 rounded-full border border-glass-border" 
                 data-testid={`player-bet-${player.id}`}
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.2 }}
               >
-                BET: ${player.bet}
+                <span className="gradient-text-primary font-bold text-[14px] tabular-nums">
+                  BET: ${player.bet}
+                </span>
               </motion.div>
             )}
             
             {player.folded && (
               <motion.div 
-                className="px-3 py-1 bg-gray-800 text-gray-400 rounded-full font-bold" 
-                style={{ fontSize: textSize.status }}
+                className="px-3 py-1 glass-morphism-chip border border-gray-600/30 rounded-full opacity-50" 
                 data-testid={`player-folded-${player.id}`}
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
               >
-                FOLDED
+                <span className="text-gray-400 font-bold text-[12px]">FOLDED</span>
               </motion.div>
             )}
             
             {player.allIn && !player.folded && (
               <motion.div 
-                className="px-3 py-1 bg-gradient-to-r from-red-600 to-red-800 text-white rounded-full font-bold shadow-red-glow" 
-                style={{ fontSize: textSize.status }}
+                className="px-3 py-1 glass-morphism-chip gradient-border-allin rounded-full shadow-[0_0_20px_rgba(236,72,153,0.5)]" 
                 data-testid={`player-allin-${player.id}`}
                 animate={{ 
                   scale: [1, 1.05, 1],
                   boxShadow: [
-                    '0 0 10px rgba(239, 68, 68, 0.5)',
-                    '0 0 20px rgba(239, 68, 68, 0.8)',
-                    '0 0 10px rgba(239, 68, 68, 0.5)',
+                    '0 0 20px rgba(236, 72, 153, 0.5)',
+                    '0 0 30px rgba(236, 72, 153, 0.8)',
+                    '0 0 20px rgba(236, 72, 153, 0.5)',
                   ]
                 }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
-                ALL IN!
+                <span className="text-white font-bold text-[12px]">ALL IN!</span>
               </motion.div>
             )}
           </div>
