@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Link, useLocation } from 'wouter';
-import { GameState, GamePhase, Card as PlayingCard, ActionHistoryEntry, PlayerAction, ACHIEVEMENT_LIST, AchievementId } from '@shared/schema';
+import { GameState, GamePhase, Card as PlayingCard, ActionHistoryEntry, PlayerAction, ACHIEVEMENT_LIST, AchievementId, Achievement } from '@shared/schema';
 import { gameEngine } from '@/lib/gameEngine';
 import { botAI, BotAI } from '@/lib/botAI';
 import { ErrorState } from '@/components/ErrorState';
@@ -473,7 +473,15 @@ export default function PokerGame() {
 
   const handleResetGame = () => {
     // Preserve achievements and session stats before resetting
-    const preservedAchievements = gameState?.achievements || {};
+    // Initialize achievements properly with all achievement properties from ACHIEVEMENT_LIST
+    const preservedAchievements = gameState?.achievements || Object.keys(ACHIEVEMENT_LIST).reduce((acc, key) => {
+      const achievementKey = key as AchievementId;
+      acc[achievementKey] = {
+        ...ACHIEVEMENT_LIST[achievementKey],
+        unlockedAt: undefined
+      };
+      return acc;
+    }, {} as Record<AchievementId, Achievement>);
     const preservedSessionStats = gameState?.sessionStats || {
       handsPlayed: 0,
       handsWonByPlayer: 0,
@@ -1493,9 +1501,8 @@ export default function PokerGame() {
         continue;
       }
       
-      // Get bot action instantly (no delay)
-      const botAI = new BotAI();
-      const botAction = botAI.getAction(currentState, currentPlayer);
+      // Get bot action instantly (no delay) - use singleton botAI instance
+      const botAction = botAI.getAction(currentPlayer, currentState);
       
       // Apply action instantly
       if (botAction.action === 'fold') {
