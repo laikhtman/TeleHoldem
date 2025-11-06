@@ -653,8 +653,38 @@ export function ActionControls({
             </div>
           </div>
           
-          {/* Enhanced slider with visual improvements */}
-          <div className="space-y-2">
+          {/* Enhanced slider with visual improvements and numeric display */}
+          <div className="space-y-3">
+            {/* Numeric display for current bet amount */}
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-muted-foreground">
+                {currentBet > 0 ? 'Raise Amount' : 'Bet Amount'}
+              </span>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  value={betAmount}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value) || minRequired;
+                    const clamped = Math.max(minRequired, Math.min(val, maxBet));
+                    setBetAmount(clamped);
+                    if (logScale) {
+                      const pct = computeSliderFromAmount(clamped, minRequired, maxBet);
+                      setSliderValue(pct);
+                    }
+                  }}
+                  min={minRequired}
+                  max={maxBet}
+                  step={10}
+                  disabled={disabled}
+                  className="w-24 px-2 py-1 text-lg font-bold text-right bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                  data-testid="input-bet-amount"
+                />
+                <span className="text-lg font-bold">$</span>
+              </div>
+            </div>
+            
+            {/* Enhanced slider */}
             <Slider
               value={[logScale ? sliderValue : betAmount]}
               onValueChange={handleBetChange}
@@ -665,7 +695,7 @@ export function ActionControls({
               showTickMarks={true}
               tickInterval={potSize > 0 ? potSize : 100}
               data-testid="slider-bet"
-              className="w-full"
+              className="w-full h-6"
               aria-label={`Bet amount slider. Range from ${minRequired} to ${maxBet} dollars. Current value: ${betAmount} dollars`}
               aria-describedby="bet-amount-description"
             />
