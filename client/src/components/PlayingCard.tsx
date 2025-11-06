@@ -139,11 +139,11 @@ export function PlayingCard({
       } else if (vw >= 768) {
         setCardDimensions({ width: '70px', height: '100px' });   // md
       } else if (vw >= 640) {
-        setCardDimensions({ width: '85px', height: '121px' });   // sm
+        setCardDimensions({ width: '65px', height: '93px' });   // sm
       } else if (vw >= 480) {
-        setCardDimensions({ width: '105px', height: '150px' });  // xs (slightly larger for readability)
+        setCardDimensions({ width: '60px', height: '86px' });  // xs - optimized for mobile
       } else {
-        setCardDimensions({ width: '96px', height: '138px' });   // mobile (slightly larger for readability)
+        setCardDimensions({ width: '60px', height: '86px' });   // mobile - 60px × 86px as requested
       }
     };
 
@@ -155,12 +155,14 @@ export function PlayingCard({
   if (!card) {
     return (
       <div 
-        className={`rounded-lg border-2 border-dashed border-border/40 bg-background/20 ${className}`}
+        className={`rounded-lg border-2 border-dashed bg-background/5 ${className}`}
         style={{
           width: cardDimensions.width,
           height: cardDimensions.height,
           minWidth: cardDimensions.width,
-          minHeight: cardDimensions.height
+          minHeight: cardDimensions.height,
+          borderColor: 'rgba(139, 92, 246, 0.3)',
+          boxShadow: 'inset 0 0 10px rgba(139, 92, 246, 0.1)'
         }}
         data-testid="card-placeholder"
       />
@@ -172,13 +174,13 @@ export function PlayingCard({
     const baseClass = "absolute top-1.5 right-1.5 w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-2.5 sm:h-2.5 z-10";
     switch (card.suit) {
       case 'S': // Spades - Circle (filled)
-        return <div className={`${baseClass} rounded-full bg-poker-cardBlack shadow-sm`} aria-label="Spades indicator" />;
+        return <div className={`${baseClass} rounded-full shadow-sm`} style={{ backgroundColor: '#1F2937' }} aria-label="Spades indicator" />;
       case 'H': // Hearts - Square (filled) 
-        return <div className={`${baseClass} bg-poker-cardRed shadow-sm`} aria-label="Hearts indicator" />;
+        return <div className={`${baseClass} shadow-sm`} style={{ backgroundColor: '#EF4444' }} aria-label="Hearts indicator" />;
       case 'D': // Diamonds - Diamond shape (rotated square)
-        return <div className={`${baseClass} bg-poker-cardRed transform rotate-45 shadow-sm`} aria-label="Diamonds indicator" />;
+        return <div className={`${baseClass} transform rotate-45 shadow-sm`} style={{ backgroundColor: '#EF4444' }} aria-label="Diamonds indicator" />;
       case 'C': // Clubs - Circle (outline)
-        return <div className={`${baseClass} rounded-full border-2 border-poker-cardBlack bg-white shadow-sm`} aria-label="Clubs indicator" />;
+        return <div className={`${baseClass} rounded-full border-2 bg-white shadow-sm`} style={{ borderColor: '#1F2937' }} aria-label="Clubs indicator" />;
       default:
         return null;
     }
@@ -260,13 +262,13 @@ export function PlayingCard({
 
   // Hover/tap animations - disabled for reduced motion
   const hoverAnimation = !faceDown && !prefersReducedMotion ? { 
-    transform: 'translate3d(0, -8px, 0) scale(1.05) rotateY(' + (isFlipped ? 180 : 0) + 'deg)',
-    transition: { duration: 0.2, ease: 'easeOut' }
+    transform: 'translate3d(0, -4px, 0) scale(1.02) rotateY(' + (isFlipped ? 180 : 0) + 'deg)',
+    transition: { duration: 0.3, ease: 'easeOut' }
   } : undefined;
 
   const tapAnimation = !faceDown && card && !prefersReducedMotion ? { 
-    transform: 'translate3d(0, -10px, 0) scale(1.08) rotateY(' + (isFlipped ? 180 : 0) + 'deg)',
-    transition: { duration: 0.1 }
+    transform: 'translate3d(0, -6px, 0) scale(1.03) rotateY(' + (isFlipped ? 180 : 0) + 'deg)',
+    transition: { duration: 0.15 }
   } : undefined;
 
   return (
@@ -302,23 +304,49 @@ export function PlayingCard({
         }}
       >
         <div 
-          className="w-full h-full rounded-lg overflow-hidden shadow-card-3d bg-gradient-to-br from-blue-700 via-blue-600 to-blue-800 border border-gray-700/80"
+          className="w-full h-full rounded-lg overflow-hidden shadow-card-3d border"
+          style={{
+            background: 'linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%)',
+            borderColor: 'rgba(139, 92, 246, 0.4)',
+            boxShadow: '0 0 20px rgba(139, 92, 246, 0.3)'
+          }}
           data-testid="card-back"
         >
-          {/* High-quality card back with pattern */}
-          <svg
-            viewBox="0 0 169.075 244.640"
-            className="w-full h-full"
-            xmlns="http://www.w3.org/2000/svg"
-            style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))' }}
-          >
-            <use href={`${svgCardsPath}#back`} fill="#1e40af" />
-          </svg>
-          {/* Subtle texture overlay for premium feel */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-white/10 pointer-events-none" />
-          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-blue-500/10 to-transparent pointer-events-none" />
-          {/* Inner border for depth */}
-          <div className="absolute inset-[2px] rounded-md border border-blue-400/20 pointer-events-none" />
+          {/* Geometric pattern overlay */}
+          <div className="absolute inset-0 opacity-20">
+            <svg viewBox="0 0 100 100" className="w-full h-full" preserveAspectRatio="none">
+              <defs>
+                <pattern id="geometric-pattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                  <polygon points="10,0 20,10 10,20 0,10" fill="rgba(255,255,255,0.1)" />
+                  <circle cx="10" cy="10" r="2" fill="rgba(255,255,255,0.15)" />
+                </pattern>
+              </defs>
+              <rect width="100" height="100" fill="url(#geometric-pattern)" />
+            </svg>
+          </div>
+          
+          {/* Center logo/design */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-16 h-16 rounded-full" 
+              style={{
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 100%)',
+                boxShadow: 'inset 0 0 20px rgba(255,255,255,0.1), 0 0 30px rgba(236, 72, 153, 0.4)'
+              }}>
+              <div className="w-full h-full flex items-center justify-center text-white/40 font-bold text-xl">
+                ♠
+              </div>
+            </div>
+          </div>
+          
+          {/* Gloss overlay for premium feel */}
+          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 pointer-events-none" />
+          
+          {/* Inner glow border */}
+          <div className="absolute inset-[1px] rounded-md border border-white/10 pointer-events-none" 
+            style={{
+              boxShadow: 'inset 0 0 15px rgba(255,255,255,0.05)'
+            }}
+          />
         </div>
       </motion.div>
       
@@ -331,16 +359,20 @@ export function PlayingCard({
         }}
       >
         <motion.div 
-          className={`w-full h-full rounded-lg overflow-hidden shadow-card-3d relative bg-white ${isTouched ? 'ring-2 ring-poker-chipGold ring-opacity-70' : ''} ${highlight ? 'outline outline-4 outline-poker-chipGold/80' : ''}`}
+          className={`w-full h-full rounded-lg overflow-hidden relative ${isTouched ? 'ring-2 ring-purple-500/50' : ''}`}
+          style={{
+            background: 'linear-gradient(135deg, #FFFFFF 0%, #F3F4F6 100%)',
+            border: '1px solid rgba(0, 0, 0, 0.1)',
+            boxShadow: highlight 
+              ? '0 4px 12px rgba(139, 92, 246, 0.2), 0 0 16px rgba(139, 92, 246, 0.6)' 
+              : '0 2px 8px rgba(139, 92, 246, 0.1)'
+          }}
           data-testid={`card-${card.id}`}
           key={settleBounceKey}
           initial={prefersReducedMotion ? {} : { y: 0, scale: 1 }}
-          animate={prefersReducedMotion ? {} : { y: [0, -6], scale: peekActive ? 1.15 : 1 }}
-          transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.25, ease: 'easeOut', repeat: 1, repeatType: "reverse" }}
+          animate={prefersReducedMotion ? {} : { y: [0, -3], scale: peekActive ? 1.15 : 1.02 }}
+          transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3, ease: 'easeOut', repeat: 1, repeatType: "reverse" }}
         >
-          {/* Premium white card background with subtle gradient */}
-          <div className="absolute inset-0 bg-gradient-to-br from-white via-gray-50 to-white pointer-events-none" />
-          
           {/* Colorblind-friendly suit indicator badge (only in colorblind mode) */}
           {colorblindMode && getSuitIndicator()}
           
@@ -357,11 +389,19 @@ export function PlayingCard({
             <use href={`${svgCardsPath}#${cardSvgId}`} />
           </svg>
           
-          {/* Subtle inner border for depth and separation */}
-          <div className="absolute inset-[1px] rounded-md border border-gray-300/50 pointer-events-none" />
+          {/* Update SVG suit colors */}
+          <style dangerouslySetInnerHTML={{ __html: `
+            svg .red { fill: #EF4444; }
+            svg .black { fill: #1F2937; }
+            svg [fill="red"] { fill: #EF4444; }
+            svg [fill="black"] { fill: #1F2937; }
+          ` }} />
+          
+          {/* Subtle inner highlight for depth */}
+          <div className="absolute inset-[1px] rounded-md border border-white/50 pointer-events-none" />
           
           {/* Gloss effect for premium card feel */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-transparent to-white/20 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-transparent to-white/10 pointer-events-none" />
         </motion.div>
       </motion.div>
     </motion.div>
