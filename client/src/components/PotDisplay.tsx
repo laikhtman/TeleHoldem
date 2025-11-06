@@ -169,7 +169,7 @@ export function PotDisplay({ amount, onRef, sidePots = [] }: PotDisplayProps) {
             <div className="flex flex-col">
               <div className="text-sm xs:text-base sm:text-sm text-gray-400 font-bold tracking-wider uppercase">POT</div>
               <motion.div 
-                className="text-3xl xs:text-4xl sm:text-3xl font-black font-mono gold-glow-text tracking-wide" 
+                className="text-pot-display tabular-nums" 
                 data-testid="pot-amount"
                 animate={isIncreasing ? {
                   scale: [1, 1.2, 1]

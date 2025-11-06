@@ -381,7 +381,7 @@ export function ActionControls({
           onClick={handleFold}
           disabled={disabled}
           data-testid="button-fold"
-          className="btn-gradient-destructive min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] touch-manipulation"
+          className="btn-gradient-destructive min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] touch-manipulation text-action-button"
           style={{ touchAction: 'manipulation' }}
           aria-label="Fold your hand. Keyboard shortcut: F key"
           aria-disabled={disabled}
@@ -396,7 +396,7 @@ export function ActionControls({
               onClick={handleCheck}
               disabled={disabled}
               data-testid="button-check"
-              className="btn-gradient-secondary min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] touch-manipulation"
+              className="btn-gradient-secondary min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] touch-manipulation text-action-button"
               style={{ touchAction: 'manipulation' }}
               aria-label="Check - pass your turn without betting. Keyboard shortcut: C key"
               aria-disabled={disabled}
@@ -410,7 +410,7 @@ export function ActionControls({
               onClick={handleCall}
               disabled={disabled || amountToCall <= 0}
               data-testid="button-call"
-              className="btn-gradient-secondary min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] touch-manipulation"
+              className="btn-gradient-secondary min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] touch-manipulation text-action-button"
               style={{ touchAction: 'manipulation' }}
               aria-label={`Call ${amountToCall} dollars to match the current bet. Keyboard shortcut: C key`}
               aria-disabled={disabled || amountToCall <= 0}
@@ -439,7 +439,7 @@ export function ActionControls({
             onClick={handleBetOrRaise}
             disabled={disabled || (!canRaise && !canBet)}
             data-testid="button-bet-raise"
-            className="btn-gradient-primary min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[140px] touch-manipulation"
+            className="btn-gradient-primary min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[140px] touch-manipulation text-action-button"
             style={{ touchAction: 'manipulation' }}
             aria-label={currentBet === 0 ? `Bet ${betAmount} dollars. Keyboard shortcut: R key` : `Raise to ${betAmount} dollars. Keyboard shortcut: R key`}
             aria-disabled={disabled || (!canRaise && !canBet)}
@@ -458,7 +458,7 @@ export function ActionControls({
           onClick={handleAllIn}
           disabled={disabled || maxBet <= (currentBet > 0 ? minRaiseAmount : minBet)}
           data-testid="button-all-in"
-          className="btn-gradient-allin min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[140px] touch-manipulation"
+          className="btn-gradient-allin min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[140px] touch-manipulation text-action-button"
           style={{ touchAction: 'manipulation' }}
           aria-label={`Go all-in with ${maxBet} dollars. Keyboard shortcut: A key`}
           aria-disabled={disabled || maxBet <= (currentBet > 0 ? minRaiseAmount : minBet)}

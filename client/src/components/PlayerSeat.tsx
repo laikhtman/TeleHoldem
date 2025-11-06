@@ -422,7 +422,7 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
 
             <div className="flex flex-col items-start">
               {/* Player Name with subtle glow */}
-              <div className="font-semibold text-white tracking-wide flex items-center gap-2 text-[13px] text-shadow-glow">
+              <div className="text-player-name text-white flex items-center gap-2">
                 {player.name}
                 {!player.isHuman && (
                   <span className="text-[10px] px-1.5 py-0.5 rounded-full glass-morphism-chip border border-glass-border text-white/80" aria-label="AI personality tag">
@@ -432,7 +432,7 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
               </div>
               
               {/* Chip Count with gradient text */}
-              <div className="flex items-center gap-1 font-bold tabular-nums text-[16px] gradient-text-primary">
+              <div className="flex items-center gap-1 text-chip-count">
                 <Coins className="w-5 h-5" aria-hidden="true" />
                 <span data-testid={`player-chips-${player.id}`}>
                   ${animatedChipCount}
@@ -465,7 +465,7 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.2 }}
               >
-                <span className="gradient-text-primary font-bold text-[14px] tabular-nums">
+                <span className="text-currency text-gradient-primary">
                   BET: ${player.bet}
                 </span>
               </motion.div>
