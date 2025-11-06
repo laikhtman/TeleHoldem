@@ -472,15 +472,30 @@ export default function PokerGame() {
   }, { minSwipeDistance: 80 });
 
   const handleResetGame = () => {
+    // Preserve achievements and session stats before resetting
+    const preservedAchievements = gameState?.achievements || {};
+    const preservedSessionStats = gameState?.sessionStats || {
+      handsPlayed: 0,
+      handsWonByPlayer: 0,
+      handDistribution: {},
+    };
+    
     localStorage.removeItem('pokerGameState');
     const initialState = gameEngine.createInitialGameState(NUM_PLAYERS);
     
-    // Reset ALL players to $1000 for a fresh start
+    // Reset ALL players to $1000 for a fresh start, but preserve human player stats
+    const humanPlayer = gameState?.players[0];
     initialState.players = initialState.players.map((player, index) => ({
       ...player,
       chips: 1000,  // Force all players to start with $1000
-      name: index === 0 ? (isAuthenticated && user ? user.displayName : 'You') : player.name
+      name: index === 0 ? (isAuthenticated && user ? user.displayName : 'You') : player.name,
+      // Preserve human player's all-time stats
+      stats: index === 0 && humanPlayer ? humanPlayer.stats : { handsWon: 0, biggestPot: 0 }
     }));
+    
+    // Preserve achievements and session stats
+    initialState.achievements = preservedAchievements;
+    initialState.sessionStats = preservedSessionStats;
     
     // Clear any existing game state
     setGameState(initialState);
@@ -491,11 +506,11 @@ export default function PokerGame() {
     setPhaseKey(0);
     setResetKey(prev => prev + 1); // Increment reset key to force complete re-render
     
-    console.log('Game reset - all players set to $1000:', initialState.players.map(p => ({ name: p.name, chips: p.chips })));
+    console.log('Game reset - all players set to $1000, stats preserved:', initialState.players.map(p => ({ name: p.name, chips: p.chips })));
     
     toast({
       title: "Game Reset",
-      description: "A new game has started - all players reset to $1000.",
+      description: "A new game has started - all players reset to $1000. Your stats and achievements have been preserved.",
       duration: 3000,
     });
   };
