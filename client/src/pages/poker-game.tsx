@@ -488,6 +488,10 @@ export default function PokerGame() {
     initialState.players = initialState.players.map((player, index) => ({
       ...player,
       chips: 1000,  // Force all players to start with $1000
+      folded: false,  // Ensure no one is marked as folded
+      allIn: false,   // Reset all-in status
+      bet: 0,         // Clear any bets
+      hand: [],       // Clear hands
       name: index === 0 ? (isAuthenticated && user ? user.displayName : 'You') : player.name,
       // Preserve human player's all-time stats
       stats: index === 0 && humanPlayer ? humanPlayer.stats : { handsWon: 0, biggestPot: 0 }
@@ -496,6 +500,11 @@ export default function PokerGame() {
     // Preserve achievements and session stats
     initialState.achievements = preservedAchievements;
     initialState.sessionStats = preservedSessionStats;
+    
+    // Clear the gameOver flag if it exists
+    if (initialState.gameOver) {
+      delete initialState.gameOver;
+    }
     
     // Clear any existing game state
     setGameState(initialState);
@@ -1486,7 +1495,7 @@ export default function PokerGame() {
       
       // Get bot action instantly (no delay)
       const botAI = new BotAI();
-      const botAction = botAI.getAction(currentState, currentState.currentPlayerIndex);
+      const botAction = botAI.getAction(currentState, currentPlayer);
       
       // Apply action instantly
       if (botAction.action === 'fold') {
