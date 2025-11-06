@@ -2082,8 +2082,8 @@ export default function PokerGame() {
                       exit={{ opacity: 0, y: -20, scale: 0.8 }}
                       transition={{ duration: 0.5 }}
                     >
-                      <div className="bg-black/80 backdrop-blur-sm px-6 py-3 rounded-lg border-2 border-poker-chipGold shadow-lg shadow-poker-chipGold/20">
-                        <div className="text-base text-poker-chipGold font-bold tracking-wide" data-testid="text-game-phase">
+                      <div className="bg-black/80 backdrop-blur-sm px-6 py-3 rounded-lg border-2 border-yellow-400 dark:border-yellow-300 shadow-lg shadow-yellow-400/20 dark:shadow-yellow-300/20">
+                        <div className="text-base text-yellow-400 dark:text-yellow-300 font-bold tracking-wide" data-testid="text-game-phase">
                           {getPhaseTitle(gameState.phase)}
                         </div>
                       </div>
@@ -2143,8 +2143,8 @@ export default function PokerGame() {
                   {/* Last Action */}
                   {gameState.lastAction && (
                     <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2" style={{ zIndex: 10 }}>
-                      <div className="bg-black/70 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/20">
-                        <div className="text-xs text-white" data-testid="text-last-action">
+                      <div className="bg-black/70 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/20 dark:border-white/20">
+                        <div className="text-xs text-white dark:text-white" data-testid="text-last-action">
                           {gameState.lastAction}
                         </div>
                       </div>
@@ -2154,8 +2154,8 @@ export default function PokerGame() {
                   {/* Game Paused Overlay */}
                   {settings.isPaused && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm rounded-[210px]" style={{ zIndex: 100 }}>
-                      <div className="bg-card/95 backdrop-blur-md px-8 py-6 rounded-lg border-2 border-poker-chipGold shadow-2xl">
-                        <div className="text-2xl font-bold text-center text-poker-chipGold" data-testid="text-game-paused">
+                      <div className="bg-card/95 backdrop-blur-md px-8 py-6 rounded-lg border-2 border-yellow-400 dark:border-yellow-300 shadow-2xl">
+                        <div className="text-2xl font-bold text-center text-yellow-400 dark:text-yellow-300" data-testid="text-game-paused">
                           Game Paused
                         </div>
                         <p className="text-sm text-muted-foreground text-center mt-2">
@@ -2493,7 +2493,7 @@ export default function PokerGame() {
                       transition={{ duration: 0.5 }}
                     >
                       <div className="bg-black/80 backdrop-blur-sm px-4 py-2 rounded-lg border-2 border-poker-chipGold shadow-lg shadow-poker-chipGold/20">
-                        <div className="text-xs text-poker-chipGold font-bold tracking-wide" data-testid="text-game-phase-mobile">
+                        <div className="text-xs text-yellow-400 dark:text-yellow-300 font-bold tracking-wide" data-testid="text-game-phase-mobile">
                           {getPhaseTitle(gameState.phase)}
                         </div>
                       </div>
@@ -2503,8 +2503,8 @@ export default function PokerGame() {
                   {/* Last Action */}
                   {gameState.lastAction && (
                     <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2" style={{ zIndex: 10 }}>
-                      <div className="bg-black/70 backdrop-blur-sm px-3 py-1 rounded-lg border border-white/20">
-                        <div className="text-xs text-white" data-testid="text-last-action-mobile">
+                      <div className="bg-black/70 backdrop-blur-sm px-3 py-1 rounded-lg border border-white/20 dark:border-white/20">
+                        <div className="text-xs text-white dark:text-white" data-testid="text-last-action-mobile">
                           {gameState.lastAction}
                         </div>
                       </div>
@@ -2514,8 +2514,8 @@ export default function PokerGame() {
                   {/* Game Paused Overlay */}
                   {settings.isPaused && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm rounded-[210px]" style={{ zIndex: 100 }}>
-                      <div className="bg-card/95 backdrop-blur-md px-6 py-4 rounded-lg border-2 border-poker-chipGold shadow-2xl">
-                        <div className="text-lg font-bold text-center text-poker-chipGold" data-testid="text-game-paused-mobile">
+                      <div className="bg-card/95 backdrop-blur-md px-6 py-4 rounded-lg border-2 border-yellow-400 dark:border-yellow-300 shadow-2xl">
+                        <div className="text-lg font-bold text-center text-yellow-400 dark:text-yellow-300" data-testid="text-game-paused-mobile">
                           Game Paused
                         </div>
                         <p className="text-xs text-muted-foreground text-center mt-1">
@@ -2706,7 +2706,7 @@ export default function PokerGame() {
 
       {/* Mobile Swipe Hint with safe-area padding */}
       <div className="fixed bottom-[calc(5rem+var(--safe-area-bottom))] left-1/2 transform -translate-x-1/2 lg:hidden">
-        <div className="bg-black/50 backdrop-blur-sm px-4 py-2 rounded-full text-xs text-white/70 text-center">
+        <div className="bg-black/50 backdrop-blur-sm px-4 py-2 rounded-full text-xs text-white dark:text-white/70 text-center">
           Swipe left to fold • Swipe right to call/check
         </div>
       </div>

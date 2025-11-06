@@ -28,6 +28,8 @@
     min-height: 100dvh;
     /* Prevent iOS bounce scrolling on body */
     overscroll-behavior: none;
+    /* Ensure text color follows theme */
+    @apply text-foreground bg-background;
   }
 
   /* Prevent double-tap zoom on all interactive elements */
