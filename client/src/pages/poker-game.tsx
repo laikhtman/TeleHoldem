@@ -475,19 +475,26 @@ export default function PokerGame() {
     localStorage.removeItem('pokerGameState');
     const initialState = gameEngine.createInitialGameState(NUM_PLAYERS);
     
-    // If authenticated with Telegram, use user's displayName and bankroll
-    if (isAuthenticated && user) {
-      initialState.players[0].name = user.displayName;
-      initialState.players[0].chips = user.bankroll;
-    }
+    // Reset ALL players to $1000 for a fresh start
+    initialState.players = initialState.players.map((player, index) => ({
+      ...player,
+      chips: 1000,  // Force all players to start with $1000
+      name: index === 0 ? (isAuthenticated && user ? user.displayName : 'You') : player.name
+    }));
     
+    // Clear any existing game state
     setGameState(initialState);
     setWinningPlayerIds([]);
     setWinAmounts({});
+    setWinningCardIds(new Set());
+    setFlyingChips([]);
     setPhaseKey(0);
+    
+    console.log('Game reset - all players set to $1000:', initialState.players.map(p => ({ name: p.name, chips: p.chips })));
+    
     toast({
       title: "Game Reset",
-      description: "A new game has started.",
+      description: "A new game has started - all players reset to $1000.",
       duration: 3000,
     });
   };
@@ -2014,15 +2021,27 @@ export default function PokerGame() {
           <div className="border-t bg-background p-4">
             <div id="action-controls" className="w-full max-w-3xl mx-auto" style={{ transform: `scale(${settings.uiScale ?? 1})`, transformOrigin: 'bottom center' }}>
               {gameState.phase === 'waiting' ? (
-                <Button 
-                  onClick={startNewHand}
-                  size="lg"
-                  className="w-full min-h-[48px] btn-gradient-primary font-bold text-base"
-                  data-testid="button-start-hand"
-                  aria-label="Start new hand"
-                >
-                  Start New Hand
-                </Button>
+                <div className="flex flex-col gap-2">
+                  <Button 
+                    onClick={startNewHand}
+                    size="lg"
+                    className="w-full min-h-[48px] btn-gradient-primary font-bold text-base"
+                    data-testid="button-start-hand"
+                    aria-label="Start new hand"
+                  >
+                    Start New Hand
+                  </Button>
+                  <Button 
+                    onClick={handleResetGame}
+                    size="lg"
+                    variant="outline"
+                    className="w-full min-h-[48px] font-bold text-base"
+                    data-testid="button-start-new-game"
+                    aria-label="Start new game - reset all chips to $1000"
+                  >
+                    Start New Game (Reset All Chips to $1000)
+                  </Button>
+                </div>
               ) : gameState.currentPlayerIndex === 0 && !humanPlayer.folded ? (
                 <>
                   {/* Pot Odds Display */}
@@ -2367,15 +2386,27 @@ export default function PokerGame() {
         >
           {gameState.phase === 'waiting' ? (
             <div className="p-4" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)' }}>
-              <Button 
-                onClick={startNewHand}
-                size="lg"
-                className="w-full min-h-[48px] btn-gradient-primary font-bold text-base"
-                data-testid="button-start-hand-mobile"
-                aria-label="Start new hand"
-              >
-                Start New Hand
-              </Button>
+              <div className="flex flex-col gap-2">
+                <Button 
+                  onClick={startNewHand}
+                  size="lg"
+                  className="w-full min-h-[48px] btn-gradient-primary font-bold text-base"
+                  data-testid="button-start-hand-mobile"
+                  aria-label="Start new hand"
+                >
+                  Start New Hand
+                </Button>
+                <Button 
+                  onClick={handleResetGame}
+                  size="lg"
+                  variant="outline"
+                  className="w-full min-h-[48px] font-bold text-base"
+                  data-testid="button-start-new-game-mobile"
+                  aria-label="Start new game - reset all chips to $1000"
+                >
+                  Start New Game (Reset All Chips to $1000)
+                </Button>
+              </div>
             </div>
           ) : gameState.currentPlayerIndex === 0 && !humanPlayer.folded ? (
             <div className="p-4" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)' }}>
