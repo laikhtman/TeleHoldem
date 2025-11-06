@@ -3,7 +3,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { Link, useLocation } from 'wouter';
 import { GameState, GamePhase, Card as PlayingCard, ActionHistoryEntry, PlayerAction, ACHIEVEMENT_LIST, AchievementId } from '@shared/schema';
 import { gameEngine } from '@/lib/gameEngine';
-import { botAI } from '@/lib/botAI';
+import { botAI, BotAI } from '@/lib/botAI';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState, FullPageLoader } from '@/components/LoadingState';
 import { Card } from '@/components/ui/card';
@@ -1438,6 +1438,102 @@ export default function PokerGame() {
     handlePlayerAction(newState);
   };
 
+  // Fast-forward through remaining bot actions without delays
+  const handleFastForward = async () => {
+    if (!gameState || isProcessing || settings.isPaused) return;
+    
+    setIsProcessing(true);
+    let currentState = gameState;
+    const MAX_ITERATIONS = 100;
+    let iterations = 0;
+    
+    // Process all remaining bot actions instantly
+    while (!gameEngine.isRoundComplete(currentState) && iterations < MAX_ITERATIONS) {
+      iterations++;
+      
+      // Check if only one player remains
+      const activePlayers = gameEngine.getActivePlayers(currentState);
+      if (activePlayers.length <= 1) {
+        break;
+      }
+      
+      // Get current player
+      const currentPlayer = currentState.players[currentState.currentPlayerIndex];
+      
+      // Skip human player (they've already folded)
+      if (currentPlayer.isHuman || currentPlayer.folded) {
+        currentState = {
+          ...currentState,
+          currentPlayerIndex: gameEngine.getNextPlayerIndex(currentState)
+        };
+        continue;
+      }
+      
+      // Get bot action instantly (no delay)
+      const botAI = new BotAI();
+      const botAction = botAI.getAction(currentState, currentState.currentPlayerIndex);
+      
+      // Apply action instantly
+      if (botAction.action === 'fold') {
+        currentState = gameEngine.playerFold(currentState, currentState.currentPlayerIndex);
+        currentState = addActionHistory(currentState, 'player-action', 'folded', currentPlayer.name, 'fold');
+      } else if (botAction.action === 'check') {
+        currentState = gameEngine.playerCheck(currentState, currentState.currentPlayerIndex);
+        currentState = addActionHistory(currentState, 'player-action', 'checked', currentPlayer.name, 'check');
+      } else if (botAction.action === 'call') {
+        currentState = gameEngine.playerBet(currentState, currentState.currentPlayerIndex, currentState.currentBet - currentPlayer.bet);
+        currentState = addActionHistory(currentState, 'player-action', `called $${currentState.currentBet}`, currentPlayer.name, 'call');
+      } else if (botAction.action === 'bet' || botAction.action === 'raise') {
+        const raiseAmount = botAction.amount || currentState.currentBet * 2;
+        currentState = gameEngine.playerBet(currentState, currentState.currentPlayerIndex, raiseAmount);
+        currentState = addActionHistory(currentState, 'player-action', 
+          botAction.action === 'bet' ? `bet $${raiseAmount}` : `raised to $${raiseAmount}`,
+          currentPlayer.name, botAction.action);
+      }
+      
+      // Move to next player
+      currentState = {
+        ...currentState,
+        currentPlayerIndex: gameEngine.getNextPlayerIndex(currentState)
+      };
+      
+      // Check if round is complete and advance phase if needed
+      if (gameEngine.isRoundComplete(currentState)) {
+        if (currentState.phase === 'river') {
+          // Immediately resolve showdown
+          await resolveShowdown(currentState);
+          return;
+        } else {
+          currentState = gameEngine.advancePhase(currentState);
+          // Find first active player after dealer
+          const dealerIndex = currentState.dealerIndex;
+          let firstActive = dealerIndex;
+          for (let i = 1; i <= currentState.players.length; i++) {
+            const idx = (dealerIndex + i) % currentState.players.length;
+            if (!currentState.players[idx].folded) {
+              firstActive = idx;
+              break;
+            }
+          }
+          currentState = {
+            ...currentState,
+            currentPlayerIndex: firstActive
+          };
+        }
+      }
+    }
+    
+    // Update state
+    setGameState(currentState);
+    
+    // If we're at showdown, resolve it
+    if (currentState.phase === 'showdown' || gameEngine.getActivePlayers(currentState).length <= 1) {
+      await resolveShowdown(currentState);
+    }
+    
+    setIsProcessing(false);
+  };
+
   const handleCheck = () => {
     if (!gameState || isProcessing || settings.isPaused) return;
     setIsProcessing(true);
@@ -2126,6 +2222,7 @@ export default function PokerGame() {
                         playerFolded={humanPlayer.folded}
                         isProcessing={isProcessing}
                         logScale={true}
+                        onFastForward={humanPlayer.folded ? handleFastForward : undefined}
                       />
                     </motion.div>
                   </AnimatePresence>
@@ -2472,6 +2569,7 @@ export default function PokerGame() {
                 playerFolded={humanPlayer.folded}
                 isProcessing={isProcessing}
                 logScale={true}
+                onFastForward={humanPlayer.folded ? handleFastForward : undefined}
               />
             </div>
           ) : (

@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { AlertCircle, ChevronLeft, ChevronRight, X, Info } from 'lucide-react';
+import { AlertCircle, ChevronLeft, ChevronRight, X, Info, FastForward } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useShake } from '@/hooks/useShake';
 import { useToast } from '@/hooks/use-toast';
@@ -51,8 +51,9 @@ export function ActionControls({
   animationSpeed = 1,
   playerFolded = false,
   isProcessing = false,
-  logScale = false
-}: ActionControlsProps & { playerFolded?: boolean }) {
+  logScale = false,
+  onFastForward
+}: ActionControlsProps & { playerFolded?: boolean; onFastForward?: () => void }) {
   const [betAmount, setBetAmount] = useState(minBet);
   const [sliderValue, setSliderValue] = useState(0);
   const [showGestureHints, setShowGestureHints] = useState(() => {
@@ -289,7 +290,7 @@ export function ActionControls({
     }
   );
 
-  // If player has folded, show a clear message instead of disabled controls
+  // If player has folded, show a clear message instead of disabled controls with fast-forward option
   if (playerFolded) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 p-6 bg-card/50 backdrop-blur-sm rounded-lg border border-card-border">
@@ -297,10 +298,28 @@ export function ActionControls({
           <h3 className="text-lg font-semibold text-muted-foreground">You have folded</h3>
           <p className="text-sm text-muted-foreground/70">Waiting for the hand to complete...</p>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="animate-pulse w-2 h-2 bg-muted-foreground/50 rounded-full"></div>
-          <div className="animate-pulse w-2 h-2 bg-muted-foreground/50 rounded-full" style={{ animationDelay: '0.2s' }}></div>
-          <div className="animate-pulse w-2 h-2 bg-muted-foreground/50 rounded-full" style={{ animationDelay: '0.4s' }}></div>
+        <div className="flex flex-col items-center gap-3">
+          {onFastForward && (
+            <Button
+              onClick={() => {
+                triggerHaptic('medium');
+                playSound('button-click', { volume: 0.15 });
+                onFastForward();
+              }}
+              disabled={isProcessing}
+              variant="default"
+              className="min-h-[44px] px-6"
+              data-testid="button-fast-forward"
+            >
+              <FastForward className="w-4 h-4 mr-2" />
+              Skip to Next Hand
+            </Button>
+          )}
+          <div className="flex items-center gap-2">
+            <div className="animate-pulse w-2 h-2 bg-muted-foreground/50 rounded-full"></div>
+            <div className="animate-pulse w-2 h-2 bg-muted-foreground/50 rounded-full" style={{ animationDelay: '0.2s' }}></div>
+            <div className="animate-pulse w-2 h-2 bg-muted-foreground/50 rounded-full" style={{ animationDelay: '0.4s' }}></div>
+          </div>
         </div>
       </div>
     );
