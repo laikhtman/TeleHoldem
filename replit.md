@@ -3,6 +3,14 @@
 ## Overview
 A web-based Texas Hold'em poker application offering a realistic and engaging experience with a professional poker table interface, AI bot opponents, and full game mechanics. It functions as both a Telegram Mini App and a standalone web application, featuring persistent user statistics, bankroll management, and a focus on intuitive UI/UX to provide a professional-grade platform for poker enthusiasts. The project aims to integrate advanced tournament systems and a modern, crypto/Web3-inspired design aesthetic.
 
+### Recent Bug Fixes (November 2025)
+- **Blind Values**: Corrected from $10/$20 to $5/$10 throughout the application
+- **Pot Calculation**: Fixed to accurately show $15 (small blind $5 + big blind $10)
+- **Game Reset**: "Start New Game" button now properly resets all players to $1000 chips
+- **Card Visibility**: Opponents' cards remain hidden until showdown phase
+- **Fast-Forward**: Implemented automatic phase advancement when all players are all-in
+- **Action History**: Fixed display to show correct blind amounts ($5/$10)
+
 ## User Preferences
 I prefer iterative development with clear communication on major changes. Please ask before making significant architectural alterations or introducing new external dependencies. I value detailed explanations for complex features or decisions.
 

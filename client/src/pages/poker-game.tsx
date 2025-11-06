@@ -116,6 +116,7 @@ export default function PokerGame() {
   const [winAmounts, setWinAmounts] = useState<Record<string, number>>({});
   const [winningCardIds, setWinningCardIds] = useState<Set<string>>(new Set());
   const [phaseKey, setPhaseKey] = useState(0);
+  const [resetKey, setResetKey] = useState(0); // Add a reset key to force re-render PlayerSeats
   const [showPhaseTransition, setShowPhaseTransition] = useState(false);
   const [flyingChips, setFlyingChips] = useState<FlyingChipData[]>([]);
   const [isRightPanelCollapsed, setIsRightPanelCollapsed] = useState(false);
@@ -489,6 +490,7 @@ export default function PokerGame() {
     setWinningCardIds(new Set());
     setFlyingChips([]);
     setPhaseKey(0);
+    setResetKey(prev => prev + 1); // Increment reset key to force complete re-render
     
     console.log('Game reset - all players set to $1000:', initialState.players.map(p => ({ name: p.name, chips: p.chips })));
     
@@ -933,7 +935,7 @@ export default function PokerGame() {
       'posted small blind',
       newState.players[smallBlindIndex].name,
       undefined,
-      10
+      5  // Corrected to actual small blind amount
     );
     newState = addActionHistory(
       newState,
@@ -941,7 +943,7 @@ export default function PokerGame() {
       'posted big blind',
       newState.players[bigBlindIndex].name,
       undefined,
-      20
+      10  // Corrected to actual big blind amount
     );
     
     // First action is from player after big blind
@@ -1845,7 +1847,7 @@ export default function PokerGame() {
                   {/* Player Seats */}
                   {gameState.players.map((player, index) => (
                     <PlayerSeat
-                      key={player.id}
+                      key={`${player.id}-${resetKey}`}
                       player={player}
                       position={index}
                       totalPlayers={NUM_PLAYERS}
@@ -2248,7 +2250,7 @@ export default function PokerGame() {
                   {/* Player Seats */}
                   {gameState.players.map((player, index) => (
                     <PlayerSeat
-                      key={player.id}
+                      key={`${player.id}-${resetKey}`}
                       player={player}
                       position={index}
                       totalPlayers={NUM_PLAYERS}
