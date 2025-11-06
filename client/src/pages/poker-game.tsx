@@ -907,10 +907,10 @@ export default function PokerGame() {
       }
     }
     
-    // Post blinds (small blind $10, big blind $20)
+    // Post blinds (small blind $5, big blind $10)
     const smallBlindIndex = (newState.dealerIndex + 1) % NUM_PLAYERS;
     const bigBlindIndex = (newState.dealerIndex + 2) % NUM_PLAYERS;
-    newState = gameEngine.postBlinds(newState, 10, 20);
+    newState = gameEngine.postBlinds(newState, 5, 10);
     
     // Sound for blinds posting
     if (settings.soundEnabled) {
