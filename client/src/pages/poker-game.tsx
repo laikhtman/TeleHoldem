@@ -7,7 +7,8 @@ import { botAI } from '@/lib/botAI';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState, FullPageLoader } from '@/components/LoadingState';
 import { Card } from '@/components/ui/card';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { logError, ErrorCategory } from '@/lib/errorHandler';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
@@ -1737,61 +1738,96 @@ export default function PokerGame() {
         
         {/* Desktop Center Column - Game Area + Controls */}
         <div className="flex flex-col h-screen overflow-hidden">
-          {/* Header Controls for Desktop - in center column */}
-          <div className="flex justify-end items-center p-4 gap-2 border-b">
-            <ThemeToggle />
-            {tableId && (
-              <Link href="/lobby">
+          {/* Enhanced Header with Navigation - in center column */}
+          <div className="flex justify-between items-center p-4 gap-2 border-b bg-background/95 backdrop-blur-sm app-header">
+            {/* Left side - Breadcrumb Navigation */}
+            <nav className="hidden sm:flex items-center gap-2 text-sm" aria-label="Breadcrumb">
+              <Link href="/" className="text-muted-foreground hover:text-foreground transition-colors">
+                Home
+              </Link>
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              {tableId ? (
+                <>
+                  <Link href="/lobby" className="text-muted-foreground hover:text-foreground transition-colors">
+                    Lobby
+                  </Link>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-foreground font-medium">Table {tableId}</span>
+                </>
+              ) : (
+                <span className="text-foreground font-medium">Demo Game</span>
+              )}
+            </nav>
+            
+            {/* Mobile Menu Button - Triggers existing mobile sheet */}
+            <div className="sm:hidden">
+              <Button 
+                variant="outline" 
+                size="icon"
+                onClick={() => setIsMobileMenuOpen(true)}
+                aria-label="Open navigation menu"
+                data-testid="button-hamburger-menu"
+                className="min-h-11 min-w-11"
+              >
+                <Menu className="w-5 h-5" />
+              </Button>
+            </div>
+            
+            {/* Right side controls */}
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              {tableId && (
+                <Link href="/lobby" className="hidden sm:block">
+                  <Button 
+                    variant="outline" 
+                    size="default"
+                    aria-label="Back to Lobby"
+                    data-testid="button-back-to-lobby"
+                    className="min-h-11"
+                  >
+                    <ChevronLeft className="w-4 h-4 mr-1" />
+                    Back to Lobby
+                  </Button>
+                </Link>
+              )}
+              <Link href="/help" className="hidden sm:block">
                 <Button 
                   variant="outline" 
-                  size="default"
-                  aria-label="Back to Lobby"
-                  data-testid="button-back-to-lobby"
-                  className="min-h-11"
+                  size="icon"
+                  aria-label="Help and Documentation"
+                  data-testid="button-help"
+                  className="min-h-11 min-w-11"
                 >
-                  <ChevronLeft className="w-4 h-4 mr-1" />
-                  Back to Lobby
+                  <HelpCircle className="w-5 h-5" />
                 </Button>
               </Link>
-            )}
-            <Link href="/help">
-              <Button 
-                variant="outline" 
-                size="icon"
-                aria-label="Help and Documentation"
-                data-testid="button-help"
-                className="min-h-11 min-w-11"
-              >
-                <HelpCircle className="w-5 h-5" />
-              </Button>
-            </Link>
-            <Link href="/settings">
-              <Button 
-                variant="outline" 
-                size="icon"
-                aria-label="Application Settings"
-                data-testid="button-admin-settings"
-                className="min-h-11 min-w-11"
-              >
-                <Settings className="w-5 h-5" />
-              </Button>
-            </Link>
-            <SettingsPanel 
-              settings={{
-                ...settings,
-                performanceMetrics: gameState.performanceMetrics ? {
-                  winRate: gameState.performanceMetrics.winRate,
-                  consecutiveWins: gameState.performanceMetrics.consecutiveWins,
-                  consecutiveLosses: gameState.performanceMetrics.consecutiveLosses,
-                  bankrollTrend: gameState.performanceMetrics.bankrollTrend
-                } : undefined,
-                currentDifficulty: gameState.difficultySettings?.currentLevel,
-                difficultyMode: gameState.difficultySettings?.mode
-              }}
-              onSettingsChange={handleSettingsChange}
-              onPauseToggle={handlePauseToggle}
-              disabled={isProcessing}
-            />
+              <Link href="/settings" className="hidden sm:block">
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  aria-label="Application Settings"
+                  data-testid="button-admin-settings"
+                  className="min-h-11 min-w-11"
+                >
+                  <Settings className="w-5 h-5" />
+                </Button>
+              </Link>
+              <SettingsPanel 
+                settings={{
+                  ...settings,
+                  performanceMetrics: gameState.performanceMetrics ? {
+                    winRate: gameState.performanceMetrics.winRate,
+                    consecutiveWins: gameState.performanceMetrics.consecutiveWins,
+                    consecutiveLosses: gameState.performanceMetrics.consecutiveLosses,
+                    bankrollTrend: gameState.performanceMetrics.bankrollTrend
+                  } : undefined,
+                  currentDifficulty: gameState.difficultySettings?.currentLevel,
+                  difficultyMode: gameState.difficultySettings?.mode
+                }}
+                onSettingsChange={handleSettingsChange}
+                onPauseToggle={handlePauseToggle}
+                disabled={isProcessing}
+              />
           </div>
           
           {/* Game Table Area */}
@@ -2452,6 +2488,30 @@ export default function PokerGame() {
             </SheetHeader>
             <ScrollArea className="h-[calc(100vh-5rem)]">
               <div className="p-4 space-y-4">
+                {/* Navigation Links */}
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-sm">Navigation</h3>
+                  <div className="flex flex-col gap-2">
+                    <Link href="/" className="flex items-center gap-3 p-2 rounded-md hover:bg-accent transition-colors">
+                      <ChevronLeft className="w-4 h-4" />
+                      <span>Home</span>
+                    </Link>
+                    <Link href="/lobby" className="flex items-center gap-3 p-2 rounded-md hover:bg-accent transition-colors">
+                      <ChevronLeft className="w-4 h-4" />
+                      <span>Back to Lobby</span>
+                    </Link>
+                    <Link href="/help" className="flex items-center gap-3 p-2 rounded-md hover:bg-accent transition-colors">
+                      <HelpCircle className="w-4 h-4" />
+                      <span>Help & Rules</span>
+                    </Link>
+                    <Link href="/settings" className="flex items-center gap-3 p-2 rounded-md hover:bg-accent transition-colors">
+                      <Settings className="w-4 h-4" />
+                      <span>Settings</span>
+                    </Link>
+                  </div>
+                </div>
+                <Separator />
+                
                 {/* Hand Strength Analysis */}
                 <div className="space-y-2">
                   <h3 className="font-semibold text-sm">Hand Analysis</h3>

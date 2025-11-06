@@ -2111,21 +2111,25 @@ input[type="range"]::-moz-range-thumb {
    Gradient fills and glow effects for poker action buttons
    ================================================ */
 
-/* Primary Action Button Gradient (Fold, Call, Raise, All-in) */
+/* Primary Action Button Gradient (Fold, Call, Raise, All-in) - Enhanced Contrast */
 .btn-gradient-primary {
-  background: linear-gradient(135deg, #7C3AED 0%, #DB2777 100%);
+  background: linear-gradient(135deg, #A855F7 0%, #EC4899 100%);
   color: #FFFFFF !important;
   font-size: 17px !important;
-  font-weight: 600 !important;
+  font-weight: 700 !important;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.075em;
   border-radius: 12px !important;
   min-height: 56px !important;
-  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
-  border: 1px solid rgba(139, 92, 246, 0.3);
+  min-width: 44px !important;
+  box-shadow: 0 6px 24px rgba(168, 85, 247, 0.5),
+              0 2px 8px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.25) !important;
   position: relative;
   overflow: hidden;
   transition: all 0.3s ease;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4),
+               0 0 24px rgba(255, 255, 255, 0.2);
 }
 
 .btn-gradient-primary::before {
@@ -2135,15 +2139,16 @@ input[type="range"]::-moz-range-thumb {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, #8B3FFD 0%, #E2308F 100%);
+  background: linear-gradient(135deg, #C084FC 0%, #F472B6 100%);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
 
 .btn-gradient-primary:hover:not(:disabled) {
-  box-shadow: 0 4px 30px rgba(139, 92, 246, 0.6), 
-              0 8px 40px rgba(236, 72, 153, 0.3);
-  transform: translateY(-1px);
+  box-shadow: 0 8px 32px rgba(168, 85, 247, 0.6), 
+              0 10px 40px rgba(236, 72, 153, 0.4);
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.4) !important;
 }
 
 .btn-gradient-primary:hover:not(:disabled)::before {
@@ -2152,7 +2157,7 @@ input[type="range"]::-moz-range-thumb {
 
 .btn-gradient-primary:active:not(:disabled) {
   transform: scale(0.98) translateY(0);
-  box-shadow: 0 2px 15px rgba(139, 92, 246, 0.5);
+  box-shadow: 0 4px 16px rgba(168, 85, 247, 0.5);
 }
 
 .btn-gradient-primary span {
@@ -2160,21 +2165,25 @@ input[type="range"]::-moz-range-thumb {
   z-index: 1;
 }
 
-/* Secondary Action Button Gradient (Check, Snap Call) - Cyan accent */
+/* Secondary Action Button Gradient (Check, Snap Call) - Enhanced Cyan */
 .btn-gradient-secondary {
-  background: linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%);
+  background: linear-gradient(135deg, #0EA5E9 0%, #6366F1 100%);
   color: #FFFFFF !important;
   font-size: 17px !important;
-  font-weight: 600 !important;
+  font-weight: 700 !important;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.075em;
   border-radius: 12px !important;
   min-height: 56px !important;
-  box-shadow: 0 4px 20px rgba(6, 182, 212, 0.4);
-  border: 1px solid rgba(6, 182, 212, 0.3);
+  min-width: 44px !important;
+  box-shadow: 0 6px 24px rgba(14, 165, 233, 0.5),
+              0 2px 8px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.25) !important;
   position: relative;
   overflow: hidden;
   transition: all 0.3s ease;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4),
+               0 0 24px rgba(255, 255, 255, 0.2);
 }
 
 .btn-gradient-secondary::before {
@@ -2184,7 +2193,7 @@ input[type="range"]::-moz-range-thumb {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, #0ECFE8 0%, #4F8FFF 100%);
+  background: linear-gradient(135deg, #38BDF8 0%, #818CF8 100%);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -2209,89 +2218,105 @@ input[type="range"]::-moz-range-thumb {
   z-index: 1;
 }
 
-/* Destructive Action Button Gradient (Fold) - Red/Pink */
+/* Destructive Action Button Gradient (Fold) - Enhanced Red/Pink */
 .btn-gradient-destructive {
-  background: linear-gradient(135deg, #DC2626 0%, #DB2777 100%);
-  color: #FFFFFF !important;
-  font-size: 17px !important;
-  font-weight: 600 !important;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-radius: 12px !important;
-  min-height: 56px !important;
-  box-shadow: 0 4px 20px rgba(220, 38, 38, 0.4);
-  border: 1px solid rgba(220, 38, 38, 0.3);
-  position: relative;
-  overflow: hidden;
-  transition: all 0.3s ease;
-}
-
-.btn-gradient-destructive:hover:not(:disabled) {
-  box-shadow: 0 4px 30px rgba(220, 38, 38, 0.6), 
-              0 8px 40px rgba(219, 39, 119, 0.3);
-  transform: translateY(-1px);
-}
-
-.btn-gradient-destructive:active:not(:disabled) {
-  transform: scale(0.98) translateY(0);
-  box-shadow: 0 2px 15px rgba(220, 38, 38, 0.5);
-}
-
-/* All-in Button - Special gold gradient with pulse animation */
-.btn-gradient-allin {
-  background: linear-gradient(135deg, #F59E0B 0%, #EF4444 100%);
+  background: linear-gradient(135deg, #EF4444 0%, #EC4899 100%);
   color: #FFFFFF !important;
   font-size: 17px !important;
   font-weight: 700 !important;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.075em;
   border-radius: 12px !important;
   min-height: 56px !important;
-  box-shadow: 0 4px 25px rgba(245, 158, 11, 0.5),
-              0 0 40px rgba(245, 158, 11, 0.3);
-  border: 1px solid rgba(251, 191, 36, 0.4);
+  min-width: 44px !important;
+  box-shadow: 0 6px 24px rgba(239, 68, 68, 0.5),
+              0 2px 8px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.25) !important;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4),
+               0 0 24px rgba(255, 255, 255, 0.2);
+}
+
+.btn-gradient-destructive:hover:not(:disabled) {
+  box-shadow: 0 8px 32px rgba(239, 68, 68, 0.6), 
+              0 10px 40px rgba(236, 72, 153, 0.4);
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.btn-gradient-destructive:active:not(:disabled) {
+  transform: scale(0.98) translateY(0);
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.5);
+}
+
+/* All-in Button - Special gold gradient with pulse animation - Enhanced Visibility */
+.btn-gradient-allin {
+  background: linear-gradient(135deg, #FBBF24 0%, #F97316 100%);
+  color: #FFFFFF !important;
+  font-size: 17px !important;
+  font-weight: 800 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-radius: 12px !important;
+  min-height: 56px !important;
+  min-width: 44px !important;
+  box-shadow: 0 6px 30px rgba(251, 191, 36, 0.6),
+              0 0 50px rgba(251, 191, 36, 0.4),
+              0 2px 8px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.35) !important;
   position: relative;
   overflow: hidden;
   transition: all 0.3s ease;
   animation: pulse-glow 2s ease-in-out infinite;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5),
+               0 0 30px rgba(255, 255, 255, 0.3);
 }
 
 @keyframes pulse-glow {
   0%, 100% {
-    box-shadow: 0 4px 25px rgba(245, 158, 11, 0.5),
-                0 0 40px rgba(245, 158, 11, 0.3);
+    box-shadow: 0 6px 30px rgba(251, 191, 36, 0.6),
+                0 0 50px rgba(251, 191, 36, 0.4),
+                0 2px 8px rgba(0, 0, 0, 0.3);
   }
   50% {
-    box-shadow: 0 4px 35px rgba(245, 158, 11, 0.7),
-                0 0 60px rgba(245, 158, 11, 0.5);
+    box-shadow: 0 8px 40px rgba(251, 191, 36, 0.8),
+                0 0 70px rgba(251, 191, 36, 0.6),
+                0 2px 10px rgba(0, 0, 0, 0.3);
   }
 }
 
 .btn-gradient-allin:hover:not(:disabled) {
-  box-shadow: 0 4px 35px rgba(245, 158, 11, 0.8),
-              0 0 60px rgba(245, 158, 11, 0.6);
+  box-shadow: 0 8px 40px rgba(251, 191, 36, 0.9),
+              0 0 70px rgba(251, 191, 36, 0.7),
+              0 2px 10px rgba(0, 0, 0, 0.3);
   transform: translateY(-2px) scale(1.02);
+  border-color: rgba(255, 255, 255, 0.5) !important;
 }
 
 .btn-gradient-allin:active:not(:disabled) {
   transform: scale(0.98) translateY(0);
 }
 
-/* Quick Bet Chips - Glass morphism with gradient border */
+/* Quick Bet Chips - Enhanced Glass morphism with visible gradient border */
 .quick-bet-chip {
-  background: rgba(20, 18, 30, 0.6);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid transparent;
+  background: rgba(30, 28, 40, 0.8);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 2px solid rgba(168, 85, 247, 0.4) !important;
   border-radius: 12px;
-  padding: 8px 16px;
+  padding: 10px 18px;
   color: #FFFFFF;
-  font-weight: 600;
-  font-size: 15px;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  font-weight: 700;
+  font-size: 16px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
   position: relative;
   transition: all 0.3s ease;
-  min-height: 44px;
+  min-height: 48px;
+  min-width: 44px;
+  box-shadow: 0 4px 16px rgba(168, 85, 247, 0.2),
+              0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
 .quick-bet-chip::before {
@@ -3259,6 +3284,203 @@ html.theme-transition * {
 /* Force crypto table gradient background */
 .crypto-table {
   background: radial-gradient(ellipse at center, #13111C 0%, #0A0A0F 100%) !important;
+}
+
+/* ================================================
+   ENHANCED MOBILE RESPONSIVE DESIGN
+   ================================================
+   Mobile-first responsive breakpoints for optimal experience
+   ================================================ */
+
+/* Small Mobile Devices (320px - 374px) - iPhone SE, older phones */
+@media (max-width: 374px) {
+  /* Action controls stacked vertically */
+  .action-controls-container {
+    padding: 12px 8px calc(12px + var(--safe-area-bottom)) 8px !important;
+  }
+  
+  .action-controls-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+  
+  /* Ensure minimum button size for iOS */
+  button, .btn-gradient-primary, .btn-gradient-secondary, 
+  .btn-gradient-destructive, .btn-gradient-allin {
+    min-height: 48px !important;
+    min-width: 44px !important;
+    font-size: 14px !important;
+    padding: 10px 12px !important;
+  }
+  
+  /* Adjust pot display for small screens */
+  .pot-display {
+    font-size: 18px !important;
+    padding: 8px 12px !important;
+  }
+  
+  /* Stack player seats more efficiently */
+  .player-seat {
+    min-width: 120px !important;
+    padding: 8px !important;
+  }
+  
+  /* Hide non-essential UI elements */
+  .desktop-only {
+    display: none !important;
+  }
+}
+
+/* Standard Mobile (375px - 413px) - iPhone 12/13/14, most Android */
+@media (min-width: 375px) and (max-width: 413px) {
+  /* Optimized button grid */
+  .action-controls-container {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: rgba(10, 10, 15, 0.98) !important;
+    backdrop-filter: blur(24px) !important;
+    padding: 12px calc(12px + var(--safe-area-left)) calc(16px + var(--safe-area-bottom)) calc(12px + var(--safe-area-right)) !important;
+    z-index: 40 !important;
+    border-top: 2px solid rgba(168, 85, 247, 0.3) !important;
+  }
+  
+  .action-controls-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 10px !important;
+  }
+  
+  /* Full-width important actions */
+  .action-controls-grid .btn-allin {
+    grid-column: span 3 !important;
+  }
+  
+  /* Responsive text sizes */
+  button {
+    font-size: 15px !important;
+    min-height: 50px !important;
+    min-width: 44px !important;
+  }
+  
+  /* Compact player seats */
+  .player-seat {
+    min-width: 140px !important;
+    max-width: 160px !important;
+  }
+  
+  /* Optimized community cards */
+  .community-cards {
+    gap: 4px !important;
+  }
+  
+  .playing-card {
+    width: 55px !important;
+    height: 78px !important;
+  }
+}
+
+/* Large Mobile / Small Tablet (414px - 767px) */
+@media (min-width: 414px) and (max-width: 767px) {
+  /* Flexible action bar */
+  .action-controls-container {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: rgba(10, 10, 15, 0.98) !important;
+    backdrop-filter: blur(24px) !important;
+    padding: 16px calc(16px + var(--safe-area-left)) calc(20px + var(--safe-area-bottom)) calc(16px + var(--safe-area-right)) !important;
+    z-index: 40 !important;
+    border-top: 2px solid rgba(168, 85, 247, 0.3) !important;
+  }
+  
+  .action-controls-grid {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+    justify-content: center !important;
+  }
+  
+  .action-controls-grid button {
+    flex: 1 1 calc(33.333% - 8px) !important;
+    min-width: 100px !important;
+    min-height: 52px !important;
+  }
+  
+  /* Improved slider visibility */
+  .bet-slider-container {
+    padding: 12px 0 !important;
+  }
+  
+  [data-radix-slider-track] {
+    height: 8px !important;
+  }
+  
+  [data-radix-slider-thumb] {
+    width: 52px !important;
+    height: 52px !important;
+  }
+}
+
+/* Tablet Portrait (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .action-controls-container {
+    padding: 20px calc(24px + var(--safe-area-left)) calc(24px + var(--safe-area-bottom)) calc(24px + var(--safe-area-right)) !important;
+  }
+  
+  .action-controls-grid {
+    display: flex !important;
+    gap: 16px !important;
+    justify-content: center !important;
+  }
+  
+  button {
+    min-height: 56px !important;
+    min-width: 120px !important;
+    font-size: 16px !important;
+  }
+}
+
+/* Landscape Orientation Adjustments */
+@media (orientation: landscape) and (max-height: 600px) {
+  /* Compact action bar for landscape */
+  .action-controls-container {
+    padding: 8px 16px !important;
+  }
+  
+  button {
+    min-height: 44px !important;
+    font-size: 14px !important;
+  }
+  
+  /* Hide less important elements in landscape */
+  .stats-panel, .achievements-panel {
+    display: none !important;
+  }
+  
+  /* Adjust table size */
+  .poker-table {
+    max-height: 60vh !important;
+  }
+}
+
+/* Safe Area Padding for iOS devices with notch */
+@supports (padding: max(0px)) {
+  .app-header {
+    padding-top: max(16px, env(safe-area-inset-top)) !important;
+  }
+  
+  .action-controls-container {
+    padding-bottom: max(20px, env(safe-area-inset-bottom)) !important;
+  }
+  
+  .mobile-menu {
+    padding-top: max(20px, env(safe-area-inset-top)) !important;
+    padding-bottom: max(20px, env(safe-area-inset-bottom)) !important;
+  }
 }
 
 /* Ensure gradient buttons show properly */

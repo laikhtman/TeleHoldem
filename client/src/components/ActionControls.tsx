@@ -319,7 +319,7 @@ export function ActionControls({
   }, [autoCheckFold, disabled, canCheck, amountToCall]);
 
   return (
-    <div className="flex flex-col gap-3 xs:gap-4 relative" ref={swipeRef} role="group" aria-label="Action controls">
+    <div className="action-controls-container flex flex-col gap-3 xs:gap-4 relative" ref={swipeRef} role="group" aria-label="Action controls">
       {/* Swipe visual feedback indicators for mobile */}
       <AnimatePresence>
         {(isSwipingLeft || isSwipingRight) && (
@@ -375,7 +375,7 @@ export function ActionControls({
         </motion.div>
       )}
 
-      <div className="flex gap-2 xs:gap-3 md:gap-2 lg:gap-4 justify-center flex-wrap">
+      <div className="action-controls-grid flex gap-2 xs:gap-3 md:gap-2 lg:gap-4 justify-center flex-wrap">
         {/* Fold Button - Destructive gradient (red/pink) */}
         <button
           onClick={handleFold}
