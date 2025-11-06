@@ -56,8 +56,8 @@ export function PotDisplay({ amount, onRef, sidePots = [] }: PotDisplayProps) {
   return (
     <div 
       ref={onRef}
-      className="absolute top-[25%] left-1/2 transform -translate-x-1/2"
-      style={{ zIndex: 10 }}
+      className="absolute top-[20%] left-1/2 transform -translate-x-1/2 pointer-events-none"
+      style={{ zIndex: 20 }}
       role="status"
       aria-live="polite"
       aria-atomic="true"

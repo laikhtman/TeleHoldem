@@ -184,35 +184,35 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
     const isSmallMobile = vw < 480;
     const isVerySmallMobile = vw < 360;
     
-    // Calculate radius based on screen size
-    // Desktop: Seats positioned around the outside edge of the table
-    // Tablet: Slightly closer positioning
-    // Mobile: Closer positioning to fit smaller screens
+    // Calculate radius based on screen size - INCREASED values to prevent overlapping
+    // Desktop: Seats positioned farther from center to prevent overlap
+    // Tablet: Moderate positioning with more spacing
+    // Mobile: Tighter but still non-overlapping positioning
     let radiusX: number;
     let radiusY: number;
     
     if (isDesktop) {
-      // Desktop: Position seats around the outside edge of the table
-      // Use larger radius values to push seats to the outer edge
-      radiusX = (baseWidth / 2) * 0.92;  // 92% of half-width
-      radiusY = (baseHeight / 2) * 0.88; // 88% of half-height
+      // Desktop: Increased radius to prevent overlapping
+      // Push seats further out to the edge of the table
+      radiusX = (baseWidth / 2) * 0.98;  // 98% of half-width (was 92%)
+      radiusY = (baseHeight / 2) * 0.95; // 95% of half-height (was 88%)
     } else if (isTablet) {
-      // Tablet: Medium positioning
-      radiusX = (baseWidth / 2) * 0.85;  // 85% of half-width
-      radiusY = (baseHeight / 2) * 0.80; // 80% of half-height
+      // Tablet: Increased spacing
+      radiusX = (baseWidth / 2) * 0.90;  // 90% of half-width (was 85%)
+      radiusY = (baseHeight / 2) * 0.85; // 85% of half-height (was 80%)
     } else if (isSmallMobile) {
-      // Small mobile: Tighter positioning
+      // Small mobile: Maintain tighter positioning but with better spacing
       if (isVerySmallMobile) {
-        radiusX = (baseWidth / 2) * 0.70;  // 70% of half-width for very small screens
-        radiusY = (baseHeight / 2) * 0.65; // 65% of half-height
+        radiusX = (baseWidth / 2) * 0.72;  // 72% of half-width (was 70%)
+        radiusY = (baseHeight / 2) * 0.68; // 68% of half-height (was 65%)
       } else {
-        radiusX = (baseWidth / 2) * 0.75;  // 75% of half-width for small screens
-        radiusY = (baseHeight / 2) * 0.70; // 70% of half-height
+        radiusX = (baseWidth / 2) * 0.78;  // 78% of half-width (was 75%)
+        radiusY = (baseHeight / 2) * 0.73; // 73% of half-height (was 70%)
       }
     } else {
-      // Regular mobile: Moderate positioning
-      radiusX = (baseWidth / 2) * 0.78;  // 78% of half-width
-      radiusY = (baseHeight / 2) * 0.73; // 73% of half-height
+      // Regular mobile: Slightly increased spacing
+      radiusX = (baseWidth / 2) * 0.82;  // 82% of half-width (was 78%)
+      radiusY = (baseHeight / 2) * 0.77; // 77% of half-height (was 73%)
     }
     
     // Map seat indices to specific angles for better distribution
