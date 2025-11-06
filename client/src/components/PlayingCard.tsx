@@ -186,29 +186,41 @@ export function PlayingCard({
     }
   };
 
+  // Determine the actual rotation based on both faceDown and isFlipped
+  // faceDown=true means show back (0deg), faceDown=false means show front (180deg)
+  // But we also need to consider the flip animation for human players
+  const getCardRotation = () => {
+    if (faceDown) {
+      return 0; // Show card back
+    }
+    return isFlipped ? 180 : 0; // For face-up cards, use flip animation state
+  };
+
   const getInitialState = () => {
+    const rotation = getCardRotation();
     if (prefersReducedMotion) {
       // No animation for reduced motion
-      return { opacity: 1, transform: 'translate3d(0, 0, 0) scale(1) rotateY(0deg)' };
+      return { opacity: 1, transform: `translate3d(0, 0, 0) scale(1) rotateY(${rotation}deg)` };
     }
     
     if (animateDeal) {
       // Use translate3d for GPU acceleration, start from deck position
-      return { opacity: 0, transform: 'translate3d(0, -400px, 0) scale(0.5) rotateY(180deg)' };
+      return { opacity: 0, transform: `translate3d(0, -400px, 0) scale(0.5) rotateY(${rotation}deg)` };
     }
-    return { opacity: 1, transform: `translate3d(0, 0, 0) scale(1) rotateY(${isFlipped ? 180 : 0}deg)` };
+    return { opacity: 1, transform: `translate3d(0, 0, 0) scale(1) rotateY(${rotation}deg)` };
   };
 
   const getAnimateState = () => {
+    const rotation = getCardRotation();
     if (prefersReducedMotion) {
       // No animation for reduced motion
-      return { opacity: 1, transform: `translate3d(0, 0, 0) scale(1) rotateY(${isFlipped ? 180 : 0}deg)` };
+      return { opacity: 1, transform: `translate3d(0, 0, 0) scale(1) rotateY(${rotation}deg)` };
     }
     
     if (animateDeal && !isDealt) {
       return getInitialState();
     }
-    return { opacity: 1, transform: `translate3d(0, 0, 0) scale(1) rotateY(${isFlipped ? 180 : 0}deg)` };
+    return { opacity: 1, transform: `translate3d(0, 0, 0) scale(1) rotateY(${rotation}deg)` };
   };
 
   const cardSvgId = card ? getCardSvgId(card) : '';
@@ -261,13 +273,14 @@ export function PlayingCard({
       };
 
   // Hover/tap animations - disabled for reduced motion
+  const rotation = getCardRotation();
   const hoverAnimation = !faceDown && !prefersReducedMotion ? { 
-    transform: 'translate3d(0, -4px, 0) scale(1.02) rotateY(' + (isFlipped ? 180 : 0) + 'deg)',
+    transform: `translate3d(0, -4px, 0) scale(1.02) rotateY(${rotation}deg)`,
     transition: { duration: 0.3, ease: 'easeOut' }
   } : undefined;
 
   const tapAnimation = !faceDown && card && !prefersReducedMotion ? { 
-    transform: 'translate3d(0, -6px, 0) scale(1.03) rotateY(' + (isFlipped ? 180 : 0) + 'deg)',
+    transform: `translate3d(0, -6px, 0) scale(1.03) rotateY(${rotation}deg)`,
     transition: { duration: 0.15 }
   } : undefined;
 

@@ -1,0 +1,41 @@
+Gameplay & Logic
+
+Hide opponent hole cards: Players can see every AI’s hole cards during the hand
+teleholdem.replit.app
+. Cards should remain face‑down until the showdown or a player voluntarily reveals them.
+
+Fix pot calculations: The displayed pot often remains at the blind amount ($60) or jumps to an incorrect value after bets/raises
+teleholdem.replit.app
+. Update pot totals after each bet and ensure the figure reflects all contributions.
+
+Reset all stacks on new game: When the user’s stack hits zero and they start a new game, only the user’s stack is reset; AI opponents keep previous winnings, resulting in huge chip totals. Reset everyone’s stack to the default buy‑in when a new game is started.
+
+Constrain bet amounts: The bet slider lets players raise more than their remaining stack, and the quick‑bet buttons (½ pot, 2× pot) propose amounts far exceeding the pot size. Limit bet options so they never exceed the user’s stack or the legal raise ranges.
+
+Ensure stats reset correctly: Session stats (hands played, achievements count, VPIP, etc.) don’t reset cleanly when starting a new game. Achievements show a default value of 5 even before any hand is played.
+
+Tune AI bet sizing: Pre‑flop AI raises regularly jump straight to the maximum (e.g., all‑in on the first betting round), which makes the game uninteresting and unrealistic for learning. Implement more varied and reasonable bet sizing.
+
+User Interface
+
+Resolve overlapping elements: Player avatars, stack amounts, bet chips and community cards overlap each other, making the table hard to read
+teleholdem.replit.app
+. Improve alignment and spacing of these elements.
+
+Improve button visibility: Important controls like “Fold”, “Call”, “Raise” and the quick‑bet options sometimes sit on top of the card area or are barely visible due to low contrast.
+
+Redesign the bet slider: The raise slider is extremely thin and lacks a numeric display of the amount. Increase its size, add a clear label showing the chosen bet and ensure it’s usable on both desktop and mobile.
+
+Add responsive/mobile layout: The current desktop layout is already crowded; on a narrow mobile screen it will overlap badly. Create responsive breakpoints (e.g., stack players vertically on mobile) and ensure all controls remain usable on an iPhone‑sized viewport.
+
+Provide navigation back to lobby: Once in a hand, there is no obvious way to return to the lobby or landing page. Add a back button or navigation menu within the game.
+
+Allow skipping ahead: When the user folds, they must watch the rest of the hand play out without interacting. Include a “fast‑forward” or “skip to next hand” button so the user isn’t forced to wait.
+
+Clarify stats and achievements: The stats panel lists “Achievements: 5” but doesn’t show what those are or how to earn them. Make the achievements viewable and reset them between sessions.
+
+Page Flow & Miscellaneous
+
+Improve lobby table list: In the lobby, the placeholder cards for tables never populate; there’s no clear feedback when no tables exist. Ensure tables load correctly or show a message explaining that no tables are available.
+
+Fix back‑button behaviour: Using the browser’s back button doesn’t return the user to the previous page, likely due to client‑side routing. Handle the back button so it navigates logically through landing → lobby → table.
