@@ -98,13 +98,22 @@ export function DraggableChip({ value, onDrop, disabled = false, className = '',
     }
   };
 
-  // Get chip color based on value
+  // Get chip color based on value - crypto theme with denomination-based colors
   const getChipColor = (amount: number) => {
-    if (amount >= 100) return 'bg-black text-white';
-    if (amount >= 50) return 'bg-blue-600 text-white';
-    if (amount >= 25) return 'bg-green-600 text-white';
-    if (amount >= 10) return 'bg-red-600 text-white';
-    return 'bg-white text-black';
+    if (amount >= 100) return 'bg-gradient-to-br from-poker-chipGold to-yellow-600 text-black';
+    if (amount >= 50) return 'bg-gradient-to-br from-purple-600 to-pink-600 text-white';
+    if (amount >= 25) return 'bg-gradient-to-br from-purple-500 to-purple-700 text-white';
+    if (amount >= 10) return 'bg-gradient-to-br from-cyan-500 to-cyan-700 text-white';
+    return 'bg-gradient-to-br from-gray-600 to-gray-800 text-white';
+  };
+  
+  // Get chip border and glow based on value
+  const getChipBorderAndGlow = (amount: number) => {
+    if (amount >= 100) return 'border-poker-chipGold shadow-gold-glow';
+    if (amount >= 50) return 'border-purple-500 shadow-purple-glow';
+    if (amount >= 25) return 'border-purple-400 shadow-purple-glow-sm';
+    if (amount >= 10) return 'border-cyan-500 shadow-cyan-glow';
+    return 'border-gray-500';
   };
 
   return (
@@ -131,7 +140,7 @@ export function DraggableChip({ value, onDrop, disabled = false, className = '',
       >
         <div className={`relative ${isDragging ? 'shadow-2xl' : 'shadow-lg'} transition-shadow`}>
           {/* Custom chip with value display */}
-          <div className={`w-16 h-16 rounded-full ${getChipColor(value)} border-2 border-yellow-600 shadow-lg chip-shine flex items-center justify-center font-bold text-sm ${isDragging ? 'scale-110' : ''}`}>
+          <div className={`w-16 h-16 rounded-full ${getChipColor(value)} border-2 ${getChipBorderAndGlow(value)} chip-shine flex items-center justify-center font-bold text-sm ${isDragging ? 'scale-110' : ''} transition-all duration-300`}>
             ${value}
           </div>
           

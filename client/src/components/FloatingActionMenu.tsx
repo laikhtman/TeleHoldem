@@ -132,15 +132,15 @@ export function FloatingActionMenu({
       {/* Main FAB button */}
       <motion.button
         onClick={handleToggle}
-        className="w-14 h-14 min-h-[56px] rounded-full bg-poker-chipGold text-black shadow-xl flex items-center justify-center relative overflow-hidden"
+        className="w-14 h-14 min-h-[56px] rounded-full bg-gradient-to-br from-purple-600 to-pink-600 text-white shadow-purple-glow shadow-xl flex items-center justify-center relative overflow-hidden"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         animate={{ rotate: isOpen ? 45 : 0 }}
         aria-label="Open action menu"
         data-testid="fab-main"
       >
-        {/* Ripple effect background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-yellow-400 to-yellow-600" />
+        {/* Ripple effect background - purple/pink gradient matching crypto theme */}
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-600 to-pink-600" />
         
         {/* Icon */}
         <motion.div

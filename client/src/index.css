@@ -3235,11 +3235,42 @@ input[type="range"]::-moz-range-thumb {
   }
 }
 
-/* Smooth transition for all elements */
-* {
+/* Smooth transition for theme changes - only when theme is switching */
+html.theme-transition * {
   transition: color 0.3s ease, 
               background-color 0.3s ease, 
               border-color 0.3s ease,
-              box-shadow 0.3s ease,
-              transform 0.3s ease;
+              box-shadow 0.3s ease !important;
+}
+
+/* ================================================
+   CRITICAL GLASS MORPHISM FIXES
+   ================================================ */
+/* Ensure glass morphism effects work across all browsers */
+.glass-panel,
+.player-seat,
+[class*="glass"] {
+  background: var(--glass-panel) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  border: 1px solid var(--glass-border) !important;
+}
+
+/* Force crypto table gradient background */
+.crypto-table {
+  background: radial-gradient(ellipse at center, #13111C 0%, #0A0A0F 100%) !important;
+}
+
+/* Ensure gradient buttons show properly */
+.btn-gradient-primary {
+  background: var(--gradient-button) !important;
+  background: linear-gradient(135deg, #7C3AED 0%, #DB2777 100%) !important;
+}
+
+/* Fix for Start New Hand button - ensure gradient is applied */
+[data-testid="button-start-hand"],
+[data-testid="button-start-hand-mobile"] {
+  background: linear-gradient(135deg, #7C3AED 0%, #DB2777 100%) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4) !important;
 }

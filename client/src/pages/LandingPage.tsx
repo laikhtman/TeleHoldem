@@ -51,8 +51,8 @@ export default function LandingPage() {
             <Card className="border-2 h-full flex flex-col focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 hover:border-primary/50">
               <CardHeader className="p-6 pb-4">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 rounded-lg bg-green-500/10">
-                    <Zap className="w-6 h-6 text-green-500" />
+                  <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/10">
+                    <Zap className="w-6 h-6 text-accent" />
                   </div>
                   <div>
                     <CardTitle className="text-xl">Demo Mode</CardTitle>
@@ -65,15 +65,15 @@ export default function LandingPage() {
               <CardContent className="p-6 pt-2 flex-1 flex flex-col">
                 <ul className="space-y-3 mb-6 flex-1">
                   <li className="flex items-center gap-3">
-                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
                     <span className="text-sm">Instant access</span>
                   </li>
                   <li className="flex items-center gap-3">
-                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
                     <span className="text-sm">All features unlocked</span>
                   </li>
                   <li className="flex items-center gap-3">
-                    <AlertCircle className="w-5 h-5 text-yellow-500 flex-shrink-0" />
+                    <AlertCircle className="w-5 h-5 text-poker-chipGold flex-shrink-0" />
                     <span className="text-sm">Progress not saved</span>
                   </li>
                 </ul>
@@ -108,8 +108,8 @@ export default function LandingPage() {
             <Card className="border-2 h-full flex flex-col focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 hover:border-primary/50">
               <CardHeader className="p-6 pb-4">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 rounded-lg bg-blue-500/10">
-                    <MessageCircle className="w-6 h-6 text-blue-500" />
+                  <div className="p-2 rounded-lg bg-gradient-to-br from-cyan-500/10 to-blue-500/10">
+                    <MessageCircle className="w-6 h-6 text-poker-accent" />
                   </div>
                   <div>
                     <CardTitle className="text-xl">Telegram App</CardTitle>
@@ -122,21 +122,21 @@ export default function LandingPage() {
               <CardContent className="p-6 pt-2 flex-1 flex flex-col">
                 <ul className="space-y-3 mb-6 flex-1">
                   <li className="flex items-center gap-3">
-                    <CheckCircle className="w-5 h-5 text-blue-500 flex-shrink-0" />
+                    <CheckCircle className="w-5 h-5 text-poker-accent flex-shrink-0" />
                     <span className="text-sm">Save your progress</span>
                   </li>
                   <li className="flex items-center gap-3">
-                    <CheckCircle className="w-5 h-5 text-blue-500 flex-shrink-0" />
+                    <CheckCircle className="w-5 h-5 text-poker-accent flex-shrink-0" />
                     <span className="text-sm">Track statistics</span>
                   </li>
                   <li className="flex items-center gap-3">
-                    <CheckCircle className="w-5 h-5 text-blue-500 flex-shrink-0" />
+                    <CheckCircle className="w-5 h-5 text-poker-accent flex-shrink-0" />
                     <span className="text-sm">Secure authentication</span>
                   </li>
                 </ul>
                 <div className="space-y-3">
                   <div className="p-4 bg-muted rounded-lg text-center">
-                    <MessageCircle className="w-10 h-10 text-blue-500 mx-auto mb-3" />
+                    <MessageCircle className="w-10 h-10 text-poker-accent mx-auto mb-3" />
                     <p className="font-medium text-sm">Open in Telegram</p>
                     <p className="text-xs text-muted-foreground mt-1">
                       Full experience with saved progress
