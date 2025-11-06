@@ -251,6 +251,9 @@ export class GameEngine {
   }
 
   postBlinds(gameState: GameState, smallBlindAmount: number, bigBlindAmount: number): GameState {
+    console.log('[GameEngine] postBlinds called - small:', smallBlindAmount, 'big:', bigBlindAmount);
+    console.log('[GameEngine] Before blinds - player bets:', gameState.players.map(p => ({ name: p.name, bet: p.bet })));
+    
     let newState = { ...gameState };
     const players = newState.players;
     const dealerIndex = newState.dealerIndex;
@@ -261,12 +264,17 @@ export class GameEngine {
     // Post small blind
     const sbPlayer = players[smallBlindIndex];
     const smallBlindBet = Math.min(smallBlindAmount, sbPlayer.chips);
+    console.log('[GameEngine] Posting small blind:', sbPlayer.name, 'amount:', smallBlindBet);
     newState = this.playerBet(newState, smallBlindIndex, smallBlindBet, true);
 
     // Post big blind
     const bbPlayer = players[bigBlindIndex];
     const bigBlindBet = Math.min(bigBlindAmount, bbPlayer.chips);
+    console.log('[GameEngine] Posting big blind:', bbPlayer.name, 'amount:', bigBlindBet);
     newState = this.playerBet(newState, bigBlindIndex, bigBlindBet, true);
+    
+    console.log('[GameEngine] After blinds - player bets:', newState.players.map(p => ({ name: p.name, bet: p.bet })));
+    console.log('[GameEngine] After blinds - pots:', newState.pots);
     
     newState.currentBet = bigBlindAmount;
     newState.lastAction = `Blinds posted: $${smallBlindAmount}/$${bigBlindAmount}`;

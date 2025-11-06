@@ -292,21 +292,19 @@ export default function PokerGame() {
   const totalPotAmount = useMemo(() => {
     if (!gameState) return 0;
     
+    // The pots array already includes all bets that have been collected by calculatePots
+    // We should ONLY use the pots amount, not add current player bets
     const potAmount = gameState.pots.reduce((sum, pot) => sum + pot.amount, 0);
-    const currentBetsAmount = gameState.players.reduce((sum, player) => sum + player.bet, 0);
-    const total = potAmount + currentBetsAmount;
     
     // Log for debugging pot synchronization
     console.log('[PokerGame] Pot calculation:', {
       pots: gameState.pots,
       potAmount,
-      currentBetsAmount,
-      total,
       phase: gameState.phase
     });
     
-    return total;
-  }, [gameState?.pots, gameState?.players]);
+    return potAmount;
+  }, [gameState?.pots]);
 
   // Memoize side pots as well
   const sidePots = useMemo(() => gameState ? gameState.pots.map(p => p.amount) : [], [gameState?.pots]);
@@ -1838,7 +1836,8 @@ export default function PokerGame() {
                 className="crypto-table crypto-table-border rounded-[220px] w-full mx-auto relative"
                 style={{ 
                   aspectRatio: tableAspect,
-                  overflow: 'visible'
+                  overflow: 'visible',
+                  minHeight: '420px'
                 }}
               >
                 {/* Glow orbs for corner effects */}
@@ -2248,7 +2247,8 @@ export default function PokerGame() {
                 className="crypto-table crypto-table-border rounded-[220px] w-full mx-auto relative"
                 style={{ 
                   aspectRatio: tableAspect,
-                  overflow: 'visible'
+                  overflow: 'visible',
+                  minHeight: '300px'
                 }}
               >
                 {/* Glow orbs for corner effects - smaller for mobile */}
