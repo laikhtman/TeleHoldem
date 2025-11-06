@@ -1979,7 +1979,7 @@ export default function PokerGame() {
                 <Button 
                   onClick={startNewHand}
                   size="lg"
-                  className="w-full min-h-[48px] bg-poker-chipGold text-black hover:bg-poker-chipGold/90 font-bold text-base"
+                  className="w-full min-h-[48px] btn-gradient-primary font-bold text-base"
                   data-testid="button-start-hand"
                   aria-label="Start new hand"
                 >
@@ -2332,7 +2332,7 @@ export default function PokerGame() {
               <Button 
                 onClick={startNewHand}
                 size="lg"
-                className="w-full min-h-[48px] bg-poker-chipGold text-black hover:bg-poker-chipGold/90 font-bold text-base"
+                className="w-full min-h-[48px] btn-gradient-primary font-bold text-base"
                 data-testid="button-start-hand-mobile"
                 aria-label="Start new hand"
               >
