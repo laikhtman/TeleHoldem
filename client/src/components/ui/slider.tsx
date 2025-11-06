@@ -51,8 +51,8 @@ const Slider = React.forwardRef<
         step={step}
         {...props}
       >
-        <SliderPrimitive.Track className="relative h-3 w-full grow overflow-visible rounded-full bg-secondary cursor-pointer">
-          <SliderPrimitive.Range className="absolute h-full bg-poker-chipGold rounded-full transition-all" />
+        <SliderPrimitive.Track className="relative h-3 w-full grow overflow-visible rounded-full bg-background/50 border border-border/50 cursor-pointer">
+          <SliderPrimitive.Range className="absolute h-full bg-gradient-to-r from-purple-600 to-pink-600 rounded-full transition-all shadow-[0_0_20px_rgba(139,92,246,0.3)]" />
           {/* Tick marks */}
           {showTickMarks && tickMarks.map((tick) => (
             <div
@@ -64,7 +64,7 @@ const Slider = React.forwardRef<
           ))}
         </SliderPrimitive.Track>
         <SliderPrimitive.Thumb 
-          className="block h-[44px] w-[44px] min-h-[44px] min-w-[44px] rounded-full border-3 border-poker-chipGold bg-poker-chipGold shadow-xl transition-all hover:scale-110 hover:shadow-2xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-poker-chipGold/20 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 cursor-grab active:cursor-grabbing active:scale-105"
+          className="block h-[44px] w-[44px] min-h-[44px] min-w-[44px] rounded-full border-2 border-white/20 bg-gradient-to-br from-white to-purple-300 shadow-[0_0_25px_rgba(139,92,246,0.5)] transition-all hover:scale-110 hover:shadow-[0_0_35px_rgba(139,92,246,0.7)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-purple-500/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 cursor-grab active:cursor-grabbing active:scale-105"
           style={{ minWidth: '44px', minHeight: '44px', width: '44px', height: '44px' }}
           aria-label="Buy-in amount slider" 
         />

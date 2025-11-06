@@ -376,81 +376,71 @@ export function ActionControls({
       )}
 
       <div className="flex gap-2 xs:gap-3 md:gap-2 lg:gap-4 justify-center flex-wrap">
-        {/* Fold Button - Destructive variant (red) */}
-        <Button
+        {/* Fold Button - Destructive gradient (red/pink) */}
+        <button
           onClick={handleFold}
-          variant="destructive"
-          size="lg"
           disabled={disabled}
           data-testid="button-fold"
-          className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] min-h-[56px] text-base font-bold touch-manipulation"
-          style={{ touchAction: 'manipulation', minHeight: '56px' }}
+          className="btn-gradient-destructive min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] touch-manipulation"
+          style={{ touchAction: 'manipulation' }}
           aria-label="Fold your hand. Keyboard shortcut: F key"
           aria-disabled={disabled}
         >
-          {isProcessing ? (<><PokerSpinner className="mr-2" size={16} /> Processing...</>) : (<>Fold <span className="text-xs ml-1 opacity-70">(F)</span></>)}
-        </Button>
+          <span>{isProcessing ? (<><PokerSpinner className="mr-2" size={16} /> Processing...</>) : (<>FOLD <span className="text-xs ml-1 opacity-70">(F)</span></>)}</span>
+        </button>
         
-        {/* Check/Call Button - Primary variant */}
+        {/* Check/Call Button - Cyan gradient */}
         {canCheck ? (
           <motion.div key="check" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}>
-            <Button
+            <button
               onClick={handleCheck}
-              variant="default"
-              size="lg"
               disabled={disabled}
               data-testid="button-check"
-              className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] min-h-[56px] text-base font-bold touch-manipulation"
-              style={{ touchAction: 'manipulation', minHeight: '56px' }}
+              className="btn-gradient-secondary min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] touch-manipulation"
+              style={{ touchAction: 'manipulation' }}
               aria-label="Check - pass your turn without betting. Keyboard shortcut: C key"
               aria-disabled={disabled}
             >
-              {isProcessing ? (<><PokerSpinner className="mr-2" size={16} /> Processing...</>) : (<>Check <span className="text-xs ml-1 opacity-70">(C)</span></>)}
-            </Button>
+              <span>{isProcessing ? (<><PokerSpinner className="mr-2" size={16} /> Processing...</>) : (<>CHECK <span className="text-xs ml-1 opacity-70">(C)</span></>)}</span>
+            </button>
           </motion.div>
         ) : (
           <motion.div key="call" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}>
-            <Button
+            <button
               onClick={handleCall}
-              variant="default"
-              size="lg"
               disabled={disabled || amountToCall <= 0}
               data-testid="button-call"
-              className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] min-h-[56px] text-base font-bold touch-manipulation"
-              style={{ touchAction: 'manipulation', minHeight: '56px' }}
+              className="btn-gradient-secondary min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] touch-manipulation"
+              style={{ touchAction: 'manipulation' }}
               aria-label={`Call ${amountToCall} dollars to match the current bet. Keyboard shortcut: C key`}
               aria-disabled={disabled || amountToCall <= 0}
             >
-              {isProcessing ? (<><PokerSpinner className="mr-2" size={16} /> Processing...</>) : (<>Call ${amountToCall} <span className="text-xs ml-1 opacity-70">(C)</span></>)}
-            </Button>
+              <span>{isProcessing ? (<><PokerSpinner className="mr-2" size={16} /> Processing...</>) : (<>CALL ${amountToCall} <span className="text-xs ml-1 opacity-70">(C)</span></>)}</span>
+            </button>
           </motion.div>
         )}
 
         {!canCheck && (
-          <Button
+          <button
             onClick={handleCall}
-            variant="outline"
-            size="lg"
             disabled={disabled || amountToCall <= 0}
             data-testid="button-snap-call"
-            className="min-w-[110px] min-h-[56px] text-base font-semibold"
-            style={{ minHeight: '56px' }}
+            className="btn-snap-call btn-gradient-secondary min-w-[110px] touch-manipulation"
+            style={{ touchAction: 'manipulation' }}
             aria-label={`Snap call ${amountToCall} dollars`}
           >
-            Snap Call
-          </Button>
+            <span>SNAP CALL</span>
+          </button>
         )}
         
-        {/* Raise Button - Secondary variant, only shown when raising is allowed */}
+        {/* Raise Button - Primary purple/pink gradient, only shown when raising is allowed */}
         {(canRaise || canBet) && (
-          <Button
+          <button
             onClick={handleBetOrRaise}
-            variant="secondary"
-            size="lg"
             disabled={disabled || (!canRaise && !canBet)}
             data-testid="button-bet-raise"
-            className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[140px] min-h-[56px] text-base font-bold touch-manipulation"
-            style={{ touchAction: 'manipulation', minHeight: '56px' }}
+            className="btn-gradient-primary min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[140px] touch-manipulation"
+            style={{ touchAction: 'manipulation' }}
             aria-label={currentBet === 0 ? `Bet ${betAmount} dollars. Keyboard shortcut: R key` : `Raise to ${betAmount} dollars. Keyboard shortcut: R key`}
             aria-disabled={disabled || (!canRaise && !canBet)}
             onMouseDown={startLongPress}
@@ -459,24 +449,22 @@ export function ActionControls({
             onTouchStart={startLongPress}
             onTouchEnd={cancelLongPress}
           >
-            {isProcessing ? (<><PokerSpinner className="mr-2" size={16} /> Processing...</>) : (<>{currentBet === 0 ? `Bet $${betAmount}` : `Raise to $${betAmount}`} <span className="text-xs ml-1 opacity-70">(R)</span></>)}
-          </Button>
+            <span>{isProcessing ? (<><PokerSpinner className="mr-2" size={16} /> Processing...</>) : (<>{currentBet === 0 ? `BET $${betAmount}` : `RAISE TO $${betAmount}`} <span className="text-xs ml-1 opacity-70">(R)</span></>)}</span>
+          </button>
         )}
         
-        {/* All-in Button - Special highlight color */}
-        <Button
+        {/* All-in Button - Special gold gradient with pulse animation */}
+        <button
           onClick={handleAllIn}
-          variant="outline"
-          size="lg"
           disabled={disabled || maxBet <= (currentBet > 0 ? minRaiseAmount : minBet)}
           data-testid="button-all-in"
-          className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[140px] min-h-[56px] text-base font-bold bg-poker-chipGold/20 border-2 border-poker-chipGold text-poker-chipGold hover:bg-poker-chipGold/30 touch-manipulation"
-          style={{ touchAction: 'manipulation', minHeight: '56px' }}
+          className="btn-gradient-allin min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[140px] touch-manipulation"
+          style={{ touchAction: 'manipulation' }}
           aria-label={`Go all-in with ${maxBet} dollars. Keyboard shortcut: A key`}
           aria-disabled={disabled || maxBet <= (currentBet > 0 ? minRaiseAmount : minBet)}
         >
-          {isProcessing ? (<><PokerSpinner className="mr-2" size={16} /> Processing...</>) : (<>All-in ${maxBet} <span className="text-xs ml-1 opacity-70">(A)</span></>)}
-        </Button>
+          <span>{isProcessing ? (<><PokerSpinner className="mr-2" size={16} /> Processing...</>) : (<>ALL-IN ${maxBet} <span className="text-xs ml-1 opacity-70">(A)</span></>)}</span>
+        </button>
       </div>
 
       {maxBet >= minBet && (
@@ -494,7 +482,7 @@ export function ActionControls({
               <div className="flex items-center gap-2">
                 <motion.span 
                   key={betAmount}
-                  className="text-lg font-mono font-bold text-poker-chipGold" 
+                  className="bet-value-display text-2xl font-mono font-bold" 
                   data-testid="text-bet-amount"
                   initial={{ scale: 1 }}
                   animate={{ scale: [1, 1.1] }}
@@ -565,116 +553,98 @@ export function ActionControls({
             </div>
           </div>
 
-          {/* Large preset bet buttons */}
+          {/* Large preset bet buttons with glass morphism */}
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground text-center">Quick bet options:</p>
             <div className="flex gap-2 justify-center flex-wrap">
               {potSize > 0 && Math.floor(potSize * 0.66) <= maxBet && (
-                <Button
+                <button
                   onClick={() => handleQuickBet(Math.floor(potSize * 0.66))}
-                  variant={betAmount === Math.floor(potSize * 0.66) ? "default" : "outline"}
-                  size="lg"
                   disabled={disabled || Math.floor(potSize * 0.66) < (currentBet > 0 ? minRaiseAmount : minBet)}
                   data-testid="button-quick-protection"
-                  className={`min-w-[100px] min-h-[48px] font-bold transition-all ${
-                    betAmount === Math.floor(potSize * 0.66) ? 'ring-2 ring-primary ring-offset-2' : ''
+                  className={`quick-bet-chip min-w-[100px] ${
+                    betAmount === Math.floor(potSize * 0.66) ? 'ring-2 ring-purple-500 ring-offset-2' : ''
                   }`}
-                  style={{ minHeight: '48px' }}
                   aria-label={`Protection bet two thirds pot: ${Math.floor(potSize * 0.66)} dollars`}
                 >
                   <div className="flex flex-col items-center">
-                    <span className="text-base">2/3 POT</span>
+                    <span className="text-base font-bold uppercase">2/3 POT</span>
                     <span className="text-[10px] opacity-80">Protect</span>
                   </div>
-                </Button>
+                </button>
               )}
               {potSize > 0 && Math.floor(potSize / 3) <= maxBet && (
-                <Button
+                <button
                   onClick={() => handleQuickBet(Math.floor(potSize / 3))}
-                  variant={betAmount === Math.floor(potSize / 3) ? "default" : "outline"}
-                  size="lg"
                   disabled={disabled || Math.floor(potSize / 3) < (currentBet > 0 ? minRaiseAmount : minBet)}
                   data-testid="button-quick-third-pot"
-                  className={`min-w-[100px] min-h-[48px] font-bold transition-all ${
-                    betAmount === Math.floor(potSize / 3) ? 'ring-2 ring-primary ring-offset-2' : ''
+                  className={`quick-bet-chip min-w-[100px] ${
+                    betAmount === Math.floor(potSize / 3) ? 'ring-2 ring-purple-500 ring-offset-2' : ''
                   }`}
-                  style={{ minHeight: '48px' }}
                   aria-label={`Quick bet one third pot: ${Math.floor(potSize / 3)} dollars`}
                 >
                   <div className="flex flex-col items-center">
-                    <span className="text-base">1/3 POT</span>
+                    <span className="text-base font-bold uppercase">1/3 POT</span>
                     <span className="text-[10px] opacity-80">Value</span>
                   </div>
-                </Button>
+                </button>
               )}
-              <Button
+              <button
                 onClick={() => handleQuickBet(halfPot)}
-                variant={betAmount === halfPot ? "default" : "outline"}
-                size="lg"
                 disabled={disabled || halfPot < (currentBet > 0 ? minRaiseAmount : minBet) || halfPot > maxBet}
                 data-testid="button-quick-half-pot"
-                className={`min-w-[100px] min-h-[48px] font-bold transition-all ${
-                  betAmount === halfPot ? 'ring-2 ring-primary ring-offset-2' : ''
+                className={`quick-bet-chip min-w-[100px] ${
+                  betAmount === halfPot ? 'ring-2 ring-purple-500 ring-offset-2' : ''
                 }`}
-                style={{ minHeight: '48px' }}
                 aria-label={`Quick bet half pot: ${halfPot} dollars`}
               >
                 <div className="flex flex-col items-center">
-                  <span className="text-base">½ POT</span>
+                  <span className="text-base font-bold uppercase">½ POT</span>
                   <span className="text-xs opacity-80">${halfPot}</span>
                 </div>
-              </Button>
-              <Button
+              </button>
+              <button
                 onClick={() => handleQuickBet(potSize)}
-                variant={betAmount === potSize ? "default" : "outline"}
-                size="lg"
                 disabled={disabled || potSize < (currentBet > 0 ? minRaiseAmount : minBet) || potSize > maxBet}
                 data-testid="button-quick-pot"
-                className={`min-w-[100px] min-h-[48px] font-bold transition-all ${
-                  betAmount === potSize ? 'ring-2 ring-primary ring-offset-2' : ''
+                className={`quick-bet-chip min-w-[100px] ${
+                  betAmount === potSize ? 'ring-2 ring-purple-500 ring-offset-2' : ''
                 }`}
-                style={{ minHeight: '48px' }}
                 aria-label={`Quick bet pot size: ${potSize} dollars`}
               >
                 <div className="flex flex-col items-center">
-                  <span className="text-base">POT</span>
+                  <span className="text-base font-bold uppercase">POT</span>
                   <span className="text-xs opacity-80">${potSize}</span>
                 </div>
-              </Button>
-              <Button
+              </button>
+              <button
                 onClick={() => handleQuickBet(potSize * 2)}
-                variant={betAmount === potSize * 2 ? "default" : "outline"}
-                size="lg"
                 disabled={disabled || potSize * 2 < (currentBet > 0 ? minRaiseAmount : minBet) || potSize * 2 > maxBet}
                 data-testid="button-quick-2x-pot"
-                className={`min-w-[100px] min-h-[48px] font-bold transition-all ${
-                  betAmount === potSize * 2 ? 'ring-2 ring-primary ring-offset-2' : ''
+                className={`quick-bet-chip min-w-[100px] ${
+                  betAmount === potSize * 2 ? 'ring-2 ring-purple-500 ring-offset-2' : ''
                 }`}
-                style={{ minHeight: '48px' }}
                 aria-label={`Quick bet double pot: ${potSize * 2} dollars`}
               >
                 <div className="flex flex-col items-center">
-                  <span className="text-base">2× POT</span>
+                  <span className="text-base font-bold uppercase">2× POT</span>
                   <span className="text-xs opacity-80">${potSize * 2}</span>
                 </div>
-              </Button>
-              <Button
+              </button>
+              <button
                 onClick={() => handleQuickBet(maxBet)}
-                variant={betAmount === maxBet ? "default" : "outline"}
-                size="lg"
                 disabled={disabled || maxBet <= (currentBet > 0 ? minRaiseAmount : minBet)}
                 data-testid="button-quick-all-in-preset"
-                className={`min-w-[100px] min-h-[48px] font-bold bg-poker-chipGold/20 border-2 border-poker-chipGold text-poker-chipGold hover:bg-poker-chipGold/30 transition-all ${
-                  betAmount === maxBet ? 'ring-2 ring-poker-chipGold ring-offset-2' : ''
+                className={`quick-bet-chip-allin min-w-[100px] ${
+                  betAmount === maxBet ? 'ring-2 ring-yellow-500 ring-offset-2' : ''
                 }`}
-                style={{ minHeight: '48px' }}
                 aria-label={`Set bet to all-in amount: ${maxBet} dollars`}
               >
                 <div className="flex flex-col items-center">
-                  <span className="text-base">ALL-IN</span>
+                  <span className="text-base font-bold uppercase">ALL-IN</span>
                   <span className="text-xs opacity-90">${maxBet}</span>
                 </div>
-              </Button>
+              </button>
             </div>
           </div>
           
