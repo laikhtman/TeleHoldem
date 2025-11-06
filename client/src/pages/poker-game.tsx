@@ -2014,17 +2014,21 @@ export default function PokerGame() {
                   })}
 
                   {/* Winner Celebration */}
-                  {winningPlayerIds.length > 0 && winningPlayerIds.map(winnerId => {
-                    const winner = gameState.players.find(p => p.id === winnerId);
-                    return winner ? (
-                      <WinnerCelebration 
-                        key={winnerId} 
-                        isWinner={true} 
-                        playerName={winner.name} 
-                        winAmount={winAmounts[winnerId] || 0}
-                      />
-                    ) : null;
-                  })}
+                  {winningPlayerIds.length > 0 && (
+                    <>
+                      {winningPlayerIds.map(winnerId => {
+                        const winner = gameState.players.find(p => p.id === winnerId);
+                        return winner ? (
+                          <WinnerCelebration 
+                            key={winnerId} 
+                            isWinner={true} 
+                            playerName={winner.name} 
+                            winAmount={winAmounts[winnerId] || 0}
+                          />
+                        ) : null;
+                      })}
+                    </>
+                  )}
 
                   {/* Last Action */}
                   {gameState.lastAction && (
@@ -2053,6 +2057,7 @@ export default function PokerGame() {
                 </div>
               </div>
             </div>
+          </div>
           </div>
           
           {/* Action Controls Dock - Fixed at Bottom of Center Column */}
