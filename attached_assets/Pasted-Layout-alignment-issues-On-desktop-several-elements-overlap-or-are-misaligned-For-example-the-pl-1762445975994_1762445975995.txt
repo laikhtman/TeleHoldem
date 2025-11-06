@@ -1,0 +1,23 @@
+Layout alignment issues: On desktop, several elements overlap or are misaligned. For example, the player avatars, bet amounts and cards sometimes sit on top of each other or drift toward the centre of the table
+teleholdem.replit.app
+. The buttons (e.g., “Raise” or “Snap Call”) occasionally overlap the community cards or pot indicator, making them hard to click. On some screens the pot value text is clipped or hidden behind other elements.
+
+Button visibility: Some buttons such as the quick‑bet options and the pot‑odds helper were barely legible because they sit on dark backgrounds with low‑contrast text. The small “Start New Hand” button blends into the footer bar, and the thin slider bar for betting is difficult to see on dark monitors.
+
+Navigation flow: The navigation between the landing page, lobby and in‑game view feels disjointed. There is no clear way to return to the lobby once a demo game starts, and the user has to click “Game Over → Start New Game” to reset. Breadcrumbs or a simple back button would make it easier to navigate between screens.
+
+Mobile/responsive issues: I wasn’t able to use device emulation here, but based on how tightly packed the desktop layout already is, it’s clear the current design would not scale down well to a small screen. Elements aren’t arranged in a responsive grid, and there’s no sign of a mobile‑first stylesheet. On an iPhone‑sized viewport the overlapping cards and buttons are likely to stack unpredictably, and fixed‑size fonts and paddings will cause off‑screen overflow.
+
+Recommendations for the UI and mobile experience
+
+Implement a responsive design using CSS Flexbox/Grid. Define breakpoints for tablet and mobile widths and re‑arrange the table layout vertically for smaller screens (e.g., stack players in a column rather than around a circle).
+
+Consolidate control buttons into a consistent action bar with sufficient padding and contrast. Ensure call/raise/fold buttons are large enough to tap on a mobile device and are clearly separated from the card area.
+
+Provide a persistent navigation element (such as a hamburger menu) allowing users to return to the lobby, view stats, or exit to the landing page.
+
+Increase colour contrast for text and buttons, and use tooltips or labels to explain icons. Make sure all interactive elements meet accessibility guidelines.
+
+Thoroughly test the game in an iPhone emulator (e.g., Safari’s Responsive Design Mode or Chrome’s DevTools) at common device widths (320‑414 px). Verify that no elements overflow the viewport and that all buttons remain usable.
+
+Consider adding a tutorial or overlay on first load explaining the UI layout and controls.

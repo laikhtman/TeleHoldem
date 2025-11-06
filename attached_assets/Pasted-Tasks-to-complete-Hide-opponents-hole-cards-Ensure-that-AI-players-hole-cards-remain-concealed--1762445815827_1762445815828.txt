@@ -1,0 +1,23 @@
+Tasks to complete:
+
+Hide opponents’ hole cards: Ensure that AI players’ hole cards remain concealed until the showdown phase. Only the user’s own two cards should be visible during the hand. Modify whatever component or state currently renders opponents’ cards face‑up
+teleholdem.replit.app
+. Confirm that the reveal logic triggers only when a hand is over and a player must show their cards to claim a pot.
+
+Fix pot calculation and display: Audit the betting and pot‑tracking logic. The pot value should accumulate all bets, raises and calls across each betting round. When a player calls a bet, the pot should increase by the call amount. Remove any hard‑coded values (e.g., $60) from the pot display and rely on the computed pot total. Write unit tests to verify that pot totals update correctly after each action.
+
+Reset chip stacks for new games: When a player chooses “Start New Game,” reset all players’ chip stacks to the default buy‑in amount (e.g., $1000). Do not carry over winnings from the previous session unless a persistent cash‑game mode is intentionally supported. Ensure session statistics are also reset appropriately (hands won, biggest pot, achievements count, etc.).
+
+Constrain bets to valid amounts: Update the bet‑slider component and quick‑bet buttons so they cannot propose bets exceeding the player’s remaining stack or unrealistic pre‑flop multiples. For example, “2× pot” should be disabled if it exceeds the stack. Validate user inputs on the server/game logic side as well.
+
+Add fast‑forward option: Introduce a “Skip hand” or “Fast‑forward” button that becomes available when the user has folded or gone all‑in. Trigger immediate resolution of the remaining betting rounds and display the final result, then offer the “Start new hand” button.
+
+Guardrails & Testing:
+
+Do not alter core game rules (e.g., dealing sequence, hand ranking) beyond hiding cards and fixing pot totals.
+
+Ensure that UI state remains consistent after implementing the fixes; chip stacks, pot amounts and action buttons should reflect current game state at all times.
+
+Add automated tests covering pot calculations, card visibility, and session resets. Manually play a few hands in demo mode to confirm that the issues above are resolved and that no new problems (e.g., incorrect winner determination) arise.
+
+Document any assumptions or dependencies you discover while implementing these fixes.
