@@ -222,7 +222,12 @@ export function ActionControls({
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [disabled, canCheck, handleFold, handleCheck, handleCall, handleBetOrRaise, handleAllIn]);
 
-  const halfPot = Math.floor(potSize / 2);
+  // Calculate quick bet amounts, properly constrained to player's stack
+  const thirdPot = Math.min(Math.floor(potSize / 3), maxBet);
+  const halfPot = Math.min(Math.floor(potSize / 2), maxBet);
+  const fullPot = Math.min(potSize, maxBet);
+  const doublePot = Math.min(potSize * 2, maxBet);
+  
   const remainingChips = playerChips - betAmount;
   const betPercentageOfPot = potSize > 0 ? (betAmount / potSize) * 100 : 0;
   const betPercentageOfChips = playerChips > 0 ? (betAmount / playerChips) * 100 : 0;
@@ -573,25 +578,25 @@ export function ActionControls({
                   </div>
                 </button>
               )}
-              {potSize > 0 && Math.floor(potSize / 3) <= maxBet && (
+              {potSize > 0 && thirdPot >= minRequired && (
                 <button
-                  onClick={() => handleQuickBet(Math.floor(potSize / 3))}
-                  disabled={disabled || Math.floor(potSize / 3) < (currentBet > 0 ? minRaiseAmount : minBet)}
+                  onClick={() => handleQuickBet(thirdPot)}
+                  disabled={disabled || thirdPot < (currentBet > 0 ? minRaiseAmount : minBet)}
                   data-testid="button-quick-third-pot"
                   className={`quick-bet-chip min-w-[100px] ${
-                    betAmount === Math.floor(potSize / 3) ? 'ring-2 ring-purple-500 ring-offset-2' : ''
+                    betAmount === thirdPot ? 'ring-2 ring-purple-500 ring-offset-2' : ''
                   }`}
-                  aria-label={`Quick bet one third pot: ${Math.floor(potSize / 3)} dollars`}
+                  aria-label={`Quick bet one third pot: ${thirdPot} dollars`}
                 >
                   <div className="flex flex-col items-center">
                     <span className="text-base font-bold uppercase">1/3 POT</span>
-                    <span className="text-[10px] opacity-80">Value</span>
+                    <span className="text-xs opacity-80">${thirdPot}</span>
                   </div>
                 </button>
               )}
               <button
                 onClick={() => handleQuickBet(halfPot)}
-                disabled={disabled || halfPot < (currentBet > 0 ? minRaiseAmount : minBet) || halfPot > maxBet}
+                disabled={disabled || halfPot < (currentBet > 0 ? minRaiseAmount : minBet)}
                 data-testid="button-quick-half-pot"
                 className={`quick-bet-chip min-w-[100px] ${
                   betAmount === halfPot ? 'ring-2 ring-purple-500 ring-offset-2' : ''
@@ -604,31 +609,31 @@ export function ActionControls({
                 </div>
               </button>
               <button
-                onClick={() => handleQuickBet(potSize)}
-                disabled={disabled || potSize < (currentBet > 0 ? minRaiseAmount : minBet) || potSize > maxBet}
+                onClick={() => handleQuickBet(fullPot)}
+                disabled={disabled || fullPot < (currentBet > 0 ? minRaiseAmount : minBet)}
                 data-testid="button-quick-pot"
                 className={`quick-bet-chip min-w-[100px] ${
-                  betAmount === potSize ? 'ring-2 ring-purple-500 ring-offset-2' : ''
+                  betAmount === fullPot ? 'ring-2 ring-purple-500 ring-offset-2' : ''
                 }`}
-                aria-label={`Quick bet pot size: ${potSize} dollars`}
+                aria-label={`Quick bet pot size: ${fullPot} dollars`}
               >
                 <div className="flex flex-col items-center">
                   <span className="text-base font-bold uppercase">POT</span>
-                  <span className="text-xs opacity-80">${potSize}</span>
+                  <span className="text-xs opacity-80">${fullPot}</span>
                 </div>
               </button>
               <button
-                onClick={() => handleQuickBet(potSize * 2)}
-                disabled={disabled || potSize * 2 < (currentBet > 0 ? minRaiseAmount : minBet) || potSize * 2 > maxBet}
+                onClick={() => handleQuickBet(doublePot)}
+                disabled={disabled || doublePot < (currentBet > 0 ? minRaiseAmount : minBet)}
                 data-testid="button-quick-2x-pot"
                 className={`quick-bet-chip min-w-[100px] ${
-                  betAmount === potSize * 2 ? 'ring-2 ring-purple-500 ring-offset-2' : ''
+                  betAmount === doublePot ? 'ring-2 ring-purple-500 ring-offset-2' : ''
                 }`}
-                aria-label={`Quick bet double pot: ${potSize * 2} dollars`}
+                aria-label={`Quick bet double pot: ${doublePot} dollars`}
               >
                 <div className="flex flex-col items-center">
                   <span className="text-base font-bold uppercase">2× POT</span>
-                  <span className="text-xs opacity-80">${potSize * 2}</span>
+                  <span className="text-xs opacity-80">${doublePot}</span>
                 </div>
               </button>
               <button
