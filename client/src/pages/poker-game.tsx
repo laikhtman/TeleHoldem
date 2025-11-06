@@ -1103,6 +1103,10 @@ export default function PokerGame() {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       const activePlayers = gameEngine.getActivePlayers(currentState);
+      
+      // Check if we should fast-forward (all players are all-in or folded)
+      const shouldFastForward = currentState.players.filter(p => !p.folded && !p.allIn).length === 0;
+      
       if (activePlayers.length === 1) {
         const { winners, winningHand, bestCombos } = gameEngine.resolveShowdown(currentState);
         const winnerNames = winners.map(player => player.name).join(', ');
@@ -1157,6 +1161,40 @@ export default function PokerGame() {
         finalState = { ...finalState, phase: 'waiting' as GamePhase };
         setGameState(finalState);
         setIsProcessing(false);
+        return;
+      }
+      
+      // Fast-forward through remaining phases if all players are all-in
+      if (shouldFastForward && currentState.phase !== 'river' && currentState.phase !== 'showdown') {
+        toast({
+          variant: "info" as any,
+          title: "All-In Showdown",
+          description: "Fast-forwarding to showdown - all players are all-in!",
+          duration: 3000,
+        });
+        
+        // Quickly advance through remaining phases
+        while (currentState.phase !== 'river' && currentState.phase !== 'showdown') {
+          currentState = gameEngine.advancePhase(currentState);
+          
+          // Add history for community cards
+          if (currentState.phase === 'flop') {
+            currentState = addActionHistory(currentState, 'cards-dealt', 'Flop cards dealt');
+          } else if (currentState.phase === 'turn') {
+            currentState = addActionHistory(currentState, 'cards-dealt', 'Turn card dealt');
+          } else if (currentState.phase === 'river') {
+            currentState = addActionHistory(currentState, 'cards-dealt', 'River card dealt');
+          }
+          
+          setGameState({ ...currentState });
+          setPhaseKey(prev => prev + 1);
+          
+          // Short delay between phase transitions for visual effect
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+        
+        // Now resolve the showdown
+        await resolveShowdown(currentState);
         return;
       }
       
