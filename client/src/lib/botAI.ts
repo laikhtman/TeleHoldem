@@ -288,11 +288,17 @@ export class BotAI {
       if (targetInHand && handStrength > 0.35) {
         // Increase aggression against weak players
         if (callAmount === 0 && Math.random() < adjustedParams.betNoBet * 1.5) {
-          const betAmount = Math.min(Math.floor(totalPot * 0.75), player.chips);
+          const rawBetAmount = Math.floor(totalPot * 0.75);
+          // Round to nearest 5 or 10
+          const rounded = rawBetAmount < 100 ? Math.round(rawBetAmount / 5) * 5 : Math.round(rawBetAmount / 10) * 10;
+          const betAmount = Math.min(rounded, player.chips);
           return { action: 'bet', amount: betAmount };
         } else if (callAmount > 0 && handStrength > 0.45 && Math.random() < adjustedParams.raiseMult * 1.5) {
-          const raiseAmount = Math.min(currentBet * 2.5, player.chips);
-          return { action: 'raise', amount: Math.floor(raiseAmount) };
+          const rawRaiseAmount = Math.floor(currentBet * 2.5);
+          // Round to nearest 5 or 10
+          const rounded = rawRaiseAmount < 100 ? Math.round(rawRaiseAmount / 5) * 5 : Math.round(rawRaiseAmount / 10) * 10;
+          const raiseAmount = Math.min(rounded, player.chips);
+          return { action: 'raise', amount: raiseAmount };
         }
       }
     }
@@ -368,7 +374,7 @@ export class BotAI {
     
     // Very strong hand - raise for value with realistic sizing
     if (handStrength > 0.85) {
-      // Calculate raise sizes more realistically
+      // Calculate raise sizes more realistically - TOTAL AMOUNT MUST BE ROUNDED
       const minRaise = currentBet * 2;
       const sizeRoll = Math.random();
       let raiseAmount: number;
@@ -386,8 +392,14 @@ export class BotAI {
         else raiseAmount = Math.floor(currentBet * 2.5);                          // 2.5x
       }
       
-      // Round to nearest 10 and cap at player chips
-      raiseAmount = Math.min(Math.round(raiseAmount / 10) * 10, player.chips);
+      // Round the TOTAL raise amount to nearest 5 or 10
+      if (raiseAmount < 100) {
+        raiseAmount = Math.round(raiseAmount / 5) * 5;
+      } else {
+        raiseAmount = Math.round(raiseAmount / 10) * 10;
+      }
+      
+      raiseAmount = Math.min(raiseAmount, player.chips);
       return { action: 'raise', amount: Math.max(raiseAmount, minRaise) };
     }
     
@@ -405,7 +417,14 @@ export class BotAI {
           else if (sizeRoll < 0.8) raiseAmount = Math.floor(currentBet * 2.5); // 2.5x
           else raiseAmount = Math.floor(currentBet * 3);                       // 3x
           
-          raiseAmount = Math.min(Math.round(raiseAmount / 10) * 10, player.chips);
+          // Round the TOTAL raise amount to nearest 5 or 10
+          if (raiseAmount < 100) {
+            raiseAmount = Math.round(raiseAmount / 5) * 5;
+          } else {
+            raiseAmount = Math.round(raiseAmount / 10) * 10;
+          }
+          
+          raiseAmount = Math.min(raiseAmount, player.chips);
           return { action: 'raise', amount: Math.max(raiseAmount, minRaise) };
         }
       }
@@ -442,7 +461,14 @@ export class BotAI {
       else if (sizeRoll < 0.7) raiseAmount = Math.floor(currentBet * 3);    // 3x
       else raiseAmount = Math.floor(currentBet * 3.5 + totalPot * 0.25);   // 3.5x + pot fraction
       
-      raiseAmount = Math.min(Math.round(raiseAmount / 10) * 10, player.chips);
+      // Round the TOTAL raise amount to nearest 5 or 10
+      if (raiseAmount < 100) {
+        raiseAmount = Math.round(raiseAmount / 5) * 5;
+      } else {
+        raiseAmount = Math.round(raiseAmount / 10) * 10;
+      }
+      
+      raiseAmount = Math.min(raiseAmount, player.chips);
       return { action: 'raise', amount: Math.max(raiseAmount, minRaise) };
     }
     
@@ -695,10 +721,14 @@ export class BotAI {
     this.bluffHistory.set(handId, history);
     
     if (callAmount > 0) {
-      const raiseAmount = Math.min(callAmount + bluffAmount, player.chips);
+      const rawRaiseAmount = callAmount + bluffAmount;
+      // Round to nearest 5 or 10
+      const rounded = rawRaiseAmount < 100 ? Math.round(rawRaiseAmount / 5) * 5 : Math.round(rawRaiseAmount / 10) * 10;
+      const raiseAmount = Math.min(rounded, player.chips);
       return { action: 'raise', amount: raiseAmount };
     } else {
-      const betAmount = Math.min(Math.max(bluffAmount, 20), player.chips);
+      // Use the already-rounded bluffAmount from getRealisticBluffSize
+      const betAmount = Math.min(bluffAmount, player.chips);
       return { action: 'bet', amount: betAmount };
     }
   }
@@ -861,9 +891,12 @@ export class BotAI {
     // If we're being 3-bet too often, start 4-betting light occasionally
     if (adjustments.exploitMode && gameState.phase === 'pre-flop' && gameState.roundActionCount > 2) {
       if (handStrength > 0.3 && Math.random() < 0.25) { // 25% 4-bet frequency with decent hands
-        const fourBetAmount = Math.min(currentBet * 2.5, player.chips);
+        const rawFourBetAmount = Math.floor(currentBet * 2.5);
+        // Round to nearest 5 or 10
+        const rounded = rawFourBetAmount < 100 ? Math.round(rawFourBetAmount / 5) * 5 : Math.round(rawFourBetAmount / 10) * 10;
+        const fourBetAmount = Math.min(rounded, player.chips);
         if (fourBetAmount > currentBet) {
-          return { action: 'raise', amount: Math.floor(fourBetAmount) };
+          return { action: 'raise', amount: fourBetAmount };
         }
       }
     }
@@ -895,13 +928,19 @@ export class BotAI {
       if (callAmount > 0) {
         const raiseChance = params.raiseMult * 1.2; // Slightly more aggressive
         if (Math.random() < raiseChance && currentBet < player.chips) {
-          const raiseAmount = Math.min(currentBet * 2 + totalPot * 0.5, player.chips);
-          return { action: 'raise', amount: Math.floor(raiseAmount) };
+          const rawRaiseAmount = Math.floor(currentBet * 2 + totalPot * 0.5);
+          // Round to nearest 5 or 10
+          const rounded = rawRaiseAmount < 100 ? Math.round(rawRaiseAmount / 5) * 5 : Math.round(rawRaiseAmount / 10) * 10;
+          const raiseAmount = Math.min(rounded, player.chips);
+          return { action: 'raise', amount: raiseAmount };
         }
         return { action: 'call' };
       } else {
         if (Math.random() < params.betNoBet * 1.3) {
-          const betAmount = Math.min(Math.floor(totalPot * 0.6), player.chips);
+          const rawBetAmount = Math.floor(totalPot * 0.6);
+          // Round to nearest 5 or 10
+          const rounded = rawBetAmount < 100 ? Math.round(rawBetAmount / 5) * 5 : Math.round(rawBetAmount / 10) * 10;
+          const betAmount = Math.min(rounded, player.chips);
           return { action: 'bet', amount: betAmount };
         }
         return { action: 'check' };
