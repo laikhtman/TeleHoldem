@@ -301,14 +301,38 @@ export class BotAI {
     const betSizeModifier = this.applyDifficultyMultiplier(1.0, 'bet_size');
     const foldProbabilityModifier = this.applyDifficultyMultiplier(1.0, 'fold_probability');
     
+    // Helper function for realistic bet sizing
+    const getRealisticBetSize = (potFraction: number, randomness: number = 0.15): number => {
+      const baseAmount = totalPot * potFraction;
+      const variation = baseAmount * (Math.random() * randomness * 2 - randomness);
+      const betAmount = Math.floor((baseAmount + variation) * betSizeModifier);
+      // Round to nearest 5 or 10 for more realistic amounts
+      const rounded = betAmount < 100 ? Math.round(betAmount / 5) * 5 : Math.round(betAmount / 10) * 10;
+      return Math.min(Math.max(rounded, 10), player.chips);
+    };
+    
     if (callAmount === 0) { // No bet to call
-      // Strong hand - value bet
+      // Strong hand - value bet with varied sizing
       if (handStrength > 0.75) {
-        const betAmount = Math.min(
-          Math.floor(totalPot * (adjustedParams.raiseMult + Math.random() * 0.3) * betSizeModifier),
-          player.chips
-        );
-        return { action: 'bet', amount: Math.max(betAmount, 20) };
+        // Mix between different bet sizes based on personality and board
+        const sizeRoll = Math.random();
+        let betAmount: number;
+        
+        if (personality === 'LAG' || personality === 'TAG') {
+          // Aggressive players use larger sizes more often
+          if (sizeRoll < 0.3) betAmount = getRealisticBetSize(0.5);      // 50% pot
+          else if (sizeRoll < 0.6) betAmount = getRealisticBetSize(0.66);  // 2/3 pot
+          else if (sizeRoll < 0.85) betAmount = getRealisticBetSize(0.75); // 75% pot
+          else betAmount = getRealisticBetSize(1.0);                       // Pot sized
+        } else {
+          // Passive players use smaller sizes more often
+          if (sizeRoll < 0.4) betAmount = getRealisticBetSize(0.33);  // 1/3 pot
+          else if (sizeRoll < 0.7) betAmount = getRealisticBetSize(0.5); // 50% pot
+          else if (sizeRoll < 0.9) betAmount = getRealisticBetSize(0.66); // 2/3 pot
+          else betAmount = getRealisticBetSize(0.75);                    // 75% pot
+        }
+        
+        return { action: 'bet', amount: betAmount };
       }
       
       // Medium hand - sometimes bet (based on personality)
@@ -316,11 +340,23 @@ export class BotAI {
         // Continuation betting frequency
         const cbetChance = phase === 'flop' ? adjustedParams.cbetFrequency : adjustedParams.betNoBet;
         if (Math.random() < cbetChance) {
-          const betAmount = Math.min(
-            Math.floor(totalPot * (0.4 + Math.random() * 0.2) * betSizeModifier),
-            player.chips
-          );
-          return { action: 'bet', amount: Math.max(betAmount, 20) };
+          // Use smaller sizes for continuation bets
+          const sizeRoll = Math.random();
+          let betAmount: number;
+          
+          if (phase === 'flop') {
+            // Flop c-bets are typically smaller
+            if (sizeRoll < 0.5) betAmount = getRealisticBetSize(0.33);  // 1/3 pot
+            else if (sizeRoll < 0.8) betAmount = getRealisticBetSize(0.5); // 50% pot
+            else betAmount = getRealisticBetSize(0.66);                     // 2/3 pot
+          } else {
+            // Turn and river bets are larger
+            if (sizeRoll < 0.3) betAmount = getRealisticBetSize(0.5);   // 50% pot
+            else if (sizeRoll < 0.7) betAmount = getRealisticBetSize(0.66); // 2/3 pot
+            else betAmount = getRealisticBetSize(0.75);                    // 75% pot
+          }
+          
+          return { action: 'bet', amount: betAmount };
         }
       }
       
@@ -330,13 +366,29 @@ export class BotAI {
     // Facing a bet
     const potOdds = callAmount / (totalPot + callAmount);
     
-    // Very strong hand - raise for value
+    // Very strong hand - raise for value with realistic sizing
     if (handStrength > 0.85) {
-      const raiseAmount = Math.min(
-        callAmount + Math.floor(totalPot * (adjustedParams.raiseMult + Math.random() * 0.4) * betSizeModifier),
-        player.chips
-      );
-      return { action: 'raise', amount: raiseAmount };
+      // Calculate raise sizes more realistically
+      const minRaise = currentBet * 2;
+      const sizeRoll = Math.random();
+      let raiseAmount: number;
+      
+      if (personality === 'LAG' || personality === 'TAG') {
+        // Aggressive players make larger raises
+        if (sizeRoll < 0.3) raiseAmount = Math.floor(minRaise);                    // Min raise
+        else if (sizeRoll < 0.6) raiseAmount = Math.floor(currentBet * 2.5);      // 2.5x
+        else if (sizeRoll < 0.85) raiseAmount = Math.floor(currentBet * 3);       // 3x
+        else raiseAmount = Math.floor(currentBet * 3.5 + totalPot * 0.3);        // 3.5x + pot fraction
+      } else {
+        // Passive players make smaller raises
+        if (sizeRoll < 0.5) raiseAmount = Math.floor(minRaise);                    // Min raise
+        else if (sizeRoll < 0.8) raiseAmount = Math.floor(currentBet * 2.25);     // 2.25x
+        else raiseAmount = Math.floor(currentBet * 2.5);                          // 2.5x
+      }
+      
+      // Round to nearest 10 and cap at player chips
+      raiseAmount = Math.min(Math.round(raiseAmount / 10) * 10, player.chips);
+      return { action: 'raise', amount: Math.max(raiseAmount, minRaise) };
     }
     
     // Strong hand - call or raise based on personality
@@ -344,11 +396,17 @@ export class BotAI {
       if (personality === 'LAG' || personality === 'TAG') {
         // Aggressive personalities raise more often
         if (Math.random() < 0.4) {
-          const raiseAmount = Math.min(
-            callAmount + Math.floor(totalPot * (0.5 + Math.random() * 0.3) * betSizeModifier),
-            player.chips
-          );
-          return { action: 'raise', amount: raiseAmount };
+          // Use realistic raise sizes
+          const minRaise = currentBet * 2;
+          const sizeRoll = Math.random();
+          let raiseAmount: number;
+          
+          if (sizeRoll < 0.5) raiseAmount = Math.floor(minRaise);              // Min raise
+          else if (sizeRoll < 0.8) raiseAmount = Math.floor(currentBet * 2.5); // 2.5x
+          else raiseAmount = Math.floor(currentBet * 3);                       // 3x
+          
+          raiseAmount = Math.min(Math.round(raiseAmount / 10) * 10, player.chips);
+          return { action: 'raise', amount: Math.max(raiseAmount, minRaise) };
         }
       }
       return { action: 'call', amount: callAmount };
@@ -374,12 +432,18 @@ export class BotAI {
     
     // Weak hand - consider bluff raise or fold
     if (handStrength < 0.2 && Math.random() < advancedBluffFrequency * 0.5) {
-      // Occasional bluff raise with very weak hands
-      const raiseAmount = Math.min(
-        callAmount + Math.floor(totalPot * (0.6 + Math.random() * 0.4) * betSizeModifier),
-        player.chips
-      );
-      return { action: 'raise', amount: raiseAmount };
+      // Occasional bluff raise with realistic sizing
+      const minRaise = currentBet * 2;
+      const sizeRoll = Math.random();
+      let raiseAmount: number;
+      
+      // Bluff raises tend to be larger to generate fold equity
+      if (sizeRoll < 0.3) raiseAmount = Math.floor(currentBet * 2.5);      // 2.5x
+      else if (sizeRoll < 0.7) raiseAmount = Math.floor(currentBet * 3);    // 3x
+      else raiseAmount = Math.floor(currentBet * 3.5 + totalPot * 0.25);   // 3.5x + pot fraction
+      
+      raiseAmount = Math.min(Math.round(raiseAmount / 10) * 10, player.chips);
+      return { action: 'raise', amount: Math.max(raiseAmount, minRaise) };
     }
     
     return { action: 'fold' };
@@ -574,25 +638,51 @@ export class BotAI {
     const totalPot = pots.reduce((acc, pot) => acc + pot.amount, 0);
     const callAmount = currentBet - player.bet;
     
-    // Calculate bluff size based on board texture and context
-    let bluffSizeFactor = params.raiseMult;
+    // Helper function for realistic bluff sizing
+    const getRealisticBluffSize = (potFraction: number): number => {
+      const baseAmount = totalPot * potFraction;
+      const variation = baseAmount * (Math.random() * 0.15 - 0.075); // ±7.5% variation
+      const betAmount = Math.floor((baseAmount + variation) * this.applyDifficultyMultiplier(1.0, 'bet_size'));
+      // Round to nearest 10 for more realistic amounts
+      const rounded = Math.round(betAmount / 10) * 10;
+      return Math.min(Math.max(rounded, 10), player.chips);
+    };
     
-    // Adjust size based on board texture
-    if (context.boardTexture) {
-      if (context.boardTexture.isDry) {
-        bluffSizeFactor *= 0.75; // Smaller bluffs on dry boards
-      } else if (context.boardTexture.isWet) {
-        bluffSizeFactor *= 1.25; // Larger bluffs on wet boards to rep strong hands
+    // Determine bluff sizing based on context
+    let bluffAmount: number;
+    const sizeRoll = Math.random();
+    
+    if (context.boardTexture && context.boardTexture.isDry) {
+      // Smaller bluffs on dry boards (30-60% pot)
+      if (sizeRoll < 0.5) bluffAmount = getRealisticBluffSize(0.33);      // 1/3 pot
+      else if (sizeRoll < 0.8) bluffAmount = getRealisticBluffSize(0.5);  // 50% pot
+      else bluffAmount = getRealisticBluffSize(0.6);                       // 60% pot
+    } else if (context.boardTexture && context.boardTexture.isWet) {
+      // Larger bluffs on wet boards to represent strength (60-100% pot)
+      if (sizeRoll < 0.3) bluffAmount = getRealisticBluffSize(0.6);       // 60% pot
+      else if (sizeRoll < 0.7) bluffAmount = getRealisticBluffSize(0.75); // 75% pot
+      else bluffAmount = getRealisticBluffSize(1.0);                       // Pot sized
+    } else {
+      // Default mixed sizing
+      if (sizeRoll < 0.35) bluffAmount = getRealisticBluffSize(0.5);     // 50% pot
+      else if (sizeRoll < 0.7) bluffAmount = getRealisticBluffSize(0.66); // 2/3 pot
+      else bluffAmount = getRealisticBluffSize(0.75);                      // 75% pot
+    }
+    
+    // River bluffs are typically more polarized
+    if (gameState.phase === 'river') {
+      const riverRoll = Math.random();
+      if (riverRoll < 0.4) {
+        // Small blocking bets
+        bluffAmount = getRealisticBluffSize(0.33);
+      } else if (riverRoll < 0.7) {
+        // Medium value-ish bets
+        bluffAmount = getRealisticBluffSize(0.66);
+      } else {
+        // Large polarized bets
+        bluffAmount = getRealisticBluffSize(Math.random() < 0.5 ? 1.0 : 1.25);
       }
     }
-    
-    // Polarize on the river
-    if (gameState.phase === 'river') {
-      bluffSizeFactor *= Math.random() < 0.5 ? 1.5 : 0.8; // Mix of large and medium bluffs
-    }
-    
-    // Calculate the bluff amount
-    const bluffAmount = Math.floor(totalPot * bluffSizeFactor * this.applyDifficultyMultiplier(1.0, 'bet_size'));
     
     // Record the bluff in history
     const handId = `${gameState.sessionStats.handsPlayed}`;
