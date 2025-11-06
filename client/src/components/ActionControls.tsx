@@ -235,13 +235,40 @@ export function ActionControls({
   const isSignificantBet = betPercentageOfChips > 50;
   // Simple guidance for bet sizing
   const offeredPotOdds = potSize + betAmount > 0 ? betAmount / (potSize + betAmount) : 0;
+  
+  // Stack-to-Pot Ratio (SPR) for intelligent sizing
+  const effectiveStack = Math.min(playerChips, maxBet);
+  const spr = potSize > 0 ? effectiveStack / potSize : 0;
+  
   const betSizingHint = (() => {
     if (betAmount < minRequired) return 'Below minimum — adjust up';
     if (betAmount > maxBet) return 'Exceeds stack — reduce amount';
+    
+    // Stack depth-based intelligent sizing
     if (potSize > 0) {
+      // Deep stack (SPR > 10): More room for multi-street play
+      if (spr > 10) {
+        if (betAmount <= potSize * 0.33) return 'Deep stack: Small sizing preserves SPR';
+        if (betAmount >= potSize * 1.5) return 'Deep stack: Overbet builds pot';
+      }
+      // Medium stack (SPR 4-10): Standard sizing
+      else if (spr >= 4) {
+        if (betAmount <= potSize * 0.5) return 'Medium stack: Half pot standard';
+        if (betAmount >= potSize * 0.9 && betAmount <= potSize * 1.1) return 'Medium stack: Pot-sized pressure';
+      }
+      // Short stack (SPR < 4): Commitment decisions
+      else if (spr > 0) {
+        if (betAmount >= effectiveStack * 0.33 && betAmount < effectiveStack) {
+          return 'Short stack: Commits >33% — consider all-in';
+        }
+        if (betAmount === effectiveStack) return 'Short stack: All-in maximizes fold equity';
+      }
+      
+      // General sizing guidance
       if (betAmount <= potSize * 0.25) return 'Small bet — offers opponents great odds';
       if (betAmount >= potSize * 0.9 && !isSignificantBet) return 'Near pot — strong pressure';
     }
+    
     if (isSignificantBet) return 'High risk — >50% of stack';
     return '';
   })();
