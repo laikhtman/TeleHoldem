@@ -1958,39 +1958,34 @@ export default function PokerGame() {
           {/* Game Table Area */}
           <div className="flex-1 overflow-hidden flex items-center justify-center p-6">
             <div className="w-full max-w-5xl">
-              {/* Crypto Gaming Table */}
+              {/* Crypto Gaming Table with Enhanced Neon Styling */}
               <div 
-                className="crypto-table crypto-table-border rounded-[220px] w-full mx-auto relative"
+                className="table-neon-trim w-full mx-auto relative"
                 style={{ 
                   aspectRatio: tableAspect,
                   overflow: 'visible',
                   minHeight: '420px'
                 }}
               >
-                {/* Glow orbs for corner effects */}
-                <div className="glow-orb glow-orb-purple" style={{ top: '-150px', left: '-150px' }} />
-                <div className="glow-orb glow-orb-pink" style={{ top: '-150px', right: '-150px' }} />
-                <div className="glow-orb glow-orb-cyan" style={{ bottom: '-150px', left: '-100px' }} />
-                <div className="glow-orb glow-orb-cyan" style={{ bottom: '-150px', right: '-100px' }} />
-                
-                {/* Grid pattern overlay */}
-                <div className="crypto-table-grid rounded-[220px]" />
-                
-                {/* Ambient particles */}
-                <div className="ambient-particle" style={{ top: '20%', left: '10%', animationDelay: '0s' }} />
-                <div className="ambient-particle" style={{ top: '30%', right: '15%', animationDelay: '2s' }} />
-                <div className="ambient-particle" style={{ top: '70%', left: '20%', animationDelay: '4s' }} />
-                <div className="ambient-particle" style={{ bottom: '20%', right: '25%', animationDelay: '6s' }} />
-                
-                {/* Inner Table Surface */}
                 <div 
-                  className="relative rounded-[210px] overflow-visible w-full h-full"
-                  style={{ 
-                    zIndex: 2
-                  }}
-                  data-testid="poker-table"
-                  aria-label={`Poker table - ${getPhaseTitle(gameState.phase)} phase - ${gameState.players.filter(p => !p.folded).length} players active`}
+                  className="table-neon-trim-inner poker-table-felt relative w-full h-full"
+                  ref={tableRef}
                 >
+                  {/* Corner accent glows for depth */}
+                  <div className="table-corner-glow top-left" />
+                  <div className="table-corner-glow top-right" />
+                  <div className="table-corner-glow bottom-left" />
+                  <div className="table-corner-glow bottom-right" />
+                  
+                  {/* Inner Table Surface */}
+                  <div 
+                    className="relative rounded-[210px] overflow-visible w-full h-full"
+                    style={{ 
+                      zIndex: 10
+                    }}
+                    data-testid="poker-table"
+                    aria-label={`Poker table - ${getPhaseTitle(gameState.phase)} phase - ${gameState.players.filter(p => !p.folded).length} players active`}
+                  >
                   {/* Community Cards */}
                   <CommunityCards 
                     cards={gameState.communityCards} 
@@ -2183,6 +2178,7 @@ export default function PokerGame() {
                 </div>
               </div>
             </div>
+            {/* Close table-neon-trim wrapper */}
           </div>
           </div>
           
@@ -2277,7 +2273,7 @@ export default function PokerGame() {
           />
         </div>
       </div>
-      
+
       {/* Mobile and Tablet Layout (< lg) */}
       <div className="lg:hidden flex flex-col min-h-screen">
         {/* Mobile/Tablet Header with Safe Area */}
@@ -2371,37 +2367,33 @@ export default function PokerGame() {
           {/* Mobile Game Table */}
           <div className="flex items-center justify-center h-full p-4">
             <div className="w-full max-w-lg">
-              {/* Crypto Gaming Table - Mobile */}
+              {/* Crypto Gaming Table with Enhanced Neon Styling - Mobile */}
               <div 
-                className="crypto-table crypto-table-border rounded-[220px] w-full mx-auto relative"
+                className="table-neon-trim w-full mx-auto relative"
                 style={{ 
                   aspectRatio: tableAspect,
                   overflow: 'visible',
                   minHeight: '300px'
                 }}
               >
-                {/* Glow orbs for corner effects - smaller for mobile */}
-                <div className="glow-orb glow-orb-purple" style={{ top: '-100px', left: '-100px', transform: 'scale(0.7)' }} />
-                <div className="glow-orb glow-orb-pink" style={{ top: '-100px', right: '-100px', transform: 'scale(0.7)' }} />
-                <div className="glow-orb glow-orb-cyan" style={{ bottom: '-80px', left: '-80px', transform: 'scale(0.6)' }} />
-                <div className="glow-orb glow-orb-cyan" style={{ bottom: '-80px', right: '-80px', transform: 'scale(0.6)' }} />
-                
-                {/* Grid pattern overlay */}
-                <div className="crypto-table-grid rounded-[220px]" />
-                
-                {/* Ambient particles - fewer for mobile performance */}
-                <div className="ambient-particle" style={{ top: '25%', left: '15%', animationDelay: '0s' }} />
-                <div className="ambient-particle" style={{ bottom: '25%', right: '20%', animationDelay: '3s' }} />
-                
-                {/* Inner Table Surface */}
                 <div 
-                  className="relative rounded-[210px] overflow-visible w-full h-full"
-                  style={{ 
-                    zIndex: 2
-                  }}
-                  data-testid="poker-table-mobile"
-                  aria-label={`Poker table - ${getPhaseTitle(gameState.phase)} phase - ${gameState.players.filter(p => !p.folded).length} players active`}
+                  className="table-neon-trim-inner poker-table-felt relative w-full h-full"
                 >
+                  {/* Corner accent glows for depth - smaller for mobile */}
+                  <div className="table-corner-glow top-left" style={{ transform: 'scale(0.7)' }} />
+                  <div className="table-corner-glow top-right" style={{ transform: 'scale(0.7)' }} />
+                  <div className="table-corner-glow bottom-left" style={{ transform: 'scale(0.6)' }} />
+                  <div className="table-corner-glow bottom-right" style={{ transform: 'scale(0.6)' }} />
+                  
+                  {/* Inner Table Surface */}
+                  <div 
+                    className="relative rounded-[210px] overflow-visible w-full h-full"
+                    style={{ 
+                      zIndex: 10
+                    }}
+                    data-testid="poker-table-mobile"
+                    aria-label={`Poker table - ${getPhaseTitle(gameState.phase)} phase - ${gameState.players.filter(p => !p.folded).length} players active`}
+                  >
                   {/* Community Cards */}
                   <CommunityCards 
                     cards={gameState.communityCards} 
@@ -2541,6 +2533,7 @@ export default function PokerGame() {
                       </div>
                     </div>
                   )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -2612,6 +2605,7 @@ export default function PokerGame() {
             </div>
           )}
         </div>
+        
         
         {/* Mobile Menu Sheet (for stats, history, etc) */}
         <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>

@@ -1006,9 +1006,129 @@ body {
     animation: flash-border calc(var(--animation-duration-normal) * 1.33) var(--ease-in-out);
   }
 
-  /* Crypto Table Styles - Modern Gaming Aesthetic */
+  /* ================================================
+   POKER TABLE STYLES - Crypto/Web3 Aesthetic
+   ================================================ */
+
+  /* Poker Table Felt - Deep purple-black radial gradient with texture */
+  .poker-table-felt {
+    position: relative;
+    background: radial-gradient(ellipse at center, 
+      hsl(252 25% 11%) 0%,     /* #13111C center */
+      hsl(240 18% 6%) 40%,      /* Transition */
+      hsl(240 18% 4%) 100%      /* #0A0A0F edges */
+    );
+    border-radius: 2rem;
+    overflow: hidden;
+    transform-style: preserve-3d;
+    transform: translateZ(0);
+  }
+  
+  /* Grid pattern overlay for texture */
+  .poker-table-felt::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: 
+      linear-gradient(hsla(255, 84%, 67%, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, hsla(255, 84%, 67%, 0.03) 1px, transparent 1px);
+    background-size: 20px 20px;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.5;
+    mix-blend-mode: overlay;
+  }
+  
+  /* Neon trim border with purple-to-pink gradient */
+  .table-neon-trim {
+    position: relative;
+    padding: 2px;
+    background: linear-gradient(135deg, 
+      hsl(255 84% 67%),    /* Purple */
+      hsl(330 87% 67%)     /* Pink */
+    );
+    border-radius: 2rem;
+    box-shadow: 
+      0 0 40px hsla(255, 84%, 67%, 0.3),
+      0 0 80px hsla(330, 87%, 67%, 0.2),
+      inset 0 0 20px hsla(255, 84%, 67%, 0.1);
+    animation: neon-pulse 3s ease-in-out infinite;
+  }
+  
+  /* Inner container for neon trim */
+  .table-neon-trim-inner {
+    background: radial-gradient(ellipse at center, 
+      hsl(252 25% 11%) 0%,
+      hsl(240 18% 6%) 40%,
+      hsl(240 18% 4%) 100%
+    );
+    border-radius: calc(2rem - 2px);
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  
+  /* Corner accent glows */
+  .table-corner-glow {
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    pointer-events: none;
+    z-index: 2;
+    opacity: 0.6;
+  }
+  
+  .table-corner-glow.top-left {
+    top: -50px;
+    left: -50px;
+    background: radial-gradient(circle at center,
+      hsla(255, 84%, 67%, 0.4) 0%,
+      hsla(255, 84%, 67%, 0.2) 30%,
+      transparent 70%
+    );
+    animation: corner-glow-pulse 4s ease-in-out infinite;
+  }
+  
+  .table-corner-glow.top-right {
+    top: -50px;
+    right: -50px;
+    background: radial-gradient(circle at center,
+      hsla(330, 87%, 67%, 0.4) 0%,
+      hsla(330, 87%, 67%, 0.2) 30%,
+      transparent 70%
+    );
+    animation: corner-glow-pulse 4s ease-in-out infinite 1s;
+  }
+  
+  .table-corner-glow.bottom-left {
+    bottom: -50px;
+    left: -50px;
+    background: radial-gradient(circle at center,
+      hsla(330, 87%, 67%, 0.4) 0%,
+      hsla(330, 87%, 67%, 0.2) 30%,
+      transparent 70%
+    );
+    animation: corner-glow-pulse 4s ease-in-out infinite 2s;
+  }
+  
+  .table-corner-glow.bottom-right {
+    bottom: -50px;
+    right: -50px;
+    background: radial-gradient(circle at center,
+      hsla(255, 84%, 67%, 0.4) 0%,
+      hsla(255, 84%, 67%, 0.2) 30%,
+      transparent 70%
+    );
+    animation: corner-glow-pulse 4s ease-in-out infinite 3s;
+  }
+  
+  /* Legacy classes for compatibility - mapped to new enhanced styles */
   .crypto-table {
-    background: radial-gradient(ellipse at center, #13111C 0%, #0A0A0F 100%);
+    background: radial-gradient(ellipse at center, 
+      hsl(252 25% 11%) 0%,
+      hsl(240 18% 6%) 40%,
+      hsl(240 18% 4%) 100%
+    );
     position: relative;
     overflow: visible;
   }
@@ -1018,31 +1138,149 @@ body {
     position: absolute;
     inset: 0;
     background-image: 
-      repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 20px,
-        rgba(139, 92, 246, 0.05) 20px,
-        rgba(139, 92, 246, 0.05) 21px
-      ),
-      repeating-linear-gradient(
-        90deg,
-        transparent,
-        transparent 20px,
-        rgba(139, 92, 246, 0.05) 20px,
-        rgba(139, 92, 246, 0.05) 21px
-      );
+      linear-gradient(hsla(255, 84%, 67%, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, hsla(255, 84%, 67%, 0.03) 1px, transparent 1px);
+    background-size: 20px 20px;
     pointer-events: none;
     z-index: 1;
+    opacity: 0.5;
+    mix-blend-mode: overlay;
   }
 
   /* Crypto table border with inner glow */
   .crypto-table-border {
-    border: 1px solid rgba(139, 92, 246, 0.2);
+    border: 2px solid transparent;
+    background: linear-gradient(135deg, 
+      hsl(255 84% 67%),
+      hsl(330 87% 67%)
+    );
+    background-clip: border-box;
     box-shadow: 
-      inset 0 0 20px rgba(139, 92, 246, 0.1),
-      inset 0 0 40px rgba(139, 92, 246, 0.05),
-      0 0 30px rgba(139, 92, 246, 0.1);
+      0 0 40px hsla(255, 84%, 67%, 0.3),
+      0 0 80px hsla(330, 87%, 67%, 0.2),
+      inset 0 0 20px hsla(255, 84%, 67%, 0.1);
+  }
+
+  /* Floating animation for player seats */
+  .player-seat-float {
+    animation: float-animation 3s ease-in-out infinite;
+    transform-style: preserve-3d;
+    transform: translateZ(0);
+  }
+  
+  /* Enhanced glow for active player */
+  .player-seat-active-glow {
+    box-shadow: 
+      0 0 30px hsla(255, 84%, 67%, 0.5),
+      0 0 60px hsla(255, 84%, 67%, 0.3),
+      0 0 90px hsla(255, 84%, 67%, 0.2),
+      inset 0 0 20px hsla(255, 84%, 67%, 0.1);
+    transform: scale(1.02);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    background-image: linear-gradient(135deg,
+      hsla(252, 25%, 11%, 0.8),
+      hsla(252, 25%, 13%, 0.8)
+    );
+  }
+  
+  .player-seat-active-glow::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(135deg,
+      hsl(255 84% 67%),
+      hsl(330 87% 67%)
+    );
+    border-radius: inherit;
+    z-index: -1;
+  }
+  
+  /* Dealer button gold glow */
+  .dealer-button-glow {
+    position: relative;
+    background: linear-gradient(135deg,
+      hsl(45 93% 58%),     /* Gold */
+      hsl(38 92% 50%)      /* Dark gold */
+    );
+    color: hsl(240 18% 4%);
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    box-shadow:
+      0 0 20px hsla(45, 93%, 58%, 0.6),
+      0 0 40px hsla(45, 93%, 58%, 0.4),
+      inset 0 1px 0 hsla(45, 93%, 68%, 0.6);
+    animation: dealer-pulse 2s ease-in-out infinite;
+  }
+  
+  /* Animations */
+  @keyframes neon-pulse {
+    0%, 100% {
+      box-shadow: 
+        0 0 40px hsla(255, 84%, 67%, 0.3),
+        0 0 80px hsla(330, 87%, 67%, 0.2),
+        inset 0 0 20px hsla(255, 84%, 67%, 0.1);
+    }
+    50% {
+      box-shadow: 
+        0 0 60px hsla(255, 84%, 67%, 0.4),
+        0 0 100px hsla(330, 87%, 67%, 0.3),
+        inset 0 0 30px hsla(255, 84%, 67%, 0.15);
+    }
+  }
+  
+  @keyframes corner-glow-pulse {
+    0%, 100% {
+      opacity: 0.4;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.7;
+      transform: scale(1.1);
+    }
+  }
+  
+  @keyframes float-animation {
+    0%, 100% {
+      transform: translateY(0) translateZ(0);
+    }
+    50% {
+      transform: translateY(-4px) translateZ(0);
+    }
+  }
+  
+  @keyframes dealer-pulse {
+    0%, 100% {
+      box-shadow:
+        0 0 20px hsla(45, 93%, 58%, 0.6),
+        0 0 40px hsla(45, 93%, 58%, 0.4),
+        inset 0 1px 0 hsla(45, 93%, 68%, 0.6);
+    }
+    50% {
+      box-shadow:
+        0 0 30px hsla(45, 93%, 58%, 0.8),
+        0 0 60px hsla(45, 93%, 58%, 0.6),
+        inset 0 1px 0 hsla(45, 93%, 68%, 0.8);
+    }
+  }
+  
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .poker-table-felt,
+    .table-neon-trim,
+    .table-corner-glow,
+    .player-seat-float,
+    .dealer-button-glow {
+      animation: none;
+    }
+    
+    .player-seat-active-glow {
+      transform: scale(1);
+    }
   }
 
   /* Glow orbs for corner effects */

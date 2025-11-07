@@ -240,36 +240,36 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
     } as React.CSSProperties;
   };
 
-  // Glass morphism panel styling with crypto aesthetic
+  // Glass morphism panel styling with crypto aesthetic and floating effects
   const getSeatClasses = () => {
-    const baseClasses = 'rounded-2xl p-4 backdrop-blur-[20px] transition-all duration-300 relative';
+    const baseClasses = 'rounded-2xl p-4 backdrop-blur-[20px] transition-all duration-300 relative player-seat-float';
     
     if (player.chips === 0) {
-      // Eliminated players - heavily dimmed with grayscale
-      return `${baseClasses} glass-morphism-panel opacity-40 grayscale`;
+      // Eliminated players - heavily dimmed with grayscale, no float
+      return `${baseClasses.replace('player-seat-float', '')} glass-morphism-panel opacity-40 grayscale`;
     }
     
     if (player.folded) {
-      // Folded players - reduced opacity with grayscale
-      return `${baseClasses} glass-morphism-panel opacity-50 grayscale`;
+      // Folded players - reduced opacity with grayscale, no float
+      return `${baseClasses.replace('player-seat-float', '')} glass-morphism-panel opacity-50 grayscale`;
     }
     
     if (isCurrentPlayer) {
-      // Current player - gradient border with animated glow pulse
-      return `${baseClasses} glass-morphism-panel gradient-border-active animate-purple-glow-pulse`;
+      // Current player - enhanced neon glow with scale effect
+      return `${baseClasses} glass-morphism-panel player-seat-active-glow`;
     }
     
     if (isWinner) {
-      // Winner - gold gradient glow
+      // Winner - gold gradient glow with float
       return `${baseClasses} glass-morphism-panel border-2 border-poker-chipGold/60 shadow-[0_8px_32px_rgba(0,0,0,0.4),0_0_30px_rgba(251,191,36,0.5)]`;
     }
     
     if (player.allIn) {
-      // All-in player - intense purple-pink glow
+      // All-in player - intense purple-pink glow with float
       return `${baseClasses} glass-morphism-panel gradient-border-allin shadow-[0_8px_32px_rgba(0,0,0,0.4),0_0_40px_rgba(236,72,153,0.6)]`;
     }
     
-    // Default seat styling with glass morphism
+    // Default seat styling with glass morphism and floating
     return `${baseClasses} glass-morphism-panel`;
   };
 
@@ -443,14 +443,14 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
             {/* Enhanced Dealer Button with gradient and glow */}
             {isDealer && (
               <motion.div 
-                className="absolute -top-2 -right-2 w-10 h-10 xs:w-12 xs:h-12 rounded-full dealer-button-gradient shadow-[0_0_20px_rgba(251,191,36,0.5)] flex items-center justify-center"
+                className="absolute -top-2 -right-2 dealer-button-glow flex items-center justify-center"
                 initial={{ scale: 0, rotate: -180 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ type: "spring", stiffness: 260, damping: 20 }}
                 whileHover={{ scale: 1.1 }}
                 aria-label="Dealer button"
               >
-                <Crown className="w-5 h-5 xs:w-6 xs:h-6 text-black" />
+                <Crown className="w-5 h-5 xs:w-6 xs:h-6" />
               </motion.div>
             )}
           </div>
