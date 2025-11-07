@@ -41,7 +41,7 @@ NavigationMenuList.displayName = NavigationMenuPrimitive.List.displayName
 const NavigationMenuItem = NavigationMenuPrimitive.Item
 
 const navigationMenuTriggerStyle = cva(
-  "group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[state=open]:text-accent-foreground data-[state=open]:bg-accent/50 data-[state=open]:hover:bg-accent data-[state=open]:focus:bg-accent"
+  "group inline-flex h-10 w-max items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-all duration-300 glass-panel hover:glass-border hover:shadow-[0_0_15px_rgba(139,92,246,0.3)] hover:text-neon-purple focus:glass-border focus:shadow-[0_0_15px_rgba(139,92,246,0.3)] focus:text-neon-purple focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[state=open]:text-neon-purple data-[state=open]:glass-border data-[state=open]:shadow-[0_0_20px_rgba(139,92,246,0.4)] data-[state=open]:hover:shadow-[0_0_25px_rgba(139,92,246,0.5)] data-[state=open]:focus:shadow-[0_0_25px_rgba(139,92,246,0.5)]"
 )
 
 const NavigationMenuTrigger = React.forwardRef<
@@ -55,7 +55,7 @@ const NavigationMenuTrigger = React.forwardRef<
   >
     {children}{" "}
     <ChevronDown
-      className="relative top-[1px] ml-1 h-3 w-3 transition duration-200 group-data-[state=open]:rotate-180"
+      className="relative top-[1px] ml-1 h-3 w-3 transition-all duration-300 group-data-[state=open]:rotate-180 group-hover:text-neon-purple group-data-[state=open]:text-neon-purple"
       aria-hidden="true"
     />
   </NavigationMenuPrimitive.Trigger>
@@ -86,7 +86,13 @@ const NavigationMenuViewport = React.forwardRef<
   <div className={cn("absolute left-0 top-full flex justify-center")}>
     <NavigationMenuPrimitive.Viewport
       className={cn(
-        "origin-top-center relative mt-1.5 h-[var(--radix-navigation-menu-viewport-height)] w-full overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-90 md:w-[var(--radix-navigation-menu-viewport-width)]",
+        "origin-top-center relative mt-1.5 h-[var(--radix-navigation-menu-viewport-height)] w-full overflow-hidden rounded-xl",
+        "glass-panel-enhanced glass-border-enhanced",
+        "text-popover-foreground shadow-[0_10px_40px_rgba(0,0,0,0.5),0_0_30px_rgba(139,92,246,0.2)]",
+        "data-[state=open]:animate-in data-[state=closed]:animate-out",
+        "data-[state=closed]:zoom-out-95 data-[state=closed]:fade-out",
+        "data-[state=open]:zoom-in-90 data-[state=open]:fade-in",
+        "md:w-[var(--radix-navigation-menu-viewport-width)]",
         className
       )}
       ref={ref}

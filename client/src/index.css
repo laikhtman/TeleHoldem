@@ -915,6 +915,20 @@ body {
     will-change: transform;
   }
 
+  /* Subtle pulse animation for breadcrumb active items */
+  @keyframes pulse-subtle {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.8;
+    }
+  }
+
+  .animate-pulse-subtle {
+    animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
   /* Reduced motion variant */
   @media (prefers-reduced-motion: reduce) {
     .animate-pulse-glow {
@@ -3255,6 +3269,45 @@ input[type="range"]::-moz-range-thumb {
               0 0 40px rgba(236, 72, 153, 0.3),
               inset 0 0 20px rgba(139, 92, 246, 0.2);
   animation: neon-flicker 4s ease-in-out infinite;
+}
+
+/* Neon Text Color Utilities */
+.text-neon-purple {
+  color: #8B5CF6 !important;
+}
+
+.text-neon-pink {
+  color: #EC4899 !important;
+}
+
+.text-neon-cyan {
+  color: #06B6D4 !important;
+}
+
+/* Neon Border Color Utilities */
+.border-neon-purple {
+  border-color: #8B5CF6 !important;
+}
+
+.border-neon-pink {
+  border-color: #EC4899 !important;
+}
+
+.border-neon-cyan {
+  border-color: #06B6D4 !important;
+}
+
+/* Neon Ring Color Utilities */
+.ring-neon-purple {
+  --tw-ring-color: rgba(139, 92, 246, var(--tw-ring-opacity, 1));
+}
+
+.ring-neon-pink {
+  --tw-ring-color: rgba(236, 72, 153, var(--tw-ring-opacity, 1));
+}
+
+.ring-neon-cyan {
+  --tw-ring-color: rgba(6, 182, 212, var(--tw-ring-opacity, 1));
 }
 
 @keyframes neon-flicker {

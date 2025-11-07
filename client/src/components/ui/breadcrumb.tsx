@@ -50,7 +50,11 @@ const BreadcrumbLink = React.forwardRef<
   return (
     <Comp
       ref={ref}
-      className={cn("transition-colors hover:text-foreground", className)}
+      className={cn(
+        "transition-all duration-300",
+        "hover:text-neon-purple hover:drop-shadow-[0_0_6px_rgba(139,92,246,0.5)]",
+        className
+      )}
       {...props}
     />
   )
@@ -66,7 +70,12 @@ const BreadcrumbPage = React.forwardRef<
     role="link"
     aria-disabled="true"
     aria-current="page"
-    className={cn("font-normal text-foreground", className)}
+    className={cn(
+      "font-medium text-neon-purple",
+      "drop-shadow-[0_0_8px_rgba(139,92,246,0.6)]",
+      "animate-pulse-subtle",
+      className
+    )}
     {...props}
   />
 ))
@@ -80,7 +89,12 @@ const BreadcrumbSeparator = ({
   <li
     role="presentation"
     aria-hidden="true"
-    className={cn("[&>svg]:w-3.5 [&>svg]:h-3.5", className)}
+    className={cn(
+      "[&>svg]:w-3.5 [&>svg]:h-3.5",
+      "text-transparent bg-gradient-to-r from-neon-purple to-neon-pink bg-clip-text",
+      "[&>svg]:drop-shadow-[0_0_4px_rgba(236,72,153,0.4)]",
+      className
+    )}
     {...props}
   >
     {children ?? <ChevronRight />}

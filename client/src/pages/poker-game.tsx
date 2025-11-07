@@ -2699,6 +2699,7 @@ export default function PokerGame() {
           </SheetContent>
         </Sheet>
       </div>
+      </div>
 
       {/* Common Elements for both layouts */}
       
