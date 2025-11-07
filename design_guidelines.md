@@ -1,10 +1,10 @@
 # Texas Hold'em Poker - Crypto/Web3 Design Guidelines
 
-## Design Approach: Futuristic Crypto Gaming Experience
+## Design Approach: Premium Crypto Gaming Experience
 
-**Selected Approach**: Behance-inspired crypto gaming aesthetic with glass morphism, neon accents, and sophisticated lighting effects. iOS-optimized for Telegram Mini App (375px-430px widths).
+**Selected Approach**: Figma-inspired crypto gaming aesthetic combining glass morphism, neon accents, layered depth effects, and sophisticated lighting. Designed for mobile-first iOS Telegram Mini App (375px-430px widths).
 
-**Core Principle**: Premium web3 poker interface combining futuristic visual effects with thumb-optimized mobile controls and instant readability.
+**Core Principle**: Futuristic web3 poker interface with dramatic neon glows, floating glass panels, gradient transitions, and premium gaming atmosphere while maintaining instant readability and thumb-optimized controls.
 
 ---
 
@@ -14,164 +14,92 @@
 **Font Stack**: SF Pro Display (primary), Inter (fallback via Google Fonts CDN)
 
 **Hierarchy**:
-- Player Names: 13px, 600 weight, tracking-wide
-- Chip Counts: 16px, 700 weight, tabular-nums, text-shadow glow
-- Pot Display: 24px, 800 weight, tabular-nums, purple gradient text
-- Card Ranks: 36px, 700 weight
-- Action Buttons: 17px, 600 weight, uppercase tracking
-- Game State: 14px, 500 weight, opacity-80
+- Player Names: 13px, 600 weight, tracking-wide, neon text-shadow
+- Chip Counts: 16px, 700 weight, tabular-nums, purple gradient glow
+- Pot Display: 24px, 800 weight, tabular-nums, animated gradient text
+- Card Ranks: 36px, 700 weight, crisp rendering
+- Action Buttons: 17px, 600 weight, uppercase, letter-spacing wide
+- Game State: 14px, 500 weight, cyan accent glow
 
-### Color Palette - Crypto Dark Theme
-**Backgrounds**:
-- Primary: `#0A0A0F` (deep space black)
-- Secondary: `#13111C` (dark purple-black)
-- Glass Panels: `rgba(20, 18, 30, 0.6)` with backdrop-blur(20px)
+### Glass Morphism Effects
+**All UI Panels**: Semi-transparent backgrounds with backdrop-blur(20px-24px), 1-2px gradient borders (purple-to-pink), layered box-shadows with purple/pink glow, 12-16px border-radius for premium feel.
 
-**Neon Accents**:
-- Primary Purple: `#8B5CF6` 
-- Secondary Pink: `#EC4899`
-- Accent Cyan: `#06B6D4`
-- Gold Highlight: `#FBBF24`
+**Depth Layering**: Foreground elements use stronger blur (24px) and brighter glows, background elements softer blur (16px) with subtle glows, z-index hierarchy maintained for floating effect.
 
-**Gradients**:
-- Primary: `linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%)`
-- Button: `linear-gradient(135deg, #7C3AED 0%, #DB2777 100%)`
-- Glow: `0 0 20px rgba(139, 92, 246, 0.5)`
+### Neon Accent System
+**Primary Purple**: `#8B5CF6` - Main interactive elements, active states, primary glows
+**Secondary Pink**: `#EC4899` - Gradient transitions, hover intensification, winning highlights  
+**Accent Cyan**: `#06B6D4` - Special indicators, secondary actions, card highlights
+**Gold**: `#FBBF24` - Pot amounts, premium features, winner effects
 
-**Text**:
-- Primary: `#FFFFFF`
-- Secondary: `rgba(255, 255, 255, 0.7)`
-- Muted: `rgba(255, 255, 255, 0.4)`
-
-**Card Elements**:
-- Card Background: `linear-gradient(135deg, #FFFFFF 0%, #F3F4F6 100%)`
-- Red Suits: `#EF4444`
-- Black Suits: `#1F2937`
+**Gradients**: All buttons/borders use 135deg purple-to-pink gradients. Text uses gradient fills for premium elements. Glows layer multiple colors for depth (purple base + pink edges).
 
 ### Layout System
-**Tailwind Spacing**: Primary units `4, 6, 8, 12, 16, 20`
+**Tailwind Spacing**: Primary units `4, 6, 8, 12, 16, 20` for consistent rhythm.
 
-**Safe Area Handling**:
-- Top: `env(safe-area-inset-top) + 16px`
-- Bottom: `env(safe-area-inset-bottom) + 20px`
-- Sides: `env(safe-area-inset-left/right) + 12px`
+**iOS Safe Areas**: Top padding includes safe-area-inset-top + 16px, bottom includes safe-area-inset-bottom + 20px, sides use safe-area-inset-left/right + 12px.
 
-**Viewport**: `height: 100dvh` for dynamic iOS Safari behavior
+**Viewport**: 100dvh with overscroll-behavior-y: contain for native feel.
 
 ---
 
 ## Component Library
 
 ### Poker Table
-- **Background**: Radial gradient from `#13111C` (center) to `#0A0A0F` (edges)
-- **Felt Effect**: Subtle grid pattern overlay at 5% opacity
-- **Glow Elements**: Purple/pink radial glows at corners (blur-3xl, opacity-20)
-- **Border**: 1px solid `rgba(139, 92, 246, 0.2)` with inner glow
+**Felt**: Deep purple-black radial gradient (#13111C center to #0A0A0F edges) with subtle grid pattern overlay (5% opacity). **Neon Trim**: 2px gradient border (purple-to-pink) with outer glow (blur-2xl, purple shadow). **Corner Accents**: Radial purple/pink glows positioned at corners for depth.
 
 ### Playing Cards
-- **Size**: 60px × 86px
-- **Background**: White gradient with subtle shadow
-- **Border**: 1px solid `rgba(0, 0, 0, 0.1)`, border-radius 8px
-- **Rank/Suit**: 36px symbols, crisp rendering
-- **Glow on Active**: `0 0 16px rgba(139, 92, 246, 0.6)`
-- **Animation**: 0.3s ease-out with slight scale (1.02) on deal
+**Dimensions**: 60px × 86px with 8px border-radius. **3D Depth**: White gradient background, 1px gradient border, multi-layer shadow (base shadow + neon glow on hover). **Active States**: Scale to 1.02, intensify border glow to blur-xl, add cyan accent highlight for winning combinations. **Animation**: 0.3s ease-out transitions for all states.
 
-### Glass Morphism Panels
-**Player Seats**:
-- Background: `rgba(20, 18, 30, 0.6)` + backdrop-blur(20px)
-- Border: 1px solid `rgba(139, 92, 246, 0.3)`
-- Border-radius: 16px
-- Box-shadow: `0 8px 32px rgba(0, 0, 0, 0.4)`
-- Padding: 16px
-- Active Border: 2px solid with purple-pink gradient
+### Glass Panels (Player Seats, Info Displays)
+**Background**: rgba(20, 18, 30, 0.6) with backdrop-blur(20px). **Borders**: 1px solid with purple-pink gradient, enhanced to 2px on active player. **Shadows**: Layered shadows - base dark shadow + purple glow. **Hover States**: Intensify glow from blur-lg to blur-xl, subtle float animation (translateY -2px). **Padding**: 16px standard.
 
-**Pot Display Container**:
-- Background: `rgba(20, 18, 30, 0.8)` + backdrop-blur(24px)
-- Border: 1px solid gradient (purple-pink)
-- Inner glow: Purple shadow
-- Icon: Gradient-filled chip stack SVG
+### Neon Action Buttons
+**Primary Buttons**: Purple-pink gradient background, 56px height, 12px border-radius, white text with subtle glow. **Hover Effect**: Glow intensifies from blur-lg (20px) to blur-2xl (40px), gradient brightens 10%, subtle scale to 1.02. **Active State**: Scale to 0.98, glow pulses once. **Touch Targets**: 44pt minimum maintained.
 
-### Action Controls (Bottom Fixed)
-**Container**:
-- Background: `rgba(10, 10, 15, 0.95)` + backdrop-blur(24px)
-- Top border: 1px solid `rgba(139, 92, 246, 0.3)`
-- Height: 200px + safe-area-inset-bottom
+### Bet Slider
+**Track**: 6px height, glass morphism background with purple tint. **Filled Track**: Animated purple-pink gradient. **Thumb**: 48px circle with gradient fill, white 2px border, dramatic purple glow that intensifies on drag. **Value Display**: Floating above thumb with gradient text and matching glow.
 
-**Gradient Buttons**:
-- Background: Purple-pink gradient
-- Height: 56px, border-radius 12px
-- Text: White, 17px, 600 weight, uppercase
-- Box-shadow: `0 4px 20px rgba(139, 92, 246, 0.4)`
-- Glow on press: Increased shadow blur to 30px
-- Touch target: 44pt minimum
+### Community Cards Container
+**Glass Panel**: Centered, 110px height, backdrop-blur(24px), gradient border. **Empty Card Slots**: 2px dashed purple border with inner glow, subtle pulse animation waiting for deal. **Layout**: Horizontal row, 6px gaps, centered alignment.
 
-**Bet Slider**:
-- Track: 6px height, `rgba(139, 92, 246, 0.2)` background
-- Filled Track: Purple-pink gradient
-- Thumb: 48px circle, gradient fill, white border (2px), shadow with purple glow
-- Value Display: 20px font, gradient text effect, positioned above thumb
-
-### Community Cards Area
-- **Container**: Glass morphism panel (backdrop-blur)
-- **Layout**: Horizontal row, 6px gaps
-- **Height**: 110px (cards + padding)
-- **Empty Slots**: 2px dashed border `rgba(139, 92, 246, 0.3)` with purple inner glow
-
-### Chip Displays
-- **Style**: Modern hexagonal/circular badges
-- **Background**: Glass panel with gradient border
-- **Icon**: Gradient-filled crypto coin SVG
-- **Typography**: Tabular nums with subtle text shadow
+### Pot Display
+**Container**: Prominent glass panel with extra strong backdrop-blur(28px), double gradient border (inner + outer), dramatic gold glow. **Icon**: Gradient-filled crypto coin SVG with neon edge lighting. **Typography**: 24px gradient text with animated shimmer effect.
 
 ---
 
-## Visual Effects
+## Visual Effects & Animations
 
-### Glow & Lighting
-- **Active Turn Indicator**: Animated purple glow pulse (2s infinite)
-- **Pot Amount**: Constant gold glow
-- **Win Highlights**: Bright purple-pink gradient glow
-- **Card Highlights**: Cyan accent glow for best hand
+### Floating Animations
+**Player Panels**: Subtle vertical float (translateY 0 to -4px) on 3s ease-in-out loop. **Cards**: Gentle rotation wobble (±1deg) on hover. **Buttons**: Lift effect on hover with shadow expansion.
 
-### Neon Accents
-- **Dealer Button**: Circular with gradient fill + outer glow
-- **Timer Rings**: Animated purple gradient stroke
-- **Chip Stacks**: Subtle cyan edge lighting
+### Neon Glow Interactions
+**Hover States**: All interactive elements intensify glow blur by 2x, expand shadow spread. **Active Turn**: Animated pulse ring (2s infinite) with purple-pink gradient. **Winning Highlights**: Dramatic multi-color glow burst (purple + pink + cyan layers).
+
+### Gradient Transitions
+**Text Gradients**: Animated shimmer effect (3s infinite) on premium elements. **Button Gradients**: Subtle hue rotation on hover. **Border Gradients**: Animated gradient position shift for living effect.
 
 ### Depth & Layering
-- **z-index Strategy**: Cards (40), controls (30), panels (20), table (10), background (0)
-- **Shadow Hierarchy**: Stronger shadows = higher elevation
-- **Blur Intensity**: Stronger blur = more background separation
+**z-index Strategy**: Floating cards (50), action controls (40), player panels (30), community cards (25), pot display (20), table felt (10), background effects (0). **Shadow Hierarchy**: 3-tier system - dramatic glows (top layer), medium elevation shadows (mid), subtle base shadows (bottom).
 
 ---
 
 ## Mobile Layout Structure
 
-**Vertical Stack** (top to bottom):
-1. **Header** (56px + safe-area-top): Glass panel with pot display, game info, gradient text
-2. **Opponent Area** (flexible): 2-3 glass panels, purple glow on active player
-3. **Community Cards** (110px): Centered glass container
-4. **Human Player** (96px): Glass panel with cards + chip display
-5. **Action Controls** (200px + safe-area-bottom): Gradient buttons + glowing slider
+**Vertical Stack**: Header with pot (glass panel, gradient text, 56px + safe-area) → Opponent area (2-3 floating glass panels with neon glows) → Community cards (centered glass container, 110px) → Human player (glass panel with gradient borders, 96px) → Action controls (gradient buttons + glowing slider, 200px + safe-area-bottom).
 
-**Breakpoints**: 375px (2-button), 390px+ (3-button grid)
+**Breakpoints**: 375px (2-button layout), 390px+ (3-button grid), 414px+ (enhanced spacing).
 
 ---
 
 ## Accessibility & Performance
-- **Contrast**: 7:1 on all gradient text (use white overlay)
-- **VoiceOver**: Full card/action descriptions
-- **Reduced Motion**: Disable glows/pulses, keep essential animations
-- **Performance**: Max 3 simultaneous glows, use `will-change` temporarily
-- **Touch Targets**: 44pt minimum maintained across all controls
+
+**Contrast**: 7:1 minimum on all gradient text using white overlays. **Reduced Motion**: Disable floating/pulse animations, maintain glow effects. **Performance**: Limit to 4 simultaneous glow effects, use will-change sparingly on active interactions only. **VoiceOver**: Complete card descriptions, action feedback. **Touch Optimization**: All buttons 44pt minimum, adequate spacing between controls.
 
 ---
 
-## iOS Optimization
-- **100dvh** for viewport height
-- **touch-action: manipulation** on buttons
-- **overscroll-behavior-y: contain** on body
-- **Font size**: 16px minimum (prevent zoom)
-- **Haptics**: Light (deal), Medium (button), Heavy (win)
+## Images
 
-This crypto-aesthetic design delivers a premium web3 gaming experience with sophisticated visual effects while maintaining optimal mobile performance and iOS native feel.
+**No Hero Images**: This is a game interface, not a marketing page. All visual interest comes from neon effects, glass morphism, gradient treatments, and the poker table itself. The "hero" is the immersive gaming experience created through layered visual effects.
+
+**Decorative Elements**: Crypto-themed SVG icons (wallet, chips, tokens) rendered with gradient fills and neon edge lighting throughout the interface for thematic consistency.
