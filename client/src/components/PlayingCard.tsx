@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
 import { useSound } from '@/hooks/useSound';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
-import svgCardsPath from '@assets/svg-cards.svg';
+import cardSpriteSheet from '@assets/Cards/On Table.png';
 
 interface PlayingCardProps {
   card?: Card;
@@ -16,28 +16,33 @@ interface PlayingCardProps {
   highlight?: boolean;
 }
 
-// Convert our card format to SVG-cards naming convention
-const getCardSvgId = (card: Card): string => {
-  // Map suits: S->spade, H->heart, D->diamond, C->club
-  const suitMap: Record<string, string> = {
-    'S': 'spade',
-    'H': 'heart',
-    'D': 'diamond',
-    'C': 'club'
+// Calculate sprite position for a card
+const getCardSpritePosition = (card: Card): { x: number, y: number } => {
+  // Card dimensions in the sprite sheet
+  const cardWidth = 79; // Width of each card in the sprite
+  const cardHeight = 123; // Height of each card in the sprite
+  
+  // Map suits to row indices (0-3)
+  const suitToRow: Record<string, number> = {
+    'H': 0, // Hearts - Row 0
+    'S': 1, // Spades - Row 1
+    'D': 2, // Diamonds - Row 2
+    'C': 3  // Clubs - Row 3
   };
   
-  // Map ranks: A->1, J->jack, Q->queen, K->king, 2-10->2-10
-  const rankMap: Record<string, string> = {
-    'A': '1',
-    'J': 'jack',
-    'Q': 'queen',
-    'K': 'king'
+  // Map ranks to column indices (0-12)
+  const rankToCol: Record<string, number> = {
+    '2': 0, '3': 1, '4': 2, '5': 3, '6': 4, '7': 5,
+    '8': 6, '9': 7, '10': 8, 'J': 9, 'Q': 10, 'K': 11, 'A': 12
   };
   
-  const suit = suitMap[card.suit] || 'spade';
-  const rank = rankMap[card.rank] || card.rank.toLowerCase();
+  const row = suitToRow[card.suit] || 0;
+  const col = rankToCol[card.rank] || 0;
   
-  return `${suit}_${rank}`;
+  return {
+    x: col * cardWidth,
+    y: row * cardHeight
+  };
 };
 
 // Get the actual suit symbol (♠ ♥ ♦ ♣)
@@ -61,10 +66,20 @@ export function PlayingCard({
   colorblindMode = false,
   highlight = false
 }: PlayingCardProps) {
+  // Debug logging
+  if (card) {
+    console.log('[PlayingCard] Rendering card:', {
+      card: `${card.rank}-${card.suit}`,
+      faceDown,
+      animateFlip,
+      spritePosition: getCardSpritePosition(card)
+    });
+  }
+  
   const [isFlipped, setIsFlipped] = useState(!animateFlip);
   const [isDealt, setIsDealt] = useState(!animateDeal);
   const [isTouched, setIsTouched] = useState(false);
-  const [cardDimensions, setCardDimensions] = useState({ width: '90px', height: '129px' });
+  const [cardDimensions, setCardDimensions] = useState({ width: '70px', height: '100px' });
   const { playSound } = useSound();
   const prefersReducedMotion = useReducedMotion();
   const cardRef = useRef<HTMLDivElement>(null);
@@ -141,15 +156,15 @@ export function PlayingCard({
     const updateCardSize = () => {
       const vw = window.innerWidth;
       if (vw >= 1024) {
-        setCardDimensions({ width: '75px', height: '107px' });  // lg
+        setCardDimensions({ width: '70px', height: '100px' });  // lg
       } else if (vw >= 768) {
-        setCardDimensions({ width: '70px', height: '100px' });   // md
+        setCardDimensions({ width: '65px', height: '93px' });   // md
       } else if (vw >= 640) {
-        setCardDimensions({ width: '65px', height: '93px' });   // sm
+        setCardDimensions({ width: '62px', height: '88px' });   // sm
       } else if (vw >= 480) {
-        setCardDimensions({ width: '60px', height: '86px' });  // xs - optimized for mobile
+        setCardDimensions({ width: '58px', height: '82px' });  // xs - optimized for mobile
       } else {
-        setCardDimensions({ width: '60px', height: '86px' });   // mobile - 60px × 86px as requested
+        setCardDimensions({ width: '56px', height: '80px' });   // mobile
       }
     };
 
@@ -227,7 +242,7 @@ export function PlayingCard({
     return { opacity: 1, transform: `translate3d(0, 0, 0) scale(1) rotateY(${rotation}deg)` };
   };
 
-  const cardSvgId = card ? getCardSvgId(card) : '';
+  const spritePosition = card ? getCardSpritePosition(card) : { x: 0, y: 0 };
   
   const getCardAriaLabel = () => {
     if (!card) return 'Empty card slot';
@@ -330,38 +345,14 @@ export function PlayingCard({
         <div 
           className="w-full h-full rounded-lg overflow-hidden shadow-card-3d border"
           style={{
-            background: 'linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%)',
+            backgroundImage: `url('${cardSpriteSheet}')`,
+            backgroundPosition: '316px 492px', // Position for card back (red pattern)
+            backgroundSize: '1027px 615px', // Full sprite sheet size
             borderColor: 'rgba(139, 92, 246, 0.4)',
             boxShadow: '0 0 20px rgba(139, 92, 246, 0.3)'
           }}
           data-testid="card-back"
         >
-          {/* Geometric pattern overlay */}
-          <div className="absolute inset-0 opacity-20">
-            <svg viewBox="0 0 100 100" className="w-full h-full" preserveAspectRatio="none">
-              <defs>
-                <pattern id="geometric-pattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                  <polygon points="10,0 20,10 10,20 0,10" fill="rgba(255,255,255,0.1)" />
-                  <circle cx="10" cy="10" r="2" fill="rgba(255,255,255,0.15)" />
-                </pattern>
-              </defs>
-              <rect width="100" height="100" fill="url(#geometric-pattern)" />
-            </svg>
-          </div>
-          
-          {/* Center logo/design */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-16 h-16 rounded-full" 
-              style={{
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 100%)',
-                boxShadow: 'inset 0 0 20px rgba(255,255,255,0.1), 0 0 30px rgba(236, 72, 153, 0.4)'
-              }}>
-              <div className="w-full h-full flex items-center justify-center text-white/40 font-bold text-xl">
-                ♠
-              </div>
-            </div>
-          </div>
-          
           {/* Gloss overlay for premium feel */}
           <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 pointer-events-none" />
           
@@ -383,7 +374,7 @@ export function PlayingCard({
         }}
       >
         <motion.div 
-          className={`w-full h-full playing-card rounded-lg overflow-hidden relative ${isTouched ? 'ring-2 ring-purple-500/50' : ''}`}
+          className={`w-full h-full playing-card rounded-lg overflow-hidden relative bg-white ${isTouched ? 'ring-2 ring-purple-500/50' : ''}`}
           data-testid={`card-${card.id}`}
           key={settleBounceKey}
           initial={prefersReducedMotion ? {} : { y: 0, scale: 1 }}
@@ -393,26 +384,17 @@ export function PlayingCard({
           {/* Colorblind-friendly suit indicator badge (only in colorblind mode) */}
           {colorblindMode && getSuitIndicator()}
           
-          {/* High-quality SVG Card with enhanced rendering */}
-          <svg
-            viewBox="0 0 169.075 244.640"
-            className="w-full h-full relative z-10"
-            xmlns="http://www.w3.org/2000/svg"
-            style={{ 
-              filter: 'contrast(1.1) brightness(1.02)',
-              imageRendering: 'crisp-edges'
+          {/* Card face using sprite sheet */}
+          <div 
+            className="w-full h-full"
+            style={{
+              backgroundImage: `url('${cardSpriteSheet}')`,
+              backgroundPosition: `-${spritePosition.x}px -${spritePosition.y}px`,
+              backgroundSize: '1027px 615px', // Full sprite sheet size
+              imageRendering: 'crisp-edges',
+              filter: 'contrast(1.1) brightness(1.02)'
             }}
-          >
-            <use href={`${svgCardsPath}#${cardSvgId}`} />
-          </svg>
-          
-          {/* Update SVG suit colors */}
-          <style dangerouslySetInnerHTML={{ __html: `
-            svg .red { fill: #EF4444; }
-            svg .black { fill: #1F2937; }
-            svg [fill="red"] { fill: #EF4444; }
-            svg [fill="black"] { fill: #1F2937; }
-          ` }} />
+          />
           
           {/* Subtle inner highlight for depth */}
           <div className="absolute inset-[1px] rounded-md border border-white/50 pointer-events-none" />

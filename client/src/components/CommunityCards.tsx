@@ -160,6 +160,15 @@ export function CommunityCards({ cards, phase, colorblindMode = false, highlight
     return `${card.rank} of ${card.suit}`;
   };
 
+  // Debug logging
+  console.log('[CommunityCards] Rendering with:', {
+    cards: cards.map(c => c ? `${c.rank}-${c.suit}` : 'null'),
+    phase,
+    revealedCards,
+    showSkeletons,
+    cardIdentities
+  });
+
   return (
     <div 
       ref={containerRef}
