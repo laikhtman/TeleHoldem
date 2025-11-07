@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { AnimatedButton, PrimaryAnimatedButton, DestructiveAnimatedButton, SecondaryAnimatedButton } from '@/components/AnimatedButton';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { useState, useEffect, useCallback, useRef } from 'react';

@@ -73,6 +73,8 @@ export function PlayingCard({
   const [pinchActive, setPinchActive] = useState(false);
   const [peekActive, setPeekActive] = useState(false);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [showGlow, setShowGlow] = useState(false);
+  const [show3DFlip, setShow3DFlip] = useState(false);
 
   // Handle will-change for performance
   useEffect(() => {
@@ -105,8 +107,12 @@ export function PlayingCard({
       const delay = prefersReducedMotion ? 0 : 100;
       const timer = setTimeout(() => {
         setIsFlipped(true);
+        setShow3DFlip(true);
         if (!prefersReducedMotion) {
           playSound('card-flip', { volume: 0.12 });
+          // Add glow pulse effect on flip
+          setShowGlow(true);
+          setTimeout(() => setShowGlow(false), 2000);
         }
       }, delay);
       return () => clearTimeout(timer);
@@ -289,7 +295,7 @@ export function PlayingCard({
   return (
     <motion.div
       ref={cardRef}
-      className={`relative playing-card-border ${isWinningCard ? 'playing-card-winning' : ''} ${isHovered && !prefersReducedMotion ? 'playing-card-hover' : ''} ${className}`}
+      className={`relative playing-card-border ${isWinningCard ? 'playing-card-winning' : ''} ${isHovered && !prefersReducedMotion ? 'playing-card-hover' : ''} ${show3DFlip ? 'card-3d-flip' : ''} ${animateDeal ? 'card-slide-deal' : ''} ${showGlow ? 'card-glow-pulse' : ''} ${!prefersReducedMotion ? 'hover-parallax' : ''} ${className}`}
       style={{ 
         width: cardDimensions.width, 
         height: cardDimensions.height,

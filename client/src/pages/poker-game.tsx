@@ -56,6 +56,17 @@ import { useGameTips } from '@/hooks/useGameTips';
 import { DevOverlay } from '@/components/DevOverlay';
 import { FPSOverlay } from '@/components/FPSOverlay';
 import { DevEventLog } from '@/components/DevEventLog';
+import { 
+  FloatingParticles, 
+  AuroraBackground, 
+  GridBackground,
+  PhaseTransition,
+  TypewriterText,
+  ExplosionEffect,
+  TrophyAnimation,
+  AnimatedCounter,
+  useScreenShake
+} from '@/components/AnimationEffects';
 
 const NUM_PLAYERS = 6;
 const MAX_HISTORY_ENTRIES = 30;

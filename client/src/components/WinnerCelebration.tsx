@@ -1,7 +1,9 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, Coins } from 'lucide-react';
+import { Trophy, Coins, Crown, Star } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useSound } from '@/hooks/useSound';
+import { ExplosionEffect, TrophyAnimation, RainbowGradient } from '@/components/AnimationEffects';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 
 interface WinnerCelebrationProps {
   isWinner: boolean;
