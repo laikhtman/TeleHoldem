@@ -2193,8 +2193,9 @@ export default function PokerGame() {
                 <div className="flex flex-col gap-2">
                   <Button 
                     onClick={startNewHand}
+                    variant="neon-primary"
                     size="lg"
-                    className="w-full min-h-[48px] btn-gradient-primary font-bold text-base"
+                    className="w-full font-bold text-base neon-shimmer"
                     data-testid="button-start-hand"
                     aria-label="Start new hand"
                   >
@@ -2202,9 +2203,9 @@ export default function PokerGame() {
                   </Button>
                   <Button 
                     onClick={handleResetGame}
+                    variant="neon-outline"
                     size="lg"
-                    variant="outline"
-                    className="w-full min-h-[48px] font-bold text-base"
+                    className="w-full font-bold text-base"
                     data-testid="button-start-new-game"
                     aria-label="Start new game - reset all chips to $1000"
                   >
@@ -2560,8 +2561,9 @@ export default function PokerGame() {
               <div className="flex flex-col gap-2">
                 <Button 
                   onClick={startNewHand}
+                  variant="neon-primary"
                   size="lg"
-                  className="w-full min-h-[48px] btn-gradient-primary font-bold text-base"
+                  className="w-full font-bold text-base neon-shimmer"
                   data-testid="button-start-hand-mobile"
                   aria-label="Start new hand"
                 >
@@ -2569,9 +2571,9 @@ export default function PokerGame() {
                 </Button>
                 <Button 
                   onClick={handleResetGame}
+                  variant="neon-outline"
                   size="lg"
-                  variant="outline"
-                  className="w-full min-h-[48px] font-bold text-base"
+                  className="w-full font-bold text-base"
                   data-testid="button-start-new-game-mobile"
                   aria-label="Start new game - reset all chips to $1000"
                 >

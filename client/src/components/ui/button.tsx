@@ -21,6 +21,16 @@ const buttonVariants = cva(
         secondary: "border bg-secondary text-secondary-foreground border border-secondary-border ",
         // Add a transparent border so that when someone toggles a border on later, it doesn't shift layout/size.
         ghost: "border border-transparent",
+        // Neon variants for crypto/Web3 aesthetic
+        "neon-primary": "neon-button-primary no-default-hover-elevate no-default-active-elevate",
+        "neon-secondary": "neon-button-secondary no-default-hover-elevate no-default-active-elevate",
+        "neon-outline": "neon-button-outline no-default-hover-elevate no-default-active-elevate",
+        "neon-ghost": "neon-button-ghost no-default-hover-elevate no-default-active-elevate",
+        "neon-destructive": "neon-button-destructive no-default-hover-elevate no-default-active-elevate",
+        "neon-icon": "neon-button-icon no-default-hover-elevate no-default-active-elevate",
+        "neon-quick": "neon-button-quick no-default-hover-elevate no-default-active-elevate",
+        "neon-toggle": "neon-button-toggle no-default-hover-elevate no-default-active-elevate",
+        "neon-cyan": "neon-button-cyan no-default-hover-elevate no-default-active-elevate",
       },
       // Heights are set as "min" heights, because sometimes Ai will place large amount of content
       // inside buttons. With a min-height they will look appropriate with small amounts of content,

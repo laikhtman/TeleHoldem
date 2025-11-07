@@ -427,70 +427,80 @@ export function ActionControls({
       )}
 
       <div className="action-controls-grid flex gap-2 xs:gap-3 md:gap-2 lg:gap-4 justify-center flex-wrap">
-        {/* Fold Button - Destructive gradient (red/pink) */}
-        <button
+        {/* Fold Button - Neon destructive gradient */}
+        <Button
           onClick={handleFold}
           disabled={disabled}
           data-testid="button-fold"
-          className="btn-gradient-destructive min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] touch-manipulation text-action-button"
+          variant="neon-destructive"
+          size="lg"
+          className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] touch-manipulation"
           style={{ touchAction: 'manipulation' }}
           aria-label="Fold your hand. Keyboard shortcut: F key"
           aria-disabled={disabled}
         >
           <span>{isProcessing ? (<><PokerSpinner className="mr-2" size={16} /> Processing...</>) : (<>FOLD <span className="text-xs ml-1 opacity-70">(F)</span></>)}</span>
-        </button>
+        </Button>
         
         {/* Check/Call Button - Cyan gradient */}
         {canCheck ? (
           <motion.div key="check" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}>
-            <button
+            <Button
               onClick={handleCheck}
               disabled={disabled}
               data-testid="button-check"
-              className="btn-gradient-secondary min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] touch-manipulation text-action-button"
+              variant="neon-cyan"
+              size="lg"
+              className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] touch-manipulation"
               style={{ touchAction: 'manipulation' }}
               aria-label="Check - pass your turn without betting. Keyboard shortcut: C key"
               aria-disabled={disabled}
             >
               <span>{isProcessing ? (<><PokerSpinner className="mr-2" size={16} /> Processing...</>) : (<>CHECK <span className="text-xs ml-1 opacity-70">(C)</span></>)}</span>
-            </button>
+            </Button>
           </motion.div>
         ) : (
           <motion.div key="call" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}>
-            <button
+            <Button
               onClick={handleCall}
               disabled={disabled || amountToCall <= 0}
               data-testid="button-call"
-              className="btn-gradient-secondary min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] touch-manipulation text-action-button"
+              variant="neon-cyan"
+              size="lg"
+              className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[110px] lg:min-w-[140px] touch-manipulation"
               style={{ touchAction: 'manipulation' }}
               aria-label={`Call ${amountToCall} dollars to match the current bet. Keyboard shortcut: C key`}
               aria-disabled={disabled || amountToCall <= 0}
             >
               <span>{isProcessing ? (<><PokerSpinner className="mr-2" size={16} /> Processing...</>) : (<>CALL ${amountToCall} <span className="text-xs ml-1 opacity-70">(C)</span></>)}</span>
-            </button>
+            </Button>
           </motion.div>
         )}
 
         {!canCheck && (
-          <button
+          <Button
             onClick={handleCall}
             disabled={disabled || amountToCall <= 0}
             data-testid="button-snap-call"
-            className="btn-snap-call btn-gradient-secondary min-w-[110px] touch-manipulation"
+            variant="neon-cyan"
+            size="lg"
+            className="min-w-[110px] touch-manipulation"
             style={{ touchAction: 'manipulation' }}
             aria-label={`Snap call ${amountToCall} dollars`}
           >
             <span>SNAP CALL</span>
-          </button>
+          </Button>
         )}
         
-        {/* Raise Button - Primary purple/pink gradient, only shown when raising is allowed */}
+        {/* Raise Button - Primary neon purple/pink gradient, only shown when raising is allowed */}
         {(canRaise || canBet) && (
-          <button
+          <Button
             onClick={handleBetOrRaise}
             disabled={disabled || (!canRaise && !canBet)}
             data-testid="button-bet-raise"
-            className="btn-gradient-primary min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[140px] touch-manipulation text-action-button"
+            variant="neon-primary"
+            size="lg"
+            className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[140px] touch-manipulation"
             style={{ touchAction: 'manipulation' }}
             aria-label={currentBet === 0 ? `Bet ${betAmount} dollars. Keyboard shortcut: R key` : `Raise to ${betAmount} dollars. Keyboard shortcut: R key`}
             aria-disabled={disabled || (!canRaise && !canBet)}
@@ -501,21 +511,23 @@ export function ActionControls({
             onTouchEnd={cancelLongPress}
           >
             <span>{isProcessing ? (<><PokerSpinner className="mr-2" size={16} /> Processing...</>) : (<>{currentBet === 0 ? `BET $${betAmount}` : `RAISE TO $${betAmount}`} <span className="text-xs ml-1 opacity-70">(R)</span></>)}</span>
-          </button>
+          </Button>
         )}
         
-        {/* All-in Button - Special gold gradient with pulse animation */}
-        <button
+        {/* All-in Button - Special neon primary gradient with pulse animation */}
+        <Button
           onClick={handleAllIn}
           disabled={disabled || maxBet <= (currentBet > 0 ? minRaiseAmount : minBet)}
           data-testid="button-all-in"
-          className="btn-gradient-allin min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[140px] touch-manipulation text-action-button"
+          variant="neon-primary"
+          size="lg"
+          className="min-w-[110px] xs:min-w-[120px] sm:min-w-[120px] md:min-w-[140px] touch-manipulation neon-shimmer"
           style={{ touchAction: 'manipulation' }}
           aria-label={`Go all-in with ${maxBet} dollars. Keyboard shortcut: A key`}
           aria-disabled={disabled || maxBet <= (currentBet > 0 ? minRaiseAmount : minBet)}
         >
           <span>{isProcessing ? (<><PokerSpinner className="mr-2" size={16} /> Processing...</>) : (<>ALL-IN ${maxBet} <span className="text-xs ml-1 opacity-70">(A)</span></>)}</span>
-        </button>
+        </Button>
       </div>
 
       {maxBet >= minBet && (

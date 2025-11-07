@@ -3700,3 +3700,318 @@ html.theme-transition * {
   color: #FFFFFF !important;
   box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4) !important;
 }
+
+/* ================================================
+   NEON BUTTON SYSTEM
+   ================================================
+   Premium crypto/Web3 button styles with neon glows
+   ================================================ */
+
+/* Primary neon button with purple-pink gradient */
+.neon-button-primary {
+  background: linear-gradient(135deg, hsl(270 95% 65%), hsl(330 75% 52%)) !important;
+  color: white !important;
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
+  box-shadow: 
+    0 0 20px rgba(139, 92, 246, 0.5),
+    0 0 40px rgba(139, 92, 246, 0.3),
+    inset 0 0 20px rgba(236, 72, 153, 0.2) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 56px !important;
+  border-radius: 12px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.025em !important;
+  text-transform: uppercase !important;
+}
+
+.neon-button-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, 
+    hsl(270 95% 70%), 
+    hsl(330 75% 57%)) !important;
+  transform: scale(1.02) translateY(-2px);
+  box-shadow: 
+    0 0 30px rgba(139, 92, 246, 0.7),
+    0 0 60px rgba(139, 92, 246, 0.5),
+    0 8px 32px rgba(139, 92, 246, 0.3),
+    inset 0 0 30px rgba(236, 72, 153, 0.3) !important;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+}
+
+.neon-button-primary:active:not(:disabled) {
+  transform: scale(0.98);
+  animation: neon-pulse 0.4s ease-out;
+}
+
+/* Secondary neon button with glass morphism */
+.neon-button-secondary {
+  background: rgba(139, 92, 246, 0.1) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(139, 92, 246, 0.5) !important;
+  color: white !important;
+  box-shadow: 
+    0 0 15px rgba(139, 92, 246, 0.3),
+    inset 0 0 20px rgba(139, 92, 246, 0.1) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 48px !important;
+  border-radius: 12px !important;
+}
+
+.neon-button-secondary:hover:not(:disabled) {
+  background: rgba(139, 92, 246, 0.15) !important;
+  border-color: rgba(139, 92, 246, 0.7) !important;
+  transform: translateY(-2px);
+  box-shadow: 
+    0 0 25px rgba(139, 92, 246, 0.5),
+    0 4px 20px rgba(139, 92, 246, 0.3),
+    inset 0 0 30px rgba(139, 92, 246, 0.15) !important;
+}
+
+.neon-button-secondary:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* Outline neon button */
+.neon-button-outline {
+  background: transparent !important;
+  border: 2px solid transparent !important;
+  border-image: linear-gradient(135deg, hsl(270 95% 65%), hsl(330 75% 52%)) 1 !important;
+  color: hsl(270 95% 65%) !important;
+  box-shadow: 
+    0 0 10px rgba(139, 92, 246, 0.4),
+    inset 0 0 10px rgba(139, 92, 246, 0.1) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 48px !important;
+  border-radius: 12px !important;
+}
+
+.neon-button-outline:hover:not(:disabled) {
+  background: rgba(139, 92, 246, 0.05) !important;
+  transform: translateY(-2px);
+  box-shadow: 
+    0 0 20px rgba(139, 92, 246, 0.6),
+    0 4px 16px rgba(139, 92, 246, 0.3),
+    inset 0 0 20px rgba(139, 92, 246, 0.15) !important;
+  text-shadow: 0 0 10px currentColor;
+}
+
+/* Ghost neon button with subtle glow */
+.neon-button-ghost {
+  background: transparent !important;
+  color: white !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 44px !important;
+  border-radius: 12px !important;
+}
+
+.neon-button-ghost:hover:not(:disabled) {
+  background: rgba(139, 92, 246, 0.08) !important;
+  color: hsl(270 95% 65%) !important;
+  box-shadow: 
+    0 0 15px rgba(139, 92, 246, 0.3),
+    inset 0 0 15px rgba(139, 92, 246, 0.1) !important;
+  text-shadow: 0 0 8px currentColor;
+  transform: translateY(-1px);
+}
+
+/* Icon button with circular neon glow */
+.neon-button-icon {
+  background: rgba(139, 92, 246, 0.1) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(139, 92, 246, 0.3) !important;
+  border-radius: 50% !important;
+  box-shadow: 
+    0 0 20px rgba(139, 92, 246, 0.3),
+    inset 0 0 15px rgba(139, 92, 246, 0.1) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 48px !important;
+  min-height: 48px !important;
+  width: 48px !important;
+  height: 48px !important;
+}
+
+.neon-button-icon:hover:not(:disabled) {
+  background: rgba(139, 92, 246, 0.15) !important;
+  border-color: rgba(139, 92, 246, 0.5) !important;
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 
+    0 0 30px rgba(139, 92, 246, 0.5),
+    0 0 50px rgba(139, 92, 246, 0.3),
+    inset 0 0 25px rgba(139, 92, 246, 0.15) !important;
+}
+
+.neon-button-icon:active:not(:disabled) {
+  transform: scale(0.95) rotate(0deg);
+}
+
+/* Quick action button with gradient border */
+.neon-button-quick {
+  position: relative;
+  background: rgba(10, 10, 15, 0.8) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 44px !important;
+  border-radius: 12px !important;
+  overflow: visible !important;
+  border: 1px solid transparent !important;
+}
+
+.neon-button-quick::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(135deg, hsl(270 95% 65%), hsl(330 75% 52%));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.neon-button-quick:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 24px rgba(139, 92, 246, 0.3),
+    0 0 20px rgba(139, 92, 246, 0.4) !important;
+}
+
+.neon-button-quick:hover:not(:disabled)::before {
+  opacity: 1;
+}
+
+/* Auto-action toggle button */
+.neon-button-toggle {
+  background: rgba(30, 30, 40, 0.6) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(139, 92, 246, 0.2) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 44px !important;
+  border-radius: 12px !important;
+}
+
+.neon-button-toggle[data-state="on"],
+.neon-button-toggle.active {
+  background: linear-gradient(135deg, 
+    rgba(139, 92, 246, 0.3), 
+    rgba(236, 72, 153, 0.3)) !important;
+  border-color: hsl(270 95% 65%) !important;
+  color: white !important;
+  box-shadow: 
+    0 0 20px rgba(139, 92, 246, 0.5),
+    inset 0 0 20px rgba(139, 92, 246, 0.2) !important;
+}
+
+.neon-button-toggle:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(139, 92, 246, 0.7) !important;
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.2) !important;
+}
+
+/* Cyan accent button for special actions */
+.neon-button-cyan {
+  background: linear-gradient(135deg, hsl(188 94% 43%), hsl(188 94% 35%)) !important;
+  color: white !important;
+  box-shadow: 
+    0 0 20px rgba(6, 182, 212, 0.5),
+    0 0 40px rgba(6, 182, 212, 0.3) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 48px !important;
+  border-radius: 12px !important;
+}
+
+.neon-button-cyan:hover:not(:disabled) {
+  transform: scale(1.02) translateY(-2px);
+  box-shadow: 
+    0 0 30px rgba(6, 182, 212, 0.7),
+    0 8px 24px rgba(6, 182, 212, 0.3) !important;
+}
+
+/* Destructive neon button (for Fold action) */
+.neon-button-destructive {
+  background: linear-gradient(135deg, hsl(0 80% 50%), hsl(0 80% 40%)) !important;
+  color: white !important;
+  box-shadow: 
+    0 0 20px rgba(239, 68, 68, 0.4),
+    inset 0 0 15px rgba(239, 68, 68, 0.2) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 56px !important;
+  border-radius: 12px !important;
+}
+
+.neon-button-destructive:hover:not(:disabled) {
+  transform: scale(1.02) translateY(-2px);
+  box-shadow: 
+    0 0 30px rgba(239, 68, 68, 0.6),
+    0 8px 24px rgba(239, 68, 68, 0.3) !important;
+}
+
+/* Neon pulse animation */
+@keyframes neon-pulse {
+  0% {
+    box-shadow: 
+      0 0 20px rgba(139, 92, 246, 0.5),
+      0 0 40px rgba(139, 92, 246, 0.3);
+  }
+  50% {
+    box-shadow: 
+      0 0 40px rgba(139, 92, 246, 0.8),
+      0 0 80px rgba(139, 92, 246, 0.6),
+      0 0 120px rgba(139, 92, 246, 0.4);
+  }
+  100% {
+    box-shadow: 
+      0 0 20px rgba(139, 92, 246, 0.5),
+      0 0 40px rgba(139, 92, 246, 0.3);
+  }
+}
+
+/* Gradient shimmer animation for buttons */
+@keyframes gradient-shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.neon-shimmer {
+  background-size: 200% 200%;
+  animation: gradient-shimmer 3s ease infinite;
+}
+
+/* Floating animation for buttons */
+@keyframes neon-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.neon-float {
+  animation: neon-float 3s ease-in-out infinite;
+}
+
+/* Glass blur background for button containers */
+.neon-glass-panel {
+  background: rgba(30, 30, 40, 0.6) !important;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(139, 92, 246, 0.3) !important;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.2),
+    inset 0 0 32px rgba(139, 92, 246, 0.05) !important;
+  border-radius: 16px !important;
+}
