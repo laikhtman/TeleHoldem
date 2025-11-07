@@ -171,7 +171,7 @@ export function CommunityCards({ cards, phase, colorblindMode = false, highlight
       role="group" 
       aria-label="Community cards"
     >
-      <div className={`relative glass-neon rounded-xl p-4 ${cards.length > 0 ? 'cyan-glow' : ''}`}>
+      <div className={`relative community-cards-container community-cards-border ${cards.length > 0 ? '' : ''}`}>
         {/* Glow effect container */}
         <AnimatePresence>
           {showGlow && !prefersReducedMotion && (
@@ -193,8 +193,8 @@ export function CommunityCards({ cards, phase, colorblindMode = false, highlight
           )}
         </AnimatePresence>
 
-        {/* Cards */}
-        <div className="flex gap-2.5 xs:gap-3 sm:gap-3 md:gap-4 relative" data-testid="community-cards">
+        {/* Cards - 6px gap as per design requirements */}
+        <div className="flex gap-1.5 relative justify-center items-center" data-testid="community-cards">
           {[0, 1, 2, 3, 4].map((index) => {
             const hasCard = !!cards[index];
             const animation = getCardAnimation(index);
@@ -219,7 +219,7 @@ export function CommunityCards({ cards, phase, colorblindMode = false, highlight
                   <PlayingCard 
                     card={cards[index]}
                     animateFlip={hasCard && !revealedCards[index] && !prefersReducedMotion}
-                    className={hasCard ? 'shadow-lg card-stagger-reveal hover-glow' : 'border-2 border-purple-500/30 border-dashed animate-pulse'}
+                    className={hasCard ? 'card-stagger-reveal' : ''}
                     highlight={!!(cards[index] && highlightIds && highlightIds.has(cards[index]!.id))}
                     colorblindMode={colorblindMode}
                   />

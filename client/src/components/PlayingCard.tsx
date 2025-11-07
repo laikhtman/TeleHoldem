@@ -155,14 +155,12 @@ export function PlayingCard({
   if (!card) {
     return (
       <div 
-        className={`rounded-lg border-2 border-dashed bg-background/5 ${className}`}
+        className={`card-empty-slot rounded-lg ${className}`}
         style={{
           width: cardDimensions.width,
           height: cardDimensions.height,
           minWidth: cardDimensions.width,
-          minHeight: cardDimensions.height,
-          borderColor: 'rgba(139, 92, 246, 0.3)',
-          boxShadow: 'inset 0 0 10px rgba(139, 92, 246, 0.1)'
+          minHeight: cardDimensions.height
         }}
         data-testid="card-placeholder"
       />
@@ -284,10 +282,14 @@ export function PlayingCard({
     transition: { duration: 0.15 }
   } : undefined;
 
+  // Determine if this is a winning card
+  const isWinningCard = highlight;
+  const [isHovered, setIsHovered] = useState(false);
+  
   return (
     <motion.div
       ref={cardRef}
-      className={`relative ${className}`}
+      className={`relative playing-card-border ${isWinningCard ? 'playing-card-winning' : ''} ${isHovered && !prefersReducedMotion ? 'playing-card-hover' : ''} ${className}`}
       style={{ 
         width: cardDimensions.width, 
         height: cardDimensions.height,
@@ -295,6 +297,7 @@ export function PlayingCard({
         minHeight: cardDimensions.height,
         flexShrink: 0,
         transformStyle: 'preserve-3d',
+        borderRadius: '8px',
         // Hardware acceleration hint
         transform: `translateZ(0) scale(${pinchActive ? 1.2 : 1})`
       }}
@@ -307,6 +310,8 @@ export function PlayingCard({
       whileTap={tapAnimation}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       {/* Card Back */}
       <motion.div 
@@ -372,18 +377,11 @@ export function PlayingCard({
         }}
       >
         <motion.div 
-          className={`w-full h-full rounded-lg overflow-hidden relative ${isTouched ? 'ring-2 ring-purple-500/50' : ''}`}
-          style={{
-            background: 'linear-gradient(135deg, #FFFFFF 0%, #F3F4F6 100%)',
-            border: '1px solid rgba(0, 0, 0, 0.1)',
-            boxShadow: highlight 
-              ? '0 4px 12px rgba(139, 92, 246, 0.2), 0 0 16px rgba(139, 92, 246, 0.6)' 
-              : '0 2px 8px rgba(139, 92, 246, 0.1)'
-          }}
+          className={`w-full h-full playing-card rounded-lg overflow-hidden relative ${isTouched ? 'ring-2 ring-purple-500/50' : ''}`}
           data-testid={`card-${card.id}`}
           key={settleBounceKey}
           initial={prefersReducedMotion ? {} : { y: 0, scale: 1 }}
-          animate={prefersReducedMotion ? {} : { y: [0, -3], scale: peekActive ? 1.15 : 1.02 }}
+          animate={prefersReducedMotion ? {} : { y: [0, -3], scale: peekActive ? 1.15 : 1 }}
           transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3, ease: 'easeOut', repeat: 1, repeatType: "reverse" }}
         >
           {/* Colorblind-friendly suit indicator badge (only in colorblind mode) */}
