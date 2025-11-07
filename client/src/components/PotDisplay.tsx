@@ -137,9 +137,9 @@ export function PotDisplay({ amount, onRef, sidePots = [] }: PotDisplayProps) {
           )}
         </AnimatePresence>
 
-        {/* Main Pot Container with enhanced styling */}
+        {/* Main Pot Container with enhanced glass morphism styling */}
         <motion.div
-          className={`relative glass-neon rounded-2xl px-6 xs:px-8 sm:px-7 py-4 xs:py-5 sm:py-4 ${amount > 0 ? 'gold-glow' : ''} ${isIncreasing ? 'pot-win-burst' : ''}`}
+          className={`pot-display-glass glass-border-gold glass-shadow-gold glass-float ${isIncreasing ? 'pot-win-burst' : ''}`}
           whileHover={{ scale: 1.05 }}
           transition={{ type: "spring", stiffness: 300 }}
         >
@@ -167,9 +167,9 @@ export function PotDisplay({ amount, onRef, sidePots = [] }: PotDisplayProps) {
             
             {/* Text Display */}
             <div className="flex flex-col">
-              <div className="text-sm xs:text-base sm:text-sm text-gray-400 font-bold tracking-wider uppercase">POT</div>
+              <div className="text-sm xs:text-base sm:text-sm text-gray-400 font-bold tracking-wider uppercase neon-glow-gold">POT</div>
               <motion.div 
-                className="text-pot-display tabular-nums" 
+                className="gradient-text-gold tabular-nums" 
                 data-testid="pot-amount"
                 animate={isIncreasing ? {
                   scale: [1, 1.2, 1]

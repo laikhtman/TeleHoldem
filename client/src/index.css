@@ -1901,6 +1901,317 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* ================================================
+   GLASS MORPHISM DESIGN SYSTEM
+   ================================================
+   Premium crypto gaming glass effects with neon accents
+   ================================================ */
+
+/* Base Glass Panel */
+.glass-panel {
+  background: rgba(20, 18, 30, 0.6) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid transparent !important;
+  border-radius: 12px !important;
+  padding: 16px !important;
+  position: relative;
+  transition: all 0.3s ease-out !important;
+}
+
+/* Enhanced Glass Panel for prominence */
+.glass-panel-enhanced {
+  background: rgba(20, 18, 30, 0.7) !important;
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
+  border: 1px solid transparent !important;
+  border-radius: 16px !important;
+  padding: 24px !important;
+  position: relative;
+}
+
+/* Glass Border Gradient */
+.glass-border {
+  background-image: linear-gradient(rgba(20, 18, 30, 0.6), rgba(20, 18, 30, 0.6)),
+                    linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%) !important;
+  background-origin: border-box !important;
+  background-clip: padding-box, border-box !important;
+}
+
+/* Enhanced Glass Border for active/special states */
+.glass-border-enhanced {
+  border-width: 2px !important;
+  background-image: linear-gradient(rgba(20, 18, 30, 0.7), rgba(20, 18, 30, 0.7)),
+                    linear-gradient(135deg, #8B5CF6 0%, #EC4899 50%, #06B6D4 100%) !important;
+  background-origin: border-box !important;
+  background-clip: padding-box, border-box !important;
+}
+
+/* Gold Glass Border for pot/winnings */
+.glass-border-gold {
+  background-image: linear-gradient(rgba(20, 18, 30, 0.7), rgba(20, 18, 30, 0.7)),
+                    linear-gradient(135deg, #FBBF24 0%, #F59E0B 50%, #FBBF24 100%) !important;
+  background-origin: border-box !important;
+  background-clip: padding-box, border-box !important;
+}
+
+/* Glass Panel Shadows and Glows */
+.glass-shadow {
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.4),
+    0 0 20px rgba(139, 92, 246, 0.15),
+    inset 0 0 20px rgba(139, 92, 246, 0.03) !important;
+}
+
+/* Enhanced shadow for prominent panels */
+.glass-shadow-enhanced {
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.5),
+    0 0 40px rgba(139, 92, 246, 0.25),
+    0 0 80px rgba(236, 72, 153, 0.15),
+    inset 0 0 30px rgba(139, 92, 246, 0.05) !important;
+}
+
+/* Gold shadow for pot display */
+.glass-shadow-gold {
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.5),
+    0 0 40px rgba(251, 191, 36, 0.4),
+    0 0 80px rgba(251, 191, 36, 0.2),
+    inset 0 0 30px rgba(251, 191, 36, 0.1) !important;
+}
+
+/* Hover Effects for Glass Panels */
+.glass-hover:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 
+    0 8px 20px rgba(0, 0, 0, 0.5),
+    0 0 40px rgba(139, 92, 246, 0.3),
+    0 0 60px rgba(236, 72, 153, 0.2),
+    inset 0 0 30px rgba(139, 92, 246, 0.08) !important;
+  transition: all 0.3s ease-out !important;
+}
+
+/* Active Player Glass Effects */
+.glass-active {
+  animation: glass-pulse 2s ease-in-out infinite !important;
+  border-width: 2px !important;
+  background: rgba(25, 22, 35, 0.75) !important;
+}
+
+@keyframes glass-pulse {
+  0%, 100% {
+    box-shadow: 
+      0 4px 12px rgba(0, 0, 0, 0.4),
+      0 0 30px rgba(139, 92, 246, 0.3),
+      0 0 60px rgba(236, 72, 153, 0.2);
+  }
+  50% {
+    box-shadow: 
+      0 4px 12px rgba(0, 0, 0, 0.4),
+      0 0 40px rgba(139, 92, 246, 0.4),
+      0 0 80px rgba(236, 72, 153, 0.3);
+  }
+}
+
+/* Floating Animation for Glass Panels */
+.glass-float {
+  animation: glass-float-animation 3s ease-in-out infinite !important;
+}
+
+@keyframes glass-float-animation {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+/* Gradient Text for Premium Elements */
+.gradient-text {
+  background: linear-gradient(135deg, #8B5CF6 0%, #EC4899 50%, #06B6D4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+}
+
+/* Gold Gradient Text for Pot */
+.gradient-text-gold {
+  background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 50%, #FBBF24 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 800;
+  font-size: 24px;
+  animation: shimmer 3s linear infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+/* Dialog/Modal Glass Overlay */
+.glass-overlay {
+  background: rgba(10, 8, 15, 0.85) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+/* Dialog/Modal Glass Content */
+.glass-dialog {
+  background: rgba(20, 18, 30, 0.9) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border: 1px solid transparent !important;
+  background-image: linear-gradient(rgba(20, 18, 30, 0.9), rgba(20, 18, 30, 0.9)),
+                    linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%) !important;
+  background-origin: border-box !important;
+  background-clip: padding-box, border-box !important;
+  border-radius: 16px !important;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.6),
+    0 0 60px rgba(139, 92, 246, 0.2),
+    0 0 120px rgba(236, 72, 153, 0.1) !important;
+}
+
+/* Neon Glow Text */
+.neon-glow {
+  text-shadow: 
+    0 0 10px rgba(139, 92, 246, 0.8),
+    0 0 20px rgba(139, 92, 246, 0.6),
+    0 0 30px rgba(139, 92, 246, 0.4) !important;
+}
+
+.neon-glow-pink {
+  text-shadow: 
+    0 0 10px rgba(236, 72, 153, 0.8),
+    0 0 20px rgba(236, 72, 153, 0.6),
+    0 0 30px rgba(236, 72, 153, 0.4) !important;
+}
+
+.neon-glow-cyan {
+  text-shadow: 
+    0 0 10px rgba(6, 182, 212, 0.8),
+    0 0 20px rgba(6, 182, 212, 0.6),
+    0 0 30px rgba(6, 182, 212, 0.4) !important;
+}
+
+.neon-glow-gold {
+  text-shadow: 
+    0 0 10px rgba(251, 191, 36, 0.8),
+    0 0 20px rgba(251, 191, 36, 0.6),
+    0 0 30px rgba(251, 191, 36, 0.4) !important;
+}
+
+/* Scale Animation for Dialogs */
+.glass-scale-in {
+  animation: glass-scale-in 0.3s ease-out forwards;
+}
+
+@keyframes glass-scale-in {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.glass-scale-out {
+  animation: glass-scale-out 0.2s ease-in forwards;
+}
+
+@keyframes glass-scale-out {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+}
+
+/* Info Panel Specific Styles */
+.glass-info-panel {
+  background: rgba(20, 18, 30, 0.5) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid transparent !important;
+  background-image: linear-gradient(rgba(20, 18, 30, 0.5), rgba(20, 18, 30, 0.5)),
+                    linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%) !important;
+  background-origin: border-box !important;
+  background-clip: padding-box, border-box !important;
+  border-radius: 12px !important;
+  padding: 16px !important;
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(6, 182, 212, 0.1) !important;
+}
+
+/* Player Seat Glass Morphism */
+.player-seat-glass {
+  background: rgba(20, 18, 30, 0.6) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid transparent !important;
+  background-image: linear-gradient(rgba(20, 18, 30, 0.6), rgba(20, 18, 30, 0.6)),
+                    linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%) !important;
+  background-origin: border-box !important;
+  background-clip: padding-box, border-box !important;
+  border-radius: 12px !important;
+  padding: 16px !important;
+  position: relative;
+  transition: all 0.3s ease-out !important;
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.4),
+    0 0 20px rgba(139, 92, 246, 0.15),
+    inset 0 0 20px rgba(139, 92, 246, 0.03) !important;
+}
+
+.player-seat-glass:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 
+    0 8px 20px rgba(0, 0, 0, 0.5),
+    0 0 40px rgba(139, 92, 246, 0.3),
+    0 0 60px rgba(236, 72, 153, 0.2) !important;
+}
+
+.player-seat-glass.active-player {
+  border-width: 2px !important;
+  background: rgba(25, 22, 35, 0.75) !important;
+  animation: glass-pulse 2s ease-in-out infinite !important;
+}
+
+/* Pot Display Glass Morphism */
+.pot-display-glass {
+  background: rgba(20, 18, 30, 0.7) !important;
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
+  border: 2px solid transparent !important;
+  background-image: linear-gradient(rgba(20, 18, 30, 0.7), rgba(20, 18, 30, 0.7)),
+                    linear-gradient(135deg, #FBBF24 0%, #F59E0B 50%, #FBBF24 100%) !important;
+  background-origin: border-box !important;
+  background-clip: padding-box, border-box !important;
+  border-radius: 16px !important;
+  padding: 24px !important;
+  position: relative;
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.5),
+    0 0 40px rgba(251, 191, 36, 0.4),
+    0 0 80px rgba(251, 191, 36, 0.2),
+    inset 0 0 30px rgba(251, 191, 36, 0.1) !important;
+}
+
+/* ================================================
    MOBILE-SPECIFIC RESPONSIVE IMPROVEMENTS
    ================================================
    Optimized for iPhone screen sizes (375px-430px)

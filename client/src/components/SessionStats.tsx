@@ -9,8 +9,8 @@ export function SessionStats({ stats }: SessionStatsProps) {
   const winRate = stats.handsPlayed > 0 ? Math.round((stats.handsWonByPlayer / stats.handsPlayed) * 100) : 0;
 
   return (
-    <div className="rounded-lg bg-black/70 p-3 text-white mt-4">
-      <h3 className="text-md font-bold mb-2 text-center">Session Stats</h3>
+    <div className="glass-info-panel glass-float mt-4 text-white">
+      <h3 className="text-md font-bold mb-2 text-center gradient-text">Session Stats</h3>
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-2 text-sm">

@@ -9,7 +9,7 @@ export function TurnTimer({ duration }: TurnTimerProps) {
   
   return (
     <div 
-      className={`absolute inset-0 flex items-center justify-center pointer-events-none ${isUrgent ? 'timer-urgent-glow' : ''}`}
+      className={`absolute inset-0 flex items-center justify-center pointer-events-none ${isUrgent ? 'neon-glow-pink' : ''}`}
       role="progressbar"
       aria-label="Bot thinking timer"
       aria-valuenow={0}
