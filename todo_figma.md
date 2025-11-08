@@ -24,6 +24,27 @@
   - "CONVERT" button with orange styling
   - USDT currency indicator
 
+### 🎯 LOADING SCREEN IMPLEMENTATION
+
+#### 32. **Loading Screen Design Update**
+- [x] **32.1** Update main loading screen to match Figma design
+  - Dark background (#1a1a1a)
+  - Circular progress loader with diamond icon
+  - Orange/amber progress color (#facc15)
+  - "Advice" header with orange styling
+- [x] **32.2** Implement tip rotation system
+  - Display poker tips during loading
+  - Featured tip: "Check the promotional chips, they usually sell extremely profitably!"
+  - Randomized tip selection from predefined list
+- [x] **32.3** Add progress indicators
+  - Circular progress with smooth animation
+  - Bottom progress bar matching design
+  - Consistent timing and transitions
+- [x] **32.4** Update PokerLoader component
+  - Match new design aesthetic
+  - Diamond icon integration
+  - Consistent color scheme with main loading screen
+
 ### 💰 DEPOSIT SYSTEM IMPLEMENTATION
 
 #### 3. **Deposit Flow - Step 1: Amount Entry**

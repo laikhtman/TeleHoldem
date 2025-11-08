@@ -90,77 +90,67 @@ export function PokerLoader({
   return (
     <div className={cn("flex flex-col items-center justify-center gap-6", className)}>
       {/* Main loader container */}
-      <div className={cn("relative", sizeClasses[size])}>
-        {/* Poker table background circle */}
-        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-poker-felt to-green-800 opacity-20" />
-        
-        {/* Central rotating container */}
+      <div className={cn("relative", sizeClasses[size])}>        
+        {/* Central rotating container with diamond */}
         <motion.div
           className="absolute inset-0 flex items-center justify-center"
           variants={animationVariants.container}
           animate="animate"
         >
-          {/* Animated card suits in corners */}
-          {suits.map((suit, index) => {
-            const positions = [
-              'top-0 left-1/2 -translate-x-1/2',
-              'right-0 top-1/2 -translate-y-1/2',
-              'bottom-0 left-1/2 -translate-x-1/2',
-              'left-0 top-1/2 -translate-y-1/2'
-            ];
-            
-            return (
-              <motion.div
-                key={index}
-                className={cn(
-                  "absolute text-4xl font-bold",
-                  suit.color,
-                  positions[index]
-                )}
-                variants={animationVariants.suit}
-                initial="initial"
-                animate="animate"
-                custom={suit.delay}
-              >
-                {suit.symbol}
-              </motion.div>
-            );
-          })}
-        </motion.div>
-
-        {/* Center chip stack */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <motion.div
-            className="flex flex-col items-center gap-1"
-            variants={animationVariants.chip}
-            initial="initial"
-            animate="animate"
+          {/* Progress circle background */}
+          <svg
+            className="absolute inset-0 -rotate-90 transform w-full h-full"
+            viewBox="0 0 128 128"
           >
-            {/* Stacked chips */}
-            {[0, 1, 2].map((i) => (
-              <div
-                key={i}
-                className="w-12 h-12 rounded-full bg-gradient-to-br from-poker-chipGold to-yellow-600 border-2 border-yellow-700 shadow-lg"
-                style={{
-                  marginTop: i > 0 ? '-35px' : 0,
-                  zIndex: 3 - i,
-                  transform: 'translateZ(0)' // GPU acceleration
-                }}
-              >
-                {/* Chip detail */}
-                <div className="w-full h-full rounded-full border-4 border-dashed border-yellow-800/30 flex items-center justify-center">
-                  <span className="text-yellow-900 font-bold text-xs">$</span>
-                </div>
-              </div>
-            ))}
-          </motion.div>
-        </div>
+            <circle
+              cx="64"
+              cy="64"
+              r="56"
+              stroke="rgb(55, 65, 81)"
+              strokeWidth="8"
+              fill="none"
+            />
+          </svg>
+          
+          {/* Animated progress circle */}
+          <svg
+            className="absolute inset-0 -rotate-90 transform w-full h-full"
+            viewBox="0 0 128 128"
+          >
+            <circle
+              cx="64"
+              cy="64"
+              r="56"
+              stroke="#facc15"
+              strokeWidth="8"
+              fill="none"
+              strokeLinecap="round"
+              strokeDasharray="351.86"
+              strokeDashoffset="175.93"
+              className="animate-spin"
+              style={{ 
+                animationDuration: prefersReducedMotion ? '0s' : '3s'
+              }}
+            />
+          </svg>
+
+          {/* Center diamond icon */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <motion.div
+              variants={animationVariants.chip}
+              initial="initial"
+              animate="animate"
+            >
+              <Diamond className="h-12 w-12 text-amber-400" fill="currentColor" />
+            </motion.div>
+          </div>
+        </motion.div>
       </div>
 
       {/* Loading message */}
       <motion.p 
         className={cn(
-          "text-foreground/70 font-medium",
+          "text-gray-300 font-medium text-center",
           textSizes[size]
         )}
         initial={{ opacity: 0 }}
@@ -178,29 +168,6 @@ export function PokerLoader({
       >
         {message}
       </motion.p>
-
-      {/* Progress dots */}
-      <div className="flex gap-2">
-        {[0, 1, 2].map((i) => (
-          <motion.div
-            key={i}
-            className="w-2 h-2 rounded-full bg-poker-chipGold"
-            initial={{ opacity: 0.3 }}
-            animate={{ 
-              opacity: prefersReducedMotion ? 0.8 : [0.3, 1, 0.3],
-            }}
-            transition={prefersReducedMotion
-              ? { duration: 0.01 }
-              : {
-                  duration: 1.5,
-                  repeat: Infinity,
-                  delay: i * 0.2,
-                  ease: "easeInOut"
-                }
-            }
-          />
-        ))}
-      </div>
     </div>
   );
 }
