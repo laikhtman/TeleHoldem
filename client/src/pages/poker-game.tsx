@@ -2557,9 +2557,9 @@ export default function PokerGame() {
           </div>
         </div>
         
-        {/* Mobile Bottom Sheet for Action Controls with Safe Area */}
+        {/* Mobile Bottom Sheet for Action Controls - Optimized for mobile UX */}
         <div 
-          className="fixed bottom-0 left-0 right-0 z-40 bg-background border-t shadow-lg"
+          className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-lg border-t border-border/50 shadow-xl"
           style={{ 
             paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0px)',
             paddingLeft: 'calc(env(safe-area-inset-left, 0px) + 0px)',
@@ -2567,7 +2567,7 @@ export default function PokerGame() {
           }}
         >
           {gameState.phase === 'waiting' ? (
-            <div className="p-4" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)' }}>
+            <div className="p-3" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.75rem)' }}>
               <div className="flex flex-col gap-2">
                 <Button 
                   onClick={startNewHand}
