@@ -943,6 +943,267 @@ server/
    - Empty states and error handling
    - Cross-device testing and optimization
 
+## Phase 12: Store and Payment System Implementation 🚨 CRITICAL
+### 12.1 Game Store Core Architecture
+- [ ] **Store Navigation Component**
+  - [ ] Back arrow with "Game Store" title
+  - [ ] Diamond logo with balance display at top
+  - [ ] "Buy Chips" primary section header
+  - [ ] Smooth navigation transitions
+  - [ ] Dark theme with orange accents
+
+- [ ] **Store Header with Balance Display**
+  - [ ] Current chip balance prominently displayed
+  - [ ] Diamond icon next to balance
+  - [ ] Real-time balance updates
+  - [ ] Currency formatting (commas for thousands)
+  - [ ] Responsive header sizing
+
+### 12.2 Chip Packages Implementation (Screen 1)
+- [ ] **Chip Package Cards System**
+  - [ ] Various chip packages with different values:
+    - [ ] Starter Pack (red chips) - lower value
+    - [ ] Premium Pack (blue chips) - mid value  
+    - [ ] VIP Pack (gold chips) - high value
+    - [ ] Ultimate Pack (purple chips) - highest value
+  - [ ] Each card shows:
+    - [ ] Chip stack illustration with proper colors
+    - [ ] Package name and chip count
+    - [ ] Price in USD/crypto
+    - [ ] "BUY" button in orange theme
+    - [ ] Special offers/bonuses if applicable
+
+- [ ] **Chip Package Visual Design**
+  - [ ] Realistic 3D chip stack illustrations
+  - [ ] Color-coded chip types (red, blue, gold, purple)
+  - [ ] Gradient backgrounds for premium packages
+  - [ ] Proper card shadows and hover effects
+  - [ ] Responsive grid layout (2 columns on mobile)
+
+- [ ] **Special Chip Offers Section**
+  - [ ] "Guest Chips" section with bonus offers
+  - [ ] Limited-time promotions
+  - [ ] First-time buyer bonuses
+  - [ ] Daily deal rotations
+  - [ ] VIP member exclusive packages
+
+### 12.3 Table Customization Store (Screen 2)
+- [ ] **Table Themes Section**
+  - [ ] "Red Chips" poker table theme
+  - [ ] "Blue Chips" poker table theme  
+  - [ ] Various colored poker table options
+  - [ ] Each theme card shows:
+    - [ ] Table preview image/illustration
+    - [ ] Theme name
+    - [ ] Price (some marked as "OWNED")
+    - [ ] "BUY" or "OWNED" status button
+
+- [ ] **Table Background Options**
+  - [ ] "Sunset Scene" table background
+  - [ ] Multiple environmental backgrounds
+  - [ ] Premium table surface materials
+  - [ ] Seasonal/themed backgrounds
+  - [ ] Unlockable achievement backgrounds
+
+### 12.4 Table Surface Customization (Detailed View)
+- [ ] **Table Surface Colors**
+  - [ ] Multiple poker table felt colors:
+    - [ ] Classic Green (default)
+    - [ ] Royal Blue  
+    - [ ] Deep Red
+    - [ ] Sunset Orange
+    - [ ] Premium Black
+    - [ ] Golden Elite
+  - [ ] Each with realistic felt texture
+  - [ ] Preview functionality before purchase
+
+- [ ] **Table Shape Options**
+  - [ ] Oval poker tables (classic)
+  - [ ] Round tables
+  - [ ] Rectangular tournament tables
+  - [ ] VIP private table designs
+  - [ ] Different size options
+
+### 12.5 Store Purchase System
+- [ ] **Payment Integration**
+  - [ ] Multiple payment methods support:
+    - [ ] Credit/debit cards
+    - [ ] PayPal integration
+    - [ ] Cryptocurrency payments (BTC, ETH)
+    - [ ] Apple Pay/Google Pay
+    - [ ] Bank transfers
+  - [ ] Secure payment processing
+  - [ ] Purchase confirmation flows
+
+- [ ] **Purchase Flow Components**
+  - [ ] Item selection confirmation modal
+  - [ ] Payment method selection
+  - [ ] Purchase processing indicators
+  - [ ] Success/failure feedback
+  - [ ] Receipt generation and storage
+
+### 12.6 Store State Management
+- [ ] **Inventory System**
+  - [ ] Track owned vs. unowned items
+  - [ ] User inventory management
+  - [ ] Item usage/activation system
+  - [ ] Purchase history tracking
+  - [ ] Refund/return policies
+
+- [ ] **Store Data Management**
+  - [ ] Dynamic pricing system
+  - [ ] Special offers and promotions
+  - [ ] Seasonal item rotations
+  - [ ] User-specific recommendations
+  - [ ] Purchase analytics tracking
+
+### 12.7 Backend Store Integration
+- [ ] **Store API Endpoints**
+  - [ ] GET /api/store/items - fetch all store items
+  - [ ] GET /api/store/packages - chip packages
+  - [ ] GET /api/store/themes - table themes
+  - [ ] POST /api/store/purchase - process purchase
+  - [ ] GET /api/user/inventory - user's owned items
+  - [ ] PUT /api/user/equipped - set active theme
+
+- [ ] **Payment Processing APIs**
+  - [ ] Payment gateway integration
+  - [ ] Transaction validation
+  - [ ] Purchase receipt generation
+  - [ ] Refund processing
+  - [ ] Fraud detection systems
+
+### 12.8 Store UI Components Architecture
+- [ ] **Core Store Components**
+  - [ ] StoreHeader.tsx - header with balance
+  - [ ] ChipPackageCard.tsx - individual chip packages
+  - [ ] ThemeCard.tsx - table theme cards
+  - [ ] PurchaseModal.tsx - purchase confirmation
+  - [ ] PaymentMethods.tsx - payment selection
+
+- [ ] **Supporting Components**
+  - [ ] StoreNavigation.tsx - store navigation
+  - [ ] ItemPreview.tsx - theme preview system
+  - [ ] PurchaseHistory.tsx - transaction history
+  - [ ] InventoryManager.tsx - owned items management
+  - [ ] PromotionBanner.tsx - special offers display
+
+### 12.9 Store Visual Design Implementation
+- [ ] **Store Theme Consistency**
+  - [ ] Dark theme with orange accents throughout
+  - [ ] Consistent card styling with current app theme
+  - [ ] Orange "BUY" buttons matching app design
+  - [ ] Proper contrast ratios for accessibility
+
+- [ ] **Item Visualization System**
+  - [ ] High-quality chip stack renders
+  - [ ] Table theme preview images
+  - [ ] 3D-like illustrations for premium items
+  - [ ] Smooth hover and selection animations
+  - [ ] Loading states for purchase processing
+
+### 12.10 Store Security and Validation
+- [ ] **Purchase Security**
+  - [ ] Server-side purchase validation
+  - [ ] Duplicate purchase prevention
+  - [ ] Balance verification before purchases
+  - [ ] Secure payment token handling
+  - [ ] Purchase audit logging
+
+- [ ] **Anti-Fraud Measures**
+  - [ ] Rate limiting on purchases
+  - [ ] Suspicious activity detection
+  - [ ] IP-based purchase restrictions
+  - [ ] Payment verification systems
+
+### 12.11 Store Integration with Game
+- [ ] **Theme Application System**
+  - [ ] Real-time theme switching in games
+  - [ ] Theme persistence across sessions
+  - [ ] Theme preview in lobby
+  - [ ] Social theme sharing features
+
+- [ ] **Chip Balance Integration**
+  - [ ] Real-time balance updates after purchases
+  - [ ] Balance synchronization across devices
+  - [ ] Chip transaction history
+  - [ ] Balance notifications
+
+### 12.12 File Structure for Store System
+```
+client/src/components/store/
+├── StoreHeader.tsx (new)
+├── StoreNavigation.tsx (new)
+├── ChipPackageCard.tsx (new)
+├── ChipPackageGrid.tsx (new)
+├── ThemeCard.tsx (new)
+├── ThemeGrid.tsx (new)
+├── PurchaseModal.tsx (new)
+├── PaymentMethods.tsx (new)
+├── ItemPreview.tsx (new)
+├── PurchaseHistory.tsx (new)
+├── InventoryManager.tsx (new)
+├── PromotionBanner.tsx (new)
+├── StoreCategories.tsx (new)
+└── StoreSearch.tsx (new)
+
+client/src/pages/
+├── StorePage.tsx (new)
+├── ChipStorePage.tsx (new)
+├── ThemeStorePage.tsx (new)
+├── PurchaseHistoryPage.tsx (new)
+└── InventoryPage.tsx (new)
+
+client/src/hooks/
+├── useStore.ts (new)
+├── usePurchase.ts (new)
+├── useInventory.ts (new)
+├── useThemes.ts (new)
+└── usePayments.ts (new)
+
+server/store/
+├── storeController.ts (new)
+├── purchaseController.ts (new)
+├── inventoryController.ts (new)
+├── paymentService.ts (new)
+└── storeValidation.ts (new)
+```
+
+### 12.13 Store Implementation Priority
+1. **Week 1: Core Store Structure**
+   - Store navigation and header
+   - Basic chip package display
+   - Store routing and pages
+
+2. **Week 2: Purchase System**
+   - Purchase modal and flow
+   - Payment method integration
+   - Basic inventory management
+
+3. **Week 3: Theme System**
+   - Table theme cards and preview
+   - Theme application in games
+   - Advanced store features
+
+4. **Week 4: Polish and Integration**
+   - Store animations and polish
+   - Advanced payment methods
+   - Store analytics and optimization
+
+### 12.14 Store Success Criteria
+- [ ] ✅ Complete store navigation works smoothly
+- [ ] ✅ All chip packages display correctly with proper pricing
+- [ ] ✅ Table themes show accurate previews
+- [ ] ✅ Purchase flow works end-to-end
+- [ ] ✅ Payment methods integrate properly
+- [ ] ✅ Inventory system tracks owned items
+- [ ] ✅ Themes apply correctly in game
+- [ ] ✅ Balance updates in real-time
+- [ ] ✅ Store matches Figma design exactly
+- [ ] ✅ Mobile responsive design works properly
+- [ ] ✅ Purchase security measures implemented
+- [ ] ✅ Store performance optimized for mobile
+
 *Last Updated: January 2025*
 *Design Source: Figma - POKER App Complete Interface Design*
-*Latest Addition: Notification Center Implementation*
+*Latest Addition: Complete Store and Payment System Implementation*
