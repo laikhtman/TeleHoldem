@@ -67,6 +67,8 @@ import {
   AnimatedCounter,
   useScreenShake
 } from '@/components/AnimationEffects';
+import LoadingScreen from '@/components/LoadingScreen';
+import WelcomeScreens from '@/components/WelcomeScreens';
 
 const NUM_PLAYERS = 6;
 const MAX_HISTORY_ENTRIES = 30;
@@ -140,6 +142,13 @@ export default function PokerGame() {
   const [showEventLog, setShowEventLog] = useState(false);
   const [tableAspect, setTableAspect] = useState<string>('3 / 2');
   const potPosition = useRef<{ x: number; y: number }>({ x: 400, y: 150 });
+  
+  // Loading and onboarding state
+  const [showWelcomeScreens, setShowWelcomeScreens] = useState(false);
+  const [showLoadingScreen, setShowLoadingScreen] = useState(true);
+  const [hasCompletedWelcome, setHasCompletedWelcome] = useState(() => {
+    return localStorage.getItem('pokerWelcomeCompleted') === 'true';
+  });
   
   // Chip physics animation state
   const [activeChipAnimations, setActiveChipAnimations] = useState<ChipPhysicsAnimation[]>([]);
@@ -1862,6 +1871,31 @@ export default function PokerGame() {
     minimal: '#184a3b', // modern teal-green
     neon: '#112244' // dark base; neon accents via table-edge glow css
   };
+
+  // Handle loading screen completion
+  const handleLoadingComplete = () => {
+    setShowLoadingScreen(false);
+    if (!hasCompletedWelcome) {
+      setShowWelcomeScreens(true);
+    }
+  };
+
+  // Handle welcome screens completion
+  const handleWelcomeComplete = () => {
+    setShowWelcomeScreens(false);
+    setHasCompletedWelcome(true);
+    localStorage.setItem('pokerWelcomeCompleted', 'true');
+  };
+
+  // Show loading screen
+  if (showLoadingScreen) {
+    return <LoadingScreen onComplete={handleLoadingComplete} minDuration={2500} />;
+  }
+
+  // Show welcome screens for first-time users
+  if (showWelcomeScreens && !hasCompletedWelcome) {
+    return <WelcomeScreens onComplete={handleWelcomeComplete} />;
+  }
 
   return (
     <div className={`min-h-screen bg-background ${settings.highContrast ? 'high-contrast' : ''} ${settings.largeText ? 'large-text' : ''}`} role="main" aria-label="Poker game table">
