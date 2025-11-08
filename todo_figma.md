@@ -236,35 +236,180 @@ client/src/pages/
 3. `"/lobby"` → Redesigned game selection
 4. `"/game"` → Existing game (minimal changes)
 
+## Phase 7: Complete Game View Redesign 🚨 CRITICAL
+### 7.1 Game Interface Architecture (Based on Figma Screenshots)
+- [ ] **Complete Mobile Game Layout Redesign**
+  - [ ] Dark theme with green poker table background
+  - [ ] Compact vertical layout optimized for mobile screens
+  - [ ] Header with game info (Texas Hold'em, pot amount, player stats)
+  - [ ] Player avatars arranged around the table perimeter
+  - [ ] Community cards center-positioned on green felt
+  - [ ] Player's cards prominently displayed at bottom
+  - [ ] Action controls at very bottom of screen
+
+### 7.2 Header Design Implementation
+- [ ] **Game Header Component**
+  - [ ] "Texas Hold'em" title on left with back arrow
+  - [ ] Central pot display with coin icon and amount (e.g., "1,053,033")
+  - [ ] Right-side menu/settings button
+  - [ ] Player info bar below header (bankroll, position indicators)
+
+### 7.3 Player Positioning System
+- [ ] **Radial Player Layout**
+  - [ ] 6 players arranged around oval table perimeter
+  - [ ] Each player shows: avatar, name, chip count, cards (if applicable)
+  - [ ] Current player highlighted with special border/glow
+  - [ ] Dealer button and position indicators
+  - [ ] Folded players grayed out but still visible
+
+### 7.4 Community Cards Redesign
+- [ ] **Center Table Card Display**
+  - [ ] 5 card slots horizontally arranged on green felt
+  - [ ] Cards properly spaced and sized for mobile viewing
+  - [ ] Empty slots shown with card-back placeholders
+  - [ ] Smooth animation for card reveals (flop, turn, river)
+
+### 7.5 Player Hand Display
+- [ ] **Bottom Player Card Area**
+  - [ ] Two hole cards prominently displayed
+  - [ ] Cards larger than community cards for better visibility
+  - [ ] "Your turn" indicator when it's player's action
+  - [ ] Current bet amount and chip count display
+  - [ ] Hand strength indicator (if applicable)
+
+### 7.6 Action Controls Redesign
+- [ ] **Bottom Action Bar**
+  - [ ] Three primary buttons: Fold (red), Call (blue), Raise (green/orange)
+  - [ ] Bet amount slider/input below buttons
+  - [ ] Quick bet buttons (100, +, 2x, Raise amounts)
+  - [ ] All buttons sized for touch interaction (minimum 44px)
+
+### 7.7 Visual Design System Updates
+- [ ] **Color Scheme Implementation**
+  - [ ] Dark background (#1a1a1a or similar)
+  - [ ] Green poker felt (#0f7b3c or similar)
+  - [ ] Gold/yellow accent colors for active elements
+  - [ ] Red for fold/danger actions
+  - [ ] Blue/cyan for call/neutral actions
+  - [ ] Proper contrast ratios for accessibility
+
+- [ ] **Typography and Spacing**
+  - [ ] Clean, readable fonts optimized for mobile
+  - [ ] Proper hierarchy (headers, body text, button text)
+  - [ ] Adequate spacing between interactive elements
+  - [ ] Consistent padding and margins
+
+### 7.8 Mobile-First Responsive Design
+- [ ] **Screen Size Adaptations**
+  - [ ] Portrait orientation primary layout
+  - [ ] Landscape orientation fallback
+  - [ ] Safe area handling for notched devices
+  - [ ] Proper scaling for different screen densities
+
+- [ ] **Touch Interactions**
+  - [ ] Tap targets minimum 44x44 points
+  - [ ] Gesture support (swipe to fold, double-tap to call)
+  - [ ] Haptic feedback for actions
+  - [ ] Visual feedback for button presses
+
+### 7.9 Animation and Transitions
+- [ ] **Game Flow Animations**
+  - [ ] Card dealing animations
+  - [ ] Chip movement from players to pot
+  - [ ] Player action indicators
+  - [ ] Phase transition effects
+  - [ ] Winner celebration animations
+
+### 7.10 State Management Updates
+- [ ] **Game State Integration**
+  - [ ] Update existing game engine to work with new UI
+  - [ ] Maintain all current game logic
+  - [ ] Ensure proper state synchronization
+  - [ ] Handle offline/online modes
+
+## Phase 8: Component Implementation Priority
+### 8.1 Critical Components (Week 1)
+1. **GameHeader** component
+2. **RadialPlayerLayout** component  
+3. **CommunityCardsTable** redesign
+4. **PlayerHandDisplay** component
+5. **MobileActionControls** redesign
+
+### 8.2 Supporting Components (Week 2)
+1. **PlayerAvatar** with status indicators
+2. **PotDisplay** header integration
+3. **ActionButton** styled components
+4. **BetAmountControls** slider/input
+5. **GamePhaseIndicator** component
+
+### 8.3 Integration and Polish (Week 3)
+1. **Animation system** implementation
+2. **Gesture handling** integration
+3. **Responsive breakpoints** fine-tuning
+4. **Performance optimization**
+5. **Cross-device testing**
+
+## Updated File Structure
+```
+client/src/components/game/
+├── GameHeader.tsx (new)
+├── RadialPlayerLayout.tsx (new)
+├── PlayerAvatar.tsx (new)
+├── CommunityCardsTable.tsx (redesigned)
+├── PlayerHandDisplay.tsx (new)
+├── MobileActionControls.tsx (redesigned)
+├── PotDisplay.tsx (header integration)
+├── ActionButton.tsx (new)
+├── BetAmountControls.tsx (new)
+└── GamePhaseIndicator.tsx (new)
+```
+
 ## Success Criteria
 - [ ] ✅ App loads with new loading screen
-- [ ] ✅ Three-step onboarding flow works smoothly
-- [ ] ✅ Mobile-first responsive design
-- [ ] ✅ Smooth transitions between screens
+- [ ] ✅ Three-step onboarding flow works smoothly  
+- [ ] ✅ Game interface matches Figma design exactly
+- [ ] ✅ Mobile-first responsive design implemented
+- [ ] ✅ All player positions and cards display correctly
+- [ ] ✅ Action controls work intuitively on mobile
+- [ ] ✅ Smooth transitions between game phases
+- [ ] ✅ Proper touch interactions and gesture support
+- [ ] ✅ Dark theme with green table implemented
+- [ ] ✅ Header with game info functions properly
+- [ ] ✅ Player avatars and status indicators work
+- [ ] ✅ Community cards animate correctly
 - [ ] ✅ Onboarding can be skipped for returning users
 - [ ] ✅ All illustrations and assets load properly
-- [ ] ✅ Orange button theme implemented consistently
+- [ ] ✅ Orange/gold button theme implemented consistently
 - [ ] ✅ Progress indicators work correctly
 - [ ] ✅ Close/skip functionality works
-- [ ] ✅ Final "START PLAYING" leads to game selection
+- [ ] ✅ Final "START PLAYING" leads to redesigned game
 
 ## Dependencies & Considerations
 - [ ] **Asset Creation**: Need all illustrations from Figma
-- [ ] **Animation Library**: Consider Framer Motion for smooth transitions
-- [ ] **State Management**: Persist onboarding completion
-- [ ] **Performance**: Optimize loading sequence
+- [ ] **Animation Library**: Framer Motion for smooth transitions
+- [ ] **State Management**: Persist onboarding completion and game state
+- [ ] **Performance**: Optimize for mobile devices
 - [ ] **Accessibility**: Maintain screen reader support
-- [ ] **Testing**: Test on various mobile devices
+- [ ] **Testing**: Test on various mobile devices and orientations
+- [ ] **Game Logic**: Ensure existing poker engine works with new UI
+- [ ] **Responsive Design**: Handle different screen sizes gracefully
 
 ---
-**CRITICAL NOTE**: This represents a fundamental app architecture change. The current lobby-first approach will be completely replaced with an onboarding-first experience. This affects the entire user journey from app startup.
+**CRITICAL NOTE**: This represents a complete visual redesign of the poker game interface. The current desktop-focused layout will be replaced with a mobile-first design that matches the Figma specifications exactly. This affects:
+
+1. **Player positioning** - from flexible layout to fixed radial positions
+2. **Card display** - larger, more prominent community cards and player hands
+3. **Action controls** - complete redesign for mobile touch interaction
+4. **Visual theme** - dark theme with green poker table
+5. **Information hierarchy** - header-based game info instead of sidebars
 
 **Next Steps**:
-1. Create LoadingScreen component
-2. Implement OnboardingFlow
-3. Update App routing
-4. Redesign lobby to match new aesthetic
-5. Test complete user journey
+1. Implement complete loading and onboarding flow
+2. Create new game interface components
+3. Redesign poker table layout system
+4. Update action controls for mobile
+5. Integrate dark theme with green table
+6. Test complete user journey from onboarding to gameplay
 
 *Last Updated: January 2025*
-*Design Source: Figma - POKER App Mobile Onboarding Flow*
+*Design Source: Figma - POKER App Complete Interface Design*
