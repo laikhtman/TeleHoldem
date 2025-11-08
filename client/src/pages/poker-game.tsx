@@ -2378,9 +2378,9 @@ export default function PokerGame() {
             paddingLeft: 'calc(env(safe-area-inset-left, 0px) + 0.5rem)',
             paddingRight: 'calc(env(safe-area-inset-right, 0px) + 0.5rem)',
           }}>
-          {/* Mobile Game Table */}
-          <div className="flex items-center justify-center h-full p-4">
-            <div className="w-full max-w-lg">
+          {/* Mobile Game Table - Optimized for mobile screens */}
+          <div className="flex items-center justify-center h-full p-2">
+            <div className="w-full max-w-md">
               {/* Crypto Gaming Table with Enhanced Neon Styling - Mobile */}
               <div className={`table-theme-${settings.tableTheme} table-theme-transition`}>
               <div 

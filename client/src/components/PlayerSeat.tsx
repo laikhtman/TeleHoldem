@@ -59,13 +59,14 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
   const { playSound } = useSound();
   const { toast } = useToast();
   
-  // Slight downscale seats on very small screens to reduce overlap
+  // Optimize seat scale for mobile devices
   const getSeatScale = () => {
     if (typeof window === 'undefined') return 1;
     const vw = window.innerWidth;
-    if (vw < 360) return 0.85;
-    if (vw < 480) return 0.92;
-    return 1;
+    if (vw < 360) return 0.75;  // Very compact for small phones
+    if (vw < 480) return 0.80;  // Compact for phones
+    if (vw < 768) return 0.85;  // Slightly smaller for larger phones
+    return 1;  // Full size for tablets and desktop
   };
   const [seatScale, setSeatScale] = useState<number>(getSeatScale());
   useEffect(() => {
@@ -184,35 +185,35 @@ export function PlayerSeat({ player, position, totalPlayers, isCurrentPlayer, is
     const isSmallMobile = vw < 480;
     const isVerySmallMobile = vw < 360;
     
-    // Calculate radius based on screen size - INCREASED values to prevent overlapping
+    // Calculate radius based on screen size - Optimized for clean mobile layout
     // Desktop: Seats positioned farther from center to prevent overlap
     // Tablet: Moderate positioning with more spacing
-    // Mobile: Tighter but still non-overlapping positioning
+    // Mobile: Compact and organized like the design reference
     let radiusX: number;
     let radiusY: number;
     
     if (isDesktop) {
       // Desktop: Increased radius to prevent overlapping
       // Push seats further out to the edge of the table
-      radiusX = (baseWidth / 2) * 0.98;  // 98% of half-width (was 92%)
-      radiusY = (baseHeight / 2) * 0.95; // 95% of half-height (was 88%)
+      radiusX = (baseWidth / 2) * 0.98;  // 98% of half-width
+      radiusY = (baseHeight / 2) * 0.95; // 95% of half-height
     } else if (isTablet) {
       // Tablet: Increased spacing
-      radiusX = (baseWidth / 2) * 0.90;  // 90% of half-width (was 85%)
-      radiusY = (baseHeight / 2) * 0.85; // 85% of half-height (was 80%)
+      radiusX = (baseWidth / 2) * 0.90;  // 90% of half-width
+      radiusY = (baseHeight / 2) * 0.85; // 85% of half-height
     } else if (isSmallMobile) {
-      // Small mobile: Maintain tighter positioning but with better spacing
+      // Small mobile: Optimized for compact screens
       if (isVerySmallMobile) {
-        radiusX = (baseWidth / 2) * 0.72;  // 72% of half-width (was 70%)
-        radiusY = (baseHeight / 2) * 0.68; // 68% of half-height (was 65%)
+        radiusX = (baseWidth / 2) * 0.85;  // Better spacing for very small screens
+        radiusY = (baseHeight / 2) * 0.75; // More vertical space
       } else {
-        radiusX = (baseWidth / 2) * 0.78;  // 78% of half-width (was 75%)
-        radiusY = (baseHeight / 2) * 0.73; // 73% of half-height (was 70%)
+        radiusX = (baseWidth / 2) * 0.88;  // Optimal mobile spacing
+        radiusY = (baseHeight / 2) * 0.78; // Clean vertical distribution
       }
     } else {
-      // Regular mobile: Slightly increased spacing
-      radiusX = (baseWidth / 2) * 0.82;  // 82% of half-width (was 78%)
-      radiusY = (baseHeight / 2) * 0.77; // 77% of half-height (was 73%)
+      // Regular mobile: Clean spacing like design reference
+      radiusX = (baseWidth / 2) * 0.90;  // Good horizontal spread
+      radiusY = (baseHeight / 2) * 0.80; // Proper vertical spacing
     }
     
     // Map seat indices to specific angles for better distribution
