@@ -2557,7 +2557,7 @@ export default function PokerGame() {
           </div>
         </div>
         
-        {/* Mobile Bottom Sheet for Action Controls - Optimized for mobile UX */}
+        {/* Mobile Bottom Sheet for Action Controls - Always visible for game actions */}
         <div 
           className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-lg border-t border-border/50 shadow-xl"
           style={{ 
