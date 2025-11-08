@@ -749,5 +749,200 @@ client/src/pages/
 7. Integrate dark theme with green table
 8. Test complete user journey: Loading → Onboarding → Registration → Game
 
+## Phase 11: Notification Center Implementation 🚨 CRITICAL
+### 11.1 Notification Center Core Components
+- [ ] **NotificationCenter Screen Component**
+  - [ ] Back arrow navigation with "Notifications" title
+  - [ ] Two-tab system: "Unread" and "Read" sections
+  - [ ] "Read All" button for unread notifications
+  - [ ] "Clear All" button for read notifications
+  - [ ] Dark theme with proper section separation
+  - [ ] Smooth tab switching animations
+
+- [ ] **NotificationItem Component**
+  - [ ] Icon-based notification types with proper styling:
+    - [ ] 🔔 Bell icon for payment/subscription notifications
+    - [ ] 🎁 Gift box icon for mystery gifts and rewards
+    - [ ] 🏆 Trophy icon for achievements and challenges
+    - [ ] 📄 Document icon for general updates
+  - [ ] Orange dot indicator for unread notifications
+  - [ ] Notification title with proper typography
+  - [ ] Timestamp display (e.g., "Today 19:53", "Yesterday, 9:00")
+  - [ ] Notification description/body text
+  - [ ] Proper card styling with dark theme
+
+### 11.2 Notification Actions & Interactions
+- [ ] **Swipe Actions Implementation**
+  - [ ] Left swipe to delete notification (trash icon)
+  - [ ] Smooth animation for swipe gestures
+  - [ ] Confirmation dialog for destructive actions
+  - [ ] Visual feedback during swipe interactions
+
+- [ ] **Notification State Management**
+  - [ ] Mark individual notifications as read on tap
+  - [ ] "Read All" functionality for unread tab
+  - [ ] "Clear All" functionality for read tab
+  - [ ] Persistent notification state across app sessions
+  - [ ] Real-time notification updates
+
+### 11.3 Notification Types Implementation
+- [ ] **Payment & Subscription Notifications**
+  - [ ] "Update payment method" with bell icon
+  - [ ] "Oops, we're having trouble paying" payment failures
+  - [ ] Deposit bonus and promotional notifications
+  - [ ] Subscription renewal reminders
+  - [ ] Payment success confirmations
+
+- [ ] **Game Rewards & Achievements**
+  - [ ] "You've received a mystery gift!" with gift icon
+  - [ ] "5 Days streak challenge done!" with trophy icon
+  - [ ] "New achievement unlocked!" with document icon
+  - [ ] XP and coin reward notifications
+  - [ ] Daily/weekly challenge completions
+
+- [ ] **System & Game Updates**
+  - [ ] General game announcements
+  - [ ] Feature updates and new releases
+  - [ ] Maintenance notifications
+  - [ ] Tournament and event announcements
+
+### 11.4 Notification Backend Integration
+- [ ] **Notification API Endpoints**
+  - [ ] GET /api/notifications - fetch user notifications
+  - [ ] PUT /api/notifications/:id/read - mark as read
+  - [ ] PUT /api/notifications/read-all - mark all as read
+  - [ ] DELETE /api/notifications/:id - delete notification
+  - [ ] DELETE /api/notifications/clear-all - clear all read
+  - [ ] POST /api/notifications/push - send push notification
+
+- [ ] **Real-time Notification System**
+  - [ ] WebSocket integration for live notifications
+  - [ ] Push notification service integration
+  - [ ] Notification queuing system
+  - [ ] Background notification sync
+  - [ ] Offline notification storage
+
+### 11.5 Mobile Notification Features
+- [ ] **Push Notifications**
+  - [ ] Browser push notification support
+  - [ ] Permission request handling
+  - [ ] Notification payload formatting
+  - [ ] Click-to-action functionality
+  - [ ] Notification sound and vibration
+
+- [ ] **Badge System**
+  - [ ] Unread notification count badge
+  - [ ] Tab bar notification indicator
+  - [ ] App icon badge (if PWA)
+  - [ ] Real-time badge updates
+
+### 11.6 UI/UX Enhancement Features
+- [ ] **Visual Polish**
+  - [ ] Smooth scroll behavior in notification list
+  - [ ] Loading states for notification actions
+  - [ ] Empty state design for no notifications
+  - [ ] Pull-to-refresh functionality
+  - [ ] Skeleton loading for notification items
+
+- [ ] **Accessibility Features**
+  - [ ] Screen reader support for notifications
+  - [ ] Keyboard navigation support
+  - [ ] High contrast mode compatibility
+  - [ ] Voice-over announcements for new notifications
+
+### 11.7 Notification Content Templates
+- [ ] **Payment Notifications**
+  - [ ] Payment method update reminders
+  - [ ] Subscription renewal notices
+  - [ ] Payment failure alerts
+  - [ ] Deposit bonus announcements
+  - [ ] Free spin notifications
+
+- [ ] **Game Achievement Notifications**
+  - [ ] Daily streak completions
+  - [ ] Achievement unlocks with XP rewards
+  - [ ] Mystery gift notifications
+  - [ ] Tournament result announcements
+  - [ ] Leaderboard position updates
+
+### 11.8 Component Architecture for Notifications
+- [ ] **Core Components**
+  - [ ] NotificationCenter.tsx - main notification screen
+  - [ ] NotificationList.tsx - notification list container
+  - [ ] NotificationItem.tsx - individual notification
+  - [ ] NotificationIcon.tsx - icon system for notification types
+  - [ ] SwipeActions.tsx - swipe gesture handling
+
+- [ ] **Supporting Components**
+  - [ ] NotificationTabs.tsx - unread/read tab system
+  - [ ] NotificationBadge.tsx - unread count indicator
+  - [ ] EmptyNotifications.tsx - empty state component
+  - [ ] NotificationActions.tsx - bulk action buttons
+  - [ ] PushNotificationHandler.tsx - push notification service
+
+### 11.9 State Management for Notifications
+- [ ] **Notification Store**
+  - [ ] Notification data structure and types
+  - [ ] Unread/read state management
+  - [ ] Notification filtering and sorting
+  - [ ] Local storage persistence
+  - [ ] Real-time updates handling
+
+- [ ] **Integration with Game Events**
+  - [ ] Achievement notifications from game engine
+  - [ ] Tournament result notifications
+  - [ ] Payment status notifications
+  - [ ] Social interaction notifications
+  - [ ] Daily task completion notifications
+
+### 11.10 File Structure for Notification System
+```
+client/src/components/notifications/
+├── NotificationCenter.tsx (new)
+├── NotificationList.tsx (new)
+├── NotificationItem.tsx (new)
+├── NotificationIcon.tsx (new)
+├── NotificationTabs.tsx (new)
+├── NotificationBadge.tsx (new)
+├── SwipeActions.tsx (new)
+├── EmptyNotifications.tsx (new)
+├── NotificationActions.tsx (new)
+└── PushNotificationHandler.tsx (new)
+
+client/src/pages/
+├── NotificationPage.tsx (new)
+
+client/src/hooks/
+├── useNotifications.ts (new)
+├── usePushNotifications.ts (new)
+├── useNotificationActions.ts (new)
+
+server/
+├── notifications.ts (new)
+├── pushService.ts (new)
+```
+
+### 11.11 Priority Implementation Order
+1. **Week 1: Core Notification System**
+   - NotificationCenter component with tabs
+   - NotificationItem with proper styling
+   - Basic navigation and state management
+
+2. **Week 2: Interactions and Actions**
+   - Swipe gestures for delete actions
+   - Read/unread state management
+   - Bulk actions (Read All, Clear All)
+
+3. **Week 3: Backend Integration**
+   - API endpoints for notifications
+   - Real-time notification updates
+   - Push notification service
+
+4. **Week 4: Polish and Testing**
+   - Visual polish and animations
+   - Empty states and error handling
+   - Cross-device testing and optimization
+
 *Last Updated: January 2025*
 *Design Source: Figma - POKER App Complete Interface Design*
+*Latest Addition: Notification Center Implementation*
