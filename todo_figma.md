@@ -234,8 +234,10 @@ client/src/pages/
 1. `"/"` → LoadingPage (replaces direct lobby)
 2. `"/welcome"` → OnboardingPage (3 screens)
 3. `"/register"` → RegistrationPage (5 screens)
-4. `"/lobby"` → Redesigned game selection
-5. `"/game"` → Existing game (minimal changes)
+4. `"/profile"` → ProfilePage (user stats and achievements)
+5. `"/settings"` → SettingsPageMobile (mobile-optimized settings)
+6. `"/lobby"` → Redesigned game selection
+7. `"/game"` → Existing game (minimal changes)
 
 ## Phase 7: Registration Flow Implementation 🚨 CRITICAL
 ### 7.1 Complete Registration System (Based on Figma Screenshots)
@@ -442,27 +444,182 @@ client/src/pages/
 4. **RegistrationProgress** indicator
 5. **FormValidation** utilities
 
-## Phase 9: Component Implementation Priority
-### 9.1 Critical Components (Week 3)
-1. **GameHeader** component
-2. **RadialPlayerLayout** component  
-3. **CommunityCardsTable** redesign
-4. **PlayerHandDisplay** component
-5. **MobileActionControls** redesign
+## Phase 9: Profile & Settings System Implementation 🚨 CRITICAL
+### 9.1 Profile Screen Implementation (Screen 1)
+- [ ] **Profile Header Design**
+  - [ ] Gold coin balance display (e.g., "1,063,131") with coin icon
+  - [ ] User name display ("James") with edit capability
+  - [ ] User avatar with level indicator and online status
+  - [ ] Crown/achievement icon for special status
+  - [ ] Level display ("LV 900") with progress indication
 
-### 8.2 Supporting Components (Week 2)
-1. **PlayerAvatar** with status indicators
-2. **PotDisplay** header integration
-3. **ActionButton** styled components
-4. **BetAmountControls** slider/input
-5. **GamePhaseIndicator** component
+- [ ] **Player Statistics Cards**
+  - [ ] "Hands" statistics card with icon and count
+  - [ ] "Last Winnings" card showing recent earnings
+  - [ ] Additional stat cards in grid layout
+  - [ ] Card styling with dark theme and proper spacing
 
-### 8.3 Integration and Polish (Week 3)
-1. **Animation system** implementation
-2. **Gesture handling** integration
-3. **Responsive breakpoints** fine-tuning
-4. **Performance optimization**
-5. **Cross-device testing**
+- [ ] **Achievement System Display**
+  - [ ] Achievement badges/icons in grid layout
+  - [ ] Achievement titles and descriptions
+  - [ ] Progress indicators for incomplete achievements
+  - [ ] Rarity indicators (common, rare, legendary)
+  - [ ] Achievement unlock animations
+
+- [ ] **Navigation Elements**
+  - [ ] Settings gear icon in top right
+  - [ ] Back navigation where applicable
+  - [ ] Smooth transitions between screens
+
+### 9.2 Settings Screen Implementation (Screen 2)
+- [ ] **Settings Categories**
+  - [ ] "Wallets & Deposits" section with wallet icon
+  - [ ] "Privacy & Security" section with lock icon  
+  - [ ] "Profile Settings" section with user icon
+  - [ ] Each section with arrow indicator for navigation
+  - [ ] Proper section spacing and visual hierarchy
+
+- [ ] **Audio Settings**
+  - [ ] "Sounds" toggle with speaker icon
+  - [ ] "Set amounts" option
+  - [ ] "Bet odds-chart" toggle
+  - [ ] "Voiceover" toggle with appropriate controls
+  - [ ] Visual feedback for toggle states
+
+- [ ] **Settings List Design**
+  - [ ] Dark card-based layout for each setting
+  - [ ] Icon + text + toggle/arrow layout
+  - [ ] Proper touch targets (44px minimum)
+  - [ ] Visual hierarchy with consistent spacing
+
+### 9.3 Wallets Management System (Screen 3)
+- [ ] **Wallet List Interface**
+  - [ ] Connected wallet cards showing:
+    - [ ] Wallet logo/icon (MetaMask, etc.)
+    - [ ] Wallet name
+    - [ ] Connection status (green dot for connected)
+    - [ ] Balance if applicable
+    - [ ] Checkmark for primary wallet
+
+- [ ] **Wallet Connection Features**
+  - [ ] "Connect new wallet" functionality
+  - [ ] Wallet switching capabilities
+  - [ ] Disconnect wallet option
+  - [ ] Primary wallet selection
+  - [ ] Balance refresh functionality
+
+### 9.4 MetaMask Integration Screen (Screen 4)
+- [ ] **MetaMask Connection Modal**
+  - [ ] QR code display for desktop connection
+  - [ ] MetaMask logo and branding
+  - [ ] Connection instructions text
+  - [ ] "Reconnect wallet" button
+  - [ ] Close button (X) functionality
+  - [ ] Error handling for connection failures
+
+- [ ] **QR Code System**
+  - [ ] Generate connection QR codes
+  - [ ] Auto-refresh expired codes
+  - [ ] Mobile/desktop detection
+  - [ ] Alternative connection methods
+
+### 9.5 Wallet Success Screen (Screen 5)
+- [ ] **Success State Design**
+  - [ ] "Wallet disconnected" confirmation message
+  - [ ] Success icon/animation
+  - [ ] "You have disconnected wallet" descriptive text
+  - [ ] Orange "OK" button to acknowledge
+  - [ ] Proper modal/overlay styling
+
+- [ ] **Success Animations**
+  - [ ] Smooth transition animations
+  - [ ] Success state visual feedback
+  - [ ] Auto-dismiss after confirmation
+  - [ ] Sound effects for success states
+
+### 9.6 Backend Integration for Profile System
+- [ ] **User Profile API**
+  - [ ] GET /api/user/profile - fetch user data
+  - [ ] PUT /api/user/profile - update profile info
+  - [ ] GET /api/user/stats - fetch player statistics
+  - [ ] GET /api/user/achievements - fetch achievements
+  - [ ] POST /api/user/avatar - update avatar
+
+- [ ] **Wallet Management API**
+  - [ ] GET /api/wallets - list connected wallets
+  - [ ] POST /api/wallets/connect - connect new wallet
+  - [ ] DELETE /api/wallets/:id - disconnect wallet
+  - [ ] PUT /api/wallets/:id/primary - set primary wallet
+  - [ ] GET /api/wallets/balance - fetch balances
+
+- [ ] **Settings Management API**
+  - [ ] GET /api/user/settings - fetch user settings
+  - [ ] PUT /api/user/settings - update settings
+  - [ ] POST /api/user/settings/reset - reset to defaults
+
+### 9.7 State Management for Profile System
+- [ ] **Profile State Management**
+  - [ ] User profile data store
+  - [ ] Statistics tracking and caching
+  - [ ] Achievement system integration
+  - [ ] Level and experience tracking
+  - [ ] Profile picture/avatar management
+
+- [ ] **Settings State Management**
+  - [ ] Settings persistence across sessions
+  - [ ] Real-time settings sync
+  - [ ] Default settings management
+  - [ ] Settings validation and error handling
+
+### 9.8 Component Architecture for Profile/Settings
+- [ ] **Profile Components**
+  - [ ] ProfileHeader.tsx - header with balance and user info
+  - [ ] StatisticsCards.tsx - player stats display
+  - [ ] AchievementGrid.tsx - achievement system
+  - [ ] UserAvatar.tsx - avatar with level and status
+  - [ ] ProfileNavigation.tsx - navigation elements
+
+- [ ] **Settings Components**
+  - [ ] SettingsList.tsx - main settings interface
+  - [ ] SettingsCategory.tsx - category sections
+  - [ ] SettingsToggle.tsx - toggle switches
+  - [ ] WalletManager.tsx - wallet management interface
+  - [ ] WalletCard.tsx - individual wallet display
+
+- [ ] **Modal Components**
+  - [ ] WalletConnectionModal.tsx - wallet connection flow
+  - [ ] QRCodeDisplay.tsx - QR code generation and display
+  - [ ] SuccessModal.tsx - success state feedback
+  - [ ] SettingsModal.tsx - settings overlay/modal
+
+## Phase 10: Component Implementation Priority
+### 10.1 Critical Components (Week 1)
+1. **ProfileHeader** component with balance and user info
+2. **SettingsList** component with categories
+3. **WalletManager** component for wallet operations
+4. **GameHeader** component for game interface
+5. **App routing updates** for new screens
+
+### 10.2 Supporting Components (Week 2)
+1. **StatisticsCards** for profile stats
+2. **AchievementGrid** for achievement display
+3. **WalletCard** for wallet list items
+4. **QRCodeDisplay** for wallet connections
+5. **SuccessModal** for confirmation states
+
+### 10.3 Integration and Game Components (Week 3)
+1. **RadialPlayerLayout** component  
+2. **CommunityCardsTable** redesign
+3. **PlayerHandDisplay** component
+4. **MobileActionControls** redesign
+5. **Animation system** implementation
+
+### 10.4 Polish and Testing (Week 4)
+1. **Gesture handling** integration
+2. **Responsive breakpoints** fine-tuning
+3. **Performance optimization**
+4. **Cross-device testing**
+5. **End-to-end user flow testing**
 
 ## Updated File Structure
 ```
@@ -477,6 +634,24 @@ client/src/components/registration/
 ├── RegistrationProgress.tsx (new)
 └── VerificationCircle.tsx (new)
 
+client/src/components/profile/
+├── ProfileHeader.tsx (new)
+├── StatisticsCards.tsx (new)
+├── AchievementGrid.tsx (new)
+├── UserAvatar.tsx (new)
+├── ProfileNavigation.tsx (new)
+└── LevelIndicator.tsx (new)
+
+client/src/components/settings/
+├── SettingsList.tsx (new)
+├── SettingsCategory.tsx (new)
+├── SettingsToggle.tsx (new)
+├── WalletManager.tsx (new)
+├── WalletCard.tsx (new)
+├── WalletConnectionModal.tsx (new)
+├── QRCodeDisplay.tsx (new)
+└── SuccessModal.tsx (new)
+
 client/src/components/game/
 ├── GameHeader.tsx (new)
 ├── RadialPlayerLayout.tsx (new)
@@ -488,6 +663,14 @@ client/src/components/game/
 ├── ActionButton.tsx (new)
 ├── BetAmountControls.tsx (new)
 └── GamePhaseIndicator.tsx (new)
+
+client/src/pages/
+├── ProfilePage.tsx (new)
+├── SettingsPageMobile.tsx (new)
+├── LoadingPage.tsx (new)
+├── OnboardingPage.tsx (new)
+├── RegistrationPage.tsx (new)
+└── lobby.tsx (major redesign)
 ```
 
 ## Success Criteria
@@ -512,6 +695,18 @@ client/src/components/game/
 - [ ] ✅ Proper error handling and validation
 - [ ] ✅ Security measures implemented
 
+### Profile & Settings System
+- [ ] ✅ Profile screen with balance and user info
+- [ ] ✅ Player statistics and achievement display
+- [ ] ✅ Settings categories with proper navigation
+- [ ] ✅ Audio and game settings toggles work
+- [ ] ✅ Wallet management system functional
+- [ ] ✅ MetaMask integration with QR codes
+- [ ] ✅ Wallet connection/disconnection flow
+- [ ] ✅ Success states and confirmations
+- [ ] ✅ Settings persistence across sessions
+- [ ] ✅ Profile data synchronization
+
 ### Game Interface
 - [ ] ✅ Game interface matches Figma design exactly
 - [ ] ✅ Mobile-first responsive design implemented
@@ -523,7 +718,7 @@ client/src/components/game/
 - [ ] ✅ Header with game info functions properly
 - [ ] ✅ Player avatars and status indicators work
 - [ ] ✅ Community cards animate correctly
-- [ ] ✅ Final registration leads to redesigned game
+- [ ] ✅ Complete user journey: Loading → Onboarding → Registration → Profile → Settings → Game
 
 ## Dependencies & Considerations
 - [ ] **Asset Creation**: Need all illustrations from Figma
