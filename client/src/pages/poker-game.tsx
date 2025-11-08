@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Link, useLocation } from 'wouter';
-import { GameState, GamePhase, Card as PlayingCard, ActionHistoryEntry, PlayerAction, ACHIEVEMENT_LIST, AchievementId, Achievement } from '@shared/schema';
+import { GameState, GamePhase, Card as PlayingCard, ActionHistoryEntry, PlayerAction, ACHIEVEMENT_LIST, AchievementId, Achievement, TableTheme } from '@shared/schema';
 import { gameEngine } from '@/lib/gameEngine';
 import { botAI, BotAI } from '@/lib/botAI';
 import { ErrorState } from '@/components/ErrorState';
@@ -204,7 +204,7 @@ export default function PokerGame() {
       soundEnabled: true,
       soundVolume: 0.5,
       animationSpeed: 1,
-      tableTheme: 'classic',
+      tableTheme: 'black' as TableTheme,
       colorblindMode: false,
       isPaused: false,
       reducedAnimations: prefersReducedMotion,
@@ -1970,6 +1970,7 @@ export default function PokerGame() {
           <div className="flex-1 overflow-hidden flex items-center justify-center p-6">
             <div className="w-full max-w-5xl">
               {/* Crypto Gaming Table with Enhanced Neon Styling */}
+              <div className={`table-theme-${settings.tableTheme} table-theme-transition`}>
               <div 
                 className="table-neon-trim w-full mx-auto relative"
                 style={{ 
@@ -2192,6 +2193,8 @@ export default function PokerGame() {
             {/* Close table-neon-trim wrapper */}
           </div>
           </div>
+          {/* Close table theme wrapper */}
+          </div>
           
           {/* Action Controls Dock - Fixed at Bottom of Center Column */}
           <div className="border-t bg-background p-4">
@@ -2379,6 +2382,7 @@ export default function PokerGame() {
           <div className="flex items-center justify-center h-full p-4">
             <div className="w-full max-w-lg">
               {/* Crypto Gaming Table with Enhanced Neon Styling - Mobile */}
+              <div className={`table-theme-${settings.tableTheme} table-theme-transition`}>
               <div 
                 className="table-neon-trim w-full mx-auto relative"
                 style={{ 
@@ -2546,6 +2550,8 @@ export default function PokerGame() {
                   )}
                   </div>
                 </div>
+              </div>
+              {/* Close table theme wrapper */}
               </div>
             </div>
           </div>

@@ -488,3 +488,87 @@ export const selectTournamentTableSchema = createSelectSchema(tournamentTables);
 
 export type TournamentTable = typeof tournamentTables.$inferSelect;
 export type InsertTournamentTable = z.infer<typeof insertTournamentTableSchema>;
+
+// Table Theme System
+export type TableTheme = 'green' | 'blue' | 'red' | 'gold' | 'brown' | 'black';
+
+export interface TableThemeConfig {
+  name: string;
+  feltGradient: {
+    from: string;
+    to: string;
+  };
+  trimColor: string;
+  glowColor: string;
+  accentColor: string;
+  shadowColor: string;
+}
+
+export const TABLE_THEMES: Record<TableTheme, TableThemeConfig> = {
+  green: {
+    name: 'Classic Green',
+    feltGradient: {
+      from: '#1a4d2e', // Deep forest green
+      to: '#0d2818'    // Darker forest green
+    },
+    trimColor: '#10b981',  // Emerald
+    glowColor: '#34d399',  // Light emerald
+    accentColor: '#22c55e', // Bright green
+    shadowColor: 'rgba(16, 185, 129, 0.4)'
+  },
+  blue: {
+    name: 'Ocean Blue',
+    feltGradient: {
+      from: '#1e3a8a', // Navy blue
+      to: '#1e1b4b'    // Midnight blue
+    },
+    trimColor: '#06b6d4',  // Cyan
+    glowColor: '#22d3ee',  // Light cyan
+    accentColor: '#0ea5e9', // Electric blue
+    shadowColor: 'rgba(6, 182, 212, 0.4)'
+  },
+  red: {
+    name: 'Ruby Red',
+    feltGradient: {
+      from: '#7f1d1d', // Burgundy
+      to: '#450a0a'    // Dark crimson
+    },
+    trimColor: '#ec4899',  // Hot pink
+    glowColor: '#f472b6',  // Light pink
+    accentColor: '#ef4444', // Bright red
+    shadowColor: 'rgba(236, 72, 153, 0.4)'
+  },
+  gold: {
+    name: 'Royal Gold',
+    feltGradient: {
+      from: '#78350f', // Bronze
+      to: '#451a03'    // Dark amber
+    },
+    trimColor: '#fbbf24',  // Golden yellow
+    glowColor: '#fcd34d',  // Light gold
+    accentColor: '#f59e0b', // Bright gold
+    shadowColor: 'rgba(251, 191, 36, 0.4)'
+  },
+  brown: {
+    name: 'Mahogany',
+    feltGradient: {
+      from: '#451a03', // Chocolate
+      to: '#1c0a00'    // Espresso
+    },
+    trimColor: '#fb923c',  // Warm orange
+    glowColor: '#fdba74',  // Light orange
+    accentColor: '#c2410c', // Burnt sienna
+    shadowColor: 'rgba(251, 146, 60, 0.4)'
+  },
+  black: {
+    name: 'Midnight Black',
+    feltGradient: {
+      from: '#18181b', // Charcoal
+      to: '#000000'    // Pure black
+    },
+    trimColor: '#8b5cf6',  // Purple (current default)
+    glowColor: '#a78bfa',  // Light purple
+    accentColor: '#ec4899', // Magenta
+    shadowColor: 'rgba(139, 92, 246, 0.4)'
+  }
+};

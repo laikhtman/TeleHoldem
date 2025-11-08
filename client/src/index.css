@@ -4989,3 +4989,286 @@ html.theme-transition * {
 .count-up {
   animation: count-up 0.5s ease-out;
 }
+
+/* ================================================
+   TABLE COLOR THEME SYSTEM
+   ================================================
+   Dynamic table themes for poker table customization
+   ================================================ */
+
+/* Green Theme - Classic Casino */
+.table-theme-green .poker-table-felt,
+.table-theme-green .table-neon-trim-inner {
+  background: radial-gradient(ellipse at center, 
+    #1a4d2e 0%,    /* Deep forest green */
+    #143d24 40%,   /* Transition */
+    #0d2818 100%   /* Dark forest green */
+  );
+}
+
+.table-theme-green .table-neon-trim {
+  background: linear-gradient(135deg, 
+    #10b981,       /* Emerald */
+    #22c55e        /* Bright green */
+  );
+  box-shadow: 
+    0 0 40px rgba(16, 185, 129, 0.4),
+    0 0 80px rgba(34, 197, 94, 0.3),
+    inset 0 0 20px rgba(52, 211, 153, 0.2);
+}
+
+.table-theme-green .table-corner-glow.top-left,
+.table-theme-green .table-corner-glow.bottom-right {
+  background: radial-gradient(circle at center,
+    rgba(16, 185, 129, 0.5) 0%,
+    rgba(16, 185, 129, 0.3) 30%,
+    transparent 70%
+  );
+}
+
+.table-theme-green .table-corner-glow.top-right,
+.table-theme-green .table-corner-glow.bottom-left {
+  background: radial-gradient(circle at center,
+    rgba(34, 197, 94, 0.5) 0%,
+    rgba(34, 197, 94, 0.3) 30%,
+    transparent 70%
+  );
+}
+
+/* Blue Theme - Ocean Deep */
+.table-theme-blue .poker-table-felt,
+.table-theme-blue .table-neon-trim-inner {
+  background: radial-gradient(ellipse at center, 
+    #1e3a8a 0%,    /* Navy blue */
+    #1e2d5f 40%,   /* Transition */
+    #1e1b4b 100%   /* Midnight blue */
+  );
+}
+
+.table-theme-blue .table-neon-trim {
+  background: linear-gradient(135deg, 
+    #06b6d4,       /* Cyan */
+    #0ea5e9        /* Electric blue */
+  );
+  box-shadow: 
+    0 0 40px rgba(6, 182, 212, 0.4),
+    0 0 80px rgba(14, 165, 233, 0.3),
+    inset 0 0 20px rgba(34, 211, 238, 0.2);
+}
+
+.table-theme-blue .table-corner-glow.top-left,
+.table-theme-blue .table-corner-glow.bottom-right {
+  background: radial-gradient(circle at center,
+    rgba(6, 182, 212, 0.5) 0%,
+    rgba(6, 182, 212, 0.3) 30%,
+    transparent 70%
+  );
+}
+
+.table-theme-blue .table-corner-glow.top-right,
+.table-theme-blue .table-corner-glow.bottom-left {
+  background: radial-gradient(circle at center,
+    rgba(14, 165, 233, 0.5) 0%,
+    rgba(14, 165, 233, 0.3) 30%,
+    transparent 70%
+  );
+}
+
+/* Red Theme - Ruby Royale */
+.table-theme-red .poker-table-felt,
+.table-theme-red .table-neon-trim-inner {
+  background: radial-gradient(ellipse at center, 
+    #7f1d1d 0%,    /* Burgundy */
+    #581414 40%,   /* Transition */
+    #450a0a 100%   /* Dark crimson */
+  );
+}
+
+.table-theme-red .table-neon-trim {
+  background: linear-gradient(135deg, 
+    #ec4899,       /* Hot pink */
+    #ef4444        /* Bright red */
+  );
+  box-shadow: 
+    0 0 40px rgba(236, 72, 153, 0.4),
+    0 0 80px rgba(239, 68, 68, 0.3),
+    inset 0 0 20px rgba(244, 114, 182, 0.2);
+}
+
+.table-theme-red .table-corner-glow.top-left,
+.table-theme-red .table-corner-glow.bottom-right {
+  background: radial-gradient(circle at center,
+    rgba(236, 72, 153, 0.5) 0%,
+    rgba(236, 72, 153, 0.3) 30%,
+    transparent 70%
+  );
+}
+
+.table-theme-red .table-corner-glow.top-right,
+.table-theme-red .table-corner-glow.bottom-left {
+  background: radial-gradient(circle at center,
+    rgba(239, 68, 68, 0.5) 0%,
+    rgba(239, 68, 68, 0.3) 30%,
+    transparent 70%
+  );
+}
+
+/* Gold Theme - Royal Gold */
+.table-theme-gold .poker-table-felt,
+.table-theme-gold .table-neon-trim-inner {
+  background: radial-gradient(ellipse at center, 
+    #78350f 0%,    /* Bronze */
+    #5a2a0b 40%,   /* Transition */
+    #451a03 100%   /* Dark amber */
+  );
+}
+
+.table-theme-gold .table-neon-trim {
+  background: linear-gradient(135deg, 
+    #fbbf24,       /* Golden yellow */
+    #f59e0b        /* Bright gold */
+  );
+  box-shadow: 
+    0 0 40px rgba(251, 191, 36, 0.4),
+    0 0 80px rgba(245, 158, 11, 0.3),
+    inset 0 0 20px rgba(252, 211, 77, 0.2);
+}
+
+.table-theme-gold .table-corner-glow.top-left,
+.table-theme-gold .table-corner-glow.bottom-right {
+  background: radial-gradient(circle at center,
+    rgba(251, 191, 36, 0.5) 0%,
+    rgba(251, 191, 36, 0.3) 30%,
+    transparent 70%
+  );
+}
+
+.table-theme-gold .table-corner-glow.top-right,
+.table-theme-gold .table-corner-glow.bottom-left {
+  background: radial-gradient(circle at center,
+    rgba(245, 158, 11, 0.5) 0%,
+    rgba(245, 158, 11, 0.3) 30%,
+    transparent 70%
+  );
+}
+
+/* Brown Theme - Mahogany */
+.table-theme-brown .poker-table-felt,
+.table-theme-brown .table-neon-trim-inner {
+  background: radial-gradient(ellipse at center, 
+    #451a03 0%,    /* Chocolate */
+    #2e1000 40%,   /* Transition */
+    #1c0a00 100%   /* Espresso */
+  );
+}
+
+.table-theme-brown .table-neon-trim {
+  background: linear-gradient(135deg, 
+    #fb923c,       /* Warm orange */
+    #c2410c        /* Burnt sienna */
+  );
+  box-shadow: 
+    0 0 40px rgba(251, 146, 60, 0.4),
+    0 0 80px rgba(194, 65, 12, 0.3),
+    inset 0 0 20px rgba(253, 186, 116, 0.2);
+}
+
+.table-theme-brown .table-corner-glow.top-left,
+.table-theme-brown .table-corner-glow.bottom-right {
+  background: radial-gradient(circle at center,
+    rgba(251, 146, 60, 0.5) 0%,
+    rgba(251, 146, 60, 0.3) 30%,
+    transparent 70%
+  );
+}
+
+.table-theme-brown .table-corner-glow.top-right,
+.table-theme-brown .table-corner-glow.bottom-left {
+  background: radial-gradient(circle at center,
+    rgba(194, 65, 12, 0.5) 0%,
+    rgba(194, 65, 12, 0.3) 30%,
+    transparent 70%
+  );
+}
+
+/* Black Theme - Midnight Black (Default) */
+.table-theme-black .poker-table-felt,
+.table-theme-black .table-neon-trim-inner {
+  background: radial-gradient(ellipse at center, 
+    #18181b 0%,    /* Charcoal */
+    #0a0a0a 40%,   /* Transition */
+    #000000 100%   /* Pure black */
+  );
+}
+
+.table-theme-black .table-neon-trim {
+  background: linear-gradient(135deg, 
+    #8b5cf6,       /* Purple */
+    #ec4899        /* Magenta */
+  );
+  box-shadow: 
+    0 0 40px rgba(139, 92, 246, 0.4),
+    0 0 80px rgba(236, 72, 153, 0.3),
+    inset 0 0 20px rgba(167, 139, 250, 0.2);
+}
+
+.table-theme-black .table-corner-glow.top-left,
+.table-theme-black .table-corner-glow.bottom-right {
+  background: radial-gradient(circle at center,
+    rgba(139, 92, 246, 0.5) 0%,
+    rgba(139, 92, 246, 0.3) 30%,
+    transparent 70%
+  );
+}
+
+.table-theme-black .table-corner-glow.top-right,
+.table-theme-black .table-corner-glow.bottom-left {
+  background: radial-gradient(circle at center,
+    rgba(236, 72, 153, 0.5) 0%,
+    rgba(236, 72, 153, 0.3) 30%,
+    transparent 70%
+  );
+}
+
+/* Theme Transition Animation */
+.table-theme-transition .poker-table-felt,
+.table-theme-transition .table-neon-trim,
+.table-theme-transition .table-neon-trim-inner,
+.table-theme-transition .table-corner-glow {
+  transition: background 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
+}
+
+/* Mobile-specific theme adjustments */
+@media (max-width: 768px) {
+  /* Increase glow intensity on mobile for better visibility */
+  .table-neon-trim {
+    box-shadow: 
+      0 0 50px var(--theme-glow-primary, rgba(139, 92, 246, 0.5)),
+      0 0 100px var(--theme-glow-secondary, rgba(236, 72, 153, 0.4)),
+      inset 0 0 30px var(--theme-glow-inset, rgba(167, 139, 250, 0.3));
+  }
+  
+  /* Slightly increase corner glow size on mobile */
+  .table-corner-glow {
+    transform: scale(1.1);
+  }
+}
+
+/* Dark mode specific adjustments for themes */
+.dark .table-theme-green .poker-table-felt,
+.dark .table-theme-blue .poker-table-felt,
+.dark .table-theme-red .poker-table-felt,
+.dark .table-theme-gold .poker-table-felt,
+.dark .table-theme-brown .poker-table-felt {
+  filter: brightness(0.85);
+}
+
+/* Light mode specific adjustments for themes */
+body:not(.dark) .table-theme-green .table-neon-trim,
+body:not(.dark) .table-theme-blue .table-neon-trim,
+body:not(.dark) .table-theme-red .table-neon-trim,
+body:not(.dark) .table-theme-gold .table-neon-trim,
+body:not(.dark) .table-theme-brown .table-neon-trim,
+body:not(.dark) .table-theme-black .table-neon-trim {
+  filter: brightness(1.2) saturate(1.2);
+}

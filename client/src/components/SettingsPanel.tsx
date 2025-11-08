@@ -7,14 +7,14 @@ import { useState, useEffect } from 'react';
 import { useSound } from '@/hooks/useSound';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { DifficultyMode, DifficultyLevel } from '@shared/schema';
+import { DifficultyMode, DifficultyLevel, TableTheme, TABLE_THEMES } from '@shared/schema';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export interface GameSettings {
   soundEnabled: boolean;
   soundVolume: number; // 0 to 1
   animationSpeed: number; // 0.5 = slow, 1 = normal, 1.5 = fast
-  tableTheme: 'classic' | 'blue' | 'red' | 'purple' | 'luxury' | 'saloon' | 'minimal' | 'neon';
+  tableTheme: TableTheme;
   colorblindMode: boolean;
   isPaused: boolean;
   reducedAnimations?: boolean; // Manual toggle for reduced animations
@@ -53,10 +53,6 @@ export function SettingsPanel({ settings, onSettingsChange, onPauseToggle, disab
 
   const handleAnimationSpeedChange = (value: number[]) => {
     onSettingsChange({ animationSpeed: value[0] });
-  };
-
-  const handleThemeChange = (theme: string) => {
-    onSettingsChange({ tableTheme: theme as GameSettings['tableTheme'] });
   };
 
   const handleColorblindToggle = (checked: boolean) => {
@@ -383,23 +379,30 @@ export function SettingsPanel({ settings, onSettingsChange, onPauseToggle, disab
             </div>
             <RadioGroup
               value={settings.tableTheme}
-              onValueChange={handleThemeChange}
+              onValueChange={(value) => onSettingsChange({ tableTheme: value as TableTheme })}
               className="grid grid-cols-2 gap-3"
               aria-label="Table theme selection"
             >
               <div>
                 <RadioGroupItem
-                  value="classic"
-                  id="theme-classic"
+                  value="green"
+                  id="theme-green"
                   className="peer sr-only"
-                  data-testid="radio-theme-classic"
+                  data-testid="radio-theme-green"
                 />
                 <Label
-                  htmlFor="theme-classic"
+                  htmlFor="theme-green"
                   className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-card p-4 hover-elevate active-elevate-2 peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-accent cursor-pointer"
                 >
-                  <div className="w-12 h-12 rounded-full mb-2" style={{ background: 'hsl(140 70% 25%)' }}></div>
-                  <span className="text-sm font-medium">Classic Green</span>
+                  <div 
+                    className="w-12 h-12 rounded-full mb-2 ring-2 ring-offset-2 ring-offset-background" 
+                    style={{ 
+                      background: `linear-gradient(135deg, ${TABLE_THEMES.green.feltGradient.from}, ${TABLE_THEMES.green.feltGradient.to})`,
+                      boxShadow: `0 0 20px ${TABLE_THEMES.green.shadowColor}`,
+                      borderColor: TABLE_THEMES.green.trimColor
+                    }}
+                  ></div>
+                  <span className="text-sm font-medium">{TABLE_THEMES.green.name}</span>
                 </Label>
               </div>
               
@@ -414,8 +417,15 @@ export function SettingsPanel({ settings, onSettingsChange, onPauseToggle, disab
                   htmlFor="theme-blue"
                   className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-card p-4 hover-elevate active-elevate-2 peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-accent cursor-pointer"
                 >
-                  <div className="w-12 h-12 rounded-full mb-2" style={{ background: 'hsl(220 70% 30%)' }}></div>
-                  <span className="text-sm font-medium">Royal Blue</span>
+                  <div 
+                    className="w-12 h-12 rounded-full mb-2 ring-2 ring-offset-2 ring-offset-background" 
+                    style={{ 
+                      background: `linear-gradient(135deg, ${TABLE_THEMES.blue.feltGradient.from}, ${TABLE_THEMES.blue.feltGradient.to})`,
+                      boxShadow: `0 0 20px ${TABLE_THEMES.blue.shadowColor}`,
+                      borderColor: TABLE_THEMES.blue.trimColor
+                    }}
+                  ></div>
+                  <span className="text-sm font-medium">{TABLE_THEMES.blue.name}</span>
                 </Label>
               </div>
               
@@ -430,88 +440,84 @@ export function SettingsPanel({ settings, onSettingsChange, onPauseToggle, disab
                   htmlFor="theme-red"
                   className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-card p-4 hover-elevate active-elevate-2 peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-accent cursor-pointer"
                 >
-                  <div className="w-12 h-12 rounded-full mb-2" style={{ background: 'hsl(0 60% 30%)' }}></div>
-                  <span className="text-sm font-medium">Casino Red</span>
+                  <div 
+                    className="w-12 h-12 rounded-full mb-2 ring-2 ring-offset-2 ring-offset-background" 
+                    style={{ 
+                      background: `linear-gradient(135deg, ${TABLE_THEMES.red.feltGradient.from}, ${TABLE_THEMES.red.feltGradient.to})`,
+                      boxShadow: `0 0 20px ${TABLE_THEMES.red.shadowColor}`,
+                      borderColor: TABLE_THEMES.red.trimColor
+                    }}
+                  ></div>
+                  <span className="text-sm font-medium">{TABLE_THEMES.red.name}</span>
                 </Label>
               </div>
               
               <div>
                 <RadioGroupItem
-                  value="purple"
-                  id="theme-purple"
+                  value="gold"
+                  id="theme-gold"
                   className="peer sr-only"
-                  data-testid="radio-theme-purple"
+                  data-testid="radio-theme-gold"
                 />
                 <Label
-                  htmlFor="theme-purple"
+                  htmlFor="theme-gold"
                   className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-card p-4 hover-elevate active-elevate-2 peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-accent cursor-pointer"
                 >
-                  <div className="w-12 h-12 rounded-full mb-2" style={{ background: 'hsl(280 60% 28%)' }}></div>
-                  <span className="text-sm font-medium">Royal Purple</span>
+                  <div 
+                    className="w-12 h-12 rounded-full mb-2 ring-2 ring-offset-2 ring-offset-background" 
+                    style={{ 
+                      background: `linear-gradient(135deg, ${TABLE_THEMES.gold.feltGradient.from}, ${TABLE_THEMES.gold.feltGradient.to})`,
+                      boxShadow: `0 0 20px ${TABLE_THEMES.gold.shadowColor}`,
+                      borderColor: TABLE_THEMES.gold.trimColor
+                    }}
+                  ></div>
+                  <span className="text-sm font-medium">{TABLE_THEMES.gold.name}</span>
                 </Label>
               </div>
 
               <div>
                 <RadioGroupItem
-                  value="luxury"
-                  id="theme-luxury"
+                  value="brown"
+                  id="theme-brown"
                   className="peer sr-only"
-                  data-testid="radio-theme-luxury"
+                  data-testid="radio-theme-brown"
                 />
                 <Label
-                  htmlFor="theme-luxury"
+                  htmlFor="theme-brown"
                   className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-card p-4 hover-elevate active-elevate-2 peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-accent cursor-pointer"
                 >
-                  <div className="w-12 h-12 rounded-full mb-2" style={{ background: 'linear-gradient(135deg, #0b3d0b, #154015)' }}></div>
-                  <span className="text-sm font-medium">Luxury</span>
+                  <div 
+                    className="w-12 h-12 rounded-full mb-2 ring-2 ring-offset-2 ring-offset-background" 
+                    style={{ 
+                      background: `linear-gradient(135deg, ${TABLE_THEMES.brown.feltGradient.from}, ${TABLE_THEMES.brown.feltGradient.to})`,
+                      boxShadow: `0 0 20px ${TABLE_THEMES.brown.shadowColor}`,
+                      borderColor: TABLE_THEMES.brown.trimColor
+                    }}
+                  ></div>
+                  <span className="text-sm font-medium">{TABLE_THEMES.brown.name}</span>
                 </Label>
               </div>
 
               <div>
                 <RadioGroupItem
-                  value="saloon"
-                  id="theme-saloon"
+                  value="black"
+                  id="theme-black"
                   className="peer sr-only"
-                  data-testid="radio-theme-saloon"
+                  data-testid="radio-theme-black"
                 />
                 <Label
-                  htmlFor="theme-saloon"
+                  htmlFor="theme-black"
                   className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-card p-4 hover-elevate active-elevate-2 peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-accent cursor-pointer"
                 >
-                  <div className="w-12 h-12 rounded-full mb-2" style={{ background: 'linear-gradient(135deg, #6b4f2a, #8b6b3a)' }}></div>
-                  <span className="text-sm font-medium">Saloon</span>
-                </Label>
-              </div>
-
-              <div>
-                <RadioGroupItem
-                  value="minimal"
-                  id="theme-minimal"
-                  className="peer sr-only"
-                  data-testid="radio-theme-minimal"
-                />
-                <Label
-                  htmlFor="theme-minimal"
-                  className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-card p-4 hover-elevate active-elevate-2 peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-accent cursor-pointer"
-                >
-                  <div className="w-12 h-12 rounded-full mb-2" style={{ background: 'hsl(160 10% 20%)' }}></div>
-                  <span className="text-sm font-medium">Minimal</span>
-                </Label>
-              </div>
-
-              <div>
-                <RadioGroupItem
-                  value="neon"
-                  id="theme-neon"
-                  className="peer sr-only"
-                  data-testid="radio-theme-neon"
-                />
-                <Label
-                  htmlFor="theme-neon"
-                  className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-card p-4 hover-elevate active-elevate-2 peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-accent cursor-pointer"
-                >
-                  <div className="w-12 h-12 rounded-full mb-2" style={{ background: 'linear-gradient(135deg, #0ea5e9, #a21caf)' }}></div>
-                  <span className="text-sm font-medium">Neon</span>
+                  <div 
+                    className="w-12 h-12 rounded-full mb-2 ring-2 ring-offset-2 ring-offset-background" 
+                    style={{ 
+                      background: `linear-gradient(135deg, ${TABLE_THEMES.black.feltGradient.from}, ${TABLE_THEMES.black.feltGradient.to})`,
+                      boxShadow: `0 0 20px ${TABLE_THEMES.black.shadowColor}`,
+                      borderColor: TABLE_THEMES.black.trimColor
+                    }}
+                  ></div>
+                  <span className="text-sm font-medium">{TABLE_THEMES.black.name}</span>
                 </Label>
               </div>
             </RadioGroup>
