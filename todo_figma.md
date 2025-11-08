@@ -24,6 +24,28 @@
   - "CONVERT" button with orange styling
   - USDT currency indicator
 
+### 🎯 ONBOARDING & WELCOME SCREENS IMPLEMENTATION
+
+#### 31. **Welcome Screens Design Update**
+- [x] **31.1** Create three-screen onboarding flow
+  - "Discover Diverse Game Zones" with forest hideout theme
+  - "Get the Chips You Need" with poker chips visualization
+  - "Pay Your Way" with payment method icons
+- [x] **31.2** Implement visual elements matching Figma
+  - Dark gradient backgrounds (#1a1a1a to black)
+  - Checkered pattern overlay for game zones screen
+  - 3D poker chips with purple, gold, and green styling
+  - Payment method icons in circular design
+- [x] **31.3** Add navigation and interaction
+  - Progress dot indicators at bottom
+  - Skip functionality with chevron icon
+  - Orange gradient "NEXT" and "START PLAYING" buttons
+  - Smooth transitions between screens
+- [x] **31.4** Integrate with existing onboarding system
+  - Connect with OnboardingFlow component
+  - Proper completion handling
+  - State management for welcome flow
+
 ### 🎯 LOADING SCREEN IMPLEMENTATION
 
 #### 32. **Loading Screen Design Update**
