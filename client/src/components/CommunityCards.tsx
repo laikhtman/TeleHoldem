@@ -15,6 +15,10 @@ interface CommunityCardsProps {
 const MAX_CONCURRENT_ANIMATIONS = 3; // Limit concurrent card animations
 
 export function CommunityCards({ cards, phase, colorblindMode = false, highlightIds }: CommunityCardsProps) {
+  // Temporary debug logging
+  if (phase === 'flop') {
+    console.log('[DEBUG] Flop phase - cards received:', cards);
+  }
   const [revealedCards, setRevealedCards] = useState<boolean[]>(new Array(5).fill(false));
   const [previousCardCount, setPreviousCardCount] = useState(0);
   const [showGlow, setShowGlow] = useState(false);
@@ -159,15 +163,6 @@ export function CommunityCards({ cards, phase, colorblindMode = false, highlight
     if (!card) return 'Empty card slot';
     return `${card.rank} of ${card.suit}`;
   };
-
-  // Debug logging
-  console.log('[CommunityCards] Rendering with:', {
-    cards: cards.map(c => c ? `${c.rank}-${c.suit}` : 'null'),
-    phase,
-    revealedCards,
-    showSkeletons,
-    cardIdentities
-  });
 
   return (
     <div 

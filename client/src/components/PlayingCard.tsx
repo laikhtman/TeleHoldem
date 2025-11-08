@@ -66,15 +66,6 @@ export function PlayingCard({
   colorblindMode = false,
   highlight = false
 }: PlayingCardProps) {
-  // Debug logging
-  if (card) {
-    console.log('[PlayingCard] Rendering card:', {
-      card: `${card.rank}-${card.suit}`,
-      faceDown,
-      animateFlip,
-      spritePosition: getCardSpritePosition(card)
-    });
-  }
   
   const [isFlipped, setIsFlipped] = useState(!animateFlip);
   const [isDealt, setIsDealt] = useState(!animateDeal);
