@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
 import { useSound } from '@/hooks/useSound';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
-import cardSpriteSheet from '@assets/Cards/On Table.png';
+import cardSpriteSheet from '@assets/Cards/cards-hand.png';
 
 interface PlayingCardProps {
   card?: Card;
@@ -18,9 +18,9 @@ interface PlayingCardProps {
 
 // Calculate sprite position for a card
 const getCardSpritePosition = (card: Card): { x: number, y: number } => {
-  // Card dimensions in the sprite sheet
-  const cardWidth = 79; // Width of each card in the sprite
-  const cardHeight = 123; // Height of each card in the sprite
+  // Card dimensions in the new sprite sheet (cleaner layout)
+  const cardWidth = 71; // Width of each card in the sprite
+  const cardHeight = 96; // Height of each card in the sprite
   
   // Map suits to row indices (0-3)
   const suitToRow: Record<string, number> = {
@@ -346,8 +346,8 @@ export function PlayingCard({
           className="w-full h-full rounded-lg overflow-hidden shadow-card-3d border"
           style={{
             backgroundImage: `url('${cardSpriteSheet}')`,
-            backgroundPosition: '316px 492px', // Position for card back (red pattern)
-            backgroundSize: '1027px 615px', // Full sprite sheet size
+            backgroundPosition: '-355px -384px', // Position for red pattern card back (6th card back)
+            backgroundSize: '923px 480px', // Full sprite sheet size (13 cards * 71px = 923px, 5 rows * 96px = 480px)
             borderColor: 'rgba(139, 92, 246, 0.4)',
             boxShadow: '0 0 20px rgba(139, 92, 246, 0.3)'
           }}
@@ -390,7 +390,7 @@ export function PlayingCard({
             style={{
               backgroundImage: `url('${cardSpriteSheet}')`,
               backgroundPosition: `-${spritePosition.x}px -${spritePosition.y}px`,
-              backgroundSize: '1027px 615px', // Full sprite sheet size
+              backgroundSize: '923px 480px', // Full sprite sheet size (13 cards * 71px = 923px, 5 rows * 96px = 480px)
               imageRendering: 'crisp-edges',
               filter: 'contrast(1.1) brightness(1.02)'
             }}
