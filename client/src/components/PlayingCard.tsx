@@ -70,7 +70,7 @@ export function PlayingCard({
   const [isFlipped, setIsFlipped] = useState(!animateFlip);
   const [isDealt, setIsDealt] = useState(!animateDeal);
   const [isTouched, setIsTouched] = useState(false);
-  const [cardDimensions, setCardDimensions] = useState({ width: '70px', height: '100px' });
+  const [cardDimensions, setCardDimensions] = useState({ width: '60px', height: '85px' });
   const { playSound } = useSound();
   const prefersReducedMotion = useReducedMotion();
   const cardRef = useRef<HTMLDivElement>(null);
@@ -149,13 +149,13 @@ export function PlayingCard({
       if (vw >= 1024) {
         setCardDimensions({ width: '70px', height: '100px' });  // lg
       } else if (vw >= 768) {
-        setCardDimensions({ width: '65px', height: '93px' });   // md
+        setCardDimensions({ width: '60px', height: '85px' });   // md
       } else if (vw >= 640) {
-        setCardDimensions({ width: '62px', height: '88px' });   // sm
+        setCardDimensions({ width: '55px', height: '78px' });   // sm
       } else if (vw >= 480) {
-        setCardDimensions({ width: '58px', height: '82px' });  // xs - optimized for mobile
+        setCardDimensions({ width: '50px', height: '71px' });  // xs - optimized for mobile
       } else {
-        setCardDimensions({ width: '56px', height: '80px' });   // mobile
+        setCardDimensions({ width: '45px', height: '64px' });   // small mobile - compact cards
       }
     };
 
