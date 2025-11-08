@@ -1,6 +1,24 @@
 import { motion } from 'framer-motion';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { cn } from '@/lib/utils';
+import { 
+  Users, 
+  Trophy, 
+  DollarSign, 
+  Plus, 
+  Spade, 
+  Heart, 
+  Diamond,
+  Club, 
+  LogOut, 
+  RefreshCw,
+  Search,
+  Filter,
+  Coins,
+  Clock,
+  UserPlus,
+  Loader2
+} from 'lucide-react';
 
 interface PokerLoaderProps {
   message?: string;
@@ -111,7 +129,7 @@ export function PokerLoader({
               fill="none"
             />
           </svg>
-          
+
           {/* Animated progress circle */}
           <svg
             className="absolute inset-0 -rotate-90 transform w-full h-full"
@@ -175,7 +193,7 @@ export function PokerLoader({
 // Compact inline version for small loading states
 export function PokerSpinner({ className, size = 16 }: { className?: string; size?: number }) {
   const prefersReducedMotion = useReducedMotion();
-  
+
   return (
     <motion.div
       className={cn("inline-flex items-center justify-center", className)}

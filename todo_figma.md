@@ -551,3 +551,185 @@
   - Data validation for ranking updates
   - Anti-fraud measures for chip amounts
   - Secure bonus distribution system
+
+## 📱 LOBBY INTERFACE REDESIGN
+
+### Status Bar & Header Area ✅
+- [ ] **Status Bar Integration**: iOS status bar with time (9:41), signal bars, wifi, and battery indicator
+- [ ] **Top Navigation Bar**: 
+  - [ ] Hamburger menu icon (left) - 3 horizontal lines
+  - [ ] "Wallet" text title (center-left) - white text, medium weight
+  - [ ] Coin balance display with golden coin icon (1,053,031) - golden coin + white text
+  - [ ] Green plus button for adding funds (right) - circular green button with + icon
+- [ ] **Header gradient background**: Dark theme (#2C2D36 base) with subtle gradients
+
+### Balance & Promotional Area ✅
+- [ ] **Promotional Banner Card**:
+  - [ ] Golden gradient background (#F4B942 to #E8A317) with bitcoin symbol
+  - [ ] "MYSTERY BONUS FOR TOP-10" headline text - white, bold
+  - [ ] "More info" subtitle link - smaller white text
+  - [ ] Floating golden coin decorative elements around bitcoin icon
+  - [ ] Rounded corners (12px radius)
+  - [ ] Full-width with horizontal margins
+- [ ] **Balance Display**: Prominent coin count with proper formatting and animations
+
+### Player Profile Header (New Component) ✅
+- [ ] **Game Balance Section**:
+  - [ ] Player avatar (circular, left side)
+  - [ ] "Game Balance" label (white text)
+  - [ ] Large balance number "12 560" with coin icon
+  - [ ] "Level 16" with orange bar chart icon
+  - [ ] Settings gear icon (top right)
+  - [ ] Dark background with rounded corners
+
+### Lobby Selection Area ✅
+- [ ] **"Last Lobbies" Section Header**: 
+  - [ ] "Last Lobbies" text - white, centered, medium weight
+  - [ ] Proper top margin from promotional banner
+- [ ] **Lobby Cards List**:
+  - [ ] **Casino Hall NLH Card**:
+    - [ ] Crown icon with golden gradient background
+    - [ ] "Casino Hall NLH" title (white, bold)
+    - [ ] "Played: 35 games" (gray subtitle)
+    - [ ] "Profit: 125,35" (green profit text)
+    - [ ] Golden background gradient overlay
+    - [ ] Full-width horizontal card design
+  - [ ] **Chinatown NLH Card**:
+    - [ ] Chinese gate/torii icon with red gradient
+    - [ ] "Chinatown NLH" title 
+    - [ ] "Played: 21 games"
+    - [ ] "Profit: 1025,35" (green profit)
+    - [ ] Red/burgundy background gradient
+  - [ ] **Forest Hideout NLH Card**:
+    - [ ] Tent/camping icon with green gradient
+    - [ ] "Forest hideout NLH" title
+    - [ ] "Played: 12 games"
+    - [ ] "Profit: -12,53" (red loss text)
+    - [ ] Green forest background gradient
+  - [ ] **Card Specifications**:
+    - [ ] Rounded corners (16px)
+    - [ ] Horizontal layout with icon left, text center-left
+    - [ ] Gradient backgrounds specific to each theme
+    - [ ] Consistent padding and spacing
+    - [ ] Subtle shadow/glow effects
+
+### Bottom Navigation ✅
+- [ ] **Tab Bar Structure**:
+  - [ ] **Profile tab**: User silhouette icon, "Profile" label, gray when inactive
+  - [ ] **Ratings tab**: Trophy icon, "Ratings" label, gray when inactive
+  - [ ] **Lobby tab**: Diamond icon, "Lobby" label, GREEN when active (#00D4AA)
+  - [ ] **Store tab**: Shopping cart icon, "Store" label, gray when inactive
+  - [ ] **Wallet tab**: Wallet icon, "Wallet" label, gray when inactive
+- [ ] **Tab Bar Design**:
+  - [ ] Dark background (#2C2D36)
+  - [ ] 5 evenly distributed tabs
+  - [ ] Icons above text labels
+  - [ ] Active state with green color and green underline indicator
+  - [ ] Rounded top corners
+- [ ] **Safe Area Handling**: Bottom safe area padding + home indicator space
+
+### Create Lobby Functionality ✅
+- [ ] **"CREATE PRIVATE LOBBY" Button**:
+  - [ ] Full-width golden gradient button (#F4B942 to #E8A317)
+  - [ ] Tent/camping icon (left side of text)
+  - [ ] "CREATE PRIVATE LOBBY" text (white, bold, centered)
+  - [ ] Rounded corners (12px)
+  - [ ] Positioned above bottom navigation with margin
+  - [ ] Proper touch target sizing (minimum 44pt height)
+  - [ ] Subtle shadow effect
+
+### Additional UI Components ✅
+- [ ] **Home Indicator**: White iOS home indicator bar at bottom
+- [ ] **Overall Layout**:
+  - [ ] Dark theme throughout (#1E1F26 background)
+  - [ ] Consistent 16px horizontal margins
+  - [ ] Proper vertical spacing between sections
+  - [ ] Smooth scrolling for lobby list
+- [ ] **Typography Scale**:
+  - [ ] Headers: Bold, white text
+  - [ ] Subtitles: Regular, gray text (#8B8B8B)
+  - [ ] Profit/Loss: Green (#4CAF50) / Red (#F44336)
+  - [ ] Balance: Large, bold, white text
+
+## 🛠️ IMPLEMENTATION PRIORITY
+
+### Phase 1: Core Layout Structure (CRITICAL) ✅
+- [ ] **Mobile-first responsive layout foundation**
+- [ ] **Safe area handling for iOS** 
+- [ ] **Dark theme color system implementation**:
+  - [ ] Primary background: #1E1F26
+  - [ ] Card background: #2C2D36  
+  - [ ] Text primary: #FFFFFF
+  - [ ] Text secondary: #8B8B8B
+  - [ ] Accent green: #00D4AA
+  - [ ] Gold gradient: #F4B942 to #E8A317
+  - [ ] Success green: #4CAF50
+  - [ ] Error red: #F44336
+- [ ] **Typography system setup**:
+  - [ ] Font weights: Regular (400), Medium (500), Bold (700)
+  - [ ] Text scales for different component types
+- [ ] **Component library foundation**:
+  - [ ] LobbyCard component
+  - [ ] PromotionalBanner component  
+  - [ ] BottomNavigation component
+  - [ ] ProfileHeader component
+
+### Phase 2: Lobby Interface Components (HIGH) ✅
+
+#### Header & Balance Components
+- [ ] **WalletHeader Component**:
+  - [ ] Hamburger menu button with proper touch target
+  - [ ] "Wallet" title with correct typography
+  - [ ] Balance display with golden coin icon and number formatting
+  - [ ] Green circular plus button with hover/active states
+  - [ ] Proper spacing and alignment
+
+#### Promotional Components  
+- [ ] **PromotionalBanner Component**:
+  - [ ] Golden gradient background implementation
+  - [ ] Bitcoin symbol icon positioning
+  - [ ] "MYSTERY BONUS FOR TOP-10" text styling
+  - [ ] "More info" clickable link
+  - [ ] Floating coin decorative elements (CSS animations)
+  - [ ] Responsive sizing and margins
+
+#### Profile Components
+- [ ] **ProfileHeader Component** (Game Balance area):
+  - [ ] Circular avatar placeholder/image support
+  - [ ] "Game Balance" label styling
+  - [ ] Large balance number display with coin icon
+  - [ ] Level indicator with orange chart icon  
+  - [ ] Settings gear icon with proper positioning
+  - [ ] Dark rounded container background
+
+#### Lobby List Components
+- [ ] **LobbyCard Component**:
+  - [ ] Dynamic background gradients per lobby theme
+  - [ ] Icon positioning and sizing (crown, gate, tent)
+  - [ ] Title text styling and positioning
+  - [ ] Subtitle (games played) styling
+  - [ ] Profit/loss text with conditional coloring
+  - [ ] Proper card dimensions and spacing
+  - [ ] Touch interaction states
+  - [ ] **Theme variants**:
+    - [ ] Casino Hall: Golden gradient + crown icon
+    - [ ] Chinatown: Red gradient + torii gate icon  
+    - [ ] Forest Hideout: Green gradient + tent icon
+
+#### Navigation Components
+- [ ] **BottomNavigation Component**:
+  - [ ] 5-tab layout with proper spacing
+  - [ ] Icon + label structure for each tab
+  - [ ] Active state styling (green color + underline)
+  - [ ] Inactive state styling (gray)
+  - [ ] Proper safe area padding
+  - [ ] Touch target optimization
+
+#### Action Components  
+- [ ] **CreateLobbyButton Component**:
+  - [ ] Golden gradient background
+  - [ ] Tent icon positioning
+  - [ ] Button text styling and centering
+  - [ ] Proper margins and positioning above navigation
+  - [ ] Touch interaction feedback
+  - [ ] Minimum 44pt touch target compliance
