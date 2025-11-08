@@ -373,3 +373,138 @@
   - SMS alerts for large withdrawals
   - Push notifications for status updates
   - Transaction confirmation preferences
+
+### 🏆 RATINGS/LEADERBOARD SYSTEM IMPLEMENTATION
+
+#### 23. **Main Ratings Screen**
+- [ ] **23.1** Create ratings screen header
+  - Navigation hamburger menu (top left)
+  - "Wallet" title centered
+  - Coin balance display with plus icon (top right)
+  - Consistent header styling with wallet screens
+- [ ] **23.2** Implement mystery bonus banner
+  - Golden gradient background banner
+  - "MYSTERY BONUS FOR TOP-10" headline
+  - "More info" link/button
+  - Floating coin graphics and decorative elements
+  - Bitcoin symbol with glow effect
+- [ ] **23.3** Create leaderboard section
+  - "Top Players" section title
+  - Dark section background
+  - Smooth scrolling container
+  - Loading states for data fetching
+
+#### 24. **Player Ranking Cards**
+- [ ] **24.1** Design ranking card layout
+  - Dark card backgrounds with subtle gradients
+  - Rounded corners and consistent spacing
+  - Hover/touch states with subtle animations
+  - Rank position highlighting
+- [ ] **24.2** Implement player ranking elements
+  - Colored rank number badges (1-7+ positions)
+  - Player avatar images (circular)
+  - Player username display with truncation
+  - Chip amount display with formatting
+  - Golden coin icons next to amounts
+- [ ] **24.3** Add special player states
+  - "YOU" indicator with special styling
+  - Current user row highlighting
+  - Different rank badge colors (gold, silver, bronze themes)
+  - Animation for user's position updates
+
+#### 25. **Ranking System Logic**
+- [ ] **25.1** Player data management
+  - Fetch top players from backend API
+  - Real-time ranking updates
+  - Player statistics tracking
+  - Chip amount formatting (e.g., "153 531 001")
+- [ ] **25.2** Ranking calculations
+  - Sort players by total chips/winnings
+  - Handle tied positions appropriately
+  - Update rankings after games
+  - Historical ranking tracking
+- [ ] **25.3** User position tracking
+  - Find and highlight current user in rankings
+  - Show user's current position clearly
+  - Position change notifications
+  - Personal ranking history
+
+#### 26. **Mystery Bonus System**
+- [ ] **26.1** Top-10 bonus mechanics
+  - Define bonus criteria and amounts
+  - Schedule bonus distributions
+  - Track eligible players
+  - Bonus claim interface
+- [ ] **26.2** Bonus information modal
+  - "More info" link functionality
+  - Detailed bonus rules and terms
+  - Distribution schedule display
+  - Historical bonus winners
+- [ ] **26.3** Bonus notifications
+  - Eligibility notifications for top-10 players
+  - Bonus distribution alerts
+  - Achievement celebrations for reaching top-10
+  - Push notifications for bonus events
+
+#### 27. **Navigation Integration**
+- [ ] **27.1** Bottom navigation consistency
+  - "Ratings" tab active state with green accent
+  - Tab icon and label styling
+  - Smooth navigation transitions
+  - State persistence between tabs
+- [ ] **27.2** Inter-screen navigation
+  - Links to player profiles (if applicable)
+  - Back navigation to wallet/previous screen
+  - Deep linking to specific rankings positions
+  - Breadcrumb navigation (if needed)
+
+#### 28. **Data Management & Performance**
+- [ ] **28.1** API integration
+  - Leaderboard data endpoints
+  - Real-time updates via WebSocket
+  - Caching strategies for performance
+  - Error handling for network issues
+- [ ] **28.2** Performance optimization
+  - Virtual scrolling for large leaderboards
+  - Image lazy loading for player avatars
+  - Debounced ranking updates
+  - Efficient re-rendering strategies
+- [ ] **28.3** Data persistence
+  - Local storage for ranking cache
+  - Offline mode with cached data
+  - Progressive data loading
+  - Background sync when online
+
+#### 29. **Visual Polish & Animations**
+- [ ] **29.1** Micro-interactions
+  - Smooth card hover effects
+  - Ranking position change animations
+  - Loading skeleton screens
+  - Pull-to-refresh functionality
+- [ ] **29.2** Visual effects
+  - Golden glow effects for top positions
+  - Particle effects for mystery bonus banner
+  - Subtle background animations
+  - Ranking change celebration animations
+- [ ] **29.3** Responsive design
+  - Mobile-first layout optimization
+  - Tablet and desktop adaptations
+  - Safe area handling for iOS devices
+  - Dynamic text sizing based on content
+
+#### 30. **Backend Infrastructure**
+- [ ] **30.1** Database schema
+  - Player rankings table
+  - Historical ranking data
+  - Bonus eligibility tracking
+  - Performance metrics storage
+- [ ] **30.2** API endpoints
+  - GET /api/rankings - fetch current leaderboard
+  - GET /api/rankings/history - player ranking history
+  - GET /api/bonus/top10 - mystery bonus information
+  - Real-time ranking update events
+- [ ] **30.3** Security and validation
+  - Rate limiting on ranking requests
+  - Data validation for ranking updates
+  - Anti-fraud measures for chip amounts
+  - Secure bonus distribution system
